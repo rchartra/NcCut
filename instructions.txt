@@ -1,0 +1,158 @@
+-------------------------
+  CutView Instructions
+-------------------------
+
+Installation:
+
+    Linux and Mac:
+
+        1. Using the terminal navigate to the directory where you want the program to reside
+        2. To download the files from deep type:
+                scp <Your Username>@deep.ocean.washington.edu:/dat1/rchartra/CutView_GUI .
+
+        3. In terminal navigate to CutView_GUI folder and type:
+                python3 -m venv cutview-env
+
+                * You will need to have python installed on your computer:
+                    https://www.python.org/downloads/
+        4. Ensure following are in same directory as new cutview-env folder:
+
+            cutview.py
+            cutview.kv
+            requirements.txt
+
+            as well as any images or .nc files you'd like to view.
+
+        5. In terminal type:
+                source venv/bin/activate
+                pip install -r requirements.txt
+                python3 cutview.py
+        6. Any images or netCDF files must be in same directory or subdirectory as script
+
+        7. To exit virtual environment when finished using program use: deactivate
+                * Whenever you want to open the program again simply run:
+                        source venv/bin/activate
+                        python3 cutview.py
+
+
+    Windows
+
+        1. Using cmd or anaconda terminal navigate to directory where you want program to reside
+        2. To download the files from deep type:
+            scp <Your Username>@deep.ocean.washington.edu:/dat1/rchartra/CutView_GUI .
+
+        3. In terminal navigate to CutView_GUI folder and type:
+                python -m venv cutview-env
+
+            * You will need to have python installed on your computer:
+                https://www.python.org/downloads/
+            * You might need to write the full path to the python executable on your computer
+                * can be found by:
+                    where.exe python
+            * If you installed the python launcher when you installed python do
+                    py -m venv cutview-env
+
+        4. Ensure following files are in the same directory as new cutview-env folder:
+
+            cutview.py
+            cutview.kv
+            requirements.txt
+
+            as well as any images or .nc files you'd like to view.
+
+        5. In terminal:
+                venv\Scripts\activate
+                pip install -r requirements.txt
+                python3 cutview.py
+        6. Any images or netCDF files must be in same directory or subdirectory as script
+
+        7. To exit virtual environment when finished using program use: deactivate
+                * Whenever you want to open the program again simply run:
+                        source venv/bin/activate
+                        python3 cutview.py
+
+Usage:
+
+    Loading a File:
+
+        1. To load an image file or .nc file type the relative file path into entry box
+        2. Click "Go"
+            - If you are loading an .nc file a popup window will appear listing the data variables
+              in your file
+            - Select the variable you wish to view
+        3. You can scroll to zoom in and out of the image, and you can click and drag the image to
+           move it around. Clicking the "Rotate" button will rotate the image clockwise 45 degrees.
+            - Any transects currently on the image will move along with the image
+
+        * A sample image and sample NetCDF file are included if you'd like to test with an example
+
+    Tools:
+
+        There are currently 3 tool options available:
+        - To exit any of the transect modes at any point you can click any of the tool buttons
+
+        * Single Transect:
+            Make a single cut between two points.
+                - Hit the "Single Transect" button to enter transect mode
+                - Click on the two points you want to make a transect between
+                - A popup will appear with a plot of the transect and downloading options
+                - Click anywhere around the popup to dismiss
+
+        * Multiple Transects:
+            Make multiple transects at a time
+                - Hit the "Multiple Transect" button to enter transect mode
+                - For each transect you want to make click on the beginning and end points
+                - When you are done making transects click the download button in the lower
+                  right corner
+                - A popup will appear with a plot of the transects and downloading options
+                - Click anywhere around the popup to dismiss
+
+        * Marker:
+            Follow along a feature and make perpendicular transects
+                - Hit the "Marker" button to enter transect mode
+                - Click points along the feature you want transects of
+                - A line will be drawn between the clicked points and two dots will appear
+                  denoting the orthogonal cut the tool will make
+                - When you are done click the download button in the lower right corner
+                - A popup will appear with a plot of the transects and downloading options
+                - Click anywhere around the popup to dismiss
+
+                - To change the width of the transects being made at any time you may enter
+                  a number of pixels into the text box in the lower left corner.
+                     * Hitting "Go" will change the width of future transects made. It will not
+                       change the width of past transects.
+                     * The width must be an integer between 0 and 400
+
+        * Multiple Marker:
+            Use multiple markers in a row and save them all to one folder
+                - Hit "Multiple Marker" button to enter transect mode
+                - Begin clicking right away to use your first marker
+                - When done select new line and begin clicking to use the next marker
+                - When finished, select the download button and enter the name of the folder
+                    - This folder will be created in your current directory and each marker's
+                      csv file will be inside, labeled as they are on the image
+                - You can update the width of the current marker as with the single Marker mode
+                    - The width will reset to the default when you make a new line
+                - Hit delete to delete the current marker
+                - To clear the image of markers hit any of the four mode buttons on the right
+
+Data:
+
+    - Selecting the "Download to CSV" button on the popup window will download a .csv file to
+      the current directory containing three columns per transect taken:
+          - The X coordinate of each point along the transect
+          - The Y coordinate of each point along the transect
+          - The value of each point along the transect
+               - If the transect was taken across an image the value will be the mean of the
+                 interpolated RGB values at that point
+               - If the transect was taken across a NetCDF file the value will be the
+                 interpolated data point at that coordinate in the .nc file
+
+          * NOTE FOR MARKERS
+                - The CSV file will contain two columns labeled "Click X" and "Click Y" which contain
+                  the coordinates of the points you clicked when making the transect
+                - These are the first two columns in the CSV file
+
+If you have any questions or suggestions you are welcome to email me at rchartra@uw.edu or reach
+out to me on Slack.
+    - Robin
