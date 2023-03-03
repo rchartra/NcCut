@@ -2,7 +2,7 @@
   CutView Instructions
 -------------------------
 
-Installation:
+Installation
 
     Linux and Mac:
 
@@ -153,6 +153,5 @@ Data:
                   the coordinates of the points you clicked when making the transect
                 - These are the first two columns in the CSV file
 
-If you have any questions or suggestions you are welcome to email me at rchartra@uw.edu or reach
-out to me on Slack.
+If you have any questions or suggestions you are welcome to email me at rchartra@uw.edu
     - Robin
