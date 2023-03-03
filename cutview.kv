@@ -1,17 +1,14 @@
-<BackgroundColor@Widget>
-    background_color: 1, 1, 1, 1
+# This document outlines and creates major UI features for GUI
+
+<RoundedButton@Button>:
+    background_color: 0,0,0,0  # the last zero is the critical on, make invisible
     canvas.before:
         Color:
-            rgba: root.background_color
-        Rectangle:
-            size: self.size
+            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.4,.7,1)  # visual feedback of press
+        RoundedRectangle:
             pos: self.pos
-# Now you can simply Mix the `BackgroundColor` class with almost
-# any other widget... to give it a background.
-<BackgroundLabel@Label+BackgroundColor>
-    background_color: 0, 0, 0, 0
-    # Default the background color for this label
-    # to r 0, g 0, b 0, a 0
+            size: self.size
+            radius: [15,]
 
 <HomeScreen>
 
@@ -25,7 +22,7 @@
 
             size_hint: (1, 0.9)
 
-            ViewerWindow:
+            StencilView:
                 id: view
                 size_hint: (1, 1)
                 #size_hint: (1, 0.7)
@@ -34,7 +31,7 @@
                 canvas:
                     Color:
                         rgb: [.7, .7, .7]
-                    Rectangle:
+                    RoundedRectangle:
                         size: self.size
                         pos: self.pos
 
@@ -44,17 +41,18 @@
             padding: [dp(10), dp(10), dp(10), dp(10)]
             canvas:
                 Color:
-                    rgb: [.1, .1, .2]
-                Rectangle:
+                    rgb: [.2, .2, .2]
+                RoundedRectangle:
                     size: self.size
                     pos: self.pos
+                    radius: [15,]
 
             TextInput:
                 id: file_in
                 size_hint: (0.7, 1)
                 hint_text: "Enter Image or NetCDF File Path"
 
-            Button:
+            RoundedButton:
                 size_hint: (0.3, 1)
                 text: "Go"
                 on_press: root.gobtn()
@@ -66,26 +64,34 @@
         padding: [dp(10), dp(20), dp(20), dp(20)]
         spacing: [dp(20)]
 
-        Button:
+        #canvas:
+        #    Color:
+        #        rgb: [.2, .2, .2]
+        #    RoundedRectangle:
+        #        size: (self.size[0] - 9, self.size[1] - 9)
+        #        pos: self.pos
+        #        radius: [20,]
+
+        RoundedButton:
             text: "Single Transect"
             on_press: root.transectbtn("single")
 
-        Button:
+        RoundedButton:
             text: "Multiple Transects"
             on_press: root.transectbtn("multi")
 
-        Button:
+        RoundedButton:
             text: "Marker"
             on_press: root.transectbtn("marker")
 
-        Button:
+        RoundedButton:
             text: "Multiple Marker"
             on_press: root.transectbtn("filament")
 
-        Button:
+        RoundedButton:
             text: "Rotate"
             on_press: root.rotate()
 
-        Button:
+        RoundedButton:
             text: "Quit"
             on_press: root.quitbtn()
