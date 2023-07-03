@@ -24,7 +24,7 @@ Installation
             as well as any images or .nc files you'd like to view.
 
         5. In terminal type:
-                source venv/bin/activate
+                source cutview-env/bin/activate
                 pip install -r requirements.txt
                 python3 cutview.py
         6. Any images or netCDF files must be in same directory or subdirectory as script
@@ -61,7 +61,7 @@ Installation
             as well as any images or .nc files you'd like to view.
 
         5. In terminal:
-                venv\Scripts\activate
+                cutview-env\Scripts\activate
                 pip install -r requirements.txt
                 python3 cutview.py
         6. Any images or netCDF files must be in same directory or subdirectory as script
