@@ -1,3 +1,7 @@
+"""
+Class for a single marker widget.
+"""
+
 import kivy.uix as ui
 from kivy.metrics import dp
 from kivy.graphics import Color, Ellipse, Line

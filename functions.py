@@ -1,3 +1,7 @@
+"""
+Helper functions to support other widgets.
+"""
+
 import kivy
 from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
@@ -12,14 +16,17 @@ from os.path import exists
 
 
 class RoundedButton(Button):
+    # Code for this is in cutview.kv. Referenced here so it can be used in scripts.
     pass
 
 
 def remove_alert(alert, home, *largs):
+    # Removes alert banner
     home.remove_widget(alert)
 
 
 def alert(text, home):
+    # Creates alert banner with given text, schedules it to be removed after 2 seconds.
     screen = kivy.core.window.Window.size
     with home.canvas:
         Color(0.2, 0.2, 0.2)
@@ -31,6 +38,8 @@ def alert(text, home):
 
 
 def check_file(fname, extension):
+    # Checks that a given file name is valid and if file already exists takes measures to avoid overwriting.
+    # If a directory is part of the file path checks that the directory exists.
 
     if fname.find(".") >= 1:
         fname = fname[:fname.find(".")]
@@ -56,7 +65,7 @@ def check_file(fname, extension):
 
 
 def plotdf(data, home):
-    # General Plotting Code
+    # Code to create plots
     dat = copy.copy(data)
     if list(dat.keys())[0] == "Click X":
         dat.pop("Click X")

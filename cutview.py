@@ -1,3 +1,7 @@
+"""
+Manages main screen functionality and builds app.
+"""
+
 import kivy
 import kivy.uix as ui
 from kivy.app import App
@@ -57,7 +61,7 @@ class HomeScreen(Screen):
                 self.img.add_widget(self.transect)
                 self.tMode = True
             else:
-                # If button pressed while tools on screen, clears tools
+                # If button pressed while tools on screen, clears tools and all buttons
                 kivy.core.window.Window.set_system_cursor("arrow")
                 self.img.remove_widget(self.transect)
                 while len(self.ids.view.parent.children) > 1:
@@ -107,6 +111,7 @@ class HomeScreen(Screen):
 
         self.file = self.ids.file_in.text
 
+        # Limit file names to alphanumeric characters and _-./
         if self.file == "" or len(re.findall(r'[^A-Za-z0-9_.\-/]', self.file)) > 0:
             func.alert("Invalid File Name", self)
         else:
@@ -166,6 +171,7 @@ class HomeScreen(Screen):
             self.img.rotation = self.img.rotation + 45
 
     def canvas_remove(self, item, *largs):
+        # Allows external sources to clear canvas
         self.canvas.remove(item)
 
     def quitbtn(self):
@@ -175,7 +181,6 @@ class HomeScreen(Screen):
 
 class cutview(App):
     # Starts app and initializes window based on OS
-    #    - Needs to be tested on mac
     def on_start(self):
         # Kivy has a mobile app emulator that needs to be turned off for computer app
         kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
