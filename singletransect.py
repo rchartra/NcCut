@@ -1,3 +1,7 @@
+"""
+Class for singular transect tool. Additionally, contains much of the base download and popup functionality.
+"""
+
 import kivy
 import kivy.uix as ui
 from kivy.graphics import Color, Ellipse, Line
@@ -45,7 +49,7 @@ class SingleTransect(ui.widget.Widget):
         if self.home.nc:
             img = self.home.data
         else:
-            img = self.home.rgb # Be handed file when created
+            img = self.home.rgb
 
         line = self.line.points
 
@@ -57,8 +61,6 @@ class SingleTransect(ui.widget.Widget):
 
         # Get x values
         ix = np.arange(int(line[0] - 3), int(line[2] + 4))
-
-        #print(ix)
 
         # Get y values increasing in value w/o changing og object
 
@@ -116,16 +118,16 @@ class SingleTransect(ui.widget.Widget):
                 data.append(intPol(xarr[i], yarr[i])[0])
 
         if xyswap:
-            df = pd.DataFrame({'x': yarr, 'y': xarr, 'Cut': data})
+            data = {'x': yarr, 'y': xarr, 'Cut': data}
         else:
-            df = pd.DataFrame({'x': xarr, 'y': yarr, 'Cut': data})
+            data = {'x': xarr, 'y': yarr, 'Cut': data}
 
-        data = {'x': df['x'].to_list(), 'y': df['y'].to_list(), 'Cut': df['Cut'].to_list()}
+        #data = {'x': df['x'].to_list(), 'y': df['y'].to_list(), 'Cut': df['Cut'].to_list()}
 
         return data
 
     def file_input(self, dat, type):
-        # Popup window for input of name for plot/csv file
+        # Popup window for input of name for plot/json file
 
         content = ui.boxlayout.BoxLayout(orientation='horizontal')
         popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
@@ -141,6 +143,7 @@ class SingleTransect(ui.widget.Widget):
         popup.open()
 
     def close_popups(self, fpop):
+        # Close file name popup and plot popup
         fpop.dismiss()
         self.popup.dismiss()
 
@@ -192,8 +195,7 @@ class SingleTransect(ui.widget.Widget):
         content.add_widget(btns)
 
         self.line.points = []
-        self.home.tMode = False # Delete itself, have homescreen check if it's transect exists?
-        #  Have a finished attribute, have homescreen delete it if finished = true?
+        self.home.tMode = False
         kivy.core.window.Window.set_system_cursor("arrow")
         self.popup.open()
 

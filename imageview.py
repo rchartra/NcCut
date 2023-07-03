@@ -1,3 +1,7 @@
+"""
+Class for main viewing window and interactive image.
+"""
+
 from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
 import kivy.uix as ui

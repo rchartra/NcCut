@@ -5,3 +5,4 @@ kivy
 matplotlib
 xarray
 netCDF4
+pytest

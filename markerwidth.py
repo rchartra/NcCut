@@ -1,3 +1,7 @@
+"""
+Class for marker width adjustment tool
+"""
+
 import kivy.uix as ui
 from kivy.uix.textinput import TextInput
 from functions import RoundedButton
@@ -16,7 +20,7 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         self.spacing = 5
 
     def update(self):
-        # Update width when button pressed
+        # Update width of current marker if given a valid width
         num = self.txt.text
         if num.isnumeric():
             num = int(num)

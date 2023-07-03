@@ -1,3 +1,7 @@
+"""
+Class for multiple marker tool that allows user to have multiple markers on screen at once.
+"""
+
 import kivy.uix as ui
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -12,6 +16,7 @@ from markerwidth import MarkerWidth
 
 
 class Click:
+    # Code to mimic a user click
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -60,7 +65,7 @@ class MultiMarker(ui.widget.Widget):
         popup.open()
 
     def check_file(self, file, popup):
-
+        # Check if given file is a json file containing marker data
         if exists(file):
             if file[-5:] == ".json":
                 data = json.load(open(file))
@@ -81,7 +86,7 @@ class MultiMarker(ui.widget.Widget):
             popup2.open()
 
     def upload_data(self, dat):
-
+        # Adds markers by "clicking" the points in the file with the marker width denoted by the file
         for m in dat.keys():
 
             marker = Marker(multi=True, home=self.home)
@@ -94,12 +99,12 @@ class MultiMarker(ui.widget.Widget):
         self.marker_off()
 
     def update_width(self, num):
+        # Update marker width
         self.twidth = num
         self.children[0].twidth = num
 
     def del_marker(self):
-        # Removes old marker
-        # If current line has no clicks, delete current line and prev line
+        # Removes old marker, If current line has no clicks, delete current line and previous line
         if self.children[0].clicks == 0:
             self.remove_widget(self.children[0])
 
@@ -123,7 +128,7 @@ class MultiMarker(ui.widget.Widget):
         self.m_on = False
 
     def download_data(self, fname):
-        # Create a folder and download each marker's transect data into csv files
+        # Downloads each marker's transect data into one json file
 
         file = func.check_file(fname, ".json")
         if file is False:
@@ -149,7 +154,7 @@ class MultiMarker(ui.widget.Widget):
             func.alert("Download Complete", self.home)
 
     def file_input(self):
-        # Create popup to ask for name of folder
+        # Create popup to ask for name of file
 
         content = ui.boxlayout.BoxLayout(orientation='horizontal')
         popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))

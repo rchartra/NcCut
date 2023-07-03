@@ -1,3 +1,6 @@
+"""
+Class for multiple transect tool that manages any case where multiple single transects are needed.
+"""
 import kivy.uix as ui
 from kivy.uix.button import Button
 from kivy.metrics import dp
@@ -17,6 +20,7 @@ class MultiTransect(ui.widget.Widget):
         self.home = home
 
     def marker_points(self, plist):
+        # When used as base by marker widget, gets users clicking points for download
         self.mpoints = plist
 
     def popup(self):
@@ -41,7 +45,6 @@ class MultiTransect(ui.widget.Widget):
 
     def on_touch_down(self, touch):
         # Transect creation and display code
-
         # Determines what to do based on which of 3 click stages the user is in
 
         if self.clicks == 2:
