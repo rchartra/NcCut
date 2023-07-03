@@ -36,7 +36,7 @@ def clicks_90_degree():
 def home_fixture():
     home = HomeScreen()
     home.data = xr.open_dataset("support/example.nc")["Vorticity"].data
-    home.rgb = im.open("big.jpg").convert('RGB')
+    home.rgb = im.open("support/example.jpg").convert('RGB')
     return home
 
 
