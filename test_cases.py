@@ -2,7 +2,7 @@ from singletransect import SingleTransect
 from multitransect import MultiTransect
 from marker import Marker
 from multimarker import MultiMarker, Click
-from cutview import HomeScreen
+from homescreen import HomeScreen
 from PIL import Image as im
 import numpy as np
 import xarray as xr
