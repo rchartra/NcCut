@@ -16,7 +16,7 @@ from markerwidth import MarkerWidth
 
 
 class Click:
-    # Code to mimic a user click
+    # Mimic a user click
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -43,7 +43,7 @@ class MultiMarker(ui.widget.Widget):
         self.nbtn = func.RoundedButton(text="New Line", pos_hint={'x': .85, 'y': 0.1}, size=(dp(100), dp(30)),
                                        size_hint_x=None, size_hint_y=None)
 
-        self.nbtn.bind(on_press=lambda x: self.marker_off())
+        self.nbtn.bind(on_press=lambda x: self.new_line())
         self.home.ids.view.parent.add_widget(self.nbtn)
 
         # Delete Button
@@ -114,14 +114,13 @@ class MultiMarker(ui.widget.Widget):
             self.clicks = 0
             self.home.ids.view.parent.remove_widget(self.dbtn)
             self.home.ids.view.parent.remove_widget(self.width_w)
-
         self.new_line()
 
     def new_line(self):
         # Creates a new marker
-
-        m = Marker(multi=True, home=self.home)
-        self.add_widget(m)
+        if len(self.children) == 0 or self.children[0].clicks >= 2:
+            m = Marker(multi=True, home=self.home)
+            self.add_widget(m)
 
     def marker_off(self):
         # Update whether there is currently a marker on the board
@@ -148,7 +147,6 @@ class MultiMarker(ui.widget.Widget):
                     count += 1
                 frames["Marker " + str(c)] = data
                 c += 1
-
             with open(file + ".json", "w") as f:
                 json.dump(frames, f)
             func.alert("Download Complete", self.home)
