@@ -16,8 +16,12 @@ class MultiTransect(ui.widget.Widget):
         self.clicks = 0
         self.dbtn = Button()
         self.remove = True
+        self.test = False
         self.mpoints = 0
         self.home = home
+
+    def test_mode(self):
+        self.test = True
 
     def marker_points(self, plist):
         # When used as base by marker widget, gets users clicking points for download
@@ -50,7 +54,8 @@ class MultiTransect(ui.widget.Widget):
         if self.clicks == 2:
             # Clean up download button from previous cycle
             self.clicks = 0
-            self.home.ids.view.parent.remove_widget(self.dbtn)
+            if not self.test:
+                self.home.ids.view.parent.remove_widget(self.dbtn)
 
         if self.clicks == 0:
             # Begins a new transect
@@ -66,8 +71,10 @@ class MultiTransect(ui.widget.Widget):
             if [touch.x, touch.y] == self.lines[-1].line.points:
                 return
             # Finishes a transect, displays download button
-            self.dbtn = func.RoundedButton(text="Download", pos_hint={'x': .85, 'y': 0.02}, size=(dp(100), dp(30)),
-                               size_hint_x=None, size_hint_y=None)
-            self.home.ids.view.parent.add_widget(self.dbtn)
-            self.dbtn.bind(on_press=lambda x: self.popup())
+            if not self.test:
+                self.dbtn = func.RoundedButton(text="Download", pos_hint={'x': .85, 'y': 0.02}, size=(dp(100), dp(30)),
+                                   size_hint_x=None, size_hint_y=None)
+                print(self.home.ids.view.parent.parent)
+                self.home.ids.view.parent.add_widget(self.dbtn)
+                self.dbtn.bind(on_press=lambda x: self.popup())
         self.clicks += 1

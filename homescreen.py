@@ -85,6 +85,7 @@ class HomeScreen(Screen):
         os.remove("nc.jpg")
 
     def gobtn(self):
+
         # Opens file and creates the interactive image
         if self.fileon:
             # If file open, clear previous file data
