@@ -5,9 +5,10 @@ name: Python application
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master" , "testing"]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,4 +38,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        run -m pytest -v -s
+        python test_kivyunit.py
