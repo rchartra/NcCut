@@ -122,7 +122,7 @@ class SingleTransect(ui.widget.Widget):
         else:
             data = {'x': xarr, 'y': yarr, 'Cut': data}
 
-        #data = {'x': df['x'].to_list(), 'y': df['y'].to_list(), 'Cut': df['Cut'].to_list()}
+        data = {'x': data['x'].tolist(), 'y': data['y'].tolist(), 'Cut': data['Cut']}
 
         return data
 
