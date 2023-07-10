@@ -43,8 +43,10 @@ class Marker(ui.widget.Widget):
 
     def get_orthogonal(self, line):
         # Get a line orthogonal to line drawn by user to use as transect
+
         xyswap = False
         line = line.points
+
         if line[0] > line[2]:
             line = [line[2], line[3], line[0], line[1]]
 
@@ -67,7 +69,7 @@ class Marker(ui.widget.Widget):
         mid = (line[0] + (line[2] - line[0]) / 2, line[1] + (line[3] - line[1]) / 2)
 
         b = mid[1] - m * mid[0]
-        xarr = np.arange(int(mid[0] - self.twidth / 2), int(mid[0] + self.twidth / 2))
+        xarr = np.arange(int(mid[0] - self.twidth / 2), int(mid[0] + self.twidth / 2 + 1))
         yarr = xarr * m + b
 
         with self.canvas:
@@ -91,7 +93,7 @@ class Marker(ui.widget.Widget):
 
     def on_touch_down(self, touch):
         # Draws marker line and points
-        par = self.home.img.children[0].children[-2] # what is this grabbing, can it be parented up? reference handed?
+        par = self.home.img.children[0].children[-2]
         self.clicks += 1
         if self.clicks == 2 and not self.multi:
             self.dbtn = func.RoundedButton(text="Download", pos_hint={'x': .85, 'y': 0.02}, size=(dp(100), dp(30)),
@@ -119,8 +121,8 @@ class Marker(ui.widget.Widget):
             self.base.remove = False
 
             if self.multi:
-
                 # Adds marker number
+                print(par.children)
                 number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=30)
                 self.add_widget(number)
 
