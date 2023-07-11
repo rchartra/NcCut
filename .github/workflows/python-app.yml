@@ -28,11 +28,12 @@ jobs:
       run: |
         sudo apt-get update 
         sudo apt-get upgrade
-        sudo apt-get install xserver-xorg-core
-        sudo apt-get install xserver-xorg
         sudo apt-get install xorg
         sudo apt-get install xorg openbox
-        sudo apt-get install ubuntu-desktop
+#        sudo apt-get install xserver-xorg-core
+#        sudo apt-get install xserver-xorg
+#
+#        sudo apt-get install ubuntu-desktop
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
