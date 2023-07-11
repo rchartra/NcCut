@@ -28,7 +28,6 @@ jobs:
       run: |
         sudo apt-get update 
         sudo apt-get upgrade
-        sudo apt-get install fglrx
         sudo apt-get install xserver-xorg-core
         sudo apt-get install xserver-xorg
         sudo apt-get install xorg
