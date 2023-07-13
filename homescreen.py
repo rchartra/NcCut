@@ -104,7 +104,6 @@ class HomeScreen(Screen):
             self.tMode = False
 
         self.file = self.ids.file_in.text
-
         # Limit file names to alphanumeric characters and _-./
         if self.file == "" or len(re.findall(r'[^A-Za-z0-9_.\-/]', self.file)) > 0:
             func.alert("Invalid File Name", self)

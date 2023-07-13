@@ -105,6 +105,8 @@ class MultiMarker(ui.widget.Widget):
 
     def del_marker(self):
         # Removes old marker, If current line has no clicks, delete current line and previous line
+        if len(self.children) == 0:
+            return
         if self.children[0].clicks == 0:
             self.remove_widget(self.children[0])
 
