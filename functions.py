@@ -81,7 +81,10 @@ def plotdf(data, home):
         plt.legend(df.columns, title="Legend", bbox_to_anchor=(1.05, 1))
     else:
         x = np.asarray(dat['x'])
-        axis = (x - x[0]) / (x[-1] - x[0])
+        if (x[-1] - x[0]) == 0:
+            axis = (x - x[0]) / 0.0000001
+        else:
+            axis = (x - x[0]) / (x[-1] - x[0])
         plt.plot(axis, dat['Cut'])
 
     if home.nc:
