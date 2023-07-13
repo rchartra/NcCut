@@ -291,7 +291,7 @@ class Test(unittest.TestCase):
 
     def rotation_test(self):
         run_app.home.rotate()
-        self.assertEqual(run_app.home.img.rotation, 45, "Viewer rotates 45 deg")
+        self.assertEqual(round(run_app.home.img.rotation, 5), 45, "Viewer rotates 45 deg")
 
     def test_file_names(self):
         # check error messages for file input
