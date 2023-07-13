@@ -65,7 +65,7 @@ def check_file(fname, extension):
 
 
 def plotdf(data, home):
-    # Code to create plots
+    # Create plots
     dat = copy.copy(data)
     if list(dat.keys())[0] == "Click X":
         dat.pop("Click X")

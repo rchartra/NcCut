@@ -97,6 +97,7 @@ class Marker(ui.widget.Widget):
         par = self.home.img.children[0].children[-2]
         self.clicks += 1
         if self.clicks == 2 and not self.multi:
+            # Add download button
             self.dbtn = func.RoundedButton(text="Download", pos_hint={'x': .85, 'y': 0.02}, size=(dp(100), dp(30)),
                                            size_hint_x=None, size_hint_y=None)
             self.dbtn.bind(on_press=lambda x: self.run())
@@ -117,7 +118,6 @@ class Marker(ui.widget.Widget):
             self.base.lines.append(x)
         else:
             # If new marker creates MultiTransect base and if part of a MultiMarker adds numbers
-
             self.base = MultiTransect(home=self.home)
             self.base.remove = False
 
@@ -125,7 +125,7 @@ class Marker(ui.widget.Widget):
                 # Adds marker number
                 number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=30)
                 self.add_widget(number)
-
+                # Use width from previous marker
                 if len(self.parent.children) > 1:
                     self.twidth = self.parent.children[1].twidth
 

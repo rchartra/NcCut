@@ -20,9 +20,6 @@ class MultiTransect(ui.widget.Widget):
         self.mpoints = 0
         self.home = home
 
-    def test_mode(self):
-        self.test = True
-
     def marker_points(self, plist):
         # When used as base by marker widget, gets users clicking points for download
         self.mpoints = plist
@@ -36,7 +33,7 @@ class MultiTransect(ui.widget.Widget):
             data = {"Click X": list(x), "Click Y": list(y), "Width": list(w)}
         count = 1
         for i in self.lines:
-            data["Cut " + str(count)] = i.ipGetPoints()
+            data["Cut " + str(count)] = i.ip_get_points()
             count += 1
 
         # Uses popup code from single_transect

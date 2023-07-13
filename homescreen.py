@@ -122,29 +122,7 @@ class HomeScreen(Screen):
                             btn.bind(on_press=popup.dismiss)
                             content.add_widget(btn)
                         popup.open()
-                    # tiff files are not fully supported yet
 
-                    # elif self.file[-4:] == ".tif" or self.file[-5:] == ".tiff":
-                    #     # Creates interactive image from .tif/.tiff files
-                    #     image = im.open(self.file)
-                    #     imeg = np.asarray(image)
-                    #     a = np.histogram(imeg)
-                    #     print(a)
-                    #
-                    #     imeg = imeg - np.median(imeg) / (np.quantile(imeg, 0.75) - np.quantile(imeg, 0.25))
-                    #     imeg = (imeg - np.nanmin(imeg)) / (np.nanmax(imeg) - np.nanmin(imeg))
-                    #     a = np.histogram(imeg)
-                    #     print(a)
-                    #     imar = (imeg*255).astype(np.uint8)
-                    #     imar = np.reshape(imar, np.shape(imar)[-2:])
-                    #     out = im.fromarray(imar)
-                    #
-                    #     out.save("___.jpg")
-                    #     self.img = ImageView(source=str("___.jpg"), size=im.open("___.jpg").size)
-                    #     self.ids.view.add_widget(self.img)
-                    #     self.img.addImage()
-                    #     self.fileon = True
-                    #     os.remove("___.jpg")
                     elif self.file[-5:] == ".jpeg" or self.file[-4:] == ".png" or self.file[-4:] == ".jpg":
                         # Creates interactive image from .jpg/.png/.jpeg files
                         self.img = ImageView(source=str(self.file), size=im.open(self.file).size, home=self)
