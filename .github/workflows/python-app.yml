@@ -44,45 +44,27 @@ jobs:
       run: |
         pytest
 
-  windows_test:
+  mac_test:
 
-      runs-on: windows-latest
+    runs-on: macos-latest
 
-      steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-  #    - name: Install X11
-  #      run: |
-  #        sudo apt-get update
-  #        sudo apt-get install xorg
-  #        sudo apt-get install xorg openbox
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          release: false
-          install: mingw-w64-x86_64-mesa
-      - name: Install Mesa
-        shell: cmd
-        run: |
-          curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/20.3.2/mesa3d-20.3.2-release-msvc.7z
-          "C:\Program Files\7-Zip\7z.exe" x mesa.7z
-          mklink opengl32.dll "x64\opengl32.dll"
-          mklink libglapi.dll "x64\libglapi.dll"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r support/requirements.txt
-          pip install kivy.deps.angle 
-          set KIVY_GL_BACKEND=angle_sdl2
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
 
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Test with unittest
-        run: |
-          python -m unittest
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f support/requirements.txt ]; then pip install -r support/requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with unittest
+      run: |
+        pytest
