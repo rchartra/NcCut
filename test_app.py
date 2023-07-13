@@ -22,6 +22,7 @@ from marker import Marker
 from functions import RoundedButton
 from cutview import CutView
 
+os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 
 class AppInfo:
     def __init__(self):
