@@ -6,6 +6,7 @@ import kivy.uix as ui
 from kivy.uix.textinput import TextInput
 from functions import RoundedButton
 
+
 class MarkerWidth(ui.boxlayout.BoxLayout):
     # Marker width adjustment widget
     def __init__(self, marker, **kwargs):

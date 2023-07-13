@@ -53,7 +53,7 @@ class MultiMarker(ui.widget.Widget):
         self.home.ids.view.parent.add_widget(self.delete)
 
     def upload_pop(self):
-        # Popup asking for file
+        # Popup asking for project file
         content = ui.boxlayout.BoxLayout(orientation='horizontal')
         popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
         txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
@@ -130,7 +130,6 @@ class MultiMarker(ui.widget.Widget):
 
     def download_data(self, fname):
         # Downloads each marker's transect data into one json file
-
         file = func.check_file(fname, ".json")
         if file is False:
             func.alert("Invalid File Name", self.home)
@@ -139,13 +138,12 @@ class MultiMarker(ui.widget.Widget):
             # Create json file
             frames = {}
             c = 1
-
             for i in reversed(self.children):
                 data = {}
                 data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
                 count = 1
                 for j in i.base.lines:
-                    data["Cut " + str(count)] = j.ipGetPoints()
+                    data["Cut " + str(count)] = j.ip_get_points()
                     count += 1
                 frames["Marker " + str(c)] = data
                 c += 1
@@ -155,7 +153,6 @@ class MultiMarker(ui.widget.Widget):
 
     def file_input(self):
         # Create popup to ask for name of file
-
         content = ui.boxlayout.BoxLayout(orientation='horizontal')
         popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
 
@@ -170,7 +167,6 @@ class MultiMarker(ui.widget.Widget):
         popup.open()
 
     def on_touch_down(self, touch):
-
         # Manage download and marker width widgets when all markers are deleted
         self.clicks += 1
         if self.clicks == 1:
