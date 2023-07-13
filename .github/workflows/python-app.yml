@@ -59,6 +59,11 @@ jobs:
   #        sudo apt-get update
   #        sudo apt-get install xorg
   #        sudo apt-get install xorg openbox
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          release: false
+          install: mingw-w64-x86_64-mesa
       - name: Install Mesa
         shell: cmd
         run: |
