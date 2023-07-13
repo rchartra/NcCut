@@ -161,7 +161,6 @@ class SingleTransect(ui.widget.Widget):
 
     def download_data(self, dat, fname):
         # Downloads data into a json file
-
         file = func.check_file(fname, ".json")
         if file is False:
             func.alert("Invalid File Name", self.home)

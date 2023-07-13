@@ -11,7 +11,7 @@ import platform
 from homescreen import HomeScreen
 
 
-class cutview(App):
+class CutView(App):
     # Starts app and initializes window based on OS
     def on_start(self):
         # Kivy has a mobile app emulator that needs to be turned off for computer app
@@ -33,4 +33,4 @@ class cutview(App):
 
 
 if __name__ == "__main__":
-    cutview().run()
+    CutView().run()

@@ -3,15 +3,17 @@ from multitransect import MultiTransect
 from marker import Marker
 from multimarker import MultiMarker, Click
 from homescreen import HomeScreen
+from cutview import cutview
 from PIL import Image as im
+from kivy.graphics import Line
 import numpy as np
 import xarray as xr
 import pytest
+import json
 
 # ==============================================
 #  Test whether tools report the correct values
 # ==============================================
-
 
 @pytest.fixture
 def clicks_zero_degree():
@@ -27,20 +29,21 @@ def clicks_45_degree():
 def clicks_90_degree():
     return [Click(1000, 100), Click(1000, 400)]
 
-# ------
-# Image
-# ------
-
 
 @pytest.fixture
 def home_fixture():
     home = HomeScreen()
-    home.data = xr.open_dataset("support/example.nc")["Vorticity"].data
-    home.rgb = im.open("support/example.jpg").convert('RGB')
+    home.data = xr.open_dataset("../support/example.nc")["Vorticity"].data
+    home.rgb = im.open("../support/example.jpg").convert('RGB')
     return home
 
 
+# ----------------
 # Single Transect
+# ----------------
+
+
+# Image
 # -----------------
 
 # 0 degree angle cut
@@ -106,15 +109,8 @@ def test_single_90(home_fixture, clicks_90_degree):
 
     assert max(manual - cut["Cut"]) == 0
 
-# Marker
-
-# Multiple Marker Upload
-
-# --------
 # NC File
 # --------
-
-# Single Transect
 
 
 def test_single_zero_nc(home_fixture, clicks_zero_degree):
@@ -178,11 +174,40 @@ def test_single_90_nc(home_fixture, clicks_90_degree):
 
     assert max(manual - cut["Cut"]) == 0
 
+# ------------------
 # Multiple Transect
+# ------------------
 
+
+def test_multi_transect(home_fixture):
+    t = MultiTransect(home_fixture)
+    t.test_mode()
+    clicks = [Click(20, 120), Click(50, 150), Click(80, 180), Click(110, 210)]
+    for i in clicks:
+        t.on_touch_down(i)
+    assert len(t.lines) == 2
+
+
+# -------
 # Marker
+# -------
 
-# Multiple Marker
 
+def test_marker(home_fixture):
+    t = Marker(False, home_fixture)
+    t.update_width(50)
+    line = Line(points=[50, 50, 100, 100])
+    coords = np.array(t.get_orthogonal(line))
+    assert max(coords - [50, 100, 100, 50]) == 0
+
+# -----------------------
+# Multiple Marker Upload
+# -----------------------
+
+
+def test_marker_upload(home_fixture):
+    t = MultiMarker(home_fixture)
+    dat = json.load(open("../support/example_markers.json"))
+    t.upload_data(dat)
 
 # Valid file names

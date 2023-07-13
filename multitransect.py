@@ -74,7 +74,6 @@ class MultiTransect(ui.widget.Widget):
             if not self.test:
                 self.dbtn = func.RoundedButton(text="Download", pos_hint={'x': .85, 'y': 0.02}, size=(dp(100), dp(30)),
                                    size_hint_x=None, size_hint_y=None)
-                print(self.home.ids.view.parent.parent)
                 self.home.ids.view.parent.add_widget(self.dbtn)
                 self.dbtn.bind(on_press=lambda x: self.popup())
         self.clicks += 1

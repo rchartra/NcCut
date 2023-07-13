@@ -32,8 +32,8 @@ class Marker(ui.widget.Widget):
         self.dbtn = 0
         self.nbtn = 0
         self.delete = 0
-        self.twidth = 40
         self.multi = multi
+        self.twidth = 40
         self.base = 0
         self.home = home
 
@@ -93,6 +93,7 @@ class Marker(ui.widget.Widget):
 
     def on_touch_down(self, touch):
         # Draws marker line and points
+
         par = self.home.img.children[0].children[-2]
         self.clicks += 1
         if self.clicks == 2 and not self.multi:
@@ -122,7 +123,9 @@ class Marker(ui.widget.Widget):
 
             if self.multi:
                 # Adds marker number
-                print(par.children)
                 number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=30)
                 self.add_widget(number)
+
+                if len(self.parent.children) > 1:
+                    self.twidth = self.parent.children[1].twidth
 
