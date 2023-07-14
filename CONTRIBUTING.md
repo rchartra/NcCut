@@ -15,4 +15,4 @@ Contributions are welcome! Feel free to add features, tests, suggestions, whatev
 ## Issues
 
 - Please submit any bugs or issues with the GUI through GitHub issues
-- Include as much information as possible such as your operating system, python version, and *steps to reproduce the issue*. If possible include the file you are using with the viewer.
+- Include as much information as possible such as your operating system, python version, and **steps to reproduce the issue**. If possible include the file you are using with the viewer.
