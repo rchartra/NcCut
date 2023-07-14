@@ -1,6 +1,6 @@
 # Contributions to CutView
 
-Contributions are welcome! Feel free to add features, tests, suggestions, whatever the like but please follow the following guidelines to smooth the process.
+Contributions are welcome! Feel free to add features, tests, examples, suggestions, whatever the like but please follow the following guidelines to smooth the process.
 
 ## Testing and Submissions
 
@@ -17,3 +17,7 @@ Contributions are welcome! Feel free to add features, tests, suggestions, whatev
 - Please submit any bugs or issues with the GUI through GitHub issues.
 - Include as much information as possible such as your operating system, python version, and **steps to reproduce the issue**.
 - If possible include the file you are using with the viewer.
+
+## Support
+
+- If you otherwise require assistance contact rchartra@uw.edu by email.
