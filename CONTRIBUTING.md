@@ -6,7 +6,7 @@ Contributions are welcome! Feel free to add features, tests, suggestions, whatev
 
 - Please submit a pull request for any additions. Any additions will be automatically tested upon submission via workflows.
 - If you are adding significant features to the GUI please include tests similar to those found in the [testing](test_app.py) file to ensure backwards compatibility with the GUI.
-- Include instructions on how to use your feature in the repository instructions
+- Include instructions on how to use your feature in the repository instructions.
 
 ## Code style
 
@@ -14,5 +14,6 @@ Contributions are welcome! Feel free to add features, tests, suggestions, whatev
 
 ## Issues
 
-- Please submit any bugs or issues with the GUI through GitHub issues
-- Include as much information as possible such as your operating system, python version, and **steps to reproduce the issue**. If possible include the file you are using with the viewer.
+- Please submit any bugs or issues with the GUI through GitHub issues.
+- Include as much information as possible such as your operating system, python version, and **steps to reproduce the issue**.
+- If possible include the file you are using with the viewer.
