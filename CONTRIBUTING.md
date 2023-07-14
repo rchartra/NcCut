@@ -20,4 +20,4 @@ Contributions are welcome! Feel free to add features, tests, examples, suggestio
 
 ## Support
 
-- If you otherwise require assistance contact rchartra@uw.edu by email.
+- If you otherwise require assistance contact rchartra@uw.edu.
