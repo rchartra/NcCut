@@ -1,6 +1,11 @@
 """
-Main script that builds and runs full app.
+Main script that builds and runs app.
 """
+
+# Turn off debug messages from kivy and matplotlib
+import os
+os.environ["KCFG_KIVY_LOG_LEVEL"] = "error"
+import matplotlib.pyplot as plt
 
 import kivy
 import kivy.uix as ui
@@ -22,9 +27,9 @@ class CutView(App):
             win.minimum_width = dp(400)
             win.minimum_height = dp(225)
         else:
-            win.size = (dp(1000), dp(600))
-            win.minimum_width = dp(800)
-            win.minimum_height = dp(550)
+            win.size = (dp(750), dp(450))
+            win.minimum_width = dp(600)
+            win.minimum_height = dp(350)
 
     def build(self):
         root = ui.screenmanager.ScreenManager()
