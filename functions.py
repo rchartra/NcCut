@@ -2,13 +2,13 @@
 Helper functions to support other widgets.
 """
 
+import matplotlib.pyplot as plt
 import kivy
 from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from functools import partial
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
 import copy
 import re
