@@ -307,11 +307,11 @@ class Test(unittest.TestCase):
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No empty file names")
 
         # download file name checks
-        self.assertFalse(functions.check_file("", ".jpg"), "No blank file name")
-        self.assertFalse(functions.check_file("test$", ".json"), "No special characters")
-        self.assertFalse(functions.check_file("support/dir1/dir2/dir3/test", ".json"), "Directories must exist")
-        self.assertEqual(functions.check_file("test.jpg", ".jpg"), "test", "Remove user entered extensions")
-        self.assertEqual(functions.check_file("support/example", ".jpg"),
+        self.assertFalse(functions.check_file(run_app.home.rel_path, "", ".jpg"), "No blank file name")
+        self.assertFalse(functions.check_file(run_app.home.rel_path, "test$", ".json"), "No special characters")
+        self.assertFalse(functions.check_file(run_app.home.rel_path, "support/dir1/dir2/dir3/test", ".json"), "Directories must exist")
+        self.assertEqual(functions.check_file(run_app.home.rel_path, "test.jpg", ".jpg"), "test", "Remove user entered extensions")
+        self.assertEqual(functions.check_file(run_app.home.rel_path, "support/example", ".jpg"),
                          "support/example(1)",
                          "If file already exists add (#)")
 
