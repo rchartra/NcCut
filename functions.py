@@ -13,6 +13,7 @@ import numpy as np
 import copy
 import re
 from os.path import exists
+from pathlib import Path
 
 
 class RoundedButton(Button):
@@ -37,22 +38,21 @@ def alert(text, home):
     kivy.clock.Clock.schedule_once(partial(home.canvas_remove, box), 2)
 
 
-def check_file(fname, extension):
+def check_file(path, fname, extension):
     # Checks that a given file name is valid and if file already exists takes measures to avoid overwriting.
     # If a directory is part of the file path checks that the directory exists.
-
     if fname.find(".") >= 1:
         fname = fname[:fname.find(".")]
-    if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/]', fname)) > 0:
+    if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/:]', fname)) > 0:
         return False
     if "/" in fname:
-        if not exists(fname[:fname.rfind("/")+1]):
+        if not Path.exists(path / fname[:fname.rfind("/")+1]):
             return False
 
     exist = True
     fcount = 0
     while exist:
-        if exists(fname + extension):
+        if Path.exists(path / (fname + extension)):
             fcount += 1
             if fcount == 1:
                 fname = fname + "(1)"

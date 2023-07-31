@@ -4,6 +4,7 @@ Class for multiple transect tool that manages any case where multiple single tra
 import kivy.uix as ui
 from kivy.uix.button import Button
 from kivy.metrics import dp
+from kivy.graphics import Color
 from singletransect import SingleTransect
 import functions as func
 
@@ -16,7 +17,7 @@ class MultiTransect(ui.widget.Widget):
         self.clicks = 0
         self.dbtn = Button()
         self.remove = True
-        self.test = False
+        self.test = False # Is this in use?
         self.mpoints = 0
         self.home = home
 

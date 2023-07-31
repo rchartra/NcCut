@@ -23,12 +23,6 @@ class Marker(ui.widget.Widget):
         super(Marker, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
-        if platform.system() == "Darwin":
-            self.line_width = dp(1)
-            self.c_size = (dp(5), dp(5))
-        else:
-            self.line_width = dp(2)
-            self.c_size = (dp(10), dp(10))
         self.dbtn = 0
         self.nbtn = 0
         self.delete = 0
@@ -36,6 +30,16 @@ class Marker(ui.widget.Widget):
         self.twidth = 40
         self.base = 0
         self.home = home
+        color = self.home.l_col
+        if color == "Blue":
+            self.l_color = Color(0.28, 0.62, 0.86)
+        elif color == "Green":
+            self.l_color = Color(0.39, 0.78, 0.47)
+        else:
+            self.l_color = Color(0.74, 0.42, 0.13)
+        size = home.cir_size
+        self.c_size = (dp(size), dp(size))
+        self.line_width = dp(size / 5)
 
     def update_width(self, width):
         # Called by marker width widget to change width for next transect
@@ -74,7 +78,7 @@ class Marker(ui.widget.Widget):
 
         with self.canvas:
             # Draw points at ends of transect
-            Color(.28, .62, .86)
+            Color(self.l_color.r, self.l_color.g, self.l_color.b)
             coords = [xarr[0], yarr[0], xarr[-1], yarr[-1]]
             if xyswap:
                 coords = [yarr[0], xarr[0], yarr[-1], xarr[-1]]
@@ -93,7 +97,6 @@ class Marker(ui.widget.Widget):
 
     def on_touch_down(self, touch):
         # Draws marker line and points
-
         par = self.home.img.children[0].children[-2]
         self.clicks += 1
         if self.clicks == 2 and not self.multi:
@@ -104,7 +107,7 @@ class Marker(ui.widget.Widget):
             self.home.ids.view.parent.add_widget(self.dbtn)
         with self.canvas:
             # Always adds point when clicked
-            Color(.28, .62, .86)
+            Color(self.l_color.r, self.l_color.g, self.l_color.b)
             d = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
             self.points.append((touch.x, touch.y, self.twidth))
         if self.clicks != 1:
