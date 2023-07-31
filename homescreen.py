@@ -4,12 +4,14 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
+from kivy.graphics import Color
 import numpy as np
 import xarray as xr
 import os
 import re
 from PIL import Image as im
 import functions as func
+from pathlib import Path
 from singletransect import SingleTransect
 from multitransect import MultiTransect
 from markerwidth import MarkerWidth
@@ -17,6 +19,7 @@ from multimarker import MultiMarker
 from imageview import ImageView
 from marker import Marker
 from cmaps import _viridis_data
+from PIL import ImageEnhance
 
 
 class HomeScreen(Screen):
@@ -24,14 +27,44 @@ class HomeScreen(Screen):
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
         self.fileon = False
-        self.img = 0
-        self.transect = SingleTransect(buttons=True, home=self)
         self.tMode = False
+        self.rel_path = Path(App.get_running_app().config.get('main', 'output'))
+        self.contrast = float(App.get_running_app().config.get('main', 'contrast'))
+        self.l_col = App.get_running_app().config.get('main', 'lines')
+        self.cir_size = float(App.get_running_app().config.get('main', 'cir_size'))
+        self.nc = False
+        self.transect = 0
         self.data = 0
         self.ds = 0
-        self.nc = False
+        self.img = 0
         self.file = 0
         self.rgb = 0
+
+    def update_settings(self, setting, value):
+        # Updates app settings depending on context of setting change
+        if setting == "contrast":
+            self.contrast = float(value)
+            if self.fileon and self.nc:
+                # Clear previous file data
+                self.img.parent.remove_widget(self.img)
+                self.fileon = False
+                self.img = 0
+                self.rgb = 0
+
+                if self.tMode:
+                    # Cleans space for new image
+                    self.transect = SingleTransect(buttons=True, home=self)
+                    kivy.core.window.Window.set_system_cursor("arrow")
+                    while len(self.ids.view.parent.children) > 1:
+                        self.ids.view.parent.remove_widget(self.ids.view.parent.children[0])
+                    self.tMode = False
+                self.ncopen(self.ds, xr.open_dataset(self.file))
+        elif setting == "lines":
+            self.l_col = value
+        elif setting == "cir_size":
+            self.cir_size = float(value)
+        elif setting == "output":
+            self.rel_path = Path(value)
 
     def transectbtn(self, type):
         # Manages the creation and deletion of each tool
@@ -76,6 +109,9 @@ class HomeScreen(Screen):
         ndata = np.array(list(map(lambda n: list(map(lambda r: _viridis_data[r], n)), ndata)))
         ndata = (ndata * 255).astype(np.uint8)
         img = im.fromarray(ndata)
+        # Applies contrast changes
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(self.contrast)
         img.save("nc.jpg")
 
         self.img = ImageView(source=str("nc.jpg"), size=im.open("nc.jpg").size, home=self)

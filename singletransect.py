@@ -26,17 +26,21 @@ class SingleTransect(ui.widget.Widget):
         self.btns = buttons
         self.line = Line()
         self.circles = 0
-        if platform.system() == "Darwin":
-            self.line_width = dp(1)
-            self.c_size = (dp(5), dp(5))
-        else:
-            self.line_width = dp(2)
-            self.c_size = (dp(10), dp(10))
+        self.home = home
         self.btn = Button()
+        color = self.home.l_col
+        if color == "Blue":
+            self.l_color = Color(0.28, 0.62, 0.86)
+        elif color == "Green":
+            self.l_color = Color(0.39, 0.78, 0.47)
+        else:
+            self.l_color = Color(0.74, 0.42, 0.13)
+        size = home.cir_size
+        self.c_size = (dp(size), dp(size))
+        self.line_width = dp(size / 5)
         self.plot = 0
         self.popup = 0
         self.data = 0
-        self.home = home
 
     def ip_get_points(self):
         # Creates a data frame containing x, y, and value of points on transect line
@@ -131,24 +135,25 @@ class SingleTransect(ui.widget.Widget):
     def download_plot(self, dat, fname):
         # Code to make and download plot of a single transect
         func.plotdf(dat, self.home)
-
-        file = func.check_file(fname, ".jpg")
+        file = func.check_file(self.home.rel_path, fname, ".jpg")
         if file is False:
             func.alert("Invalid File Name", self.home)
+            os.remove("____.jpg")
             return
         else:
-            os.rename("____.jpg", file + '.jpg')
+            path = self.home.rel_path / (file + ".jpg")
+            os.rename("____.jpg", str(path))
             func.alert("Download Complete", self.home)
 
     def download_data(self, dat, fname):
         # Downloads data into a json file
-        file = func.check_file(fname, ".json")
+        file = func.check_file(self.home.rel_path, fname, ".json")
         if file is False:
             func.alert("Invalid File Name", self.home)
             return
         else:
             # To json code
-            with open(file + ".json", "w") as f:
+            with open(self.home.rel_path / (file + ".json"), "w") as f:
                 json.dump(dat, f)
 
             func.alert("Download Complete", self.home)
@@ -181,11 +186,10 @@ class SingleTransect(ui.widget.Widget):
 
     def on_touch_down(self, touch):
         # Gathering touch coordinates and display line graphics
-
         if (self.circles < 1):
             self.circles += 1
             with self.canvas:
-                Color(.28, .62, .86)
+                Color(self.l_color.r, self.l_color.g, self.l_color.b)
                 self.line = Line(points=[], width=self.line_width)
                 c1 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
                 self.line.points = (touch.x, touch.y)

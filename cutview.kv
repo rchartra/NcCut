@@ -1,10 +1,10 @@
 # This document outlines and creates static UI features for GUI
 
 <RoundedButton@Button>:
-    background_color: 0,0,0,0  # the last zero is the critical on, make invisible
+    background_color: 0,0,0,0
     canvas.before:
         Color:
-            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.4,.7,1)  # visual feedback of press
+            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.4,.7,1)
         RoundedRectangle:
             pos: self.pos
             size: self.size
@@ -53,9 +53,16 @@
                 hint_text: "Enter Image or NetCDF File Path"
 
             RoundedButton:
-                size_hint: (0.3, 1)
+                size_hint: (0.1, 1)
                 text: "Go"
+                font_size: self.size[1] / 2
                 on_press: root.gobtn()
+
+            RoundedButton:
+                size_hint: (0.2, 1)
+                text: "Settings"
+                font_size: self.size[1] / 2
+                on_press: app.open_settings()
 
     GridLayout:
         cols: 1
@@ -66,24 +73,30 @@
 
         RoundedButton:
             text: "Single Transect"
+            font_size: self.size[0] / 10
             on_press: root.transectbtn("single")
 
         RoundedButton:
             text: "Multiple Transects"
+            font_size: self.size[0] / 10
             on_press: root.transectbtn("multi")
 
         RoundedButton:
             text: "Marker"
+            font_size: self.size[0] / 10
             on_press: root.transectbtn("marker")
 
         RoundedButton:
             text: "Multiple Marker"
+            font_size: self.size[0] / 10
             on_press: root.transectbtn("filament")
 
         RoundedButton:
             text: "Rotate"
+            font_size: self.size[0] / 10
             on_press: root.rotate()
 
         RoundedButton:
             text: "Quit"
+            font_size: self.size[0] / 10
             on_press: root.quitbtn()

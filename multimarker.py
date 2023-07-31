@@ -130,7 +130,7 @@ class MultiMarker(ui.widget.Widget):
 
     def download_data(self, fname):
         # Downloads each marker's transect data into one json file
-        file = func.check_file(fname, ".json")
+        file = func.check_file(self.home.rel_path, fname, ".json")
         if file is False:
             func.alert("Invalid File Name", self.home)
             return
@@ -147,7 +147,7 @@ class MultiMarker(ui.widget.Widget):
                     count += 1
                 frames["Marker " + str(c)] = data
                 c += 1
-            with open(file + ".json", "w") as f:
+            with open(self.home.rel_path / (file + ".json"), "w") as f:
                 json.dump(frames, f)
             func.alert("Download Complete", self.home)
 
