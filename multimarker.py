@@ -13,6 +13,7 @@ import json
 import functions as func
 from marker import Marker
 from markerwidth import MarkerWidth
+from plotpopup import PlotPopup
 
 
 class Click:
@@ -29,28 +30,27 @@ class MultiMarker(ui.widget.Widget):
         self.m_on = False
         self.home = home
         self.dbtn = Button()
+        self.font = 8
         self.width_w = 0
         self.clicks = 0
         self.twidth = 40
+        self.cir_size = self.home.cir_size
 
         # Upload Button
-        self.upbtn = func.RoundedButton(text="Upload Project", pos_hint={'x': .01, 'y': 0.08}, size=(dp(115), dp(30)),
-                            size_hint_x=None, size_hint_y=None)
+        self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.size[0] / self.font)
         self.upbtn.bind(on_press=lambda x: self.upload_pop())
-        self.home.ids.view.parent.add_widget(self.upbtn)
+        self.home.ids.sidebar.add_widget(self.upbtn, 1)
 
         # New Line Button
-        self.nbtn = func.RoundedButton(text="New Line", pos_hint={'x': .85, 'y': 0.1}, size=(dp(100), dp(30)),
-                                       size_hint_x=None, size_hint_y=None)
+        self.nbtn = func.RoundedButton(text="New Line", size_hint=(1, 0.1), font_size=self.size[0] / self.font)
 
         self.nbtn.bind(on_press=lambda x: self.new_line())
-        self.home.ids.view.parent.add_widget(self.nbtn)
+        self.home.ids.sidebar.add_widget(self.nbtn, 1)
 
         # Delete Button
-        self.delete = func.RoundedButton(text="Delete", pos_hint={'x': .85, 'y': 0.18}, size=(dp(100), dp(30)),
-                                         size_hint_x=None, size_hint_y=None)
+        self.delete = func.RoundedButton(text="Delete", size_hint=(1, 0.1), font_size=self.size[0] / self.font)
         self.delete.bind(on_press=lambda x: self.del_marker())
-        self.home.ids.view.parent.add_widget(self.delete)
+        self.home.ids.sidebar.add_widget(self.delete, 1)
 
     def upload_pop(self):
         # Popup asking for project file
@@ -58,10 +58,12 @@ class MultiMarker(ui.widget.Widget):
         popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
         txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
         content.add_widget(txt)
-        go = Button(text="Ok", size_hint=(0.3, 1))
-
+        go = Button(text="Ok", size_hint=(0.1, 1))
         go.bind(on_release= lambda x: self.check_file(txt.text, popup))
+        close = Button(text="Close", size_hint=(0.2, 1))
+        close.bind(on_press=popup.dismiss)
         content.add_widget(go)
+        content.add_widget(close)
         popup.open()
 
     def check_file(self, file, popup):
@@ -89,7 +91,7 @@ class MultiMarker(ui.widget.Widget):
         # Adds markers by "clicking" the points in the file with the marker width denoted by the file
         for m in dat.keys():
 
-            marker = Marker(multi=True, home=self.home)
+            marker = Marker(home=self.home)
             clicks = tuple(zip(dat[m]["Click X"], dat[m]["Click Y"], dat[m]["Width"]))
             self.add_widget(marker)
 
@@ -114,14 +116,16 @@ class MultiMarker(ui.widget.Widget):
             self.remove_widget(self.children[0])
         if len(self.children) == 0:
             self.clicks = 0
-            self.home.ids.view.parent.remove_widget(self.dbtn)
-            self.home.ids.view.parent.remove_widget(self.width_w)
+            self.home.ids.sidebar.remove_widget(self.dbtn)
+            self.home.ids.sidebar.remove_widget(self.width_w)
         self.new_line()
 
     def new_line(self):
         # Creates a new marker
         if len(self.children) == 0 or self.children[0].clicks >= 2:
-            m = Marker(multi=True, home=self.home)
+            if len(self.children) != 0:
+                self.children[0].stop_drawing()
+            m = Marker(home=self.home)
             self.add_widget(m)
 
     def marker_off(self):
@@ -162,21 +166,37 @@ class MultiMarker(ui.widget.Widget):
         go = Button(text="Ok", size_hint=(0.3, 1))
         go.bind(on_release=lambda x: self.download_data(txt.text))
         go.bind(on_press=popup.dismiss)
-
+        close = Button(text="Close", size_hint=(0.2, 1))
+        close.bind(on_press=popup.dismiss)
         content.add_widget(go)
+        content.add_widget(close)
         popup.open()
+
+    def gather_popup(self):
+        frames = {}
+        c = 1
+        for i in reversed(self.children):
+            data = {}
+            data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
+            count = 1
+            for j in i.base.lines:
+                data["Cut " + str(count)] = j.ip_get_points()
+                count += 1
+            frames["Marker " + str(c)] = data
+            c += 1
+
+        PlotPopup(frames, self.home)
 
     def on_touch_down(self, touch):
         # Manage download and marker width widgets when all markers are deleted
         self.clicks += 1
         if self.clicks == 1:
-            self.width_w = MarkerWidth(self, size_hint=(0.15, 0.06), orientation='horizontal', pos_hint={'x': 0.01, 'y': 0.01})
-            self.home.ids.view.parent.add_widget(self.width_w)
+            self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
+            self.home.ids.sidebar.add_widget(self.width_w, 1)
         if self.clicks == 2:
-            self.dbtn = func.RoundedButton(text="Download", pos_hint={'x': .85, 'y': 0.02}, size=(dp(100), dp(30)),
-                                           size_hint_x=None, size_hint_y=None)
-            self.dbtn.bind(on_press=lambda x: self.file_input())
-            self.home.ids.view.parent.add_widget(self.dbtn)
+            self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.size[0] / 200)
+            self.dbtn.bind(on_press=lambda x: self.gather_popup())
+            self.home.ids.sidebar.add_widget(self.dbtn, 1)
         # If no current marker, create marker. Otherwise pass touch to current marker.
         if not self.m_on:
             self.new_line()

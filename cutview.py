@@ -21,22 +21,6 @@ from homescreen import HomeScreen
 set_config = json.dumps([
     {'type': 'title',
      'title': 'Configurations'},
-    {'type': 'numeric',
-     'title': 'NetCDF Contrast',
-     'desc': 'Contrast level for NetCDF file display',
-     'section': 'main',
-     'key': 'contrast'},
-    {'type': 'numeric',
-     'title': 'Circle Size',
-     'desc': 'Size of circles and line drawn, visual effect only',
-     'section': 'main',
-     'key': 'cir_size'},
-    {'type': 'options',
-     'title': 'Line Colors',
-     'desc': 'Color of drawn lines and points',
-     'section': 'main',
-     'key': 'lines',
-     'options': ['Blue', 'Green', 'Orange']},
     {'type': 'string',
      'title': 'Output Destination',
      'desc': 'Directory plots and data are saved to',
@@ -69,14 +53,7 @@ class CutView(App):
 
     def build_config(self, config):
         # Set default values for settings
-        if platform.system() == "Darwin":
-            size = 5
-        else:
-            size = 10
         config.setdefaults('main', {
-            'contrast': 1.0,
-            'lines': 'Blue',
-            'cir_size': size,
             'output': os.getcwd()
         })
 

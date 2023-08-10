@@ -21,6 +21,11 @@ class RoundedButton(Button):
     pass
 
 
+class BackgroundLabel(Label):
+    # Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    pass
+
+
 def remove_alert(alert, home, *largs):
     # Removes alert banner
     home.remove_widget(alert)
@@ -71,7 +76,7 @@ def plotdf(data, home):
         dat.pop("Click X")
         dat.pop("Click Y")
         dat.pop("Width")
-    if list(dat.keys())[0] == "Cut 1":
+    if list(dat.keys())[0][0:3] == "Cut":
         df = pd.DataFrame()
         for i in dat.keys():
             df = pd.concat([df, pd.DataFrame(dat[i]["Cut"], columns=[i])], axis=1)

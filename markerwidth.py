@@ -4,7 +4,7 @@ Class for marker width adjustment tool
 
 import kivy.uix as ui
 from kivy.uix.textinput import TextInput
-from functions import RoundedButton
+import functions as func
 
 
 class MarkerWidth(ui.boxlayout.BoxLayout):
@@ -13,7 +13,7 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         super(MarkerWidth, self).__init__(**kwargs)
 
         self.txt = TextInput(hint_text="Width", size_hint=(.7, 1))
-        self.btn = RoundedButton(text="Go", size_hint=(.3, 1))
+        self.btn = func.RoundedButton(text="Go", size_hint=(.3, 1))
         self.btn.bind(on_press=lambda x: self.update())
         self.add_widget(self.txt)
         self.add_widget(self.btn)
