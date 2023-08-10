@@ -1040,3 +1040,4 @@ _viridis_data = [[0.267004, 0.004874, 0.329415],
                  [0.983868, 0.904867, 0.136897],
                  [1,1,1]]
 
+all = {'magma':_magma_data, 'inferno': _inferno_data, 'plasma': _plasma_data, 'viridis': _viridis_data}

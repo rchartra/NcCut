@@ -1,33 +1,26 @@
 """
-Class for singular transect tool. Additionally, contains much of the base download and popup functionality.
+Class for a singular transect
 """
 
-import kivy
 import kivy.uix as ui
-from kivy.graphics import Color, Ellipse, Line
+from kivy.graphics import Color, Ellipse, Rectangle, Line
 from kivy.metrics import dp
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.textinput import TextInput
+from kivy.uix.label import Label
+from kivy.core.window import Window
 import numpy as np
 import math
-import pandas as pd
-import os
-import json
-import platform
 from scipy import interpolate
-import functions as func
 
 
 class SingleTransect(ui.widget.Widget):
     # Base code for any single transect
-    def __init__(self, buttons, home, **kwargs):
+    def __init__(self, home, **kwargs):
         super(SingleTransect, self).__init__(**kwargs)
-        self.btns = buttons
         self.line = Line()
         self.circles = 0
         self.home = home
-        self.btn = Button()
+        self.size = self.home.img.size
+        self.pos = self.home.img.pos
         color = self.home.l_col
         if color == "Blue":
             self.l_color = Color(0.28, 0.62, 0.86)
@@ -38,9 +31,6 @@ class SingleTransect(ui.widget.Widget):
         size = home.cir_size
         self.c_size = (dp(size), dp(size))
         self.line_width = dp(size / 5)
-        self.plot = 0
-        self.popup = 0
-        self.data = 0
 
     def ip_get_points(self):
         # Creates a data frame containing x, y, and value of points on transect line
@@ -90,7 +80,7 @@ class SingleTransect(ui.widget.Widget):
             z = np.mean(z, axis=2)
         z = np.flipud(z)
         # numpy arrays are indexed by row, column NOT x, y, but interp object does do x y
-        intPol = interpolate.interp2d(ix, iy, z, kind='linear')
+        int_pol = interpolate.interp2d(ix, iy, z, kind='linear')
 
         if line[0] > line[2]:
             xarr = np.arange(int(line[2]), int(line[0]))
@@ -101,9 +91,9 @@ class SingleTransect(ui.widget.Widget):
         # Grab points from interpolation object
         for i in range(0, xarr.size):
             if xyswap:
-                data.append(intPol(yarr[i], xarr[i])[0])
+                data.append(int_pol(yarr[i], xarr[i])[0])
             else:
-                data.append(intPol(xarr[i], yarr[i])[0])
+                data.append(int_pol(xarr[i], yarr[i])[0])
         if xyswap:
             data = {'x': yarr, 'y': xarr, 'Cut': data}
         else:
@@ -112,101 +102,43 @@ class SingleTransect(ui.widget.Widget):
 
         return data
 
-    def file_input(self, dat, type):
-        # Popup window for input of name for plot/json file
-        content = ui.boxlayout.BoxLayout(orientation='horizontal')
-        popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
-        txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
-        content.add_widget(txt)
-        go = Button(text="Ok", size_hint=(0.3, 1))
-        if type == "data":
-            go.bind(on_press=lambda x: self.download_data(dat, txt.text))
-        else:
-            go.bind(on_press=lambda x: self.download_plot(dat, txt.text))
-        go.bind(on_release=lambda x: self.close_popups(popup))
-        content.add_widget(go)
-        popup.open()
-
-    def close_popups(self, fpop):
-        # Close file name popup and plot popup
-        fpop.dismiss()
-        self.popup.dismiss()
-
-    def download_plot(self, dat, fname):
-        # Code to make and download plot of a single transect
-        func.plotdf(dat, self.home)
-        file = func.check_file(self.home.rel_path, fname, ".jpg")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            os.remove("____.jpg")
-            return
-        else:
-            path = self.home.rel_path / (file + ".jpg")
-            os.rename("____.jpg", str(path))
-            func.alert("Download Complete", self.home)
-
-    def download_data(self, dat, fname):
-        # Downloads data into a json file
-        file = func.check_file(self.home.rel_path, fname, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
-        else:
-            # To json code
-            with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(dat, f)
-
-            func.alert("Download Complete", self.home)
-
-    def plot_popup(self, dat):
-        # Opens popup window with plot and download options
-        content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=10)
-        func.plotdf(dat, self.home)
-        self.popup = Popup(title="Transect", content=content, size_hint=(0.8, 0.8))
-        self.plot = ui.image.Image(source='____.jpg', size_hint=(1, .9))
-        self.plot.reload()
-        content.add_widget(self.plot)
-        os.remove("____.jpg")
-        btns = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing = 5)
-
-        dbtn = func.RoundedButton(text="Download to JSON", size_hint=(.5, 1))
-        dbtn.bind(on_press=lambda x: self.file_input(dat, 'data'))
-
-        ibtn = func.RoundedButton(text='Download Plot', size_hint=(.5, 1))
-        ibtn.bind(on_press=lambda x: self.file_input(dat, 'plot'))
-
-        btns.add_widget(dbtn)
-        btns.add_widget(ibtn)
-        content.add_widget(btns)
-
-        self.line.points = []
-        self.home.tMode = False
-        kivy.core.window.Window.set_system_cursor("arrow")
-        self.popup.open()
-
     def on_touch_down(self, touch):
         # Gathering touch coordinates and display line graphics
-        if (self.circles < 1):
-            self.circles += 1
-            with self.canvas:
-                Color(self.l_color.r, self.l_color.g, self.l_color.b)
-                self.line = Line(points=[], width=self.line_width)
-                c1 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
-                self.line.points = (touch.x, touch.y)
+        if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
+            if self.circles == 0:
+                self.circles += 1
+                number = Label(text=str(len(self.parent.children)), pos=(touch.x, touch.y), font_size=30)
+                self.add_widget(number)
+                with self.canvas:
+                    Color(self.l_color.r, self.l_color.g, self.l_color.b)
+                    self.line = Line(points=[], width=self.line_width)
+                    c1 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
+                    self.line.points = (touch.x, touch.y)
+                Window.bind(mouse_pos=self.draw_line)
 
-        elif (self.circles < 2):
-            # If clicked the same point as before, do nothing
-            if [touch.x, touch.y] == self.line.points:
-                return
-            self.circles += 1
-            with self.canvas:
-                c2 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
-                self.line.points += (touch.x, touch.y)
+            elif self.circles == 1:
+                # If clicked the same point as before, do nothing
+                self.circles += 1
+                if len(self.line.points) != 2:
+                    self.line.points.pop()
+                    self.line.points.pop()
+                if [touch.x, touch.y] == self.line.points:
+                    return
+                with self.canvas:
+                    c2 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
+                    self.line.points += (touch.x, touch.y)
 
-            if self.btns:
-                # For when just a single transect, doesn't do buttons if just a base for a higher tool
-                dat = self.ip_get_points()
-                self.plot_popup(dat)
-                while len(self.parent.children) > 2:
-                    self.parent.remove_widget(self.parent.children[0])
-                self.parent.remove_widget(self.parent.children[0])
+    def draw_line(self, instance, pos):
+        if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
+            mouse = self.to_widget(*pos)
+            if self.size[0] >= mouse[0] >= 0 and self.size[1] >= mouse[1] >= 0:
+                if self.circles == 1:
+                    if len(self.line.points) == 2:
+                        with self.canvas:
+                            self.line.points += self.to_widget(pos[0], pos[1])
+                    else:
+                        self.line.points.pop()
+                        self.line.points.pop()
+                        with self.canvas:
+                            self.line.points += self.to_widget(pos[0], pos[1])
+

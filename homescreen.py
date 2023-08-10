@@ -2,24 +2,18 @@ import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
-from kivy.graphics import Color
-import numpy as np
+from kivy.metrics import dp
 import xarray as xr
-import os
 import re
-from PIL import Image as im
 import functions as func
 from pathlib import Path
-from singletransect import SingleTransect
 from multitransect import MultiTransect
-from markerwidth import MarkerWidth
 from multimarker import MultiMarker
 from imageview import ImageView
-from marker import Marker
-from cmaps import _viridis_data
-from PIL import ImageEnhance
+from PIL import Image as im
 
 
 class HomeScreen(Screen):
@@ -29,10 +23,13 @@ class HomeScreen(Screen):
         self.fileon = False
         self.tMode = False
         self.rel_path = Path(App.get_running_app().config.get('main', 'output'))
-        self.contrast = float(App.get_running_app().config.get('main', 'contrast'))
-        self.l_col = App.get_running_app().config.get('main', 'lines')
-        self.cir_size = float(App.get_running_app().config.get('main', 'cir_size'))
+        self.l_col = "Blue"
+        self.cir_size = 10
+        self.contrast = 1.0
+        self.colormap = 'viridis'
         self.nc = False
+        self.action = func.BackgroundLabel(text="Actions", size_hint=(1, 0.1), text_size=self.size,
+                                           halign='center', valign='center', font_size=self.size[0] / 8)
         self.transect = 0
         self.data = 0
         self.ds = 0
@@ -42,24 +39,21 @@ class HomeScreen(Screen):
 
     def update_settings(self, setting, value):
         # Updates app settings depending on context of setting change
-        if setting == "contrast":
-            self.contrast = float(value)
-            if self.fileon and self.nc:
-                # Clear previous file data
-                self.img.parent.remove_widget(self.img)
-                self.fileon = False
-                self.img = 0
-                self.rgb = 0
 
-                if self.tMode:
-                    # Cleans space for new image
-                    self.transect = SingleTransect(buttons=True, home=self)
-                    kivy.core.window.Window.set_system_cursor("arrow")
-                    while len(self.ids.view.parent.children) > 1:
-                        self.ids.view.parent.remove_widget(self.ids.view.parent.children[0])
-                    self.tMode = False
-                self.ncopen(self.ds, xr.open_dataset(self.file))
-        elif setting == "lines":
+        if setting == "contrast":
+            if self.fileon and self.nc:
+                self.contrast = value
+                self.img.update_contrast(float(value))
+        elif setting == "colormap":
+            if self.fileon and self.nc:
+                self.colormap = value
+                self.img.update_colormap(value)
+        elif setting == "variable":
+            if self.fileon and self.nc:
+                self.ds = value
+                self.data = xr.open_dataset(self.file)[value].data
+                self.img.update_variable(self.data)
+        elif setting == "l_color":
             self.l_col = value
         elif setting == "cir_size":
             self.cir_size = float(value)
@@ -71,19 +65,12 @@ class HomeScreen(Screen):
         if self.fileon:
             if not self.tMode:
                 # Opens a new tool
+                self.ids.sidebar.add_widget(self.action, 1)
                 kivy.core.window.Window.set_system_cursor("crosshair")
-                if type == "single":
-                    self.transect = SingleTransect(buttons=True, home=self)
-                elif type == "multi":
+                if type == "transect":
                     self.transect = MultiTransect(home=self)
-                elif type == "filament":
+                elif type == "transect_marker":
                     self.transect = MultiMarker(home=self)
-                else:
-                    self.transect = Marker(multi=False, home=self)
-                    self.ids.view.parent.add_widget(MarkerWidth(self.transect,
-                                                                size_hint=(0.15, 0.06),
-                                                                orientation='horizontal',
-                                                                pos_hint={'x': 0.01, 'y': 0.01}))
                 self.img.add_widget(self.transect)
                 self.tMode = True
             else:
@@ -94,31 +81,19 @@ class HomeScreen(Screen):
                     self.ids.view.parent.remove_widget(self.ids.view.parent.children[0])
                 while len(self.img.children[0].children) > 1:
                     self.img.remove_widget(self.img.children[0].children[0])
-
+                while len(self.ids.sidebar.children) > 4:
+                    self.ids.sidebar.remove_widget(self.ids.sidebar.children[1])
                 self.tMode = False
 
     def ncopen(self, dataset, file):
         # Creates image from nc file to display
         self.ds = dataset
         self.data = file[dataset].data
-        ndata = (self.data - np.nanmin(self.data)) / (np.nanmax(self.data) - np.nanmin(self.data))
-        ndata = np.nan_to_num(ndata, nan=1)
 
-        # Applies colormap
-        ndata = (ndata * 255).astype(np.uint8)
-        ndata = np.array(list(map(lambda n: list(map(lambda r: _viridis_data[r], n)), ndata)))
-        ndata = (ndata * 255).astype(np.uint8)
-        img = im.fromarray(ndata)
-        # Applies contrast changes
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(self.contrast)
-        img.save("nc.jpg")
-
-        self.img = ImageView(source=str("nc.jpg"), size=im.open("nc.jpg").size, home=self)
+        self.img = ImageView(source=self.data, home=self, f_type="netcdf")
         self.ids.view.add_widget(self.img)
         self.img.addImage()
         self.fileon = True
-        os.remove("nc.jpg")
 
     def gobtn(self):
 
@@ -133,10 +108,12 @@ class HomeScreen(Screen):
 
         if self.tMode:
             # Cleans space for new image
-            self.transect = SingleTransect(buttons=True, home=self)
+            self.transect = 0
             kivy.core.window.Window.set_system_cursor("arrow")
             while len(self.ids.view.parent.children) > 1:
                 self.ids.view.parent.remove_widget(self.ids.view.parent.children[0])
+            while len(self.ids.sidebar.children) > 4:
+                self.ids.sidebar.remove_widget(self.ids.sidebar.children[1])
             self.tMode = False
 
         self.file = self.ids.file_in.text
@@ -146,22 +123,28 @@ class HomeScreen(Screen):
         else:
             if len(self.file) >= 1:
                 try:
+                    open(self.file)
                     if self.file[-3:] == ".nc":
                         # Creates selection popup for nc file data sets
                         self.nc = True
                         ds = xr.open_dataset(self.file)
-                        content = GridLayout(cols=3)
+                        content = BoxLayout(orientation='vertical', spacing=dp(10))
+                        grid = GridLayout(cols=3, size_hint=(1, 0.9))
                         popup = Popup(title="Select Data Set", content=content, size_hint=(0.6, 0.6))
                         for i in list(ds.keys()):
                             btn = Button(text=i)
                             btn.bind(on_release=lambda btn: self.ncopen(btn.text, ds))
                             btn.bind(on_press=popup.dismiss)
-                            content.add_widget(btn)
+                            grid.add_widget(btn)
+                        content.add_widget(grid)
+                        close = Button(text="Close", size_hint=(0.2, 0.1), font_size=self.size[0] / 60)
+                        close.bind(on_press=popup.dismiss)
+                        content.add_widget(close)
                         popup.open()
 
                     elif self.file[-5:] == ".jpeg" or self.file[-4:] == ".png" or self.file[-4:] == ".jpg":
                         # Creates interactive image from .jpg/.png/.jpeg files
-                        self.img = ImageView(source=str(self.file), size=im.open(self.file).size, home=self)
+                        self.img = ImageView(source=str(self.file), home=self, f_type="image")
                         self.ids.view.add_widget(self.img)
                         self.img.addImage()
                         self.rgb = im.open(self.file).convert('RGB')
@@ -171,11 +154,6 @@ class HomeScreen(Screen):
 
                 except FileNotFoundError:
                     func.alert("File Not Found", self)
-
-    def rotate(self):
-        # Rotate image
-        if self.fileon:
-            self.img.rotation = self.img.rotation + 45
 
     def canvas_remove(self, item, *largs):
         # Allows external sources to clear canvas

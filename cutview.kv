@@ -1,4 +1,18 @@
 # This document outlines and creates static UI features for GUI
+#:import Factory kivy.factory.Factory
+#:import ViewDropDown dropdowns
+#:import NetCDFDropDown dropdowns
+
+
+<BackgroundLabel@Label>
+    background_color: 0.2, 0.2, 0.2, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [5,]
 
 <RoundedButton@Button>:
     background_color: 0,0,0,0
@@ -10,23 +24,237 @@
             size: self.size
             radius: [15,]
 
+<ViewDropDown@DropDown>
+    auto_width: False
+    height: dp(180)
+    width: dp(300)
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(180)
+        width: dp(300)
+        spacing: dp(10)
+        padding: dp(10)
+        orientation: 'vertical'
+        canvas:
+            Color:
+                rgb: [.2, .2, .2]
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [10,]
+
+        BoxLayout:
+            padding: dp(10)
+            canvas:
+                Color:
+                    rgb: [.3, .3, .3]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+
+            Label:
+                text: 'Line Color: '
+                size_hint: (0.5, 1)
+                font_size: self.size[0] / 7
+
+            RoundedButton:
+                id: 'select_l_color'
+                text: "Select ..."
+                size_hint: (0.5, 0.8)
+                font_size: self.size[1] / 3
+                pos_hint: {'top': 0.9}
+                on_press: root.l_color_drop.open(self)
+
+        BoxLayout:
+            padding: dp(10)
+            canvas:
+                Color:
+                    rgb: [.3, .3, .3]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+            Label:
+                text: 'Circle Size: '
+                size_hint: (0.2, 1)
+                font_size: self.size[0] / 5
+
+            Label:
+                text: str(round(cir_size.value, 1))
+                size_hint: (0.1, 1)
+                font_size: self.size[0] / 2
+
+            Slider:
+                id: cir_size
+                min: 2
+                max: 200
+                value: 10
+                step: 1
+                size_hint: (0.5, 1)
+
+            RoundedButton:
+                text: "Go"
+                size_hint: (0.1, 0.6)
+                font_size: self.size[0] / 2
+                on_press: root.pass_setting("cir_size", cir_size.value)
+                pos_hint: {'top': 0.8}
+
+        RoundedButton:
+            text: "Rotate"
+            font_size: self.size[0] / 15
+            on_press: root.rotate()
+
+<NetCDFDropDown@DropDown>
+    auto_width: False
+    height: dp(300)
+    width: dp(300)
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(300)
+        width: dp(300)
+        spacing: dp(10)
+        padding: dp(10)
+        orientation: 'vertical'
+        canvas:
+            Color:
+                rgb: [.2, .2, .2]
+            RoundedRectangle:
+                size: self.size
+                pos: self.pos
+                radius: [10,]
+
+        BoxLayout:
+            padding: dp(10)
+            canvas:
+                Color:
+                    rgb: [.3, .3, .3]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+            Label:
+                text: 'Contrast: '
+                size_hint: (0.2, 1)
+                font_size: self.size[0] / 5
+
+            Label:
+                text: str(round(contrast.value, 1))
+                size_hint: (0.1, 1)
+                font_size: self.size[0] / 2
+
+            Slider:
+                id: contrast
+                min: 0
+                max: 10.0
+                value: 1.0
+                step: 0.2
+                size_hint: (0.5, 1)
+
+            RoundedButton:
+                text: "Go"
+                size_hint: (0.1, 0.6)
+                font_size: self.size[0] / 2
+                on_press: root.pass_setting("contrast", contrast.value)
+                pos_hint: {'top': 0.8}
+
+        BoxLayout:
+            padding: dp(10)
+            canvas:
+                Color:
+                    rgb: [.3, .3, .3]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+
+            Label:
+                text: 'Color Map: '
+                size_hint: (0.5, 1)
+                font_size: self.size[0] / 7
+
+            RoundedButton:
+                id: 'select_cmap'
+                text: "Select ..."
+                size_hint: (0.5, 0.8)
+                font_size: self.size[1] / 5
+                pos_hint: {'top': 0.9}
+                on_press: if app.root.get_screen("HomeScreen").nc: root.cmap_dropdown.open(self)
+
+        BoxLayout:
+            padding: dp(10)
+            canvas:
+                Color:
+                    rgb: [.3, .3, .3]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+
+            Label:
+                text: 'Variable: '
+                size_hint: (0.5, 1)
+                font_size: self.size[0] / 7
+
+            RoundedButton:
+                id: 'select_var'
+                text: "Select ..."
+                size_hint: (0.5, 0.8)
+                font_size: self.size[1] / 5
+                pos_hint: {'top': 0.9}
+                on_press: root.var_dropdown.open(self)
+
 <HomeScreen>
 
     BoxLayout:
         orientation: "vertical"
         size_hint: (0.8, 1)
         spacing: dp(10)
-        padding: [dp(20), dp(20), dp(10), dp(20)]
+        padding: [dp(20), dp(10), dp(10), dp(20)]
+
+        BoxLayout:
+            size_hint: (1, 0.05)
+            spacing: dp(10)
+            padding: [dp(5), dp(5), dp(5), dp(5)]
+            canvas:
+                Color:
+                    rgb: [.2, .2, .2]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+
+            RoundedButton:
+                text: "File"
+                size_hint: (0.1, 1)
+                font_size: self.size[1] / 2
+                on_press: app.open_settings()
+
+            RoundedButton:
+                text: "View"
+                size_hint: (0.1, 1)
+                font_size: self.size[1] / 2
+                on_press: Factory.ViewDropDown().open(self)
+
+            RoundedButton:
+                text: "NetCDF"
+                size_hint: (0.1, 1)
+                font_size: self.size[1] / 2
+                on_press: Factory.NetCDFDropDown().open(self)
+
+            Label:
+                text: ""
+                size_hint: (0.7, 1)
 
         RelativeLayout:
 
-            size_hint: (1, 0.9)
+            size_hint: (1, 0.85)
 
             StencilView:
                 id: view
                 size_hint: (1, 1)
-                #size_hint: (1, 0.7)
-                #pos: self.pos
 
                 canvas:
                     Color:
@@ -49,7 +277,7 @@
 
             TextInput:
                 id: file_in
-                size_hint: (0.7, 1)
+                size_hint: (0.9, 1)
                 hint_text: "Enter Image or NetCDF File Path"
 
             RoundedButton:
@@ -58,45 +286,36 @@
                 font_size: self.size[1] / 2
                 on_press: root.gobtn()
 
-            RoundedButton:
-                size_hint: (0.2, 1)
-                text: "Settings"
-                font_size: self.size[1] / 2
-                on_press: app.open_settings()
-
-    GridLayout:
-        cols: 1
+    BoxLayout:
+        id: sidebar
+        orientation: "vertical"
         size_hint: (0.2, 1)
-        pos_hint: {"x":0.8}
+        pos_hint: {"x": 0.8}
         padding: [dp(10), dp(20), dp(20), dp(20)]
-        spacing: [dp(20)]
+        spacing: dp(20)
+
+        BackgroundLabel:
+            text: "Tools"
+            size_hint: (1, 0.1)
+            text_size: self.size
+            halign: 'center'
+            valign: 'center'
+            font_size: self.size[0] / 10
 
         RoundedButton:
-            text: "Single Transect"
-            font_size: self.size[0] / 10
-            on_press: root.transectbtn("single")
+            text: "Transect"
+            size_hint: (1, 0.1)
+            font_size: self.size[0] / 12
+            on_press: root.transectbtn("transect")
 
         RoundedButton:
-            text: "Multiple Transects"
-            font_size: self.size[0] / 10
-            on_press: root.transectbtn("multi")
-
-        RoundedButton:
-            text: "Marker"
-            font_size: self.size[0] / 10
-            on_press: root.transectbtn("marker")
-
-        RoundedButton:
-            text: "Multiple Marker"
-            font_size: self.size[0] / 10
-            on_press: root.transectbtn("filament")
-
-        RoundedButton:
-            text: "Rotate"
-            font_size: self.size[0] / 10
-            on_press: root.rotate()
+            text: "Transect Marker"
+            size_hint: (1, 0.1)
+            font_size: self.size[0] / 12
+            on_press: root.transectbtn("transect_marker")
 
         RoundedButton:
             text: "Quit"
+            size_hint: (1, 0.1)
             font_size: self.size[0] / 10
             on_press: root.quitbtn()
