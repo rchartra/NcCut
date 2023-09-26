@@ -6,21 +6,10 @@ import unittest
 import os
 import time
 import copy
-import numpy as np
-import json
 from functools import partial
-import kivy
-from kivy.graphics import Line
 from kivy.clock import Clock
 
 import functions
-from imageview import ImageView
-from singletransect import SingleTransect
-from multimarker import MultiMarker, Click
-from multitransect import MultiTransect
-from markerwidth import MarkerWidth
-from marker import Marker
-from functions import RoundedButton
 from cutview import CutView
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'

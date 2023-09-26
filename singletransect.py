@@ -3,13 +3,10 @@ Class for a singular transect
 """
 
 import kivy.uix as ui
-from kivy.graphics import Color, Ellipse, Rectangle, Line
+from kivy.graphics import Color, Ellipse, Line
 from kivy.metrics import dp
 from kivy.uix.label import Label
 from kivy.core.window import Window
-import numpy as np
-import math
-from scipy import interpolate
 
 
 class SingleTransect(ui.widget.Widget):

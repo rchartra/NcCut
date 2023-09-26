@@ -1,8 +1,6 @@
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.app import App
-import cv2
-import cmaps
 import xarray as xr
 
 

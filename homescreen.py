@@ -1,12 +1,6 @@
 import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.popup import Popup
-from kivy.uix.button import Button
-from kivy.metrics import dp
-import xarray as xr
 import re
 import functions as func
 from pathlib import Path
@@ -17,7 +11,6 @@ from netcdfconfig import NetCDFConfig
 from PIL import Image as im
 import time
 import cv2
-import sys
 
 
 class HomeScreen(Screen):

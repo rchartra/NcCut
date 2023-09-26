@@ -5,3 +5,5 @@ kivy
 matplotlib
 xarray
 netCDF4
+cv2
+opencv-python

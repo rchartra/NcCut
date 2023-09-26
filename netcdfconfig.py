@@ -3,12 +3,10 @@ from kivy.metrics import dp
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.dropdown import DropDown
 import functions as func
 import xarray as xr
 import time
-from copy import copy
 
 
 class NetCDFConfig(Popup):

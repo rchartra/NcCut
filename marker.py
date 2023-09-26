@@ -7,10 +7,8 @@ from kivy.metrics import dp
 from kivy.graphics import Color, Ellipse, Line
 from kivy.uix.label import Label
 import math
-import functools
 import numpy as np
 from kivy.core.window import Window
-
 import functions
 from singletransect import SingleTransect
 from multitransect import MultiTransect

@@ -5,7 +5,7 @@ Contributions are welcome! Feel free to add features, tests, examples, suggestio
 ## Testing and Submissions
 
 - Please submit a pull request for any additions. Any additions will be automatically tested upon submission via workflows.
-- If you are adding significant features to the GUI please include tests similar to those found in the [testing](old_t3st_app.py) file to ensure backwards compatibility with the GUI.
+- If you are adding significant features to the GUI please include tests similar to those found in the [testing](old_versions/old_t3st_app.py) file to ensure backwards compatibility with the GUI.
 - Please include instructions on how to use your feature to add to the wiki. You can submit these as part of you pull request or as a GitHub issue.
 
 ## Code style
