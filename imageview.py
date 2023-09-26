@@ -7,11 +7,8 @@ from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
 import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
-from PIL import ImageEnhance
 from PIL import Image as im
-import PIL
 import numpy as np
-import xarray as xr
 import cv2
 import io
 import functions as func

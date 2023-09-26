@@ -14,7 +14,6 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
 import platform
-from pathlib import Path
 import json
 from homescreen import HomeScreen
 

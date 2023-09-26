@@ -3,7 +3,6 @@ Class for multiple transect tool that manages any case where multiple single tra
 """
 import kivy.uix as ui
 from kivy.uix.button import Button
-from kivy.metrics import dp
 from plotpopup import PlotPopup
 from singletransect import SingleTransect
 import functions as func
