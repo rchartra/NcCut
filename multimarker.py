@@ -7,7 +7,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
-from kivy.metrics import dp
+from kivy.core.window import Window
 from os.path import exists
 import json
 import functions as func
@@ -21,6 +21,7 @@ class Click:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.pos = (x, y)
 
 
 class MultiMarker(ui.widget.Widget):
@@ -29,9 +30,11 @@ class MultiMarker(ui.widget.Widget):
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
         self.home = home
-        self.dbtn = Button()
+        self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.size[0] / 10)
+        self.dbtn.bind(on_press=lambda x: self.gather_popup())
+        self.dragging = False
         self.font = 8
-        self.width_w = 0
+        self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
         self.twidth = 40
         self.cir_size = self.home.cir_size
@@ -46,11 +49,6 @@ class MultiMarker(ui.widget.Widget):
 
         self.nbtn.bind(on_press=lambda x: self.new_line())
         self.home.ids.sidebar.add_widget(self.nbtn, 1)
-
-        # Delete Button
-        self.delete = func.RoundedButton(text="Delete", size_hint=(1, 0.1), font_size=self.size[0] / self.font)
-        self.delete.bind(on_press=lambda x: self.del_marker())
-        self.home.ids.sidebar.add_widget(self.delete, 1)
 
     def upload_pop(self):
         # Popup asking for project file
@@ -98,6 +96,7 @@ class MultiMarker(ui.widget.Widget):
             for i in clicks:
                 marker.twidth = i[2]
                 marker.on_touch_down(Click(i[0], i[1]))
+            marker.stop_drawing()
         self.marker_off()
 
     def update_width(self, num):
@@ -105,72 +104,40 @@ class MultiMarker(ui.widget.Widget):
         self.twidth = num
         self.children[0].twidth = num
 
-    def del_marker(self):
-        # Removes old marker, If current line has no clicks, delete current line and previous line
+    def del_line(self):
+        # If only one, delete but add new marker, otherwise delete current and go to previous
         if len(self.children) == 0:
             return
-        if self.children[0].clicks == 0:
-            self.remove_widget(self.children[0])
-
-        if len(self.children) != 0:
-            self.remove_widget(self.children[0])
+        Window.unbind(mouse_pos=self.children[0].draw_line)
+        self.remove_widget(self.children[0])
         if len(self.children) == 0:
             self.clicks = 0
-            self.home.ids.sidebar.remove_widget(self.dbtn)
-            self.home.ids.sidebar.remove_widget(self.width_w)
-        self.new_line()
+            self.home.img.current.remove(self.dbtn)
+            self.home.img.current.remove(self.width_w)
+            self.new_line()
+
+    def del_point(self):
+        if len(self.children) == 0:
+            return
+        elif self.children[0].clicks == 0:
+            if len(self.children) > 1:
+                self.remove_widget(self.children[0])
+            else:
+                return
+        self.children[0].del_point()
 
     def new_line(self):
         # Creates a new marker
-        if len(self.children) == 0 or self.children[0].clicks >= 2:
-            if len(self.children) != 0:
-                self.children[0].stop_drawing()
-            m = Marker(home=self.home)
-            self.add_widget(m)
+        if not self.dragging or self.home.img.editing:
+            if len(self.children) == 0 or self.children[0].clicks >= 2:
+                if len(self.children) != 0:
+                    self.children[0].stop_drawing()
+                m = Marker(home=self.home)
+                self.add_widget(m)
 
     def marker_off(self):
         # Update whether there is currently a marker on the board
         self.m_on = False
-
-    def download_data(self, fname):
-        # Downloads each marker's transect data into one json file
-        file = func.check_file(self.home.rel_path, fname, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
-        else:
-            # Create json file
-            frames = {}
-            c = 1
-            for i in reversed(self.children):
-                data = {}
-                data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
-                count = 1
-                for j in i.base.lines:
-                    data["Cut " + str(count)] = j.ip_get_points()
-                    count += 1
-                frames["Marker " + str(c)] = data
-                c += 1
-            with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(frames, f)
-            func.alert("Download Complete", self.home)
-
-    def file_input(self):
-        # Create popup to ask for name of file
-        content = ui.boxlayout.BoxLayout(orientation='horizontal')
-        popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
-
-        txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
-        content.add_widget(txt)
-
-        go = Button(text="Ok", size_hint=(0.3, 1))
-        go.bind(on_release=lambda x: self.download_data(txt.text))
-        go.bind(on_press=popup.dismiss)
-        close = Button(text="Close", size_hint=(0.2, 1))
-        close.bind(on_press=popup.dismiss)
-        content.add_widget(go)
-        content.add_widget(close)
-        popup.open()
 
     def gather_popup(self):
         frames = {}
@@ -180,7 +147,7 @@ class MultiMarker(ui.widget.Widget):
             data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
             count = 1
             for j in i.base.lines:
-                data["Cut " + str(count)] = j.ip_get_points()
+                data["Cut " + str(count)] = j.line.points
                 count += 1
             frames["Marker " + str(c)] = data
             c += 1
@@ -189,17 +156,15 @@ class MultiMarker(ui.widget.Widget):
 
     def on_touch_down(self, touch):
         # Manage download and marker width widgets when all markers are deleted
-        self.clicks += 1
-        if self.clicks == 1:
-            self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
-            self.home.ids.sidebar.add_widget(self.width_w, 1)
-        if self.clicks == 2:
-            self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.size[0] / 200)
-            self.dbtn.bind(on_press=lambda x: self.gather_popup())
-            self.home.ids.sidebar.add_widget(self.dbtn, 1)
-        # If no current marker, create marker. Otherwise pass touch to current marker.
-        if not self.m_on:
-            self.new_line()
-            self.update_width(self.twidth)
-            self.m_on = True
-        self.children[0].on_touch_down(touch)
+        if not self.dragging:
+            self.clicks += 1
+            if self.clicks == 1:
+                self.home.ids.sidebar.add_widget(self.width_w, 1)
+            if self.clicks == 2:
+                self.home.ids.sidebar.add_widget(self.dbtn, 1)
+            # If no current marker, create marker. Otherwise, pass touch to current marker.
+            if not self.m_on:
+                self.new_line()
+                self.update_width(self.twidth)
+                self.m_on = True
+            self.children[0].on_touch_down(touch)

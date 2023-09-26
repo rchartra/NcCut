@@ -7,9 +7,11 @@ from kivy.metrics import dp
 from kivy.graphics import Color, Ellipse, Line
 from kivy.uix.label import Label
 import math
-import copy
+import functools
 import numpy as np
 from kivy.core.window import Window
+
+import functions
 from singletransect import SingleTransect
 from multitransect import MultiTransect
 
@@ -73,16 +75,29 @@ class Marker(ui.widget.Widget):
         b = mid[1] - m * mid[0]
         xarr = np.arange(int(mid[0] - self.twidth / 2), int(mid[0] + self.twidth / 2 + 1))
         yarr = xarr * m + b
-
         with self.canvas:
             # Draw points at ends of transect
             Color(self.l_color.r, self.l_color.g, self.l_color.b)
             coords = [xarr[0], yarr[0], xarr[-1], yarr[-1]]
             if xyswap:
                 coords = [yarr[0], xarr[0], yarr[-1], xarr[-1]]
-            c1 = Ellipse(pos=(coords[0] - self.c_size[0] / 2, coords[1] - self.c_size[1] / 2), size=self.c_size)
-            c1 = Ellipse(pos=(coords[2] - self.c_size[0] / 2, coords[3] - self.c_size[1] / 2), size=self.c_size)
+            c1 = Ellipse(pos=(coords[0] - self.c_size[0] / 2, coords[1] - self.c_size[1] / 2),
+                         size=self.c_size, group=str(self.clicks))
+            c1 = Ellipse(pos=(coords[2] - self.c_size[0] / 2, coords[3] - self.c_size[1] / 2),
+                         size=self.c_size, group=str(self.clicks))
         return coords
+
+    def del_point(self):
+        # Remove most recent point, line, and transect points
+        if self.clicks != 1:
+            self.base.lines = self.base.lines[:-1]
+        else:
+            self.remove_widget(self.children[0])
+            Window.unbind(mouse_pos=self.draw_line)
+        self.points.remove(self.points[-1])
+        self.canvas.remove_group(str(self.clicks))
+        self.canvas.remove_group(str(self.clicks + 1))
+        self.clicks -= 1
 
     def on_touch_down(self, touch):
         # Draws marker line and points
@@ -92,19 +107,31 @@ class Marker(ui.widget.Widget):
             with self.canvas:
                 # Always adds point when clicked
                 Color(self.l_color.r, self.l_color.g, self.l_color.b)
-                d = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2), size=self.c_size)
+                d = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
+                            size=self.c_size, group=str(self.clicks))
                 self.points.append((touch.x, touch.y, self.twidth))
-                self.curr_line = Line(points=[], width=self.line_width)
+                self.curr_line = Line(points=[], width=self.line_width, group=str(self.clicks + 1))
             Window.bind(mouse_pos=self.draw_line)
             if self.clicks != 1:
                 # If 2nd or more click, create a line inbetween click points
                 with self.canvas:
-                    line = Line(points=[self.points[-2][0:2], self.points[-1][0:2]], width=self.line_width)
+                    line = Line(points=[self.points[-2][0:2], self.points[-1][0:2]],
+                                width=self.line_width, group=str(self.clicks))
                 # Stores orthogonal line in a SingleTransect which gets stored in base MultiTransect
-                x = SingleTransect(home=self.home)
-                x.line = copy.copy(line)
-                x.line.points = self.get_orthogonal(line)
-                self.base.lines.append(x)
+                coords = self.get_orthogonal(line)
+                if self.in_bounds(coords):
+                    # Check if orthogonal points are within image bounds
+                    x = SingleTransect(home=self.home)
+                    x.line = Line(points=[], width=self.line_width)
+                    x.line.points = self.get_orthogonal(line)
+                    self.base.lines.append(x)
+                else:
+                    # Undo actions
+                    self.canvas.remove_group(str(self.clicks))
+                    self.canvas.remove(self.curr_line)
+                    self.clicks -= 1
+                    self.points = self.points[:-1]
+                    functions.alert("Orthogonal point out of bounds", self.home)
 
             else:
                 # If new marker creates MultiTransect base and if part of a MultiMarker adds numbers
@@ -118,12 +145,23 @@ class Marker(ui.widget.Widget):
                     self.twidth = self.parent.children[1].twidth
 
     def draw_line(self, instance, pos):
-        if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
-            mouse = self.to_widget(*pos)
-            if self.size[0] >= mouse[0] >= 0 and self.size[1] >= mouse[1] >= 0:
-                with self.canvas:
-                    self.curr_line.points = [self.points[-1][0:2], self.to_widget(pos[0], pos[1])]
+        if self.parent.children[0] == self and not self.parent.dragging:
+            if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
+                mouse = self.to_widget(*pos)
+                if self.size[0] >= mouse[0] >= 0 and self.size[1] >= mouse[1] >= 0:
+                    with self.canvas:
+                        self.curr_line.points = [self.points[-1][0:2], self.to_widget(pos[0], pos[1])]
+        else:
+            self.stop_drawing()
 
     def stop_drawing(self):
         with self.canvas:
-            self.canvas.remove(self.curr_line)
+            self.curr_line.points = self.curr_line.points[0:2]
+
+    def in_bounds(self, points):
+        dots = [points[0:2], points[2:4]]
+        for d in dots:
+            if min(d) < 0 or any([l[0] > l[1] for l in list(zip(d, self.size))]):
+                return False
+        return True
+

@@ -26,12 +26,12 @@
 
 <ViewDropDown@DropDown>
     auto_width: False
-    height: dp(180)
+    height: dp(210)
     width: dp(300)
 
     BoxLayout:
         size_hint_y: None
-        height: dp(180)
+        height: dp(210)
         width: dp(300)
         spacing: dp(10)
         padding: dp(10)
@@ -45,7 +45,7 @@
                 radius: [10,]
 
         BoxLayout:
-            padding: dp(10)
+            padding: dp(5)
             canvas:
                 Color:
                     rgb: [.3, .3, .3]
@@ -63,12 +63,12 @@
                 id: 'select_l_color'
                 text: "Select ..."
                 size_hint: (0.5, 0.8)
-                font_size: self.size[1] / 3
+                font_size: self.size[1] / 1.6
                 pos_hint: {'top': 0.9}
                 on_press: root.l_color_drop.open(self)
 
         BoxLayout:
-            padding: dp(10)
+            padding: dp(5)
             canvas:
                 Color:
                     rgb: [.3, .3, .3]
@@ -97,7 +97,7 @@
             RoundedButton:
                 text: "Go"
                 size_hint: (0.1, 0.6)
-                font_size: self.size[0] / 2
+                font_size: self.size[0] / 2.6
                 on_press: root.pass_setting("cir_size", cir_size.value)
                 pos_hint: {'top': 0.8}
 
@@ -105,6 +105,20 @@
             text: "Rotate"
             font_size: self.size[0] / 15
             on_press: root.rotate()
+
+        BoxLayout:
+            spacing: dp(10)
+
+            RoundedButton:
+                text: "Flip Vertically"
+                font_size: self.size[0] / 10
+                on_press: root.flip_v()
+
+            RoundedButton:
+                text: "Flip Horizontally"
+                font_size: self.size[0] / 10
+                on_press: root.flip_h()
+
 
 <NetCDFDropDown@DropDown>
     auto_width: False
@@ -147,10 +161,10 @@
 
             Slider:
                 id: contrast
-                min: 0
-                max: 10.0
-                value: 1.0
-                step: 0.2
+                min: -127
+                max: 127
+                value: 0
+                step: 1
                 size_hint: (0.5, 1)
 
             RoundedButton:
@@ -206,6 +220,29 @@
                 pos_hint: {'top': 0.9}
                 on_press: root.var_dropdown.open(self)
 
+        BoxLayout:
+            padding: dp(10)
+            canvas:
+                Color:
+                    rgb: [.3, .3, .3]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [5,]
+
+            Label:
+                text: 'Z: '
+                size_hint: (0.5, 1)
+                font_size: self.size[0] / 7
+
+            RoundedButton:
+                id: 'select_depth'
+                text: "Select ..."
+                size_hint: (0.5, 0.8)
+                font_size: self.size[1] / 5
+                pos_hint: {'top': 0.9}
+                on_press: root.depth_dropdown.open(self)
+
 <HomeScreen>
 
     BoxLayout:
@@ -215,7 +252,7 @@
         padding: [dp(20), dp(10), dp(10), dp(20)]
 
         BoxLayout:
-            size_hint: (1, 0.05)
+            size_hint: (1, 0.08)
             spacing: dp(10)
             padding: [dp(5), dp(5), dp(5), dp(5)]
             canvas:
@@ -229,19 +266,19 @@
             RoundedButton:
                 text: "File"
                 size_hint: (0.1, 1)
-                font_size: self.size[1] / 2
+                font_size: self.size[1] / 2.5
                 on_press: app.open_settings()
 
             RoundedButton:
                 text: "View"
                 size_hint: (0.1, 1)
-                font_size: self.size[1] / 2
+                font_size: self.size[1] / 2.5
                 on_press: Factory.ViewDropDown().open(self)
 
             RoundedButton:
                 text: "NetCDF"
                 size_hint: (0.1, 1)
-                font_size: self.size[1] / 2
+                font_size: self.size[1] / 2.5
                 on_press: Factory.NetCDFDropDown().open(self)
 
             Label:
@@ -250,7 +287,7 @@
 
         RelativeLayout:
 
-            size_hint: (1, 0.85)
+            size_hint: (1, 0.82)
 
             StencilView:
                 id: view
@@ -306,13 +343,13 @@
             text: "Transect"
             size_hint: (1, 0.1)
             font_size: self.size[0] / 12
-            on_press: root.transectbtn("transect")
+            on_press: root.transect_btn("transect")
 
         RoundedButton:
             text: "Transect Marker"
             size_hint: (1, 0.1)
             font_size: self.size[0] / 12
-            on_press: root.transectbtn("transect_marker")
+            on_press: root.transect_btn("transect_marker")
 
         RoundedButton:
             text: "Quit"
