@@ -6,3 +6,4 @@ matplotlib
 xarray
 netCDF4
 opencv-python
+img2pdf
