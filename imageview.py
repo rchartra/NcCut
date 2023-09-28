@@ -1,5 +1,5 @@
 """
-Class for main viewing window and interactive image.
+Functionality for viewing window and interactive image.
 """
 import time
 import kivy
@@ -28,7 +28,7 @@ class ImageView(ScatterLayout):
         self.colormap = self.home.cmaps[self.home.colormap]
         self.pos = self.home.ids.view.pos
 
-        # Editing Mode
+        # Editing Mode widgets
         self.editing = False
         self.back = func.RoundedButton(text="Back", size_hint=(1, 0.1), text_size=self.size,
                                        halign='center', valign='center', font_size=self.home.size[0] / 5)
@@ -48,36 +48,20 @@ class ImageView(ScatterLayout):
     ScatterLayout.do_scale = False
 
     def load_file(self, source, f_type):
-        T0 = time.time()
-        t0 = time.time()
+        # Loads file based on whether it's an image or netcdf file
         self.source = source
-        t1 = time.time()
-        #print("setting source: " + str(t1 - t0))
         self.f_type = f_type
         if f_type == "netcdf":
-            t0 = time.time()
             self.load_netcdf()
-            t1 = time.time()
-            #print("load_netcdf(): " + str(t1 - t0))
-            t0 = time.time()
             self.im = CoreImage(self.byte, ext='png')
-            t1 = time.time()
-            #print("core image: " + str(t1 - t0))
-            t0 = time.time()
             self.size = self.im.size
-            t1 = time.time()
-            #print("setting size: " + str(t1 - t0))
         else:
             self.im = CoreImage(self.source)
             self.size = im.open(self.source).size
-        t0 = time.time()
         self.add_image()
-        t1 = time.time()
-        #print("add_image(): " + str(t1 - t0))
-        T1 = time.time()
-        #print("inner load_file(): " + str(T1 - T0))
 
     def edit_mode(self, *args):
+        # Turns editing mode on if off and off if on
         if self.editing:
             for i in self.edit_widgets:
                 self.home.ids.sidebar.remove_widget(i)
@@ -94,6 +78,7 @@ class ImageView(ScatterLayout):
         self.home.transect.dragging = self.editing
 
     def drag_mode(self, *args):
+        # Turns dragging mode on if off and off if on
         if self.home.drag.text == "Drag Mode":
             self.home.drag.text = "Transect Mode"
             kivy.core.window.Window.set_system_cursor("arrow")
@@ -104,6 +89,7 @@ class ImageView(ScatterLayout):
             self.home.transect.dragging = False
 
     def update_netcdf(self, new):
+        # Reload netcdf image when netcdf settings are changed
         self.source = new
         self.load_netcdf()
         self.im = CoreImage(self.byte, ext='png')
@@ -112,6 +98,7 @@ class ImageView(ScatterLayout):
         self.img.reload()
 
     def update_colormap(self, colormap):
+        # Reload netcdf image when colormap is changed
         self.colormap = self.home.cmaps[colormap]
         self.load_netcdf()
         self.im = CoreImage(self.byte, ext='png')
@@ -120,6 +107,7 @@ class ImageView(ScatterLayout):
         self.img.reload()
 
     def update_contrast(self, contrast):
+        # Reload netcdf image when contrast is changed
         self.contrast = contrast
         self.load_netcdf()
         self.im = CoreImage(self.byte, ext='png')
@@ -128,30 +116,20 @@ class ImageView(ScatterLayout):
         self.img.reload()
 
     def load_netcdf(self):
-        t0 = time.time()
+        # Create image from selected NetCDF data
         dat = self.source
         n_data = (dat - np.nanmin(dat)) / (np.nanmax(dat) - np.nanmin(dat))
-        t1 = time.time()
-        #print("normalizing: " + str(t1 - t0))
-        t0 = time.time()
         n_data = np.nan_to_num(n_data, nan=1)
-        t1 = time.time()
-        #print("nan finding: " + str(t1 - t0))
-        t0 = time.time()
         n_data = (n_data * 255).astype(np.uint8)
         img = cv2.applyColorMap(n_data, self.colormap)
-        t1 = time.time()
-        #print("colormapping: " + str(t1 - t0))
-        # Applies contrast changes
+
+        # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
-        t0 = time.time()
         is_success, img = cv2.imencode(".png", img)
         self.byte = io.BytesIO(img)
-        t1 = time.time()
-        #print("saving img: " + str(t1 - t0))
 
     def add_image(self):
-        # Starts up image
+        # Starts up image, im must exist and be a CoreImage or Image object (precede with load_file)
         self.img = ui.image.Image(source="", texture=self.im.texture,  size=self.size, pos=self.parent.pos,
                          allow_stretch=True)
         self.add_widget(self.img)
@@ -172,6 +150,7 @@ class ImageView(ScatterLayout):
         self.pos = (xco, self.pos[1])
 
     def apply_contrast(self, data, contrast):
+        # Perform contrast level adjustment to data
         f = 131 * (contrast + 127) / (127 * (131 - contrast))
         alpha_c = f
         gamma_c = 127 * (1 - f)
@@ -179,6 +158,7 @@ class ImageView(ScatterLayout):
         return out
 
     def flip_vertically(self):
+        # Flip draggable image vertically
         m = Matrix()
         m.set(array=[
             [1.0, 0.0, 0.0, 0.0],
@@ -189,6 +169,7 @@ class ImageView(ScatterLayout):
         self.apply_transform(m, anchor=self.center)
 
     def flip_horizontally(self):
+        # Flip draggable image horizontally
         m = Matrix()
         m.set(array=[
             [-1.0, 0.0, 0.0, 0.0],

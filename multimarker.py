@@ -105,25 +105,31 @@ class MultiMarker(ui.widget.Widget):
         self.children[0].twidth = num
 
     def del_line(self):
-        # If only one, delete but add new marker, otherwise delete current and go to previous
+        # If only one marker on screen, delete but add new marker, otherwise delete current marker and go to previous
         if len(self.children) == 0:
+            # If no markers on screen do nothing
             return
         Window.unbind(mouse_pos=self.children[0].draw_line)
         self.remove_widget(self.children[0])
         if len(self.children) == 0:
+            # Remove sidebar buttons if deleted marker was the only marker
             self.clicks = 0
             self.home.img.current.remove(self.dbtn)
             self.home.img.current.remove(self.width_w)
             self.new_line()
 
     def del_point(self):
+        # Delete most recent clicked point
         if len(self.children) == 0:
+            # If no markers on screen do nothing
             return
         elif self.children[0].clicks == 0:
             if len(self.children) > 1:
+                # If no clicks on current marker and not the only marker delete current marker
                 self.remove_widget(self.children[0])
             else:
                 return
+        # Delete point from current marker
         self.children[0].del_point()
 
     def new_line(self):
@@ -140,6 +146,7 @@ class MultiMarker(ui.widget.Widget):
         self.m_on = False
 
     def gather_popup(self):
+        # Gather data and call for popup
         frames = {}
         c = 1
         for i in reversed(self.children):

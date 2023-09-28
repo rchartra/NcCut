@@ -10,10 +10,10 @@ authors:
   - name: Robin Chartrand
     orcid: 0000-0001-6948-8380
     affiliation: 1
+  - name: Robert Fajber
+      affiliation: 2
   - name: Georgy Manucharyan
     affiliation: 1
-  - name: Robert Fajber
-    affiliation: 2
 affiliations:
   - name: University of Washington, Seattle, WA, USA
     index: 1

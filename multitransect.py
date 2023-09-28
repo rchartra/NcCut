@@ -1,5 +1,5 @@
 """
-Class for multiple transect tool that manages any case where multiple single transects are needed.
+Class for multiple transect tool
 """
 import kivy.uix as ui
 from kivy.uix.button import Button
@@ -10,7 +10,7 @@ from kivy.core.window import Window
 
 
 class MultiTransect(ui.widget.Widget):
-    # Code for Multiple Transect tool, as well as base code for managing multiple single transects
+    # Creates, stores, and manages multiple transects
     def __init__(self, home, **kwargs):
         super(MultiTransect, self).__init__(**kwargs)
         self.lines = []
@@ -21,20 +21,26 @@ class MultiTransect(ui.widget.Widget):
         self.dragging = False
 
     def del_line(self):
+        # Delete all clicked points in most recent line
         for i in range(self.clicks):
             self.del_point()
 
     def del_point(self):
+        # Delete most recent clicked point
         if len(self.lines) == 0:
             return
         elif self.children[0].circles == 1:
+            # Case where point is beginning of a transect
             Window.unbind(mouse_pos=self.children[0].draw_line)
             self.remove_widget(self.children[0])
             self.lines = self.lines[:-1]
+            # Add plot button to sidebar
             self.home.img.current.insert(0, self.p_btn)
         elif self.children[0].circles == 2:
+            # Case where point is end of a transect
             self.children[0].del_point()
             if self.p_btn in self.home.img.current:
+                # Remove plot button from sidebar
                 self.home.img.current.remove(self.p_btn)
         if self.clicks == 2:
             self.clicks = 0

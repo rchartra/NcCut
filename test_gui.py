@@ -16,6 +16,7 @@ os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 
 
 class AppInfo:
+    # Class to hold home root for tests to access
     def __init__(self):
         self.home = None
 
@@ -31,12 +32,14 @@ def pause():
 
 
 def run_tests(app, *args):
+    # Get home root
     Clock.schedule_interval(pause, 0.000001)
     app.stop()
     run_app.hold_home(app.root.get_screen("HomeScreen"))
 
 
 def get_app():
+    # Run app enough to test without fully loading it
     app = CutView()
     p = partial(run_tests, app)
     Clock.schedule_once(p, 0.000001)
@@ -44,7 +47,7 @@ def get_app():
 
 
 class Test(unittest.TestCase):
-
+    # Test cases
     @classmethod
     def setUpClass(cls):
         get_app()
