@@ -1,5 +1,5 @@
 """
-Class for a single marker widget.
+Class for an individual marker.
 """
 
 import kivy.uix as ui
@@ -143,6 +143,7 @@ class Marker(ui.widget.Widget):
                     self.twidth = self.parent.children[1].twidth
 
     def draw_line(self, instance, pos):
+        # Draw line from most recent click point to user cursor
         if self.parent.children[0] == self and not self.parent.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
                 mouse = self.to_widget(*pos)
@@ -150,13 +151,16 @@ class Marker(ui.widget.Widget):
                     with self.canvas:
                         self.curr_line.points = [self.points[-1][0:2], self.to_widget(pos[0], pos[1])]
         else:
+            # Don't draw if not current marker or in dragging mode
             self.stop_drawing()
 
     def stop_drawing(self):
+        # Remove line from most recent point to cursor
         with self.canvas:
             self.curr_line.points = self.curr_line.points[0:2]
 
     def in_bounds(self, points):
+        # Determine if points in a list of two points are within the bounds of the image
         dots = [points[0:2], points[2:4]]
         for d in dots:
             if min(d) < 0 or any([l[0] > l[1] for l in list(zip(d, self.size))]):

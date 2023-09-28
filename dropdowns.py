@@ -1,3 +1,7 @@
+"""
+Functionality for View and NetCDF setting dropdowns
+"""
+
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.app import App
@@ -5,10 +9,12 @@ import xarray as xr
 
 
 class ViewDropDown(DropDown):
+    # View settings dropdown, static UI code in cutview.kv
     def __init__(self, **kwargs):
         super(ViewDropDown, self).__init__(**kwargs)
         self.home = App.get_running_app().root.get_screen("HomeScreen")
 
+        # Line Color Dropdown
         col_list = ["Blue", "Orange", "Green"]
         self.l_color_drop = DropDown()
         for i in col_list:
@@ -18,6 +24,7 @@ class ViewDropDown(DropDown):
             self.l_color_drop.add_widget(btn)
 
     def pass_setting(self, setting, value):
+        # Pass setting changes to home screen
         self.home.update_settings(setting, value)
 
     def rotate(self):
@@ -26,15 +33,18 @@ class ViewDropDown(DropDown):
             self.home.img.rotation = self.home.img.rotation + 45
 
     def flip_v(self):
+        # Flip image vertically
         if self.home.fileon:
             self.home.img.flip_vertically()
 
     def flip_h(self):
+        # Flip image horizontally
         if self.home.fileon:
             self.home.img.flip_horizontally()
 
 
 class NetCDFDropDown(DropDown):
+    # NetCDF settings dropdown, static UI code in cutview.kv
     def __init__(self, **kwargs):
         super(NetCDFDropDown, self).__init__(**kwargs)
         self.home = App.get_running_app().root.get_screen("HomeScreen")
@@ -56,6 +66,7 @@ class NetCDFDropDown(DropDown):
                 btn.bind(on_release=self.var_dropdown.dismiss)
                 self.var_dropdown.add_widget(btn)
 
+        # Dropdown of z dimension values
         self.depth_dropdown = DropDown()
         if isinstance(self.home.file, str) and self.home.nc and self.home.netcdf['z'] != "Select...":
             for i in list(self.home.netcdf['file'][self.home.netcdf['z']].data):
@@ -64,5 +75,6 @@ class NetCDFDropDown(DropDown):
                 btn.bind(on_release=self.depth_dropdown.dismiss)
                 self.depth_dropdown.add_widget(btn)
 
+    # Pass setting changes to home screen
     def pass_setting(self, setting, value):
         self.home.update_settings(setting, value)

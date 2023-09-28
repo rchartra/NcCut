@@ -1,3 +1,7 @@
+"""
+UI and functionality for plotting and saving popup
+"""
+
 import io
 import kivy.uix as ui
 from kivy.graphics import Color, Rectangle
@@ -17,10 +21,10 @@ import pandas as pd
 import json
 import cv2
 import img2pdf
-import time
 
 
 class BackgroundDropDown(DropDown):
+    # General code for a dropdown menu with a background color
     def open(self, widget):
         super(BackgroundDropDown, self).open(widget)
         with self.canvas.before:
@@ -28,13 +32,14 @@ class BackgroundDropDown(DropDown):
             self.rect = Rectangle(size=self.size, pos=self.pos, radius=[10, ])
         self.bind(pos=self.update_canvas, size=self.update_canvas)
 
+    # Update graphics if window size is changed
     def update_canvas(self, *args):
         self.rect.pos = self.pos
         self.rect.size = self.size
 
 
 class PlotPopup(Popup):
-    # Popup with plotting and downloading selections
+    # Popup with plotting selections and sacing options
     def __init__(self, transects, home, **kwargs):
         super(PlotPopup, self).__init__(**kwargs)
         self.home = home
@@ -44,8 +49,7 @@ class PlotPopup(Popup):
         else:
             self.t_type = "Multi"
 
-        # Create dictionary of which transects are selected
-
+        # Create dictionary of which transects are currently selected, default all to not selected
         self.active_transects = {}
         act = copy.deepcopy(self.all_transects)
         for key in list(act.keys()):
@@ -56,21 +60,25 @@ class PlotPopup(Popup):
                 act[key].pop("Width")
             self.active_transects[key] = dict.fromkeys(act[key], False)
 
-            # If marker and all values same width, add an average opt   ion
+            # If marker and all values same width, add an average option
             if self.t_type == "Marker":
                 w_lis = self.all_transects[key]['Width']
                 if all(x == w_lis[0] for x in w_lis):
                     new = {"Average": False}
                     new.update(self.active_transects[key])
                     self.active_transects[key] = new
+
+        # If not marker, start will all transects selected
         first = list(self.active_transects.keys())[0]
         self.active_transects[first] = dict.fromkeys(self.active_transects[first], True)
+
+        # If marker start with first marker selected
         if self.t_type == "Marker":
             w_lis = self.all_transects[first]['Width']
             if all(x == w_lis[0] for x in w_lis):
                 self.active_transects[first]["Average"] = False
 
-        # Initialize selections
+        # Initialize dropdown selections
         if self.home.nc:
             if self.home.netcdf['z'] == "Select...":
                 self.f_type = "NC"
@@ -84,6 +92,7 @@ class PlotPopup(Popup):
             self.active_vars = []
             self.active_z = []
 
+        # Get plot for initial selections
         self.z_plot = False
         self.active_data = self.get_data()
         self.plot_active()
@@ -96,6 +105,7 @@ class PlotPopup(Popup):
 
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
                                    size_hint=(0.7, 1))
+        # Plot
         self.plotting = ui.boxlayout.BoxLayout(spacing=dp(20), size_hint=(1, 0.9))
         self.plotting.add_widget(self.plot)
         self.title = "Plot Transects"
@@ -139,21 +149,23 @@ class PlotPopup(Popup):
                 self.z_select.bind(on_press=lambda x: z_drop.open(self.z_select))
                 sidebar.add_widget(z_box)
 
-                # Z Interpolated
+                # All Z option
                 zp_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
                 zp_btn = func.RoundedButton(text="Plot all Z as Img", font_size=self.size[0] / 9)
                 zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
                 zp_box.add_widget(zp_btn)
                 sidebar.add_widget(zp_box)
             else:
+                # Spacer
                 sidebar.add_widget(Label(text="", size_hint=(1, 0.6)))
         else:
+            # Spacer
             sidebar.add_widget(Label(text="", size_hint=(1, 0.8)))
 
         self.plotting.add_widget(sidebar)
         self.content.add_widget(self.plotting)
 
-        # Saving Data/Plot
+        # Saving Data/Plotting buttons
 
         buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
 
@@ -203,6 +215,7 @@ class PlotPopup(Popup):
         self.dismiss()
 
     def download_png_plot(self, f_name):
+        # Download current plot as png
         file = func.check_file(self.home.rel_path, f_name, ".png")
         if file is False:
             func.alert("Invalid File Name", self.home)
@@ -215,6 +228,7 @@ class PlotPopup(Popup):
             func.alert("Download Complete", self.home)
 
     def download_pdf_plot(self, f_name):
+        # Download current plot as pdf
         file = func.check_file(self.home.rel_path, f_name, ".pdf")
         if file is False:
             func.alert("Invalid File Name", self.home)
@@ -242,6 +256,7 @@ class PlotPopup(Popup):
             func.alert("Download Complete", self.home)
 
     def get_marker_dropdown(self):
+        # Get dropdown for marker options
         marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for i in list(self.all_transects.keys()):
             m_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40), width=dp(180))
@@ -254,10 +269,12 @@ class PlotPopup(Popup):
         return marker_list
 
     def cut_drop(self, marker, button):
+        # Attach cut dropdown to marker button
         temp_cut_drop = self.get_cut_dropdown(marker)
         temp_cut_drop.open(button)
 
     def get_cut_dropdown(self, key):
+        # Get dropdown for transect options
         drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
         for i in list(self.active_transects[key].keys()):
             c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(40), width=dp(180))
@@ -270,18 +287,23 @@ class PlotPopup(Popup):
         return drop
 
     def on_transect_checkbox(self, check, marker, cut, *args):
+        # Update plot when transect checkbox is clicked
         self.active_transects[marker][cut] = not self.active_transects[marker][cut]
         # Check this isn't the last transect selected
         count = 0
         for key in list(self.active_transects.keys()):
+            # Count current transects
             count += sum(self.active_transects[key].values())
         if count == 0:
+            # If last transect unchecked, recheck and ignore
             self.active_transects[marker][cut] = not self.active_transects[marker][cut]
             check.active = True
             return
         else:
+            # Update current data
             self.active_data = self.get_data()
             self.plotting.remove_widget(self.plot)
+            # Update plot
             self.plot_active()
             temp = io.BytesIO()
             plt.savefig(temp, format="png")
@@ -292,6 +314,7 @@ class PlotPopup(Popup):
             self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_var_dropdown(self):
+        # Get dropdown for NetCDF variable options
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for var in list(self.home.netcdf['file'].keys()):
             v_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40), width=dp(180))
@@ -304,6 +327,9 @@ class PlotPopup(Popup):
         return var_list
 
     def on_var_checkbox(self, check, var, *args):
+        # Update variable selection when variable checkbox clicked
+
+        # Update data selection
         if var in self.active_vars:
             self.active_vars.remove(var)
         else:
@@ -312,6 +338,8 @@ class PlotPopup(Popup):
             self.active_vars.append(var)
             check.active = True
         self.active_data = self.get_data()
+
+        # Update plot
         self.plotting.remove_widget(self.plot)
         self.plot_active()
         temp = io.BytesIO()
@@ -323,6 +351,7 @@ class PlotPopup(Popup):
         self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_z_dropdown(self):
+        # Get dropdown for NetCDF z value selections
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for z in list(self.home.netcdf['file'].coords[self.home.netcdf['z']].data):
             z_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
@@ -336,6 +365,9 @@ class PlotPopup(Popup):
         return z_list
 
     def on_z_checkbox(self, check, z, *args):
+        # Update z value selections when checkbox is clicked
+
+        # Update active data
         if z in self.active_z:
             self.active_z.remove(z)
         else:
@@ -344,6 +376,8 @@ class PlotPopup(Popup):
             self.active_z.append(z)
             check.active = True
         self.active_data = self.get_data()
+
+        # Update plot
         self.plotting.remove_widget(self.plot)
         self.plot_active()
         temp = io.BytesIO()
@@ -355,10 +389,13 @@ class PlotPopup(Popup):
         self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_all_z_plot(self):
+        # Determine if settings are okay to do all z plot
         count = 0
         for key in list(self.active_transects.keys()):
+            # Count current transects selected
             count += sum(self.active_transects[key].values())
         if count == 1:
+            # Go ahead and plot
             self.plot_all_z()
             self.plotting.remove_widget(self.plot)
             temp = io.BytesIO()
@@ -369,6 +406,7 @@ class PlotPopup(Popup):
                                        size_hint=(0.7, 1))
             self.plotting.add_widget(self.plot, len(self.plotting.children))
         else:
+            # Error popup if more than one transect is selected
             content = ui.boxlayout.BoxLayout()
             error = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
             lab = Label(text="Please only select one transect", size_hint=(0.8, 1))
@@ -379,7 +417,9 @@ class PlotPopup(Popup):
             error.open()
 
     def plot_all_z(self):
-        # Check only one transect is selected
+        # Gather all z value plots for all selected variables
+
+        # Determine subplot layout
         num = len(self.active_vars)
         if num <= 1:
             col = 1
@@ -393,6 +433,7 @@ class PlotPopup(Popup):
         fig, ax = plt.subplots(row, col)
         count = 0
         for var in self.active_vars:
+            # Plot variable and assign to subplot
             count += 1
             if count % 2 == 0:
                 c = 1
@@ -412,7 +453,9 @@ class PlotPopup(Popup):
         return fig
 
     def z_ip(self, var, ax):
-        t0 = time.time()
+        # Gather data and plot all z values for given variable
+
+        # Get transect coordinates
         v = self.active_data[var]
         z = v[next(iter(v))]
         marker = next(iter(z))
@@ -425,10 +468,8 @@ class PlotPopup(Popup):
         config = copy.copy(self.home.netcdf)
         config['var'] = var
         ds = ds[config['var']]
-        t0 = time.time()
+        # Load entire dataset (if big file this will take a while)
         ds.load()
-        t1 = time.time()
-        print("loading dataset: " + str(t1 - t0))
         ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
         ds = ds.transpose('x', 'y', 'z')
         ds['z'] = ds['z'].astype(str)
@@ -439,18 +480,21 @@ class PlotPopup(Popup):
         c = 0
 
         for d in range(0, z_len):
+            # Get transect data for each z level and add to array
             curr = ds[:, :, d]
             dat = func.ip_get_points(points, curr, self.home.nc)
             all_z[c, :] = dat['Cut']
             c += 1
 
+        # Plot array
         ax.imshow(all_z)
         ax.set_ylabel(self.home.netcdf['z'])
         ax.set_xlabel("Along Transect Point")
-        t1 = time.time()
-        print("z_ip(): " + str(t1 - t0))
 
     def plot_active(self):
+        # Create a plot of active data
+
+        # Determine subplot layout
         num = len(self.active_vars)
         if num <= 1:
             col = 1
@@ -463,10 +507,12 @@ class PlotPopup(Popup):
                 row = int((num + 1) / 2)
         fig, ax = plt.subplots(row, col)
         if self.f_type == "Img":
+            # If image just, plot
             names = self.plot_single(self.active_data, ax, "Mean RGB Value")
         else:
             count = 0
             for var in self.active_vars:
+                # Subplot for each variable
                 count += 1
                 if count % 2 == 0:
                     c = 1
@@ -481,16 +527,18 @@ class PlotPopup(Popup):
                 else:
                     names = self.plot_single(self.active_data[var], ax[r, c], var)
             if len(self.active_vars) % 2 == 1 and len(self.active_vars) > 1:
+                # If unused subplot in layout, delete it
                 plt.delaxes(ax[r, 1])
         fig.legend(names, title="Legend", bbox_to_anchor=(1, 1))
         self.z_plot = False
         return fig
 
     def plot_single(self, data, ax, var):
-        # Create plots
+        # Create a single plot
         dat = copy.copy(data)
         plot_dat = {}
         if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0] != "Multi":
+            # Gather data for all transects selected across all markers for all Z levels selected
             for z in list(dat.keys()):
                 for obj in list(dat[z].keys()):
                     if obj == "Multi":
@@ -504,6 +552,7 @@ class PlotPopup(Popup):
                             plot_dat[title + cut] = dat[z][obj][cut]["Cut"]
         else:
             for obj in list(dat.keys()):
+                # Gather data for all transects selected across all markers
                 if obj == "Multi":
                     title = ""
                 else:
@@ -514,6 +563,7 @@ class PlotPopup(Popup):
                     else:
                         plot_dat[title + cut] = dat[obj][cut]["Cut"]
 
+        # Plot data
         df = pd.DataFrame.from_dict(dict([(k, pd.Series(v)) for k, v in plot_dat.items()]))
         x = np.asarray(df.index)
         axis = (x - x[0]) / (x[-1] - x[0])
@@ -524,23 +574,30 @@ class PlotPopup(Popup):
             ax.set_ylim(ymin=0)
         ax.set_xlabel("Normalized Long Transect Distance")
         plt.tight_layout()
+        # Return column names for legend
         return df.columns
 
     def get_data(self):
+        # Get transect data for list of active transect points
         config = copy.copy(self.home.netcdf)
         values = {}
         if len(self.active_vars) >= 1:
+            # If data has variables
             for var in self.active_vars:
                 values[var] = {}
                 config["var"] = var
                 if len(self.active_z) >= 1:
+                    # If data has multiple Z levels
                     for z in self.active_z:
+                        # Multi Z selection
                         values[var][z] = {}
                         config["z_val"] = z
                         curr = self.home.sel_data(config)
                         for key in list(self.active_transects.keys()):
+                            # All markers selected
                             values[var][z][key] = {}
                             for cut in list(self.active_transects[key].keys()):
+                                # All selected transects
                                 if self.active_transects[key][cut]:
                                     if cut == "Average":
                                         values[var][z][key][cut] = self.get_average(key, curr)
@@ -550,10 +607,13 @@ class PlotPopup(Popup):
                                 values[var][z].pop(key)
                 else:
                     curr = self.home.sel_data(config)
+                    # Single Z Selection
                     for key in list(self.active_transects.keys()):
+                        # All markers selected
                         values[var][key] = {}
                         for cut in list(self.active_transects[key].keys()):
                             if self.active_transects[key][cut]:
+                                # All transects selected
                                 if cut == "Average":
                                     values[var][key][cut] = self.get_average(key, curr)
                                 else:
@@ -562,9 +622,12 @@ class PlotPopup(Popup):
                             values[var].pop(key)
         else:
             curr = self.home.rgb
+            # Image data (no variables, no Z levels)
             for key in list(self.active_transects.keys()):
+                # All markers selected
                 values[key] = {}
                 for cut in list(self.active_transects[key].keys()):
+                    # All transects selected
                     if self.active_transects[key][cut]:
                         if cut == "Average":
                             values[key][cut] = self.get_average(key, curr)

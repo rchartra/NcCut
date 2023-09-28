@@ -1,3 +1,7 @@
+"""
+Functionality for main app screen
+"""
+
 import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
@@ -48,7 +52,6 @@ class HomeScreen(Screen):
 
     def update_settings(self, setting, value):
         # Updates app settings depending on context of setting change
-
         if setting == "contrast":
             if self.fileon and self.nc:
                 self.contrast = value
@@ -92,7 +95,7 @@ class HomeScreen(Screen):
                 self.img.add_widget(self.transect)
                 self.tMode = True
             else:
-                # If button pressed while tools on screen, clears tools and all buttons
+                # If button pressed while tools on screen, clears tools and all new sidebar buttons
                 kivy.core.window.Window.set_system_cursor("arrow")
                 self.img.remove_widget(self.transect)
                 self.drag.text = "Drag Mode"
@@ -102,55 +105,28 @@ class HomeScreen(Screen):
                 self.tMode = False
 
     def nc_open(self, config):
-        T0 = time.time()
         # Creates image from nc file to display
-        t0 = time.time()
         self.netcdf = config
-        t1 = time.time()
-        #print("set config: " + str(t1 - t0))
-        t0 = time.time()
         self.data = self.sel_data(config)
-        t1 = time.time()
-        print("sel_data(): " + str(t1 - t0))
-        t0 = time.time()
         self.img.load_file(source=self.data, f_type="netcdf")
-        t1 = time.time()
-        #print("load_file(): " + str(t1 - t0))
-        t0 = time.time()
         self.fileon = True
         self.nc = True
-        t1 = time.time()
-        #print("set attr: " + str(t1 - t0))
-        T1 = time.time()
-        #print("inner nc_open(): " + str(T1 - T0))
 
     def sel_data(self, config):
+        # Selects data based on user dimension and variable selections
         if config['z'] == 'Select...':
+            # 2D NetCDF data
             ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
             ds = ds.transpose('x', 'y')
             data = ds.sel(x=ds['x'], y=ds['y'])
             data = data.data
         else:
-            t0 = time.time()
+            # 3D NetCDF data
             ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
-            t1 = time.time()
-            #print("choose data: " + str(t1 - t0))
-            t0 = time.time()
             ds = ds.transpose('x', 'y', 'z')
-            t1 = time.time()
-            #print("transpose: " + str(t1 - t0))
-            t0 = time.time()
             ds['z'] = ds['z'].astype(str)
-            t1 = time.time()
-            #print("to str: " + str(t1 - t0))
-            t0 = time.time()
             data = ds.sel(x=ds['x'], y=ds['y'], z=config['z_val'])
-            t1 = time.time()
-            print("ds.sel(): " + str(t1 - t0))
-            t0 = time.time()
             data = data.data
-            t1 = time.time()
-            print("load data: " + str(t1 - t0))
         return data
 
     def gobtn(self):
@@ -207,6 +183,6 @@ class HomeScreen(Screen):
         # Allows external sources to clear canvas
         self.canvas.remove(item)
 
-    def quitbtn(self):
+    def quit_btn(self):
         # Quit application
         App.get_running_app().stop()

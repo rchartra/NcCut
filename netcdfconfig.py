@@ -1,3 +1,7 @@
+"""
+UI and functionality for NetCDF configuration popup
+"""
+
 import kivy.uix as ui
 from kivy.metrics import dp
 from kivy.uix.button import Button
@@ -41,7 +45,7 @@ class NetCDFConfig(Popup):
         xy_box.add_widget(self.y_select)
         content.add_widget(xy_box)
 
-        # Z selection (optional)
+        # Z selection (not always required)
         z_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         z_box.add_widget(Label(text="Z Variable: ", size_hint=(0.2, 1)))
         self.z_select = func.RoundedButton(text="Select...", size_hint=(0.3, 1))
@@ -55,7 +59,7 @@ class NetCDFConfig(Popup):
         self.depth_select.bind(on_release=self.depth_options)
         content.add_widget(z_box)
 
-        # Controls
+        # Popup Controls
         c_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         self.error = Label(text="", size_hint=(0.7, 1))
         c_box.add_widget(self.error)
@@ -75,7 +79,7 @@ class NetCDFConfig(Popup):
         self.open()
 
     def check_inputs(self, *args):
-        # Check configurations are valid before submitting
+        # Check selected configurations are valid before submitting
         vals = {'x': self.x_select.text, 'y': self.y_select.text,
                 'z': self.z_select.text, 'z_val': self.depth_select.text,
                 'var': self.var_select.text, 'file': self.data}
@@ -97,10 +101,7 @@ class NetCDFConfig(Popup):
         if self.z_select.text != 'Select...' and self.depth_select.text == 'Select...':
             self.error.text = "Please Select a Z Value"
             return
-        t0 = time.time()
         self.home.nc_open(vals)
-        t1 = time.time()
-        print("nc_open(): " + str(t1-t0))
         self.dismiss()
 
     def depth_options(self, *args):

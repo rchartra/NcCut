@@ -1,5 +1,5 @@
 """
-Builds app and settings menu.
+Builds app and file settings menu.
 """
 
 # Turn off debug messages from kivy and matplotlib
@@ -16,6 +16,7 @@ from kivy.metrics import dp
 import platform
 import json
 from homescreen import HomeScreen
+
 
 set_config = json.dumps([
     {'type': 'title',
