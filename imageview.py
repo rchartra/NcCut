@@ -12,6 +12,7 @@ import numpy as np
 import cv2
 import io
 import functions as func
+import matplotlib.pyplot as plt
 
 
 class ImageView(ScatterLayout):
@@ -34,10 +35,10 @@ class ImageView(ScatterLayout):
                                        halign='center', valign='center', font_size=self.home.size[0] / 5)
         self.back.bind(on_press=self.edit_mode)
         self.delete_line = func.RoundedButton(text="Delete Last Line", size_hint=(1, 0.1),
-                                              font_size=self.home.size[0] / 5)
+                                              font_size=self.home.size[0] / 10)
         self.delete_line.bind(on_press=lambda x: self.home.transect.del_line())
         self.delete_point = func.RoundedButton(text="Delete Last Point", size_hint=(1, 0.1),
-                                               font_size=self.home.size[0] / 5)
+                                               font_size=self.home.size[0] / 10)
         self.delete_point.bind(on_press=lambda x: self.home.transect.del_point())
 
         self.edit_widgets = [self.back, self.delete_line, self.delete_point]
@@ -64,29 +65,33 @@ class ImageView(ScatterLayout):
         # Turns editing mode on if off and off if on
         if self.editing:
             for i in self.edit_widgets:
-                self.home.ids.sidebar.remove_widget(i)
+                if i in self.home.ids.sidebar.children:
+                    self.home.ids.sidebar.remove_widget(i)
             for i in reversed(self.current):
-                self.home.ids.sidebar.add_widget(i, 1)
+                if i not in self.home.ids.sidebar.children:
+                    self.home.ids.sidebar.add_widget(i, 1)
             self.editing = False
         else:
             self.current = self.home.ids.sidebar.children[1:self.home.ids.sidebar.children.index(self.home.action)]
             for i in self.current:
-                self.home.ids.sidebar.remove_widget(i)
+                if i in self.home.ids.sidebar.children:
+                    self.home.ids.sidebar.remove_widget(i)
             for i in self.edit_widgets:
-                self.home.ids.sidebar.add_widget(i, 1)
+                if i not in self.home.ids.sidebar.children:
+                    self.home.ids.sidebar.add_widget(i, 1)
             self.editing = True
-        self.home.transect.dragging = self.editing
+        self.home.transect.change_dragging(self.editing)
 
     def drag_mode(self, *args):
         # Turns dragging mode on if off and off if on
         if self.home.drag.text == "Drag Mode":
             self.home.drag.text = "Transect Mode"
             kivy.core.window.Window.set_system_cursor("arrow")
-            self.home.transect.dragging = True
+            self.home.transect.change_dragging(True)
         elif self.home.drag.text == "Transect Mode":
             self.home.drag.text = "Drag Mode"
             kivy.core.window.Window.set_system_cursor("crosshair")
-            self.home.transect.dragging = False
+            self.home.transect.change_dragging(False)
 
     def update_netcdf(self, new):
         # Reload netcdf image when netcdf settings are changed
@@ -122,11 +127,35 @@ class ImageView(ScatterLayout):
         n_data = np.nan_to_num(n_data, nan=1)
         n_data = (n_data * 255).astype(np.uint8)
         img = cv2.applyColorMap(n_data, self.colormap)
+        self.get_color_bar()
 
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
         is_success, img = cv2.imencode(".png", img)
         self.byte = io.BytesIO(img)
+
+    def get_color_bar(self):
+        # Create color bar image and format it
+        c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8)
+        c_bar = cv2.applyColorMap(c_arr, self.colormap)
+        c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
+        plt.figure(figsize=(10, 1))
+        plt.imshow(c_bar)
+
+        ax = plt.gca()
+        ax.get_yaxis().set_visible(False)
+        lab_arr = np.linspace(np.nanmin(self.source), np.nanmax(self.source), 256)
+        lab_arr = ["{:.2e}".format(elem) for elem in lab_arr]
+        ticks = [0, 50, 100, 150, 200, 250]
+        ax.set_xticks(ticks=ticks, labels=[lab_arr[i] for i in ticks], fontsize=20)
+        ax.xaxis.label.set_color('white')
+        ax.tick_params(axis='x', colors='white')
+        temp = io.BytesIO()
+        plt.savefig(temp, facecolor=(0.2, 0.2, 0.2), bbox_inches='tight', format="png")
+        temp.seek(0)
+        plt.close()
+        plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
+        self.home.update_color_bar(plot)
 
     def add_image(self):
         # Starts up image, im must exist and be a CoreImage or Image object (precede with load_file)

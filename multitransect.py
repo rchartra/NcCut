@@ -46,6 +46,9 @@ class MultiTransect(ui.widget.Widget):
             self.clicks = 0
         self.clicks += 1
 
+    def change_dragging(self, val):
+        self.dragging = val
+
     def marker_points(self, plist):
         # When used as base by marker widget, gets users clicking points for download
         self.mpoints = plist

@@ -113,6 +113,23 @@ class PlotPopup(Popup):
         self.size_hint = (0.8, 0.8)
         sidebar = ui.boxlayout.BoxLayout(orientation='vertical', size_hint=(0.3, 1), padding=dp(10), spacing=dp(20))
 
+        # Saving Data/Plotting buttons
+
+        buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
+
+        data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.2, 1))
+        data_btn.bind(on_press=lambda x: self.file_input('data'))
+
+        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.2, 1))
+        png_btn.bind(on_press=lambda x: self.file_input('png'))
+
+        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.2, 1))
+        pdf_btn.bind(on_press=lambda x: self.file_input('pdf'))
+
+        buttons.add_widget(data_btn)
+        buttons.add_widget(png_btn)
+        buttons.add_widget(pdf_btn)
+
         # Transect selection
         t_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
         lab = Label(text="Select Transects: ", size_hint=(0.3, 1), font_size=self.size[0] / 9)
@@ -155,6 +172,10 @@ class PlotPopup(Popup):
                 zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
                 zp_box.add_widget(zp_btn)
                 sidebar.add_widget(zp_box)
+
+                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1))
+                allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
+                buttons.add_widget(allz_btn)
             else:
                 # Spacer
                 sidebar.add_widget(Label(text="", size_hint=(1, 0.6)))
@@ -165,25 +186,8 @@ class PlotPopup(Popup):
         self.plotting.add_widget(sidebar)
         self.content.add_widget(self.plotting)
 
-        # Saving Data/Plotting buttons
-
-        buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
-
-        data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.4, 1))
-        data_btn.bind(on_press=lambda x: self.file_input('data'))
-
-        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.4, 1))
-        png_btn.bind(on_press=lambda x: self.file_input('png'))
-
-        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.4, 1))
-        pdf_btn.bind(on_press=lambda x: self.file_input('pdf'))
-
         close = func.RoundedButton(text="Close", size_hint=(.2, 1))
         close.bind(on_press=self.dismiss)
-
-        buttons.add_widget(data_btn)
-        buttons.add_widget(png_btn)
-        buttons.add_widget(pdf_btn)
         buttons.add_widget(close)
         self.content.add_widget(buttons)
 
@@ -198,6 +202,8 @@ class PlotPopup(Popup):
         go = Button(text="Ok", size_hint=(0.1, 1))
         if type == "data":
             go.bind(on_press=lambda x: self.download_data(txt.text))
+        elif type == "all_z":
+            go.bind(on_press=lambda x: self.download_all_z_data(txt.text))
         elif type == "png":
             go.bind(on_press=lambda x: self.download_png_plot(txt.text))
         else:
@@ -253,6 +259,46 @@ class PlotPopup(Popup):
             with open(self.home.rel_path / (file + ".json"), "w") as f:
                 json.dump(self.active_data, f)
 
+            func.alert("Download Complete", self.home)
+
+    def download_all_z_data(self, f_name):
+        file = func.check_file(self.home.rel_path, f_name, ".json")
+        if file is False:
+            func.alert("Invalid File Name", self.home)
+            return
+        else:
+            dat = {}
+            ds = self.home.netcdf['file']
+            z_len = len(ds.coords[self.home.netcdf['z']].data)
+            for var in self.active_vars:
+                config = copy.copy(self.home.netcdf)
+                config['var'] = var
+                ds = ds[config['var']]
+                dat[var] = {}
+                ds.load()
+                ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
+                ds = ds.transpose('x', 'y', 'z')
+                ds['z'] = ds['z'].astype(str)
+                ds = ds.data
+                for d in range(0, z_len):
+                    dat[var][d] = {}
+                    curr = ds[:, :, d]
+                    for key in list(self.active_transects.keys()):
+                        # All markers selected
+                        dat[var][d][key] = {}
+                        for cut in list(self.active_transects[key].keys()):
+                            # All selected transects
+                            if self.active_transects[key][cut]:
+                                if cut == "Average":
+                                    dat[var][d][key][cut] = self.get_average(key, curr)
+                                else:
+                                    dat[var][d][key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
+                                                                               self.home.nc)
+                        if len(dat[var][d][key]) == 0:
+                            dat[var][d].pop(key)
+
+            with open(self.home.rel_path / (file + ".json"), "w") as f:
+                json.dump(dat, f)
             func.alert("Download Complete", self.home)
 
     def get_marker_dropdown(self):
@@ -442,11 +488,14 @@ class PlotPopup(Popup):
                 c = 0
                 r = int(((count + 1) / 2) - 1)
             if row == 1 and col == 1:
-                self.z_ip(var, ax)
+                pos = self.z_ip(var, ax)
+                fig.colorbar(pos, ax=ax)
             elif row == 1:
-                self.z_ip(var, ax[c])
+                pos = self.z_ip(var, ax[c])
+                fig.colorbar(pos, ax=ax[c])
             else:
-                self.z_ip(var, ax[r, c])
+                pos = self.z_ip(var, ax[r, c])
+                fig.colorbar(pos, ax=ax[r, c])
         if len(self.active_vars) % 2 == 1 and len(self.active_vars) > 1:
             plt.delaxes(ax[r, 1])
         self.z_plot = True
@@ -487,14 +536,16 @@ class PlotPopup(Popup):
             c += 1
 
         # Plot array
-        ax.imshow(all_z)
+        pos = ax.imshow(all_z)
         ax.set_ylabel(self.home.netcdf['z'])
         ax.set_xlabel("Along Transect Point")
+        ax.set_title(var)
+        return pos
 
     def plot_active(self):
         # Create a plot of active data
 
-        # Determine subplot layout
+        # Determine subplot layout based on the number of active variables selected
         num = len(self.active_vars)
         if num <= 1:
             col = 1
@@ -644,4 +695,4 @@ class PlotPopup(Popup):
         for cut in list(self.all_transects[key].keys())[3:]:
             dat += func.ip_get_points(self.all_transects[key][cut], curr, self.home.nc)['Cut']
         dat = dat / len(list(self.all_transects[key].keys())[3:])
-        return dat
+        return list(dat)

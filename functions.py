@@ -33,7 +33,8 @@ def remove_alert(alert, home, *largs):
 
 
 def alert(text, home):
-    # Creates alert banner with given text, schedules it to be removed after 2 seconds.
+    # Creates alert banner with given text and adds it to top left corner of the home screen
+    # Schedules it to be removed after 2 seconds.
     screen = kivy.core.window.Window.size
     with home.canvas:
         Color(0.2, 0.2, 0.2)
