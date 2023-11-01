@@ -50,6 +50,9 @@ class MultiMarker(ui.widget.Widget):
         self.nbtn.bind(on_press=lambda x: self.new_line())
         self.home.ids.sidebar.add_widget(self.nbtn, 1)
 
+    def change_dragging(self, val):
+        self.dragging = val
+
     def upload_pop(self):
         # Popup asking for project file
         content = ui.boxlayout.BoxLayout(orientation='horizontal')
@@ -114,8 +117,10 @@ class MultiMarker(ui.widget.Widget):
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted marker was the only marker
             self.clicks = 0
-            self.home.img.current.remove(self.dbtn)
-            self.home.img.current.remove(self.width_w)
+            if self.dbtn in self.home.img.current:
+                self.home.img.current.remove(self.dbtn)
+            if self.width_w in self.home.img.current:
+                self.home.img.current.remove(self.width_w)
             self.new_line()
 
     def del_point(self):
@@ -164,14 +169,15 @@ class MultiMarker(ui.widget.Widget):
     def on_touch_down(self, touch):
         # Manage download and marker width widgets when all markers are deleted
         if not self.dragging:
-            self.clicks += 1
-            if self.clicks == 1:
-                self.home.ids.sidebar.add_widget(self.width_w, 1)
-            if self.clicks == 2:
-                self.home.ids.sidebar.add_widget(self.dbtn, 1)
-            # If no current marker, create marker. Otherwise, pass touch to current marker.
-            if not self.m_on:
-                self.new_line()
-                self.update_width(self.twidth)
-                self.m_on = True
-            self.children[0].on_touch_down(touch)
+            if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
+                self.clicks += 1
+                if self.clicks == 1:
+                    self.home.ids.sidebar.add_widget(self.width_w, 1)
+                if self.clicks == 2:
+                    self.home.ids.sidebar.add_widget(self.dbtn, 1)
+                # If no current marker, create marker. Otherwise, pass touch to current marker.
+                if not self.m_on:
+                    self.new_line()
+                    self.update_width(self.twidth)
+                    self.m_on = True
+                self.children[0].on_touch_down(touch)

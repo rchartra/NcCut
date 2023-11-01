@@ -13,7 +13,6 @@ from multimarker import MultiMarker
 from imageview import ImageView
 from netcdfconfig import NetCDFConfig
 from PIL import Image as im
-import time
 import cv2
 
 
@@ -76,6 +75,12 @@ class HomeScreen(Screen):
             self.cir_size = float(value)
         elif setting == "output":
             self.rel_path = Path(value)
+
+    def update_color_bar(self, colorbar):
+        # Takes colorbar widget and adds it to menu bar
+        if len(self.ids.colorbar.children) != 0:
+            self.ids.colorbar.remove_widget(self.ids.colorbar.children[0])
+        self.ids.colorbar.add_widget(colorbar)
 
     def transect_btn(self, type):
         # Manages the creation and deletion of each tool
@@ -173,6 +178,8 @@ class HomeScreen(Screen):
 
     def clean_file(self):
         # Resets file related attributes
+        if len(self.ids.colorbar.children) != 0:
+            self.ids.colorbar.remove_widget(self.ids.colorbar.children[0])
         self.img.parent.remove_widget(self.img)
         self.fileon = False
         self.img = ImageView(home=self)

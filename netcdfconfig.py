@@ -64,7 +64,7 @@ class NetCDFConfig(Popup):
         self.error = Label(text="", size_hint=(0.7, 1))
         c_box.add_widget(self.error)
         back = func.RoundedButton(text="Back", size_hint=(0.15, 1))
-        back.bind(on_press=self.dismiss)
+        back.bind(on_press=lambda x: self.clean())
         c_box.add_widget(back)
         go = func.RoundedButton(text="Go", size_hint=(0.15, 1))
         go.bind(on_press=self.check_inputs)
@@ -77,6 +77,10 @@ class NetCDFConfig(Popup):
         self.size_hint = (0.8, 0.8)
 
         self.open()
+
+    def clean(self):
+        self.home.clean_file()
+        self.dismiss()
 
     def check_inputs(self, *args):
         # Check selected configurations are valid before submitting
