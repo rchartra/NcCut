@@ -24,31 +24,68 @@ class Click:
         self.pos = (x, y)
 
 
+def correct_test(data):
+    keys = list(data.keys())
+    if len(keys) == 0:
+        return False
+    else:
+        need = ['Click X', 'Click Y', 'Width']
+        for item in need:
+            if item not in keys or not isinstance(data[item], list):
+                return False
+    return True
+
+
+def marker_find(data, res):
+    for key in list(data.keys()):
+        if key[0:6] == 'Marker':
+            if correct_test(data[key]):
+                if len(res) == 0:
+                    res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
+                else:
+                    new = True
+                    for item in res:
+                        l1 = data[key]['Click X']
+                        l2 = item[0]
+                        if len(l1) == len(l2) and len(l1) == sum([1 for i, j in zip(l1, l2) if i == j]):
+                            new = False
+                    if new:
+                        res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
+        else:
+            marker_find(data[key], res)
+    return res
+
+
 class MultiMarker(ui.widget.Widget):
     # Creates, stores, and manages downloads for multiple markers
     def __init__(self, home, **kwargs):
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
         self.home = home
-        self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.size[0] / 10)
+        self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
-        self.font = 8
         self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
         self.twidth = 40
         self.cir_size = self.home.cir_size
 
         # Upload Button
-        self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.size[0] / self.font)
+        self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
         self.upbtn.bind(on_press=lambda x: self.upload_pop())
         self.home.ids.sidebar.add_widget(self.upbtn, 1)
 
         # New Line Button
-        self.nbtn = func.RoundedButton(text="New Line", size_hint=(1, 0.1), font_size=self.size[0] / self.font)
+        self.nbtn = func.RoundedButton(text="New Line", size_hint=(1, 0.1), font_size=self.home.font)
 
         self.nbtn.bind(on_press=lambda x: self.new_line())
         self.home.ids.sidebar.add_widget(self.nbtn, 1)
+
+    def font_adapt(self, font):
+        self.dbtn.font_size = font
+        self.upbtn.font_size = font
+        self.nbtn.font_size = font
+        self.width_w.font_adapt(font)
 
     def change_dragging(self, val):
         self.dragging = val
@@ -72,9 +109,10 @@ class MultiMarker(ui.widget.Widget):
         if exists(file):
             if file[-5:] == ".json":
                 data = json.load(open(file))
-                if list(data.keys())[0] == "Marker 1":
+                found = marker_find(data, [])
+                if len(found) >= 1:
                     popup.dismiss()
-                    self.upload_data(data)
+                    self.upload_data(found)
                 else:
                     content = Label(text="Incorrect File Format")
                     popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
@@ -88,18 +126,15 @@ class MultiMarker(ui.widget.Widget):
             popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
             popup2.open()
 
-    def upload_data(self, dat):
+    def upload_data(self, points):
         # Adds markers by "clicking" the points in the file with the marker width denoted by the file
-        for m in dat.keys():
-
+        for m in range(0, len(points)):
             marker = Marker(home=self.home)
-            clicks = tuple(zip(dat[m]["Click X"], dat[m]["Click Y"], dat[m]["Width"]))
+            clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
             self.add_widget(marker)
-
             for i in clicks:
                 marker.twidth = i[2]
                 marker.on_touch_down(Click(i[0], i[1]))
-            marker.stop_drawing()
         self.marker_off()
 
     def update_width(self, num):
@@ -171,9 +206,9 @@ class MultiMarker(ui.widget.Widget):
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 self.clicks += 1
-                if self.clicks == 1:
+                if self.clicks >= 1 and self.width_w.parent is None:
                     self.home.ids.sidebar.add_widget(self.width_w, 1)
-                if self.clicks == 2:
+                if self.clicks >= 2 and self.dbtn.parent is None:
                     self.home.ids.sidebar.add_widget(self.dbtn, 1)
                 # If no current marker, create marker. Otherwise, pass touch to current marker.
                 if not self.m_on:

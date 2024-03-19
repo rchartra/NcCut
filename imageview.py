@@ -32,7 +32,7 @@ class ImageView(ScatterLayout):
         # Editing Mode widgets
         self.editing = False
         self.back = func.RoundedButton(text="Back", size_hint=(1, 0.1), text_size=self.size,
-                                       halign='center', valign='center', font_size=self.home.size[0] / 5)
+                                       halign='center', valign='center', font_size=self.home.size[0] / 8)
         self.back.bind(on_press=self.edit_mode)
         self.delete_line = func.RoundedButton(text="Delete Last Line", size_hint=(1, 0.1),
                                               font_size=self.home.size[0] / 10)
@@ -47,6 +47,11 @@ class ImageView(ScatterLayout):
     gMode = False
     ScatterLayout.do_rotation = False
     ScatterLayout.do_scale = False
+
+    def font_adapt(self, font):
+        self.back.font_size = font
+        self.delete_line.font_size = font
+        self.delete_point.font_size = font
 
     def load_file(self, source, f_type):
         # Loads file based on whether it's an image or netcdf file

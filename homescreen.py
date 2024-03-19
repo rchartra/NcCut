@@ -37,17 +37,35 @@ class HomeScreen(Screen):
         self.colormap = 'Viridis'
         self.nc = False
         self.img = ImageView(home=self)
+        self.font = self.ids.transect.font_size
         self.action = func.BackgroundLabel(text="Actions", size_hint=(1, 0.1), text_size=self.size,
-                                           halign='center', valign='center', font_size=self.size[0] / 8)
+                                           halign='center', valign='center', font_size=self.font)
         self.drag = func.RoundedButton(text="Drag Mode", size_hint=(1, 0.1), text_size=self.size,
-                                       halign='center', valign='center', font_size=self.size[0] / 8)
+                                       halign='center', valign='center', font_size=self.font)
         self.edit = func.RoundedButton(text="Edit Mode", size_hint=(1, 0.1), text_size=self.size,
-                                       halign='center', valign='center', font_size=self.size[0] / 8)
+                                       halign='center', valign='center', font_size=self.font)
         self.netcdf = {}
         self.data = 0
         self.transect = 0
         self.file = 0
         self.rgb = 0
+
+    def font_adapt(self):
+        # Calls for all elements that create buttons to update their fonts
+        font = self.ids.transect.font_size
+
+        self.font = font
+        self.action.font_size = font
+        self.drag.font_size = font
+        self.edit.font_size = font
+
+        self.ids.file_btn.font_size = font
+        self.ids.view_btn.font_size = font
+        self.ids.netcdf_btn.font_size = font
+
+        self.img.font_adapt(font)
+        if self.tMode:
+            self.transect.font_adapt(font)
 
     def update_settings(self, setting, value):
         # Updates app settings depending on context of setting change
@@ -149,10 +167,14 @@ class HomeScreen(Screen):
             while len(self.ids.sidebar.children) > 4:
                 self.ids.sidebar.remove_widget(self.ids.sidebar.children[1])
             self.tMode = False
-        self.ids.view.add_widget(self.img)
+        if self.img not in self.ids.view.children:
+            self.ids.view.add_widget(self.img)
+        else:
+            print("img object already in view")
+            print(self.ids.view.children)
         self.file = self.ids.file_in.text
         # Limit file names to alphanumeric characters and _-./
-        if self.file == "" or len(re.findall(r'[^A-Za-z0-9_.\-/]', self.file)) > 0:
+        if self.file == "" or len(re.findall(r'[^A-Za-z0-9_:\\.\-/]', self.file)) > 0:
             func.alert("Invalid File Name", self)
             self.clean_file()
         else:
@@ -180,7 +202,8 @@ class HomeScreen(Screen):
         # Resets file related attributes
         if len(self.ids.colorbar.children) != 0:
             self.ids.colorbar.remove_widget(self.ids.colorbar.children[0])
-        self.img.parent.remove_widget(self.img)
+        if self.img.parent is not None:
+            self.img.parent.remove_widget(self.img)
         self.fileon = False
         self.img = ImageView(home=self)
         self.rgb = 0

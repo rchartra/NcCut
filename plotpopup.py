@@ -117,13 +117,13 @@ class PlotPopup(Popup):
 
         buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
 
-        data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.2, 1))
+        data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.2, 1), font_size=self.home.font)
         data_btn.bind(on_press=lambda x: self.file_input('data'))
 
-        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.2, 1))
+        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.2, 1), font_size=self.home.font)
         png_btn.bind(on_press=lambda x: self.file_input('png'))
 
-        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.2, 1))
+        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.2, 1), font_size=self.home.font)
         pdf_btn.bind(on_press=lambda x: self.file_input('pdf'))
 
         buttons.add_widget(data_btn)
@@ -132,10 +132,9 @@ class PlotPopup(Popup):
 
         # Transect selection
         t_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-        lab = Label(text="Select Transects: ", size_hint=(0.3, 1), font_size=self.size[0] / 9)
+        lab = Label(text="Select Transects: ", size_hint=(0.3, 1), font_size=self.home.font)
         t_box.add_widget(lab)
-        self.t_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1),
-                                           font_size=self.size[0] / 9)
+        self.t_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1), font_size=self.home.font)
         t_box.add_widget(self.t_select)
         if self.t_type == "Marker":
             t_drop = self.get_marker_dropdown()
@@ -148,9 +147,9 @@ class PlotPopup(Popup):
             self.active_var = [self.home.netcdf['var']]
             # Variable Selection
             v_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-            v_box.add_widget(Label(text="Select Variables: ", size_hint=(0.3, 1), font_size=self.size[0] / 9))
+            v_box.add_widget(Label(text="Select Variables: ", size_hint=(0.3, 1), font_size=self.home.font))
             self.v_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1),
-                                               font_size=self.size[0] / 9)
+                                               font_size=self.home.font)
             v_box.add_widget(self.v_select)
             v_drop = self.get_var_dropdown()
             self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
@@ -158,9 +157,9 @@ class PlotPopup(Popup):
             if self.home.netcdf['z'] != "Select...":
                 # Z Selection
                 z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-                z_box.add_widget(Label(text="Select Z Values: ", size_hint=(0.3, 1), font_size=self.size[0] / 9))
+                z_box.add_widget(Label(text="Select Z Values: ", size_hint=(0.3, 1), font_size=self.home.font))
                 self.z_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1),
-                                                   font_size=self.size[0] / 9)
+                                                   font_size=self.home.font)
                 z_box.add_widget(self.z_select)
                 z_drop = self.get_z_dropdown()
                 self.z_select.bind(on_press=lambda x: z_drop.open(self.z_select))
@@ -168,12 +167,12 @@ class PlotPopup(Popup):
 
                 # All Z option
                 zp_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-                zp_btn = func.RoundedButton(text="Plot all Z as Img", font_size=self.size[0] / 9)
+                zp_btn = func.RoundedButton(text="Plot all Z as Img", font_size=self.home.font)
                 zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
                 zp_box.add_widget(zp_btn)
                 sidebar.add_widget(zp_box)
 
-                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1))
+                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1), font_size=self.home.font)
                 allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
                 buttons.add_widget(allz_btn)
             else:
@@ -190,7 +189,6 @@ class PlotPopup(Popup):
         close.bind(on_press=self.dismiss)
         buttons.add_widget(close)
         self.content.add_widget(buttons)
-
         self.open()
 
     def file_input(self, type):
@@ -209,7 +207,7 @@ class PlotPopup(Popup):
         else:
             go.bind(on_press=lambda x: self.download_pdf_plot(txt.text))
         go.bind(on_release=lambda x: self.close_popups(popup))
-        close = Button(text="Close", size_hint=(0.2, 1))
+        close = Button(text="Close", size_hint=(0.2, 1), font_size=self.home.font)
         close.bind(on_press=popup.dismiss)
         content.add_widget(go)
         content.add_widget(close)
@@ -256,10 +254,31 @@ class PlotPopup(Popup):
             func.alert("Invalid File Name", self.home)
             return
         else:
+            dat = copy.copy(self.active_data)
+            if len(self.active_vars) == 0:
+                final = self.add_marker_info(dat)
+            elif len(self.active_z) == 0:
+                final = {}
+                for var in list(dat.keys()):
+                    final[var] = self.add_marker_info(dat[var])
+            else:
+                final = {}
+                for var in list(dat.keys()):
+                    final[var] = {}
+                    for z in list(dat[var].keys()):
+                        final[var][z] = self.add_marker_info(dat[var][z])
             with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(self.active_data, f)
+                json.dump(final, f)
 
             func.alert("Download Complete", self.home)
+
+    def add_marker_info(self, dicti):
+        if list(dicti.keys())[0] != "Multi":
+            for marker in list(dicti.keys()):
+                dicti[marker]['Click X'] = self.all_transects[marker]['Click X']
+                dicti[marker]['Click Y'] = self.all_transects[marker]['Click Y']
+                dicti[marker]['Width'] = self.all_transects[marker]['Width']
+        return dicti
 
     def download_all_z_data(self, f_name):
         file = func.check_file(self.home.rel_path, f_name, ".json")

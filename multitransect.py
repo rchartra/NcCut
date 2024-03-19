@@ -15,10 +15,13 @@ class MultiTransect(ui.widget.Widget):
         super(MultiTransect, self).__init__(**kwargs)
         self.lines = []
         self.clicks = 0
-        self.p_btn = Button()
         self.mpoints = 0
         self.home = home
+        self.p_btn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
         self.dragging = False
+
+    def font_adapt(self, font):
+        self.p_btn.font_size = font
 
     def del_line(self):
         # Delete all clicked points in most recent line
@@ -92,7 +95,6 @@ class MultiTransect(ui.widget.Widget):
                         return
                     # Finishes a transect, displays download button
                     if self.p_btn not in self.home.ids.sidebar.children:
-                        self.p_btn = func.RoundedButton(text="Plot", size_hint=(1, 0.1))
                         self.home.ids.sidebar.add_widget(self.p_btn, 1)
                         self.p_btn.bind(on_press=lambda x: self.popup())
                 self.clicks += 1

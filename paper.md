@@ -33,7 +33,7 @@ section of ocean or atmosphere. For example, @Sivkov:2021 used such a vertical t
 the vertical distributions of suspended particulate matter across the Atlantic ocean.
 
 ![Figure 1: Distribution of the SPM volume concentration (ppm) on the Ioffe-2000 transect, done with Ocean Data View 
-[@odv]. Figure and discription from @Sivkov:2021](figure1.png)
+[@odv]. Figure and discription from @Sivkov:2021](images/figure1.png)
 
 In another example, @Gutjahr:2022 used vertical transects of modeled climate and ocean data in Greenland to 
 study air-sea interactions during a Katabatic storm.
@@ -42,7 +42,7 @@ study air-sea interactions during a Katabatic storm.
 turbulent kinetic energy in ocean, (c) atmospheric vertical velocity with cloud cover (10% dashed and 50% solid 
 contours), (d) ocean potential temperature, (e) atmospheric potential temperature, and (f) ocean density (σΘ = σ – 1,000 
 kg m⁻³, σΘ = 27.6 kg m⁻³ as white contour). The green line in (b, d, and f) marks the depth of the mixed layer (σΘ = 0.03 
-kg m⁻³). Figure and discription from @Gutjahr:2022](figure2.png)
+kg m⁻³). Figure and discription from @Gutjahr:2022](images/figure2.png)
 
 Such transect selecting tools are a feature common in GIS software [@qgis, @transectizer, @grass_gis] and are present in 
 some more complex viewers that work with unstructured data [@odv], but these options are all either meant for more 
@@ -52,7 +52,7 @@ interested in serious data analysis tools but are just trying to get a quick loo
 simple NetCDF viewers that already serve this audience [@NcView, @Panoply, @ncvue], but none of these simpler viewers 
 allow users to take transects across NetCDF data.
 
-![Figure 3: An overview graphic of the various functionalities of CutView.](cutviewgraphic.png)
+![Figure 3: An overview graphic of the various functionalities of CutView.](images/cutviewgraphic.png)
 
 # Functionality
 
