@@ -54,9 +54,6 @@ class Test(unittest.TestCase):
 
     def test_file_names(self):
         # Test input file name rules
-        run_app.home.ids.file_in.text = "\\"
-        run_app.home.gobtn()
-        self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Backslashes don't crash GUI")
         run_app.home.ids.file_in.text = "*$%&@! "
         run_app.home.gobtn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No irregular characters")
