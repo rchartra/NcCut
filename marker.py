@@ -90,6 +90,11 @@ class Marker(ui.widget.Widget):
         if self.clicks != 1:
             self.base.lines = self.base.lines[:-1]
         else:
+            # Remove plot and width buttons from sidebar if last point of the marker
+            if self.parent.dbtn in self.home.img.current:
+                self.home.img.current.remove(self.parent.dbtn)
+            if self.parent.width_w in self.home.img.current:
+                self.home.img.current.remove(self.parent.width_w)
             self.remove_widget(self.children[0])
             Window.unbind(mouse_pos=self.draw_line)
         self.points.remove(self.points[-1])

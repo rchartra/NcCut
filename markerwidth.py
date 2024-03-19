@@ -13,12 +13,15 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         super(MarkerWidth, self).__init__(**kwargs)
 
         self.txt = TextInput(hint_text="Width", size_hint=(.7, 1))
-        self.btn = func.RoundedButton(text="Go", size_hint=(.3, 1))
+        self.btn = func.RoundedButton(text="Go", size_hint=(.3, 1), font_size=marker.home.font)
         self.btn.bind(on_press=lambda x: self.update())
         self.add_widget(self.txt)
         self.add_widget(self.btn)
         self.marker = marker
         self.spacing = 5
+
+    def font_adapt(self, font):
+        self.btn.font_size = font
 
     def update(self):
         # Update width of current marker if given a valid width

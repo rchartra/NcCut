@@ -193,7 +193,7 @@
                 id: 'select_cmap'
                 text: "Select ..."
                 size_hint: (0.5, 0.8)
-                font_size: self.size[1] / 5
+                font_size: self.size[1] / 3
                 pos_hint: {'top': 0.9}
                 on_press: if app.root.get_screen("HomeScreen").nc: root.cmap_dropdown.open(self)
 
@@ -216,7 +216,7 @@
                 id: 'select_var'
                 text: "Select ..."
                 size_hint: (0.5, 0.8)
-                font_size: self.size[1] / 5
+                font_size: self.size[1] / 3
                 pos_hint: {'top': 0.9}
                 on_press: root.var_dropdown.open(self)
 
@@ -239,7 +239,7 @@
                 id: 'select_depth'
                 text: "Select ..."
                 size_hint: (0.5, 0.8)
-                font_size: self.size[1] / 5
+                font_size: self.size[1] / 3
                 pos_hint: {'top': 0.9}
                 on_press: root.depth_dropdown.open(self)
 
@@ -265,18 +265,21 @@
 
             RoundedButton:
                 text: "File"
+                id: file_btn
                 size_hint: (0.1, 1)
                 font_size: self.size[1] / 2.5
                 on_press: app.open_settings()
 
             RoundedButton:
                 text: "View"
+                id: view_btn
                 size_hint: (0.1, 1)
                 font_size: self.size[1] / 2.5
                 on_press: Factory.ViewDropDown().open(self)
 
             RoundedButton:
                 text: "NetCDF"
+                id: netcdf_btn
                 size_hint: (0.1, 1)
                 font_size: self.size[1] / 2.5
                 on_press: Factory.NetCDFDropDown().open(self)
@@ -341,6 +344,7 @@
 
         RoundedButton:
             text: "Transect"
+            id: transect
             size_hint: (1, 0.1)
             font_size: self.size[0] / 12
             on_press: root.transect_btn("transect")

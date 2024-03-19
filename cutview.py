@@ -42,6 +42,10 @@ class CutView(App):
             win.size = (dp(750), dp(450))
             win.minimum_width = dp(600)
             win.minimum_height = dp(350)
+        win.bind(on_resize=self.on_resize)
+
+    def on_resize(self, *args):
+        self.root.get_screen("HomeScreen").font_adapt()
 
     def build(self):
         # Build app
