@@ -17,9 +17,9 @@ authors:
 affiliations:
   - name: University of Washington, Seattle, WA, USA
     index: 1
-  - name: ????
+  - name: 
     index: 2
-date: 22 September 2023
+date: 21 March 2024
 bibliography: paper.bib
 ---
 
@@ -73,11 +73,25 @@ please.
 
 Using CutView users can mark out and plot transects onto loaded images or NetCDF data using two tools:
 
-The first is the simple transect tool, where users can click on two endpoints and a line will be drawn between them. If the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected. The pixels are interpolated using linear interpolation to improve the accuracy of the pixel selection. If the loaded file is a NetCDF file, the data values from the original dataset (also interpolated) are selected along that line. Multiple such transects can be drawn and plotted all together. 
+The first is the simple transect tool, where users can click on two endpoints and a line will be drawn between them. If 
+the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected. The pixels are 
+interpolated using linear interpolation to improve the accuracy of the pixel selection. If the loaded file is a NetCDF 
+file, the data values from the original dataset (also interpolated) are selected along that line. Multiple such 
+transects can be drawn and plotted all together. 
 
-The second is the transect marker tool. Using this tool users click points along a feature and transects of a set width will be made orthogonal to the line marked out by the user. This width can be adjusted at any point in the marking process and multiple markers can be drawn on the same file and plotted together. For use on large projects worked on over multiple sessions, the marker data saved from the plotting menu can be reuploaded back into CutView and continued.
+The second is the transect marker tool. Using this tool users click points along a feature and transects of a set width 
+will be made orthogonal to the line marked out by the user. This width can be adjusted at any point in the marking 
+process and multiple markers can be drawn on the same file and plotted together. For use on large projects worked on 
+over multiple sessions, the marker data saved from the plotting menu can be reloaded back into CutView and continued.
 
-In the plotting menu users can select which transects/markers to plot, and if the file is a NetCDF file the user can additionally plot multiple variables and values along the chosen z dimension. Additionally, users can see a plot of the transect data values for all z values shown as an image, which can be done for multiple variables at once. From here users can choose to save the data to a .JSON file as well as save the plot to either a .PNG or .PDF format. The JSON file groups the pixel data and their coordinates together and labels them by the transect number shown on the viewer. If the marker tool was used, the transects are further grouped and labeled by their marker number. This labeled and organized data structure aims to be easily loaded and understood using minimal programming experience in a language like Python or R.
+In the plotting menu users can select which transects/markers to plot, and if the file is a NetCDF file the user can 
+additionally plot multiple variables and values along the chosen z dimension. Additionally, users can see a plot of the 
+transect data values for all z values shown as an image, which can be done for multiple variables at once. From here 
+users can choose to save the data to a .JSON file as well as save the plot to either a .PNG or .PDF format. The JSON 
+file groups the pixel data and their coordinates together and labels them by the transect number shown on the viewer. 
+If the marker tool was used, the transects are further grouped and labeled by their marker number. This labeled and 
+organized data structure aims to be easily loaded and understood using minimal programming experience in a language like 
+Python or R.
 
 
 # References

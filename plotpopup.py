@@ -207,6 +207,7 @@ class PlotPopup(Popup):
         else:
             go.bind(on_press=lambda x: self.download_pdf_plot(txt.text))
         go.bind(on_release=lambda x: self.close_popups(popup))
+        print("Who I was upon creation " + str(self))
         close = Button(text="Close", size_hint=(0.2, 1), font_size=self.home.font)
         close.bind(on_press=popup.dismiss)
         content.add_widget(go)
@@ -215,6 +216,7 @@ class PlotPopup(Popup):
 
     def close_popups(self, fpop):
         # Close file name popup and plot popup
+        print("I was called " + str(self))
         fpop.dismiss()
         self.dismiss()
 
@@ -379,16 +381,18 @@ class PlotPopup(Popup):
             self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_var_dropdown(self):
-        # Get dropdown for NetCDF variable options
+        # Get dropdown for NetCDF variable options. Variable only available if dimensions match current variable
+        file = self.home.netcdf['file']
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
-        for var in list(self.home.netcdf['file'].keys()):
-            v_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40), width=dp(180))
-            lab = Label(text=var, size_hint=(0.5, 1))
-            v_box.add_widget(lab)
-            check = CheckBox(active=var in self.active_vars, size_hint=(0.5, 1))
-            check.bind(active=lambda x, y, var=var: self.on_var_checkbox(x, var))
-            v_box.add_widget(check)
-            var_list.add_widget(v_box)
+        for var in list(file.keys()):
+            if file[self.home.netcdf['var']].dims == file[var].dims:
+                v_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40), width=dp(180))
+                lab = Label(text=var, size_hint=(0.5, 1))
+                v_box.add_widget(lab)
+                check = CheckBox(active=var in self.active_vars, size_hint=(0.5, 1))
+                check.bind(active=lambda x, y, var=var: self.on_var_checkbox(x, var))
+                v_box.add_widget(check)
+                var_list.add_widget(v_box)
         return var_list
 
     def on_var_checkbox(self, check, var, *args):
