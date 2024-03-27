@@ -6,6 +6,7 @@ tags:
   - Atmospheric Sciences
   - NetCDF
   - visualization
+  - GUI
 authors:
   - name: Robin Chartrand
     orcid: 0000-0001-6948-8380
@@ -19,7 +20,7 @@ affiliations:
     index: 1
   - name: Atmospheric and Oceanic Sciences, McGill University, Montréal, Québec, Canada
     index: 2
-date: 21 March 2024
+date: 27 March 2024
 bibliography: paper.bib
 ---
 
