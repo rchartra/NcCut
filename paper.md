@@ -39,7 +39,7 @@ some more complex viewers that work with unstructured data [@odv], but these opt
 complicated data formats or require a user to spend a great amount of time learning how to use the software before they 
 can do any meaningful data analysis. CutView provides this transecting functionality with a GUI interface, allowing for 
 rapid selection of transects, which is often very useful in initial investigation or feature selection applications. 
-There are many simple NetCDF viewers that already serve this audience (@NcView, @Panoply, @ncvue), but none of these 
+There are many simple NetCDF viewers that already serve this audience (@Ncview, @Panoply, @ncvue), but none of these 
 simpler viewers allow users to take transects across NetCDF data.
 
 # Functionality
