@@ -34,12 +34,12 @@ a section of ocean or atmosphere. For example, @Sivkov:2021 used such vertical t
 distributions of suspended particulate matter across the Atlantic ocean. In another example, @Gutjahr:2022 used vertical 
 transects of modeled climate and ocean data in Greenland to study air-sea interactions during a Katabatic storm.
 
-Such transect selecting tools are a feature common in GIS software [@qgis, @transectizer, @GRASS_GIS] and are present in 
+Such transect selecting tools are a feature common in GIS software (@qgis, @transectizer, @GRASS_GIS) and are present in 
 some more complex viewers that work with unstructured data [@odv], but these options are all either meant for more 
 complicated data formats or require a user to spend a great amount of time learning how to use the software before they 
 can do any meaningful data analysis. CutView provides this transecting functionality with a GUI interface, allowing for 
 rapid selection of transects, which is often very useful in initial investigation or feature selection applications. 
-There are many simple NetCDF viewers that already serve this audience [@NcView, @Panoply, @ncvue], but none of these 
+There are many simple NetCDF viewers that already serve this audience (@NcView, @Panoply, @ncvue), but none of these 
 simpler viewers allow users to take transects across NetCDF data.
 
 # Functionality
