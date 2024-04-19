@@ -46,10 +46,6 @@ simpler viewers allow users to take transects across NetCDF data.
 
 As per the name, CutView’s functions can be divided into two main categories:
 
-![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region loaded. b.) 
-The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
-menu for loading NetCDF4 files. ](images/paper_fig_1.png)
-
 ## View
 
 CutView allows users to load NetCDF4 files, or images in .JPG, .JPEG, or .PNG formats, and has adjustable graphics for 
@@ -61,6 +57,10 @@ depths. The data is displayed as an image mapped to a color map, which can be ch
 contrast of the image. Once loaded and configured users can drag, rotate, flip, and zoom in on the file however they 
 please. The NetCDF4 viewing capabilities are shown in Figure 1, which is an example using the MIT General Circulation 
 Model LLC4320 simulation dataset (accessed via \verb|xmitgcm| https://xmitgcm.readthedocs.io/en/latest/index.html).
+
+![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region loaded. b.) 
+The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
+menu for loading NetCDF4 files. ](images/paper_fig_1.png)
 
 ## Cut
 
