@@ -40,7 +40,7 @@ complicated data formats or require a user to spend a great amount of time learn
 can do any meaningful data analysis. CutView provides this transecting functionality with a GUI interface, allowing for 
 rapid selection of transects, which is often very useful in initial investigation or feature selection applications. 
 There are many simple NetCDF viewers that already serve this audience (@Ncview, @Panoply, @ncvue), but none of these 
-simpler viewers allow users to take transects across NetCDF data.
+simpler viewers have a way for users to take transects across NetCDF data.
 
 # Functionality
 
@@ -55,23 +55,23 @@ displayed the user can switch between different displays of the x, y dimensions 
 for many NetCDF4 files which contain three-dimensional datasets with data arrays at different vertical heights or 
 depths. The data is displayed as an image mapped to a color map, which can be changed by the user as well as the 
 contrast of the image. Once loaded and configured users can drag, rotate, flip, and zoom in on the file however they 
-please. The NetCDF4 viewing capabilities are shown in Figure 1, which is an example using the MIT General Circulation 
-Model LLC4320 simulation dataset (accessed via \verb|xmitgcm| https://xmitgcm.readthedocs.io/en/latest/index.html).
+please. The NetCDF4 viewing capabilities and settings are shown in Figure 1, where an ocean temperature dataset from the MIT General Circulation 
+Model LLC4320 simulation is being displayed (accessed via \verb|xmitgcm| https://xmitgcm.readthedocs.io/en/latest/index.html).
 
-![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region loaded. b.) 
+![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region. b.) 
 The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
 menu for loading NetCDF4 files. ](images/paper_fig_1.png)
 
 ## Cut
 
-Using CutView users can mark out and plot transects onto loaded images or NetCDF4 data using two tools:
+Using CutView, users can mark out transects onto loaded images or NetCDF4 data and plot the results using two tools:
 
-The first is the simple transect tool, where users can click on two endpoints and a line will be drawn between them. If 
-the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected (Figure 2a). The pixels are 
+The first is the simple transect tool, where users can click on two endpoints and a line will be drawn between them (Figure 2a). If 
+the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected. The pixels are 
 interpolated using linear interpolation to improve the accuracy of the pixel selection. If the loaded file is a NetCDF4 
 file, the data values from the original dataset (also interpolated) are selected along that line. Multiple such 
 transects can be drawn and plotted all together in the plotting menu (Figure 3a). The second is the transect marker tool. 
-Using this tool users click points along a feature and transects of a set width will be made orthogonal to the line 
+Using this tool users can click points along a feature and transects of a set width will be made orthogonal to the line 
 marked out by the user (Figure 2b). This width can be adjusted at any point in the marking process and multiple markers 
 can be drawn on the same file and plotted together. For use on large projects worked on over multiple sessions, the 
 marker data saved from the plotting menu can be reloaded back into CutView and continued.
@@ -83,7 +83,7 @@ In the plotting menu (Figure 3) users can select which transects/markers to plot
 user can additionally plot multiple variables (Figure 4) and values along the chosen z dimension. Additionally, users can see a 
 plot of the data values for all z values shown as an image, which can be done for multiple variables at once (Figure 3b). From here 
 users can choose to save the data to a .JSON file as well as save the plot to either a .PNG or .PDF format. The JSON 
-file groups the pixel data and their coordinates together and labels them by the transect number shown on the viewer. If 
+file groups the pixel data and their coordinates together and labels them by the transect number shown in the viewing interface. If 
 the marker tool was used, the transects are further grouped and labeled by their marker number. This labeled and 
 organized data structure aims to be easily loaded and understood using minimal programming experience in a language such
 as Python or R.
