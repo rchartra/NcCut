@@ -58,33 +58,38 @@ contrast of the image. Once loaded and configured users can drag, rotate, flip, 
 please. The NetCDF4 viewing capabilities are shown in Figure 1, which is an example using the MIT General Circulation 
 Model LLC4320 simulation dataset (accessed via \verb|xmitgcm| https://xmitgcm.readthedocs.io/en/latest/index.html). 
 
-![NetCDF viewing interface, settings, and selection of transects plotted in Figure 2](images/paper_fig_1.jpg)
-
+![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region loaded. b.) 
+The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
+menu for loading NetCDF4 files. ](images/paper_fig_1.png)
 ## Cut
 
 Using CutView users can mark out and plot transects onto loaded images or NetCDF4 data using two tools:
 
 The first is the simple transect tool, where users can click on two endpoints and a line will be drawn between them. If 
-the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected. The pixels are 
+the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected (Figure 2a). The pixels are 
 interpolated using linear interpolation to improve the accuracy of the pixel selection. If the loaded file is a NetCDF4 
 file, the data values from the original dataset (also interpolated) are selected along that line. Multiple such 
-transects can be drawn and plotted all together in the plotting menu (Figure 2). The second is the transect marker tool. 
+transects can be drawn and plotted all together in the plotting menu (Figure 3a). The second is the transect marker tool. 
 Using this tool users click points along a feature and transects of a set width will be made orthogonal to the line 
-marked out by the user (Figure 3). This width can be adjusted at any point in the marking process and multiple markers 
+marked out by the user (Figure 2b). This width can be adjusted at any point in the marking process and multiple markers 
 can be drawn on the same file and plotted together. For use on large projects worked on over multiple sessions, the 
 marker data saved from the plotting menu can be reloaded back into CutView and continued.
 
-![Transect plotting menu with transects selected in Figure 1.](images/paper_fig_2.jpg)
+![a.) The simple transect tool used over two features in a loaded NetCDF file. b.) The marker tool used to take multiple 
+transects orthogonal to a linear feature.](images/paper_fig_2.png)
 
 In the plotting menu (Figure 3) users can select which transects/markers to plot, and if the file is a NetCDF file the 
-user can additionally plot multiple variables and values along the chosen z dimension. Additionally, users can see a 
-plot of the data values for all z values shown as an image, which can be done for multiple variables at once. From here 
+user can additionally plot multiple variables (Figure 4) and values along the chosen z dimension. Additionally, users can see a 
+plot of the data values for all z values shown as an image, which can be done for multiple variables at once (Figure 3b). From here 
 users can choose to save the data to a .JSON file as well as save the plot to either a .PNG or .PDF format. The JSON 
 file groups the pixel data and their coordinates together and labels them by the transect number shown on the viewer. If 
 the marker tool was used, the transects are further grouped and labeled by their marker number. This labeled and 
 organized data structure aims to be easily loaded and understood using minimal programming experience in a language such
 as Python or R.
 
-![Transect marker tool and options over a NetCDF file. Data is vorticity calculated from MITgcm LLC4320 simulation dataset.](images/paper_fig_3.JPG)
+![a.) A simple transect of a feature plotted at multiple values along the z dimension. b.) A vertical cross section of 
+the data along a simple transect.](images/paper_fig_3.png)
+
+![Simple transects taken over various variables in the NetCDF4 file.](images/paper_fig_4.png)
 
 # References

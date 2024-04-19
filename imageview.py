@@ -32,13 +32,13 @@ class ImageView(ScatterLayout):
         # Editing Mode widgets
         self.editing = False
         self.back = func.RoundedButton(text="Back", size_hint=(1, 0.1), text_size=self.size,
-                                       halign='center', valign='center', font_size=self.home.size[0] / 8)
+                                       halign='center', valign='center', font_size=self.home.font)
         self.back.bind(on_press=self.edit_mode)
         self.delete_line = func.RoundedButton(text="Delete Last Line", size_hint=(1, 0.1),
-                                              font_size=self.home.size[0] / 10)
+                                              font_size=self.home.font)
         self.delete_line.bind(on_press=lambda x: self.home.transect.del_line())
         self.delete_point = func.RoundedButton(text="Delete Last Point", size_hint=(1, 0.1),
-                                               font_size=self.home.size[0] / 10)
+                                               font_size=self.home.font)
         self.delete_point.bind(on_press=lambda x: self.home.transect.del_point())
 
         self.edit_widgets = [self.back, self.delete_line, self.delete_point]
