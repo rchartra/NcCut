@@ -36,8 +36,8 @@ class HomeScreen(Screen):
                       "Turbo": cv2.COLORMAP_TURBO, "Deep Green": cv2.COLORMAP_DEEPGREEN}
         self.colormap = 'Viridis'
         self.nc = False
-        self.img = ImageView(home=self)
         self.font = self.ids.transect.font_size
+        self.img = ImageView(home=self)
         self.action = func.BackgroundLabel(text="Actions", size_hint=(1, 0.1), text_size=self.size,
                                            halign='center', valign='center', font_size=self.font)
         self.drag = func.RoundedButton(text="Drag Mode", size_hint=(1, 0.1), text_size=self.size,
