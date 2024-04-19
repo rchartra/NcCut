@@ -61,6 +61,7 @@ Model LLC4320 simulation dataset (accessed via \verb|xmitgcm| https://xmitgcm.re
 ![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region loaded. b.) 
 The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
 menu for loading NetCDF4 files. ](images/paper_fig_1.png)
+
 ## Cut
 
 Using CutView users can mark out and plot transects onto loaded images or NetCDF4 data using two tools:
