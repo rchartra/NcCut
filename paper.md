@@ -27,14 +27,14 @@ bibliography: paper.bib
 # Statement of Need
 
 CutView is a simple yet flexible NetCDF4 file and image viewer that is designed to require no programming or GIS 
-experience to use.  In addition to being a GUI for generating "quick" visualizations of NetCDF4 data, CutView 
-additionally allows a user to view and produce plots of transets of NetCDF4 data along various dimensions.  This is a 
+experience to use.  In addition to being a GUI for generating "quick" visualizations of NetCDF4 data, CutView allows a 
+user to view and produce plots of transects of NetCDF4 data along various dimensions.  This is a 
 commonly performed task in oceanography and atmospheric sciences research used to understand the vertical composition of 
 a section of ocean or atmosphere. For example, @Sivkov:2021 used such vertical transects to study the vertical 
 distributions of suspended particulate matter across the Atlantic ocean. In another example, @Gutjahr:2022 used vertical 
 transects of modeled climate and ocean data in Greenland to study air-sea interactions during a Katabatic storm.
 
-Such transect selecting tools are a feature common in GIS software (@qgis, @transectizer, @GRASS_GIS) and are present in 
+Such transect selecting tools are a common feature in GIS software (@qgis, @transectizer, @GRASS_GIS) and are present in 
 some more complex viewers that work with unstructured data [@odv], but these options are all either meant for more 
 complicated data formats or require a user to spend a great amount of time learning how to use the software before they 
 can do any meaningful data analysis. CutView provides this transecting functionality with a GUI interface, allowing for 
