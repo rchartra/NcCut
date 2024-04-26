@@ -18,6 +18,7 @@ class MultiTransect(ui.widget.Widget):
         self.mpoints = 0
         self.home = home
         self.p_btn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
+        self.p_btn.bind(on_press=lambda x: self.popup())
         self.dragging = False
 
     def font_adapt(self, font):
@@ -73,28 +74,26 @@ class MultiTransect(ui.widget.Widget):
     def on_touch_down(self, touch):
         # Transect creation and display code
         # Determines what to do based on which of 3 click stages the user is in
+
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 if self.clicks == 2:
                     # Clean up download button from previous cycle
                     self.clicks = 0
                     self.home.ids.sidebar.remove_widget(self.p_btn)
-
                 if self.clicks == 0:
                     # Begins a new transect
                     x = SingleTransect(home=self.home)
 
                     self.add_widget(x)
                     self.lines.append(x)
-
+                if [touch.x, touch.y] == self.lines[-1].line.points:
+                    return
                 # Single transect manages the line and dots graphics
                 self.lines[-1].on_touch_down(touch)
                 if self.clicks == 1:
                     # If clicked same point as before, do nothing
-                    if [touch.x, touch.y] == self.lines[-1].line.points:
-                        return
                     # Finishes a transect, displays download button
                     if self.p_btn not in self.home.ids.sidebar.children:
                         self.home.ids.sidebar.add_widget(self.p_btn, 1)
-                        self.p_btn.bind(on_press=lambda x: self.popup())
                 self.clicks += 1
