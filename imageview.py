@@ -50,7 +50,7 @@ class ImageView(ScatterLayout):
 
     def font_adapt(self, font):
         print("Font: " + str(font))
-        print("Back fontsize: " + str(self.back.font_size))
+        print("Current Back Font: " + str(self.back.font_size))
 
         self.back.font_size = font
         self.delete_line.font_size = font
