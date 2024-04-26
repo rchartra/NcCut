@@ -102,6 +102,7 @@ class HomeScreen(Screen):
 
     def transect_btn(self, type):
         # Manages the creation and deletion of each tool
+        self.font_adapt()
         if self.fileon:
             if not self.tMode:
                 # Opens a new tool
