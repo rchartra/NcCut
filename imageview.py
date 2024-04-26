@@ -49,9 +49,7 @@ class ImageView(ScatterLayout):
     ScatterLayout.do_scale = False
 
     def font_adapt(self, font):
-        print("Font: " + str(font))
-        print("Current Back Font: " + str(self.back.font_size))
-
+        # Update button font sizes on resize
         self.back.font_size = font
         self.delete_line.font_size = font
         self.delete_point.font_size = font
