@@ -6,6 +6,7 @@ Builds app and file settings menu.
 import os
 os.environ["KCFG_KIVY_LOG_LEVEL"] = "info"
 import matplotlib.pyplot as plt
+plt.set_loglevel(level='warning')
 
 import kivy
 import kivy.uix as ui
