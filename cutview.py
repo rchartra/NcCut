@@ -8,6 +8,9 @@ import logging
 os.environ["KCFG_KIVY_LOG_LEVEL"] = "info"
 import matplotlib.pyplot as plt
 logging.getLogger('matplotlib.font_manager').disabled = True
+from kivy.logger import Logger, LOG_LEVELS
+
+Logger.setLevel(LOG_LEVELS["debug"])
 
 import kivy
 import kivy.uix as ui
