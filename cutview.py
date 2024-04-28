@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 logging.getLogger('matplotlib.font_manager').disabled = True
 from kivy.logger import Logger, LOG_LEVELS
 
-Logger.setLevel(LOG_LEVELS["debug"])
+Logger.setLevel(LOG_LEVELS["warning"])
 
 import kivy
 import kivy.uix as ui
