@@ -7,8 +7,6 @@ import os
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('kivy').setLevel(logging.INFO)
-
-
 import kivy
 import kivy.uix as ui
 from kivy.uix.settings import SettingsWithSidebar
