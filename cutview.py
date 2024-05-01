@@ -6,7 +6,6 @@ Builds app and file settings menu.
 import os
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
-#logging.getLogger('kivy').setLevel(logging.INFO)
 os.environ["KIVY_NO_CONSOLELOG"] = "1"
 
 import kivy
