@@ -4,8 +4,9 @@ Builds app and file settings menu.
 
 # Turn off debug messages from kivy and matplotlib
 import os
-os.environ["KCFG_KIVY_LOG_LEVEL"] = "info"
-import matplotlib.pyplot as plt
+import logging
+logging.getLogger('matplotlib.font_manager').disabled = True
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
 
 import kivy
 import kivy.uix as ui
