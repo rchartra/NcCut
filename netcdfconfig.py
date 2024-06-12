@@ -1,5 +1,8 @@
 """
 UI and functionality for NetCDF configuration popup
+
+Creates the NetCDF configuration popup that opens when a user loads a NetCDF file. Ensures that the file
+is in a viable configuration for the viewer.
 """
 
 import kivy.uix as ui
@@ -10,15 +13,42 @@ from kivy.uix.label import Label
 from kivy.uix.dropdown import DropDown
 import functions as func
 import xarray as xr
-import time
 
 
 class NetCDFConfig(Popup):
+    """
+    UI and functionality for NetCDF configuration popup
+
+    Creates the NetCDF configuration popup that opens when a user loads a NetCDF file. Ensures that the file
+    is in a viable configuration for the viewer.
+
+    Attributes:
+        home: Reference to root HomeScreen instance
+        data: xarray.Dataset, Opened NetCDF file
+        var_select: RoundedButton, Variable select button
+        var_drop: Dropdown(), Dropdown of variable options
+        x_select: Rounded Button, X dimension select button
+        y_select: Rounded Button, Y dimension select button
+        z_select: Rounded Button, Z dimension select button
+        depth_select: Rounded Button, Z dimension value select button
+        error: Label for displaying error alerts
+        title: Popup title
+        content: BoxLayout containing all widgets of the popup
+        size_hint: Tuple (width, height) of relative size of popup to window
+
+        Inherits additional attributes from kivy.uix.popup.Popup (see kivy docs)
+    """
     def __init__(self, file, home, **kwargs):
+        """
+        Defines UI elements and opens popup.
+
+        Args:
+            file: String, file path of NetCDF file. Must exist and be a valid NetCDF file
+            home: Reference to root HomeScreen instance
+        """
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
         self.data = xr.open_dataset(file)
-
         content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(20), padding=dp(20))
 
         # Variable Selection
@@ -82,12 +112,21 @@ class NetCDFConfig(Popup):
         self.open()
 
     def clean(self):
+        """
+        Resets file related attributes of the HomeScreen
+        """
         if not self.home.fileon:
             self.home.clean_file()
-        #self.dismiss()
 
     def check_inputs(self, *args):
-        # Check selected configurations are valid before submitting
+        """
+        Check selected configurations are valid before loading dataset
+
+        When values are selected the button text changes to the selection. This method
+        accesses values from the text of the buttons. If all checks are passed sends
+        dictionary of configurations to HomeScreen instance and closes popup. Otherwise
+        an error message is displayed and popup stays open.
+        """
         vals = {'x': self.x_select.text, 'y': self.y_select.text,
                 'z': self.z_select.text, 'z_val': self.depth_select.text,
                 'var': self.var_select.text, 'file': self.data}
@@ -116,6 +155,11 @@ class NetCDFConfig(Popup):
         self.dismiss()
 
     def var_update(self, var, *args):
+        """
+        When a variable is selected updates var_select button text to the variable name. Then finds first
+        two or three dimensions of the variable and sets them as the X, Y, and Z (if three) dimension
+        selections.
+        """
         setattr(self.var_select, 'text', var)
         dims = list(self.data[self.var_select.text].dims)
         if len(dims) < 3:
@@ -129,7 +173,14 @@ class NetCDFConfig(Popup):
         setattr(self.depth_select, 'text', "Select...")
 
     def dim_options(self, dim, *args):
-        # X, Y, Z Dropdowns
+        """
+        Creates dropdown for X, Y, or Z dimension selection button. If variable is already selected
+        options listed are all dimensions for selected variable. If variable is not selected sets button
+        to 'Select ...'
+
+        Args:
+            dim: x_select, y_select, or z_select Button
+        """
         if self.var_select.text != "Select...":
             dim_drop = ListDropDown(['Select...'] + list(self.data[self.var_select.text].dims), dim)
             dim_drop.open(dim)
@@ -137,7 +188,9 @@ class NetCDFConfig(Popup):
             dim.text = "Select..."
 
     def depth_options(self, *args):
-        # Z Value Dropdown
+        """
+        Creates dropdown for the value of Z dimension if third dimension is selected.
+        """
         if self.z_select.text != "Select...":
             depth_drop = ListDropDown(['Select...'] + list(self.data.coords[self.z_select.text].data), self.depth_select)
             depth_drop.open(self.depth_select)
@@ -146,8 +199,21 @@ class NetCDFConfig(Popup):
 
 
 class ListDropDown(DropDown):
-    # Standard dropdown code
+    """
+    Standard dropdown for all selections in the menu.
+
+    Attributes:
+        Inherits attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
+    """
     def __init__(self, items, button, **kwargs):
+        """
+        Creates dropdown. When options in dropdown are selected dropdown closes and selection button
+        text changes to the selected option.
+
+        Args:
+            items: List of items to be options for dropdown.
+            button: Button which opens dropdown
+        """
         super(ListDropDown, self).__init__(**kwargs)
         for item in items:
             btn = Button(text=str(item), size_hint_y=None, height=30)

@@ -1,40 +1,61 @@
 """
-Helper functions to support other widgets.
+Miscellaneous helper functions to support other widgets.
+
+Provides reference to custom UI elements defined in cutview.kv file so they can be used in python scripts.
+Contains error banner functionality, file management function, and transect taking function.
+
 """
 
-import matplotlib.pyplot as plt
 import kivy
 from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from functools import partial
 from scipy import interpolate
-import pandas as pd
 import numpy as np
 import math
-import copy
 import re
 from pathlib import Path
 
 
 class RoundedButton(Button):
-    # Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    """
+    Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    """
     pass
 
 
 class BackgroundLabel(Label):
-    # Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    """
+    Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    """
     pass
 
 
 def remove_alert(alert, home, *largs):
-    # Removes alert banner
+    """
+    Remove alert banner.
+
+    Args:
+        alert: Alert kivy.uix.label.Label reference.
+        home: Active HomeScreen instance.
+        *largs: Unused args from kivy Clock class.
+    """
     home.remove_widget(alert)
 
 
 def alert(text, home):
-    # Creates alert banner with given text and adds it to top left corner of the home screen
-    # Schedules it to be removed after 2 seconds.
+    """
+    Creates alert banner.
+
+    Creates alert banner with given text and adds it to top left corner of the home screen.
+    Schedules it to be removed after 2 seconds.
+
+    Args:
+        text: String of alert banner message
+        home: Active HomeScreen reference
+    """
+
     screen = kivy.core.window.Window.size
     with home.canvas:
         Color(0.2, 0.2, 0.2)
@@ -46,8 +67,22 @@ def alert(text, home):
 
 
 def check_file(path, fname, extension):
-    # Checks that a given file name is valid and if file already exists takes measures to avoid overwriting.
-    # If a directory is part of the file path checks that the directory exists.
+    """
+    Checks if a filename is valid and prevents overwriting.
+
+    Checks a file name doesn't have any problematic characters. If file name is a file path
+    ensures that the directories exists. If a file name is the same as one that already
+    exists it adds a (#) to avoid overwriting existing file.
+
+    Args:
+        path: pathlib.Path object of current output directory
+        fname: String of user proposed file name
+        extension: String of file extension for file type being created
+
+    Returns:
+        If all checks are passed the file name is returned, possibly with added (#). If checks aren't passed
+        returns False.
+    """
     if fname.find(".") >= 1:
         fname = fname[:fname.find(".")]
     if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/:]', fname)) > 0:
@@ -71,43 +106,32 @@ def check_file(path, fname, extension):
     return fname
 
 
-def plotdf(data, home):
-    # Create plots
-    dat = copy.copy(data)
-    plot_dat = {}
-    if list(dat.keys())[0][0:6] == "Marker":
-        for marker in list(dat.keys()):
-            for cut in list(dat[marker].keys()):
-                plot_dat["M" + marker[-1] + " " + cut] = dat[marker][cut]["Cut"]
-    elif list(dat.keys())[0][0:3] == "Cut":
-        for cut in list(dat.keys()):
-            plot_dat[cut] = dat[cut]["Cut"]
-    df = pd.DataFrame.from_dict(dict([(k, pd.Series(v)) for k, v in plot_dat.items()]))
-    x = np.asarray(df.index)
-    axis = (x - x[0]) / (x[-1] - x[0])
-    plt.plot(axis, df)
-    plt.legend(df.columns, title="Legend", bbox_to_anchor=(1.05, 1))
-
-    if home.nc:
-        plt.ylabel(home.netcdf['var'].capitalize())
-    else:
-        plt.ylabel("Mean RGB Value")
-        plt.gca().set_ylim(ymin=0)
-    plt.xlabel("Normalized Long Transect Distance")
-    plt.tight_layout()
-    plt.savefig("____.jpg")
-    plt.close('all')
-
-
 def ip_get_points(points, curr, nc):
-    # Creates a data frame containing x, y, and value of points on transect line
-    # If angle of line is > 45 degrees will swap x and y to still get an accurate answer
-    r = 0
+    """
+    Creates a data frame containing x, y, and value of points on transect line
+
+    From end points finds points of line connecting them. Interpolates higher resolution version of
+    relevant section of data set, and then grabs data values at each line point.
+
+    Args:
+        points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
+        curr: 2D indexable array of current dataset loaded in viewer
+        nc: Boolean of whether current file is NetCDF or not
+    
+    Returns:
+        Dictionary with three keys:
+            'x': 1D array of x-coordinates of transect points
+            'y': 1D array of y-coordinates of transect points
+            'Cut': 1D array of data values at each point along line connecting end points
+    """
+
+    # If angle of line is > 45 degrees will swap x and y to increase accuracy
     data = []
     xyswap = False
-    # Gather data as array
+
     img = curr
     line = points
+
     # Always read from left point to right
     if line[0] > line[2]:
         line = [line[2], line[3], line[0], line[1]]
@@ -126,7 +150,7 @@ def ip_get_points(points, curr, nc):
         m = (line[3] - line[1]) / .001
     else:
         m = (line[3] - line[1]) / (line[2] - line[0])
-    # If slope greater than 45 deg swap xy
+    # If slope greater than 45 deg swap x, y
     if abs(math.atan(m)) > (math.pi / 4):
         xyswap = True
         line = [line[1], line[0], line[3], line[2]]
@@ -162,4 +186,5 @@ def ip_get_points(points, curr, nc):
     else:
         data = {'x': xarr, 'y': yarr, 'Cut': data}
     data = {'x': data['x'].tolist(), 'y': data['y'].tolist(), 'Cut': data['Cut']}
+
     return data

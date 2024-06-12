@@ -1,4 +1,7 @@
-# This document outlines and creates static UI features for GUI
+# This document outlines and creates static UI features for GUI. This document uses
+# Kivy's kv language to define UI features in a more readable fashion.
+# Refer to kivy docs for syntax.
+
 #:import Factory kivy.factory.Factory
 #:import ViewDropDown dropdowns
 #:import NetCDFDropDown dropdowns
@@ -264,13 +267,6 @@
                     radius: [5,]
 
             RoundedButton:
-                text: "File"
-                id: file_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: app.open_settings()
-
-            RoundedButton:
                 text: "View"
                 id: view_btn
                 size_hint: (0.1, 1)
@@ -324,7 +320,7 @@
                 size_hint: (0.1, 1)
                 text: "Go"
                 font_size: self.size[1] / 2
-                on_press: root.gobtn()
+                on_press: root.go_btn()
 
     BoxLayout:
         id: sidebar

@@ -1,8 +1,9 @@
 """
-Class for multiple transect tool
+Widget for Transect tool
+
+Manages having multiple SingleTransects on screen at once.
 """
 import kivy.uix as ui
-from kivy.uix.button import Button
 from plotpopup import PlotPopup
 from singletransect import SingleTransect
 import functions as func
@@ -10,28 +11,59 @@ from kivy.core.window import Window
 
 
 class MultiTransect(ui.widget.Widget):
-    # Creates, stores, and manages multiple transects
+    """
+    Creates, stores, and manages multiple SingleTransects
+
+    Created when Transect button is selected. From there on this object manages the creation, modification,
+    and data packaging of transects made by user. Also used by marker to manage SingleTransects made
+    orthogonally to user marked line.
+
+    Attributes:
+        lines: List of SingleTransects made.
+        clicks: Int, Number of clicks made by user. Cycles between 0 and 2 depending on current stage of
+            transect drawing.
+        home: Reference to root HomeScreen instance
+        p_btn: RoundedButton, Plot button which opens PlotPopup
+        dragging: Boolean, Whether in dragging mode
+
+        Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
+    """
     def __init__(self, home, **kwargs):
+        """
+        Initialize object and create Plot button.
+
+        Args:
+            home: Reference to root HomeScreen instance
+        """
         super(MultiTransect, self).__init__(**kwargs)
         self.lines = []
         self.clicks = 0
-        self.mpoints = 0
         self.home = home
         self.p_btn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
         self.p_btn.bind(on_press=lambda x: self.popup())
         self.dragging = False
 
     def font_adapt(self, font):
+        """
+        Updates font size of Plot button.
+
+        Args:
+            font: Float, new font size
+        """
         self.p_btn.font_size = font
 
     def del_line(self):
-        # Delete all clicked points in most recent line
+        """
+        Delete all clicked points in most recent transect
+        """
         for i in range(self.clicks):
             self.del_point()
 
     def del_point(self):
-        # Delete most recent clicked point
-        if len(self.lines) == 0:
+        """
+        Delete most recent clicked point
+        """
+        if len(self.lines) == 0:  # If no transects, do nothing
             return
         elif self.children[0].circles == 1:
             # Case where point is beginning of a transect
@@ -51,19 +83,19 @@ class MultiTransect(ui.widget.Widget):
         self.clicks += 1
 
     def change_dragging(self, val):
+        """
+        Update whether in dragging mode
+
+        Args:
+            val: Boolean, whether in dragging mode or not
+        """
         self.dragging = val
 
-    def marker_points(self, plist):
-        # When used as base by marker widget, gets users clicking points for download
-        self.mpoints = plist
-
     def popup(self):
-        # Gathers input and calls for popup
-        if self.mpoints == 0:
-            data = {}
-        else:
-            x, y, w = zip(*self.mpoints)
-            data = {"Click X": list(x), "Click Y": list(y), "Width": list(w)}
+        """
+        Gathers coordinates from SingleTransects into a dictionary and calls for popup
+        """
+        data = {}
         count = 1
         for i in self.lines:
             data["Cut " + str(count)] = i.line.points
@@ -72,13 +104,16 @@ class MultiTransect(ui.widget.Widget):
         PlotPopup({"Multi": data}, self.home)
 
     def on_touch_down(self, touch):
-        # Transect creation and display code
-        # Determines what to do based on which of 3 click stages the user is in
+        """
+        Creating transects and managing Plot button based on which of 3 click stages user is in.
 
+        Args:
+            touch: MouseMotionEvent, see kivy docs for details
+        """
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 if self.clicks == 2:
-                    # Clean up download button from previous cycle
+                    # Clean up download button from previous cycle and reset
                     self.clicks = 0
                     self.home.ids.sidebar.remove_widget(self.p_btn)
                 if self.clicks == 0:
@@ -87,12 +122,12 @@ class MultiTransect(ui.widget.Widget):
 
                     self.add_widget(x)
                     self.lines.append(x)
+                # If clicked same point as before, do nothing
                 if [touch.x, touch.y] == self.lines[-1].line.points:
                     return
-                # Single transect manages the line and dots graphics
+                # SingleTransect manages the line and dots graphics
                 self.lines[-1].on_touch_down(touch)
                 if self.clicks == 1:
-                    # If clicked same point as before, do nothing
                     # Finishes a transect, displays download button
                     if self.p_btn not in self.home.ids.sidebar.children:
                         self.home.ids.sidebar.add_widget(self.p_btn, 1)
