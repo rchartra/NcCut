@@ -55,16 +55,16 @@ class Test(unittest.TestCase):
     def test_file_names(self):
         # Test input file name rules
         run_app.home.ids.file_in.text = "*$%&@! "
-        run_app.home.gobtn()
+        run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No irregular characters")
         run_app.home.ids.file_in.text = ""
-        run_app.home.gobtn()
+        run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No empty file names")
 
     def test_widget_cleanup(self):
         # Check that viewer window is clean after removing tools
         run_app.home.ids.file_in.text = "support/example.jpg"
-        run_app.home.gobtn()
+        run_app.home.go_btn()
 
         # Run for all tools in sidebar
         og_side = copy.copy(run_app.home.ids.sidebar.children)

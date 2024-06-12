@@ -1,5 +1,7 @@
 """
-Class for multiple marker tool that allows user to have multiple markers on screen at once.
+Transect marker tool widget.
+
+Manages having multiple markers on screen at once and the uploading of previous projects.
 """
 
 import kivy.uix as ui
@@ -17,7 +19,14 @@ from plotpopup import PlotPopup
 
 
 class Click:
-    # Mimic a user click
+    """
+    Object that mimics a user click.
+
+    Attributes:
+        x: Float, X coordinate of click point
+        y: Float, Y coordinate of click point
+        pos: 2 element tuple: (X coord, Y coord)
+    """
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -25,6 +34,15 @@ class Click:
 
 
 def correct_test(data):
+    """
+    Check if dictionary has necessary fields to be a marker
+
+    Args:
+        data: Dictionary to be tested.
+
+    Returns:
+        Boolean, whether dictionary has necessary keys with a list has the value
+    """
     keys = list(data.keys())
     if len(keys) == 0:
         return False
@@ -37,12 +55,25 @@ def correct_test(data):
 
 
 def marker_find(data, res):
+    """
+    Recursively examines dictionary and finds marker click coordinates and transect widths.
+
+    Args:
+        data: Dictionary to examine
+        res: Empty list to fill with marker click coordinates and transect widths
+
+    Returns:
+        Nested List. A list containing a list for each marker which each contains three lists:
+        click X coords, click y cooords, and the transect width for each click point in the marker.
+        If no qualifying data was found returns empty list. If duplicate data is found (ex: multiple
+        variables in a file) only returns one instance of marker data.
+    """
     for key in list(data.keys()):
         if key[0:6] == 'Marker':
-            if correct_test(data[key]):
-                if len(res) == 0:
+            if correct_test(data[key]):  # Marker dict has necessary fields
+                if len(res) == 0:  # If res empty, always add marker data
                     res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
-                else:
+                else:  # If res not empty, ensure found marker data isn't already in res
                     new = True
                     for item in res:
                         l1 = data[key]['Click X']
@@ -52,13 +83,41 @@ def marker_find(data, res):
                     if new:
                         res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
         else:
-            marker_find(data[key], res)
+            if type(data[key]) == dict:  # Can still go further in nested dictionary tree
+                marker_find(data[key], res)
+            else:
+                return res
     return res
 
 
 class MultiMarker(ui.widget.Widget):
-    # Creates, stores, and manages downloads for multiple markers
+    """
+    Transect marker tool widget.
+
+    Created when Transect Marker button is selected. From there on this object manages the creation,
+    modification, and data packaging of markers. Manages the uploading of previous projects
+    into the viewer.
+
+    Attributes:
+        m_on: Boolean, whether there are any markers active
+        home: Reference to root HomeScreen instance
+        dbtn: RoundedButton, Plot button to activate PlotPopup
+        dragging: Boolean, whether viewer is in dragging mode
+        width_w: MarkerWidth widget to allow for adjustable marker widths
+        clicks: Int, number of clicks made by user. Does not decrease when points are deleted
+            unless all points are deleted in which case it goes back to zero.
+        up_btn: RoundedButton, Upload button for uploading a past project
+        nbtn: RoundedButton, New marker button
+
+        Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
+    """
     def __init__(self, home, **kwargs):
+        """
+        Defines sidebar elements and initializes widget
+
+        Args:
+            home: Reference to root HomeScreen instance
+        """
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
         self.home = home
@@ -67,8 +126,6 @@ class MultiMarker(ui.widget.Widget):
         self.dragging = False
         self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
-        self.twidth = 40
-        self.cir_size = self.home.cir_size
 
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
@@ -82,16 +139,29 @@ class MultiMarker(ui.widget.Widget):
         self.home.ids.sidebar.add_widget(self.nbtn, 1)
 
     def font_adapt(self, font):
+        """
+        Updates font of sidebar elements.
+        Args:
+            font: Float, new font size
+        """
         self.dbtn.font_size = font
         self.upbtn.font_size = font
         self.nbtn.font_size = font
         self.width_w.font_adapt(font)
 
     def change_dragging(self, val):
+        """
+        Change whether in dragging mode or not.
+
+        Args:
+            val: Boolean, whether in dragging mode or not.
+        """
         self.dragging = val
 
     def upload_pop(self):
-        # Popup asking for project file
+        """
+        Opens popup to ask for name of project file user wishes to upload.
+        """
         content = ui.boxlayout.BoxLayout(orientation='horizontal')
         popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
         txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
@@ -105,7 +175,14 @@ class MultiMarker(ui.widget.Widget):
         popup.open()
 
     def check_file(self, file, popup):
-        # Check if given file is a json file containing marker data
+        """
+        Checks is given file name is a properly formatted project file. If it is it uploads
+        file. If not, closes popups and shows error message.
+
+        Args:
+            file: String, File path
+            popup: Popup, File name input popup (so can close if file invalid)
+        """
         if exists(file):
             if file[-5:] == ".json":
                 data = json.load(open(file))
@@ -127,7 +204,20 @@ class MultiMarker(ui.widget.Widget):
             popup2.open()
 
     def upload_data(self, points):
-        # Adds markers by "clicking" the points in the file with the marker width denoted by the file
+        """
+        Loads markers from project file.
+
+        Adds markers by 'clicking' the points in the file with the marker width denoted by the file
+
+        Args:
+            points: Properly formatted nested list from marker_find() function.
+        """
+        if len(self.children) != 0:  # If markers already exist in viewer
+            self.children[0].stop_drawing()
+            if self.children[0].clicks < 2:  # If any existing markers are incomplete, remove them
+                if self.children[0].clicks == 1:
+                    self.children[0].del_point()
+                self.remove_widget(self.children[0])
         for m in range(0, len(points)):
             marker = Marker(home=self.home)
             clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
@@ -135,15 +225,25 @@ class MultiMarker(ui.widget.Widget):
             for i in clicks:
                 marker.twidth = i[2]
                 marker.on_touch_down(Click(i[0], i[1]))
-        self.marker_off()
+        self.m_on = False
 
     def update_width(self, num):
-        # Update marker width
-        self.twidth = num
-        self.children[0].twidth = num
+        """
+        Update width of active marker.
+
+        Args:
+            num: Int, new width value
+        """
+        self.children[0].update_width(num)
 
     def del_line(self):
-        # If only one marker on screen, delete but add new marker, otherwise delete current marker and go to previous
+        """
+        Delete most recent marker with some safeguards.
+
+        If only one marker on screen, delete but add new marker and remove sidebar elements.
+        Otherwise delete current marker and go to previous. If no markers are on screen nothing
+        happens.
+        """
         if len(self.children) == 0:
             # If no markers on screen do nothing
             return
@@ -159,7 +259,14 @@ class MultiMarker(ui.widget.Widget):
             self.new_line()
 
     def del_point(self):
-        # Delete most recent clicked point
+        """
+        Delete most recently clicked point with some safeguards.
+
+        If no markers are on screen does nothing. If only one marker exists and no points have been clicked,
+        does nothing. If more than one marker exists and no points have been clicked on most recent marker,
+        Deletes most recent marker and then deletes last point of previous marker. Any other conditions
+        simply deletes last clicked point.
+        """
         if len(self.children) == 0:
             # If no markers on screen do nothing
             return
@@ -173,7 +280,9 @@ class MultiMarker(ui.widget.Widget):
         self.children[0].del_point()
 
     def new_line(self):
-        # Creates a new marker
+        """
+        Creates a new marker if not in dragging or editing mode and current marker has at least two clicks.
+        """
         if not self.dragging or self.home.img.editing:
             if len(self.children) == 0 or self.children[0].clicks >= 2:
                 if len(self.children) != 0:
@@ -181,12 +290,10 @@ class MultiMarker(ui.widget.Widget):
                 m = Marker(home=self.home)
                 self.add_widget(m)
 
-    def marker_off(self):
-        # Update whether there is currently a marker on the board
-        self.m_on = False
-
     def gather_popup(self):
-        # Gather data and call for popup
+        """
+        Gather data from markers and call for PlotPopup
+        """
         frames = {}
         c = 1
         for i in reversed(self.children):
@@ -202,6 +309,12 @@ class MultiMarker(ui.widget.Widget):
         PlotPopup(frames, self.home)
 
     def on_touch_down(self, touch):
+        """
+        Manages when sidebar elements are added to sidebar and clears them as needed.
+
+        Args:
+            touch: MouseMotionEvent, see kivy docs for details
+        """
         # Manage download and marker width widgets when all markers are deleted
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
@@ -213,6 +326,5 @@ class MultiMarker(ui.widget.Widget):
                 # If no current marker, create marker. Otherwise, pass touch to current marker.
                 if not self.m_on:
                     self.new_line()
-                    self.update_width(self.twidth)
                     self.m_on = True
                 self.children[0].on_touch_down(touch)

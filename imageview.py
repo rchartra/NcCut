@@ -1,7 +1,11 @@
 """
 Functionality for viewing window and interactive image.
+
+The dragability of the image is managed by the parent ScatterLayout class. This module
+manages the scrolling, rotation, and flipping of the image. It also executes the creation of
+and updates made to the image/dataset being displayed.
 """
-import time
+
 import kivy
 from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
@@ -16,12 +20,38 @@ import matplotlib.pyplot as plt
 
 
 class ImageView(ScatterLayout):
-    # Creates interactive image
-    # Dragging is managed by ScatterLayout widget base
+    """
+    Creation and management of the interactive image.
+
+    Loads image, or if it's a NetCDF file it turns dataset into an image according to settings. Updates image as
+    needed and manages the scrolling, flipping, and rotating of the image.
+
+    Attributes:
+        source: 2D array of dataset or image data to be loaded
+        im: kivy.core.CoreImage made from data array
+        home: Reference to root HomeScreen instance
+        contrast: Int from -127 to 127, contrast value to use when making image from NetCDF file
+        byte: io.BytesIO object containing image made from NetCDF dataset loaded in memory
+        colormap: current colormap data to use from dictionary described in __init__ method f HomeScreen
+        pos: Position of viewer. Used to properly place transect widgets on screen.
+        editing: Boolean, whether in editing mode or not
+        back: Back button for editing mode
+        delete_line: Delete line button
+        delete_point: Delete point button
+        edit_widgets: List of widgets that must be added to screen when entering editing mode
+        current: List to hold other widgets when they are replaced by editing mode widgets
+
+        Inherits additional attributes from kivy.uix.scatterlayout.ScatterLayout (see kivy docs)
+    """
     def __init__(self, home, **kwargs):
+        """
+        Initializes settings and defines editing mode buttons.
+
+        Args:
+            home: Reference to root HomeScreen reference
+        """
         super(ImageView, self).__init__(**kwargs)
         self.source = None
-        self.f_type = None
         self.im = None
         self.home = home
         self.contrast = self.home.contrast
@@ -44,31 +74,32 @@ class ImageView(ScatterLayout):
         self.edit_widgets = [self.back, self.delete_line, self.delete_point]
         self.current = []
 
-    gMode = False
+    # Turn off ScatterLayout functionality that conflicts with ImageView functionality
     ScatterLayout.do_rotation = False
     ScatterLayout.do_scale = False
 
     def font_adapt(self, font):
-        # Update button font sizes on resize
+        """
+        Update editing mode button font sizes.
+
+        Args:
+            font: Float, new font size
+        """
         self.back.font_size = font
         self.delete_line.font_size = font
         self.delete_point.font_size = font
 
-    def load_file(self, source, f_type):
-        # Loads file based on whether it's an image or netcdf file
-        self.source = source
-        self.f_type = f_type
-        if f_type == "netcdf":
-            self.load_netcdf()
-            self.im = CoreImage(self.byte, ext='png')
-            self.size = self.im.size
-        else:
-            self.im = CoreImage(self.source)
-            self.size = im.open(self.source).size
-        self.add_image()
-
     def edit_mode(self, *args):
-        # Turns editing mode on if off and off if on
+        """
+        Turns editing mode on if off and off if on.
+
+        When editing mode is being turned on, all sidebar buttons below 'Actions' label are added to
+        a temporary holding list and then replaced with editing buttons. When editing mode is turned
+        off, the editing buttons are removed and the original buttons are returned to the sidebar.
+
+        Args:
+            *args: Unused arguments passed to method when called.
+        """
         if self.editing:
             for i in self.edit_widgets:
                 if i in self.home.ids.sidebar.children:
@@ -89,7 +120,12 @@ class ImageView(ScatterLayout):
         self.home.transect.change_dragging(self.editing)
 
     def drag_mode(self, *args):
-        # Turns dragging mode on if off and off if on
+        """
+        Calls for transecting tool to turn dragging mode on if off and off if on
+
+        Args:
+            *args: Unused arguments passed to method when called.
+        """
         if self.home.drag.text == "Drag Mode":
             self.home.drag.text = "Transect Mode"
             kivy.core.window.Window.set_system_cursor("arrow")
@@ -100,7 +136,12 @@ class ImageView(ScatterLayout):
             self.home.transect.change_dragging(False)
 
     def update_netcdf(self, new):
-        # Reload netcdf image when netcdf settings are changed
+        """
+        Reload netcdf image when netcdf data is changed.
+
+        Args:
+            new: New 2D array of dataset.
+        """
         self.source = new
         self.load_netcdf()
         self.im = CoreImage(self.byte, ext='png')
@@ -109,7 +150,12 @@ class ImageView(ScatterLayout):
         self.img.reload()
 
     def update_colormap(self, colormap):
-        # Reload netcdf image when colormap is changed
+        """
+        Reload netcdf image when colormap is changed.
+
+        Args:
+            colormap: String, new colormap to use.
+        """
         self.colormap = self.home.cmaps[colormap]
         self.load_netcdf()
         self.im = CoreImage(self.byte, ext='png')
@@ -118,7 +164,12 @@ class ImageView(ScatterLayout):
         self.img.reload()
 
     def update_contrast(self, contrast):
-        # Reload netcdf image when contrast is changed
+        """
+        Reload netcdf image when contrast is changed.
+
+        Args:
+            contrast: Int from -127 to 127, contrast value to use when making image from NetCDF file
+        """
         self.contrast = contrast
         self.load_netcdf()
         self.im = CoreImage(self.byte, ext='png')
@@ -127,13 +178,19 @@ class ImageView(ScatterLayout):
         self.img.reload()
 
     def load_netcdf(self):
-        # Create image from selected NetCDF data
+        """
+        Creates image from NetCDF dataset defined in self.source
+
+        Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
+        and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
+        can make image out of an array.
+        """
         dat = self.source
         n_data = (dat - np.nanmin(dat)) / (np.nanmax(dat) - np.nanmin(dat))
         n_data = np.nan_to_num(n_data, nan=1)
         n_data = (n_data * 255).astype(np.uint8)
         img = cv2.applyColorMap(n_data, self.colormap)
-        self.get_color_bar()
+        self.home.update_color_bar(self.get_color_bar())
 
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
@@ -141,7 +198,9 @@ class ImageView(ScatterLayout):
         self.byte = io.BytesIO(img)
 
     def get_color_bar(self):
-        # Create color bar image and format it
+        """
+        Create color bar image according to colormap and dataset
+        """
         c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8)
         c_bar = cv2.applyColorMap(c_arr, self.colormap)
         c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
@@ -161,10 +220,25 @@ class ImageView(ScatterLayout):
         temp.seek(0)
         plt.close()
         plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
-        self.home.update_color_bar(plot)
+        return plot
 
-    def add_image(self):
-        # Starts up image, im must exist and be a CoreImage or Image object (precede with load_file)
+    def add_image(self, source, f_type):
+        """
+        Creates UI Image element, loads it in viewer, and scales it to window size.
+
+        Args:
+            source: 2D array of dataset or image to be loaded
+            f_type: String, 'netcdf' or 'image' according to file type
+        """
+        self.source = source
+        if f_type == "netcdf":
+            self.load_netcdf()
+            self.im = CoreImage(self.byte, ext='png')
+            self.size = self.im.size
+        elif f_type == "image":
+            self.im = CoreImage(self.source)
+            self.size = im.open(self.source).size
+
         self.img = ui.image.Image(source="", texture=self.im.texture,  size=self.size, pos=self.parent.pos,
                          allow_stretch=True)
         self.add_widget(self.img)
@@ -185,7 +259,16 @@ class ImageView(ScatterLayout):
         self.pos = (xco, self.pos[1])
 
     def apply_contrast(self, data, contrast):
-        # Perform contrast level adjustment to data
+        """
+        Perform contrast level adjustment to data
+
+        Args:
+            data: 2D array to which to apply contrast change
+            contrast: Desired contrast value
+
+        Return:
+            Data with contrast adjusted
+        """
         f = 131 * (contrast + 127) / (127 * (131 - contrast))
         alpha_c = f
         gamma_c = 127 * (1 - f)
@@ -193,6 +276,9 @@ class ImageView(ScatterLayout):
         return out
 
     def flip_vertically(self):
+        """
+        Flips image vertically
+        """
         # Flip draggable image vertically
         m = Matrix()
         m.set(array=[
@@ -204,7 +290,9 @@ class ImageView(ScatterLayout):
         self.apply_transform(m, anchor=self.center)
 
     def flip_horizontally(self):
-        # Flip draggable image horizontally
+        """
+        Flips image horizontally
+        """
         m = Matrix()
         m.set(array=[
             [-1.0, 0.0, 0.0, 0.0],
@@ -214,7 +302,19 @@ class ImageView(ScatterLayout):
         )
         self.apply_transform(m, anchor=self.center)
 
+    def rotate(self):
+        """
+        Rotates image 45 degrees counterclockwise
+        """
+        self.rotation += 45
+
     def on_touch_down(self, touch):
+        """
+        If touch is of a scrolling type zoom in or out of the image.
+        
+        Args:
+            touch: MouseMotionEvent, see kivy docs for details
+        """
         # Scroll to zoom
         if self.collide_point(*touch.pos):
             if touch.is_mouse_scrolling:
