@@ -85,7 +85,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest
           pip install -r support/requirements.txt
-          python -m pip install docutils pygments kivy["sdl2"] kivy["glew"] --extra-index-url https://kivy.org/downloads/packages/simple/
+          python -m pip uninstall kivy
+          python -m pip uninstall kivy.deps.sdl2
+          python -m pip uninstall kivy.deps.glew
+          python -m pip uninstall kivy.deps.gstreamer
+          python -m pip uninstall image
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew --extra-index-url https://kivy.org/downloads/packages/simple/
+          python -m pip install kivy
     - name: Lint with flake8
       run: |
         flake8 --ignore=E402,E501
