@@ -902,7 +902,7 @@ class PlotPopup(Popup):
     def get_average(self, key, curr):
         """
         Finds average of all transects in a marker. Transect width must be the same for the entire marker.
-        
+
         Args:
             key: String, 'Marker #'
             curr: 2D array, currently loaded dataset

@@ -71,8 +71,8 @@ class SingleTransect(ui.widget.Widget):
                     # Add points and start line
                     Color(self.l_color.r, self.l_color.g, self.l_color.b)
                     self.line = Line(points=[], width=self.line_width, group='end')
-                    c1 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
-                                 size=self.c_size, group='start')
+                    Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
+                            size=self.c_size, group='start')
                     self.line.points = (touch.x, touch.y)
                 # Bind line drawing to any time user mouse position changes
                 Window.bind(mouse_pos=self.draw_line)
@@ -85,8 +85,8 @@ class SingleTransect(ui.widget.Widget):
                 if [touch.x, touch.y] == self.line.points:  # If clicked the same point as before, do nothing
                     return
                 with self.canvas:  # Second circle and sets line between the two circles.
-                    c2 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
-                                 size=self.c_size, group='end')
+                    Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
+                            size=self.c_size, group='end')
                     self.line.points += (touch.x, touch.y)
 
     def draw_line(self, instance, pos):

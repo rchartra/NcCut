@@ -14,12 +14,10 @@ python cutview.py
 import os
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
-# os.environ["KIVY_NO_CONSOLELOG"] = "1"
-
+os.environ["KIVY_GL_BACKEND"] = "angle_sdl2"
 import kivy
 import kivy.uix as ui
 from kivy.app import App
-from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
 import platform
 from homescreen import HomeScreen
@@ -30,7 +28,8 @@ class CutView(App):
     Builds GUI and manages setting changes.
 
     Defines callbacks to various events that should trigger some change to the
-    GUI's settings. On GUI start it sets the initial settings and builds the app.
+    GUI's settings. On GUI start it sets the initial settings and builds the
+    app.
 
     Attributes:
         Inherits attributes from kivy.app.App (see kivy docs)
@@ -39,9 +38,8 @@ class CutView(App):
         """
         Sets initial window size according to operating system.
         """
-
-        # Kivy has a mobile app emulator that needs to be turned off for computer app
-
+        # Kivy has a mobile app emulator that needs to be turned off for
+        # computer app
         kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
         win = kivy.core.window.Window

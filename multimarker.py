@@ -83,7 +83,7 @@ def marker_find(data, res):
                     if new:
                         res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
         else:
-            if type(data[key]) == dict:  # Can still go further in nested dictionary tree
+            if type(data[key]) is dict:  # Can still go further in nested dictionary tree
                 marker_find(data[key], res)
             else:
                 return res
@@ -100,6 +100,7 @@ class MultiMarker(ui.widget.Widget):
 
     Attributes:
         m_on: Boolean, whether there are any markers active
+        upload_fail: Boolean, if anything has gone wrong in the project uploading process
         home: Reference to root HomeScreen instance
         dbtn: RoundedButton, Plot button to activate PlotPopup
         dragging: Boolean, whether viewer is in dragging mode
@@ -120,6 +121,7 @@ class MultiMarker(ui.widget.Widget):
         """
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
+        self.upload_fail = False
         self.home = home
         self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
@@ -167,7 +169,7 @@ class MultiMarker(ui.widget.Widget):
         txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
         content.add_widget(txt)
         go = Button(text="Ok", size_hint=(0.1, 1))
-        go.bind(on_release= lambda x: self.check_file(txt.text, popup))
+        go.bind(on_release=lambda x: self.check_file(txt.text, popup))
         close = Button(text="Close", size_hint=(0.2, 1))
         close.bind(on_press=popup.dismiss)
         content.add_widget(go)
@@ -203,6 +205,12 @@ class MultiMarker(ui.widget.Widget):
             popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
             popup2.open()
 
+    def upload_fail_alert(self):
+        """
+        Indicate upload has failed
+        """
+        self.upload_fail = True
+
     def upload_data(self, points):
         """
         Loads markers from project file.
@@ -221,11 +229,41 @@ class MultiMarker(ui.widget.Widget):
         for m in range(0, len(points)):
             marker = Marker(home=self.home)
             clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
+            marker.upload_mode(True)
             self.add_widget(marker)
             for i in clicks:
+                touch = Click(i[0], i[1])
                 marker.twidth = i[2]
-                marker.on_touch_down(Click(i[0], i[1]))
-        self.m_on = False
+                marker.on_touch_down(touch)
+            marker.upload_mode(False)
+            if self.upload_fail:  # If upload goes wrong, stop and undo everything
+                self.undo_upload(m)
+                return
+        self.new_line()
+
+    def undo_upload(self, markers):
+        """
+        Remove any previous markers that had been uploaded if upload fails
+
+        Args:
+            markers: Int, Number of markers added so far
+        """
+        for m in range(0, markers + 1):
+            Window.unbind(mouse_pos=self.children[0].draw_line)
+            self.remove_widget(self.children[0])
+        if len(self.children) == 0:
+            # Remove sidebar buttons if deleted marker was the only marker
+            self.clicks = 0
+            if self.dbtn in self.home.img.current:
+                self.home.img.current.remove(self.dbtn)
+            if self.width_w in self.home.img.current:
+                self.home.img.current.remove(self.width_w)
+            if self.dragging:
+                self.home.img.drag_mode()
+            self.new_line()
+        content = Label(text="Project File Markers out of Bounds")
+        popup = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
+        popup.open()
 
     def update_width(self, num):
         """
@@ -315,7 +353,6 @@ class MultiMarker(ui.widget.Widget):
         Args:
             touch: MouseMotionEvent, see kivy docs for details
         """
-        # Manage download and marker width widgets when all markers are deleted
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 self.clicks += 1

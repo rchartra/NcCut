@@ -42,7 +42,7 @@ class Marker(ui.widget.Widget):
     def __init__(self, home, **kwargs):
         """
         Sets initial settings and initializes object.
-        
+
         Args:
             home: Reference to root HomeScreen instance
         """
@@ -50,6 +50,7 @@ class Marker(ui.widget.Widget):
         self.clicks = 0
         self.points = []
         self.twidth = 40
+        self.uploaded = False
         self.home = home
         self.base = MultiTransect(home=self.home)
         self.curr_line = Line()
@@ -74,6 +75,9 @@ class Marker(ui.widget.Widget):
             width: Int, New width to use
         """
         self.twidth = width
+
+    def upload_mode(self, val):
+        self.uploaded = val
 
     def get_orthogonal(self, line):
         """
@@ -124,10 +128,10 @@ class Marker(ui.widget.Widget):
             coords = [xarr[0], yarr[0], xarr[-1], yarr[-1]]
             if xyswap:
                 coords = [yarr[0], xarr[0], yarr[-1], xarr[-1]]
-            c1 = Ellipse(pos=(coords[0] - self.c_size[0] / 2, coords[1] - self.c_size[1] / 2),
-                         size=self.c_size, group=str(self.clicks))
-            c1 = Ellipse(pos=(coords[2] - self.c_size[0] / 2, coords[3] - self.c_size[1] / 2),
-                         size=self.c_size, group=str(self.clicks))
+            Ellipse(pos=(coords[0] - self.c_size[0] / 2, coords[1] - self.c_size[1] / 2),
+                    size=self.c_size, group=str(self.clicks))
+            Ellipse(pos=(coords[2] - self.c_size[0] / 2, coords[3] - self.c_size[1] / 2),
+                    size=self.c_size, group=str(self.clicks))
         return coords
 
     def del_point(self):
@@ -159,15 +163,24 @@ class Marker(ui.widget.Widget):
         Args:
             touch: MouseMotionEvent, see kivy docs for details
         """
-        # Draws marker line and points
-        if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
+        # Draws marker line and points.
+        proceed = False
+        if self.uploaded:  # If being uploaded, just needs to be within image bounds
+            if self.collide_point(*touch.pos):
+                proceed = True
+            else:
+                self.parent.upload_fail_alert()  # Upload failed
+        elif self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
+            proceed = True  # If being clicked, must also be within viewing window
+
+        if proceed:
             par = self.home.img.children[0].children[-2]
             self.clicks += 1
             with self.canvas:
                 # Always adds point when clicked
                 Color(self.l_color.r, self.l_color.g, self.l_color.b)
-                d = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
-                            size=self.c_size, group=str(self.clicks))
+                Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
+                        size=self.c_size, group=str(self.clicks))
                 self.points.append((touch.x, touch.y, self.twidth))
                 self.curr_line = Line(points=[], width=self.line_width, group=str(self.clicks + 1))
             # Draw line between last point and cursor whenever cursor position changes
@@ -185,12 +198,15 @@ class Marker(ui.widget.Widget):
                     x.line = Line(points=coords, width=self.line_width)
                     self.base.lines.append(x)
                 else:
-                    # Undo actions and alert user
+                    # Undo actions and alert user or parent
                     self.canvas.remove_group(str(self.clicks))
                     self.canvas.remove(self.curr_line)
                     self.clicks -= 1
                     self.points = self.points[:-1]
-                    functions.alert("Orthogonal point out of bounds", self.home)
+                    if self.uploaded:
+                        self.parent.upload_fail_alert()
+                    else:
+                        functions.alert("Orthogonal point out of bounds", self.home)
 
             else:
                 # If first click, adds marker number
@@ -239,7 +255,6 @@ class Marker(ui.widget.Widget):
         """
         dots = [points[0:2], points[2:4]]
         for d in dots:
-            if min(d) < 0 or any([l[0] > l[1] for l in list(zip(d, self.size))]):
+            if min(d) < 0 or any([i[0] > i[1] for i in list(zip(d, self.size))]):
                 return False
         return True
-

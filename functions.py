@@ -88,7 +88,7 @@ def check_file(path, fname, extension):
     if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/:]', fname)) > 0:
         return False
     if "/" in fname:
-        if not Path.exists(path / fname[:fname.rfind("/")+1]):
+        if not Path.exists(path / fname[:fname.rfind("/") + 1]):
             return False
 
     exist = True
@@ -117,7 +117,7 @@ def ip_get_points(points, curr, nc):
         points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
         curr: 2D indexable array of current dataset loaded in viewer
         nc: Boolean of whether current file is NetCDF or not
-    
+
     Returns:
         Dictionary with three keys:
             'x': 1D array of x-coordinates of transect points

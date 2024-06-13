@@ -33,7 +33,9 @@ class ImageView(ScatterLayout):
         contrast: Int from -127 to 127, contrast value to use when making image from NetCDF file
         byte: io.BytesIO object containing image made from NetCDF dataset loaded in memory
         colormap: current colormap data to use from dictionary described in __init__ method f HomeScreen
+        image: kivy.uix.image.Image UI element which displays the image over the scatter object
         pos: Position of viewer. Used to properly place transect widgets on screen.
+        dragging: Boolean, whether in dragging mode or not
         editing: Boolean, whether in editing mode or not
         back: Back button for editing mode
         delete_line: Delete line button
@@ -56,8 +58,10 @@ class ImageView(ScatterLayout):
         self.home = home
         self.contrast = self.home.contrast
         self.byte = None
+        self.img = None
         self.colormap = self.home.cmaps[self.home.colormap]
         self.pos = self.home.ids.view.pos
+        self.dragging = False
 
         # Editing Mode widgets
         self.editing = False
@@ -109,6 +113,8 @@ class ImageView(ScatterLayout):
                     self.home.ids.sidebar.add_widget(i, 1)
             self.editing = False
         else:
+            if self.dragging:  # Can't be in both dragging and editing mode
+                self.drag_mode()
             self.current = self.home.ids.sidebar.children[1:self.home.ids.sidebar.children.index(self.home.action)]
             for i in self.current:
                 if i in self.home.ids.sidebar.children:
@@ -126,14 +132,16 @@ class ImageView(ScatterLayout):
         Args:
             *args: Unused arguments passed to method when called.
         """
-        if self.home.drag.text == "Drag Mode":
+        if not self.dragging:
             self.home.drag.text = "Transect Mode"
             kivy.core.window.Window.set_system_cursor("arrow")
             self.home.transect.change_dragging(True)
-        elif self.home.drag.text == "Transect Mode":
+            self.dragging = True
+        else:
             self.home.drag.text = "Drag Mode"
             kivy.core.window.Window.set_system_cursor("crosshair")
             self.home.transect.change_dragging(False)
+            self.dragging = False
 
     def update_netcdf(self, new):
         """
@@ -239,8 +247,8 @@ class ImageView(ScatterLayout):
             self.im = CoreImage(self.source)
             self.size = im.open(self.source).size
 
-        self.img = ui.image.Image(source="", texture=self.im.texture,  size=self.size, pos=self.parent.pos,
-                         allow_stretch=True)
+        self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.parent.pos,
+                                  allow_stretch=True)
         self.add_widget(self.img)
 
         # Begin at max size where you can see entire image
@@ -311,7 +319,7 @@ class ImageView(ScatterLayout):
     def on_touch_down(self, touch):
         """
         If touch is of a scrolling type zoom in or out of the image.
-        
+
         Args:
             touch: MouseMotionEvent, see kivy docs for details
         """
