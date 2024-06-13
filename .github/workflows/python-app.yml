@@ -47,6 +47,9 @@ jobs:
   windows_test:
     runs-on: windows-latest
 
+    env:
+      KIVY_GL_BACKEND: 'angle_sdl2'
+    
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
