@@ -43,7 +43,7 @@ class ViewDropDown(DropDown):
     def pass_setting(self, setting, value):
         """
         Passes setting changes to the HomeScreen instance.
-        
+
         Args:
             setting: String name of setting being changed.
             value: New setting value of appropriate data type for setting
@@ -90,8 +90,8 @@ class NetCDFDropDown(DropDown):
     def __init__(self, **kwargs):
         """
         Connects to root HomeScreen instance and defines dropdown menus.
-        
-        Colormaps are defined in HomeScreen class. Variables and z dimension values come from the 
+
+        Colormaps are defined in HomeScreen class. Variables and z dimension values come from the
         currently loaded NetCDF file.
         """
         super(NetCDFDropDown, self).__init__(**kwargs)

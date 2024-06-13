@@ -218,6 +218,6 @@ class ListDropDown(DropDown):
         for item in items:
             btn = Button(text=str(item), size_hint_y=None, height=30)
             btn.bind(on_release=lambda btn: self.select(btn.text))
-            btn.bind(on_press= self.dismiss)
+            btn.bind(on_press=self.dismiss)
             self.add_widget(btn)
         self.bind(on_select=lambda instance, x: setattr(button, 'text', x))

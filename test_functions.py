@@ -6,12 +6,17 @@ import unittest
 from PIL import Image as Im
 import numpy as np
 from pathlib import Path
+import json
 import xarray as xr
 import functions as func
+from multimarker import marker_find
 
 
 class Test(unittest.TestCase):
     def test_transect_0_deg_img(self):
+        """
+        Test an accurate transect is made when taken horizontally on an image
+        """
         # Setup
         img = Im.open("support/example.jpg").convert('RGB')
         points = [1000, 200, 1200, 200]
@@ -27,6 +32,9 @@ class Test(unittest.TestCase):
         self.assertEqual(max(app - manual), 0, "Transect accurate at zero degrees")
 
     def test_transect_45_deg_img(self):
+        """
+        Test an accurate transect is made when taken at 45 on an image
+        """
         # Setup
         img = Im.open("support/example.jpg").convert('RGB')
         points = [1000, 200, 1200, 400]
@@ -45,6 +53,9 @@ class Test(unittest.TestCase):
         self.assertEqual(max(app - manual), 0, "Transect accurate at 45 degrees")
 
     def test_transect_90_deg_img(self):
+        """
+        Test an accurate transect is made when taken vertically on an image
+        """
         # Setup
         img = Im.open("support/example.jpg").convert('RGB')
         points = [1000, 100, 1000, 400]
@@ -61,6 +72,9 @@ class Test(unittest.TestCase):
         self.assertEqual(max(app - manual), 0, "Transect accurate at 90 degrees")
 
     def test_transect_0_deg_nc(self):
+        """
+        Test an accurate transect is made when taken horizontally on a NetCDF file
+        """
         # Setup
         dat = xr.open_dataset("support/example.nc")['Divergence'].data
         points = [1000, 200, 1200, 200]
@@ -76,6 +90,9 @@ class Test(unittest.TestCase):
         self.assertEqual(max(app - manual), 0, "Transect accurate at zero degrees")
 
     def test_transect_45_deg_nc(self):
+        """
+        Test an accurate transect is made when taken at 45 degrees on a NetCDF file
+        """
         # Setup
         dat = xr.open_dataset("support/example.nc")['Divergence'].data
         points = [1000, 200, 1200, 400]
@@ -93,6 +110,9 @@ class Test(unittest.TestCase):
         self.assertEqual(max(app - manual), 0, "Transect accurate at 45 degrees")
 
     def test_transect_90_deg_nc(self):
+        """
+        Test an accurate transect is made when taken vertically on a NetCDF file
+        """
         # Setup
         dat = xr.open_dataset("support/example.nc")['Divergence'].data
         points = [1000, 100, 1000, 400]
@@ -108,6 +128,9 @@ class Test(unittest.TestCase):
         self.assertEqual(max(app - manual), 0, "Transect accurate at 90 degrees")
 
     def test_file_names(self):
+        """
+        Test valid and invalid file names are correctly identified
+        """
         # Setup
         rel_path = Path().absolute()
 
@@ -121,6 +144,44 @@ class Test(unittest.TestCase):
         self.assertEqual(func.check_file(rel_path, "support/example", ".jpg"),
                          "support/example(1)",
                          "If file already exists add (#)")
+
+    def test_marker_find(self):
+        """
+        Test whether valid project files can be accurately identified
+        """
+        # Data from a valid file is correctly extracted
+        proper_json = open("support/example.json")
+        proper_data = json.load(proper_json)
+        marker_result = marker_find(proper_data, [])
+
+        self.assertEqual(len(marker_result), len(proper_data["Vorticity"].keys()), "All Markers Found")
+        self.assertEqual(len(marker_result[0]), 3, "All Fields Found")
+        self.assertListEqual(marker_result[0][0], proper_data["Vorticity"]["Marker 1"]["Click X"], "X Coords Correct")
+        self.assertListEqual(marker_result[1][1], proper_data["Vorticity"]["Marker 2"]["Click Y"], "X Coords Correct")
+        self.assertListEqual(marker_result[2][2], proper_data["Vorticity"]["Marker 3"]["Width"], "Transect Widths Correct")
+
+        # Output data from non marker tool fails
+        multi_data = {"Multi": {"Cut 1": {"x": [1000, 2000, 3000], "y": [100, 200, 300], "Cut": [5, 10, 15]},
+                                "Cut 2": {"x": [50, 60, 70, 80], "y": [20, 15, 10, 5], "Cut": [33, 66, 99]}}}
+        multi_result = marker_find(multi_data, [])
+        self.assertEqual(len(multi_result), 0, "Files that were outputs from Transect tool fail")
+
+        # All identified markers are unique
+        multi_var = {"2nd Var": proper_data["Vorticity"], "Vorticity": proper_data["Vorticity"]}
+        multi_var_result = marker_find(multi_var, [])
+        self.assertEqual(len(multi_var_result), len(proper_data["Vorticity"].keys()), "No repeated Markers")
+
+        # Markers without all necessary fields aren't included
+        del proper_data["Vorticity"]["Marker 1"]["Click X"]
+        incomplete_marker_result = marker_find(proper_data, [])
+
+        self.assertEqual(len(incomplete_marker_result), 2, "Incomplete markers not included")
+
+        # A random dictionary fails
+        bad_data = {"Apples": ["Fuji", "Cosmic Crisp", "Honeycrisp"]}
+        bad_data_result = marker_find(bad_data, [])
+
+        self.assertEqual(bad_data_result, [], "Random dictionaries don't pass")
 
 
 if __name__ == '__main__':
