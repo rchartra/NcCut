@@ -70,9 +70,6 @@ jobs:
 
   mac_test:
     runs-on: macos-latest
-
-    env:
-      KIVY_GL_BACKEND: 'angle_sdl2'
     
     steps:
     - uses: actions/checkout@v4
@@ -88,7 +85,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest
           pip install -r support/requirements.txt
-          python -m pip install docutils pygments kivy_deps.sdl2 kivy_deps.glew --extra-index-url https://kivy.org/downloads/packages/simple/
+          python -m pip install docutils pygments kivy["sdl2"] kivy_deps["glew"] --extra-index-url https://kivy.org/downloads/packages/simple/
     - name: Lint with flake8
       run: |
         flake8 --ignore=E402,E501
