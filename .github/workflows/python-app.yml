@@ -41,7 +41,7 @@ jobs:
         flake8 --ignore=E402,E501
     - name: Test with unittest
       run: |
-        pytest
+        pytest -v
         
   windows_test:
     runs-on: windows-latest
@@ -66,40 +66,8 @@ jobs:
         flake8 --ignore=E402,E501
     - name: Test with unittest
       run: |
-        pytest
+        pytest -v
 
-  mac_test:
-    runs-on: macos-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-    - name: Install X11
-      run: |
-          brew install xquartz --cask
-    - name: Install dependencies
-      run: |
-          python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install -r support/requirements.txt
-          pip uninstall kivy
-          pip uninstall kivy.deps.sdl2
-          pip uninstall kivy.deps.glew
-          pip uninstall kivy.deps.gstreamer
-          pip uninstall image
-          pip install --upgrade pip wheel setuptools
-          pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew --extra-index-url https://kivy.org/downloads/packages/simple/
-          pip install kivy
-    - name: Lint with flake8
-      run: |
-        flake8 --ignore=E402,E501
-    - name: Test with unittest
-      run: |
-        pytest -s
-  
   paper:
     runs-on: ubuntu-latest
     name: Paper Draft

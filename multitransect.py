@@ -113,7 +113,7 @@ class MultiTransect(ui.widget.Widget):
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 if self.clicks == 2:
-                    # Clean up download button from previous cycle and reset
+                    # Clean up Plot button from previous cycle and reset
                     self.clicks = 0
                     self.home.ids.sidebar.remove_widget(self.p_btn)
                 if self.clicks == 0:
