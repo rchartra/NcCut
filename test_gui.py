@@ -269,4 +269,3 @@ class Test(unittest.TestCase):
         self.assertIsInstance(next((but for but in sidebar.children if but.text == "Plot")), Button,
                               "Plot Button added")
         self.assertEqual(len(tran_instance.children), 1, "Only one transect")
-
