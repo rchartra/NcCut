@@ -99,9 +99,9 @@ class NetCDFConfig(Popup):
         back = func.RoundedButton(text="Back", size_hint=(0.15, 1))
         back.bind(on_press=self.dismiss)
         c_box.add_widget(back)
-        go = func.RoundedButton(text="Go", size_hint=(0.15, 1))
-        go.bind(on_press=self.check_inputs)
-        c_box.add_widget(go)
+        self.go = func.RoundedButton(text="Go", size_hint=(0.15, 1))
+        self.go.bind(on_press=self.check_inputs)
+        c_box.add_widget(self.go)
         content.add_widget(c_box)
 
         # Final settings
@@ -115,7 +115,7 @@ class NetCDFConfig(Popup):
         """
         Resets file related attributes of the HomeScreen
         """
-        if not self.home.fileon:
+        if not self.home.file_on:
             self.home.clean_file()
 
     def check_inputs(self, *args):
@@ -151,7 +151,7 @@ class NetCDFConfig(Popup):
             if self.depth_select.text == 'Select...':
                 self.error.text = "Please Select a Z Value"
                 return
-        self.home.nc_open(vals)
+        self.home.load_netcdf(vals)
         self.dismiss()
 
     def var_update(self, var, *args):

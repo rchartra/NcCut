@@ -7,7 +7,6 @@ import os
 import time
 import copy
 import json
-import xarray as xr
 import numpy as np
 from functools import partial
 from kivy.clock import Clock
@@ -51,6 +50,24 @@ def get_app():
     app.run()
 
 
+def load_nc(variable):
+    run_app.home.ids.file_in.text = "support/example.nc"
+    run_app.home.go_btn()
+    popup = run_app.home.nc_popup
+    popup.var_select.text = variable
+    popup.x_select.text = "x"
+    popup.y_select.text = "y"
+    popup.go.dispatch("on_press")
+    popup.go.dispatch("on_release")
+
+
+def select_sidebar_button(text):
+    sidebar = run_app.home.ids.sidebar
+    but = next((but for but in sidebar.children if but.text == text), None)
+    but.dispatch('on_press')
+    but.dispatch('on_release')
+
+
 class Test(unittest.TestCase):
     # Test cases
     @classmethod
@@ -67,8 +84,17 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = ""
         run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No empty file names")
+        run_app.home.ids.file_in.text = ""
+        run_app.home.go_btn()
+        self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No empty file names")
+        run_app.home.ids.file_in.text = "test_gui.py"
+        run_app.home.go_btn()
+        self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
+        run_app.home.ids.file_in.text = "teacup.jpg"
+        run_app.home.go_btn()
+        self.assertEqual(run_app.home.children[0].text, "File Not Found", "File must exist")
 
-    def test_widget_cleanup(self):
+    def test_tool_cleanup(self):
         """
         Check that viewer window is clean after removing tools
         """
@@ -77,7 +103,7 @@ class Test(unittest.TestCase):
 
         # Run for all tools in sidebar
         og_side = copy.copy(run_app.home.ids.sidebar.children)
-        og_img = copy.copy(run_app.home.img.children[0].children)
+        og_img = copy.copy(run_app.home.display.children[0].children)
         for item in run_app.home.ids.sidebar.children:
             if isinstance(item, type(functions.RoundedButton())) and item.text != "Quit":
                 # Start tool
@@ -89,7 +115,32 @@ class Test(unittest.TestCase):
                 item.dispatch('on_release')
 
                 self.assertListEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar back to original")
-                self.assertListEqual(og_img, run_app.home.img.children[0].children, "All Tools removed")
+                self.assertListEqual(og_img, run_app.home.display.children[0].children, "All Tools removed")
+
+    def test_file_cleanup(self):
+        og_side = copy.copy(run_app.home.ids.sidebar.children)
+
+        # Open a file and use a tool
+        run_app.home.ids.file_in.text = "support/example.nc"
+        run_app.home.go_btn()
+        load_nc("Vorticity")
+        select_sidebar_button("Transect Marker")
+        x = run_app.home.size[0]
+        y = run_app.home.size[1]
+
+        tool = run_app.home.display.tool
+        incs = np.linspace(0.4, 0.8, 10)
+        x_arr = incs * x
+        y_arr = incs * y
+        for i in range(len(incs)):
+            tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
+
+        run_app.home.ids.file_in.text = "support/example.jpg"
+        run_app.home.go_btn()
+
+        self.assertEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar restored")
+        self.assertEqual(len(run_app.home.ids.colorbar.children), 0, "Colorbar removed")
+        self.assertEqual(len(run_app.home.display.children), 1, "No tools on display")
 
     def test_project_upload(self):
         """
@@ -102,17 +153,14 @@ class Test(unittest.TestCase):
         run_app.home.go_btn()
 
         # Open Transect Marker tool
-        sidebar = run_app.home.ids.sidebar
-        tm_but = next((but for but in sidebar.children if but.text == "Transect Marker"), None)
-        tm_but.dispatch('on_press')
-        tm_but.dispatch('on_release')
+        select_sidebar_button("Transect Marker")
 
         # Project File
         f1 = open("support/example.json")
         project1 = json.load(f1)
 
         # Upload Project File
-        multi_mark_instance = run_app.home.transect
+        multi_mark_instance = run_app.home.display.tool
         multi_mark_instance.upload_data(marker_find(project1, []))
 
         # Check file uploaded properly
@@ -122,22 +170,17 @@ class Test(unittest.TestCase):
             marker = multi_mark_instance.children[len(list(project1["Vorticity"].keys())) - i]
             self.assertListEqual(marker.points, m_expected_points, mar + " Points Correct")
 
-        # Test out of bounds project files don't get uploaded.
-        run_app.home.ids.file_in.text = "support/example.nc"
-        run_app.home.go_btn()
-        vals = {'x': 'x', 'y': 'y',
-                'z': 'Select...', 'z_val': 'Select...',
-                'var': 'Vorticity', 'file': xr.open_dataset("support/example.nc")}
-        run_app.home.nc_open(vals)
-        tm_but.dispatch('on_press')
-        tm_but.dispatch('on_release')
+        # Test out-of-bounds project files don't get uploaded.
+        load_nc("Vorticity")
+
+        select_sidebar_button("Transect Marker")
 
         # Load File
         f2 = open("support/test_project_file.json")
         project2 = json.load(f2)
 
         # Upload Project File
-        multi_mark_instance = run_app.home.transect
+        multi_mark_instance = run_app.home.display.tool
         multi_mark_instance.upload_data(marker_find(project2, []))
 
         self.assertEqual(len(multi_mark_instance.children), 1, "Project files that don't fit in file bounds fail")
@@ -152,27 +195,21 @@ class Test(unittest.TestCase):
 
         # Open Transect Marker tool
         sidebar = run_app.home.ids.sidebar
-        tm_but = next((but for but in sidebar.children if but.text == "Transect Marker"), None)
-        tm_but.dispatch('on_press')
-        tm_but.dispatch('on_release')
+        select_sidebar_button("Transect Marker")
 
         # Project File
         f = open("support/example.json")
         project = json.load(f)
 
         # Upload Project File
-        multi_mark_instance = run_app.home.transect
+        multi_mark_instance = run_app.home.display.tool
         multi_mark_instance.upload_data(marker_find(project, []))
 
         # Open editing mode
-        e_but = next((but for but in sidebar.children if but.text == "Edit Mode"), None)
-        e_but.dispatch('on_press')
-        e_but.dispatch('on_release')
+        select_sidebar_button("Edit Mode")
 
         # Delete last clicked point
-        dp_but = next((but for but in sidebar.children if but.text == "Delete Last Point"), None)
-        dp_but.dispatch('on_press')
-        dp_but.dispatch('on_release')
+        select_sidebar_button("Delete Last Point")
 
         # Check last clicked point was properly deleted
         m3 = project["Vorticity"]["Marker 3"]
@@ -181,37 +218,27 @@ class Test(unittest.TestCase):
         self.assertEqual(multi_mark_instance.children[0].points, m3_expected_points, "Only the last point was deleted")
 
         # Delete most recent marker
-        dl_but = next((but for but in sidebar.children if but.text == "Delete Last Line"), None)
-        dl_but.dispatch('on_press')
-        dl_but.dispatch('on_release')
+        select_sidebar_button("Delete Last Line")
 
         # Check most recent marker was properly deleted
         self.assertEqual(len(multi_mark_instance.children), 2, "Last marker deleted")
 
         # Add new line
-        b_but = next((but for but in sidebar.children if but.text == "Back"), None)
-        b_but.dispatch('on_press')
-        b_but.dispatch('on_release')
-        n_but = next((but for but in sidebar.children if but.text == "New Line"), None)
-        n_but.dispatch('on_press')
-        n_but.dispatch('on_release')
+        select_sidebar_button("Back")
+        select_sidebar_button("New Line")
         self.assertEqual(len(multi_mark_instance.children), 3, "New marker created")
 
         # Delete point
-        e_but.dispatch('on_press')
-        e_but.dispatch('on_release')
-        dp_but.dispatch('on_press')
-        dp_but.dispatch('on_release')
+        select_sidebar_button("Edit Mode")
+        select_sidebar_button("Delete Last Point")
         self.assertEqual(len(multi_mark_instance.children), 2, "Empty marker deleted")
         m2 = project["Vorticity"]["Marker 2"]
         m2_expected_points = list(zip(m2["Click X"][:-1], m2["Click Y"][:-1], m2["Width"][:-1]))
         self.assertEqual(multi_mark_instance.children[0].points, m2_expected_points, "Last point of m2 was deleted")
 
         # Test width adjustments
-        b_but.dispatch('on_press')
-        b_but.dispatch('on_release')
-        n_but.dispatch('on_press')
-        n_but.dispatch('on_release')
+        select_sidebar_button("Back")
+        select_sidebar_button("New Line")
 
         # Simulate marker press with width changes
         x = run_app.home.size[0]
@@ -245,10 +272,7 @@ class Test(unittest.TestCase):
         run_app.home.go_btn()
 
         # Open Transect Marker tool
-        sidebar = run_app.home.ids.sidebar
-        tm_but = next((but for but in sidebar.children if but.text == "Transect"), None)
-        tm_but.dispatch('on_press')
-        tm_but.dispatch('on_release')
+        select_sidebar_button("Transect")
 
         x = run_app.home.size[0]
         y = run_app.home.size[1]
@@ -256,9 +280,10 @@ class Test(unittest.TestCase):
         x_arr = incs * x
         y_arr = incs * y
 
-        tran_instance = run_app.home.transect
+        tran_instance = run_app.home.display.tool
 
         # First Click
+        sidebar = run_app.home.ids.sidebar
         tran_instance.on_touch_down(Click(x_arr[0], y_arr[0]))
         self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
                           "No Plot Button on First Click")
@@ -270,3 +295,12 @@ class Test(unittest.TestCase):
                               "Plot Button added")
         self.assertEqual(len(tran_instance.children), 1, "Only one transect")
 
+        # Third Click : No plot, new transect
+
+        # Fourth Click
+
+        # Drag Mode
+
+        # Edit Mode: Delete Line, Delete point
+
+        # Final click, check continues now only transect

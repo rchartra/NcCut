@@ -198,7 +198,7 @@
                 size_hint: (0.5, 0.8)
                 font_size: self.size[1] / 3
                 pos_hint: {'top': 0.9}
-                on_press: if app.root.get_screen("HomeScreen").nc: root.cmap_dropdown.open(self)
+                on_press: root.cmap_dropdown.open(self)
 
         BoxLayout:
             padding: dp(10)
