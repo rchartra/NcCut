@@ -64,7 +64,7 @@ def marker_find(data, res):
 
     Returns:
         Nested List. A list containing a list for each marker which each contains three lists:
-        click X coords, click y cooords, and the transect width for each click point in the marker.
+        click X coords, click y coords, and the transect width for each click point in the marker.
         If no qualifying data was found returns empty list. If duplicate data is found (ex: multiple
         variables in a file) only returns one instance of marker data.
     """
@@ -233,7 +233,7 @@ class MultiMarker(ui.widget.Widget):
             self.add_widget(marker)
             for i in clicks:
                 touch = Click(i[0], i[1])
-                marker.twidth = i[2]
+                marker.t_width = i[2]
                 marker.on_touch_down(touch)
             marker.upload_mode(False)
             if self.upload_fail:  # If upload goes wrong, stop and undo everything
@@ -254,12 +254,12 @@ class MultiMarker(ui.widget.Widget):
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted marker was the only marker
             self.clicks = 0
-            if self.dbtn in self.home.img.current:
-                self.home.img.current.remove(self.dbtn)
-            if self.width_w in self.home.img.current:
-                self.home.img.current.remove(self.width_w)
+            if self.dbtn in self.home.display.current:
+                self.home.display.current.remove(self.dbtn)
+            if self.width_w in self.home.display.current:
+                self.home.display.current.remove(self.width_w)
             if self.dragging:
-                self.home.img.drag_mode()
+                self.home.display.drag_mode()
             self.new_line()
         content = Label(text="Project File Markers out of Bounds")
         popup = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
@@ -290,10 +290,10 @@ class MultiMarker(ui.widget.Widget):
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted marker was the only marker
             self.clicks = 0
-            if self.dbtn in self.home.img.current:
-                self.home.img.current.remove(self.dbtn)
-            if self.width_w in self.home.img.current:
-                self.home.img.current.remove(self.width_w)
+            if self.dbtn in self.home.display.current:
+                self.home.display.current.remove(self.dbtn)
+            if self.width_w in self.home.display.current:
+                self.home.display.current.remove(self.width_w)
             self.new_line()
 
     def del_point(self):
@@ -321,7 +321,7 @@ class MultiMarker(ui.widget.Widget):
         """
         Creates a new marker if not in dragging or editing mode and current marker has at least two clicks.
         """
-        if not self.dragging or self.home.img.editing:
+        if not self.dragging or self.home.display.editing:
             if len(self.children) == 0 or self.children[0].clicks >= 2:
                 if len(self.children) != 0:
                     self.children[0].stop_drawing()
@@ -344,7 +344,7 @@ class MultiMarker(ui.widget.Widget):
             frames["Marker " + str(c)] = data
             c += 1
 
-        PlotPopup(frames, self.home)
+        PlotPopup(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """

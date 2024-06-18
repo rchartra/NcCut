@@ -26,8 +26,8 @@ class Marker(ui.widget.Widget):
 
     Attributes:
         clicks: Int, Number of clicks user has made. Decreases when points are deleted.
-        points: List of Tuples, For each click user makes: (X-coord, Y-coord, twidth).
-        twidth: Int, current width in pixels of orthogonal transects
+        points: List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
+        t_width: Int, current width in pixels of orthogonal transects
         home: Reference to root HomeScreen instance
         base: MultiTransect object that manages transects
         curr_line: kivy.graphics.Line, Line between cursor and last clicked point
@@ -49,34 +49,40 @@ class Marker(ui.widget.Widget):
         super(Marker, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
-        self.twidth = 40
+        self.t_width = 40
         self.uploaded = False
         self.home = home
         self.base = MultiTransect(home=self.home)
         self.curr_line = Line()
-        self.size = self.home.img.size
-        self.pos = self.home.img.pos
-        color = self.home.l_col
+        self.size = self.home.display.size
+        self.pos = self.home.display.pos
+        color = self.home.display.l_col
         if color == "Blue":
             self.l_color = Color(0.28, 0.62, 0.86)
         elif color == "Green":
             self.l_color = Color(0.39, 0.78, 0.47)
         else:
             self.l_color = Color(0.74, 0.42, 0.13)
-        size = home.cir_size
+        size = self.home.display.cir_size
         self.c_size = (dp(size), dp(size))
         self.line_width = dp(size / 5)
 
     def update_width(self, width):
         """
-        Update twidth to change width for next transect made.
+        Update t_width to change width for next transect made.
 
         Args:
             width: Int, New width to use
         """
-        self.twidth = width
+        self.t_width = width
 
     def upload_mode(self, val):
+        """
+        Update whether in upload mode or not
+
+        Args:
+            val: Boolean, whether in upload mode or not
+        """
         self.uploaded = val
 
     def get_orthogonal(self, line):
@@ -88,7 +94,7 @@ class Marker(ui.widget.Widget):
 
         Return:
             4 element array of floats: Coordinates of the two endpoints of the centered
-            orthogonal line with length twidth.
+            orthogonal line with length t_width.
         """
         xyswap = False
         line = line.points
@@ -119,7 +125,7 @@ class Marker(ui.widget.Widget):
 
         # Calculate orthogonal line points
         b = mid[1] - m * mid[0]
-        xarr = np.arange(int(mid[0] - self.twidth / 2), int(mid[0] + self.twidth / 2 + 1))
+        xarr = np.arange(int(mid[0] - self.t_width / 2), int(mid[0] + self.t_width / 2 + 1))
         yarr = xarr * m + b
 
         # Draw points at ends of transect
@@ -144,10 +150,10 @@ class Marker(ui.widget.Widget):
             self.base.lines = self.base.lines[:-1]
         else:
             # Remove plot and width buttons from sidebar if last point of the marker
-            if self.parent.dbtn in self.home.img.current:
-                self.home.img.current.remove(self.parent.dbtn)
-            if self.parent.width_w in self.home.img.current:
-                self.home.img.current.remove(self.parent.width_w)
+            if self.parent.dbtn in self.home.display.current:
+                self.home.display.current.remove(self.parent.dbtn)
+            if self.parent.width_w in self.home.display.current:
+                self.home.display.current.remove(self.parent.width_w)
             self.remove_widget(self.children[0])
             # Stop drawing line between last point and cursor
             Window.unbind(mouse_pos=self.draw_line)
@@ -174,14 +180,14 @@ class Marker(ui.widget.Widget):
             proceed = True  # If being clicked, must also be within viewing window
 
         if proceed:
-            par = self.home.img.children[0].children[-2]
+            par = self.home.display.children[0].children[-2]
             self.clicks += 1
             with self.canvas:
                 # Always adds point when clicked
                 Color(self.l_color.r, self.l_color.g, self.l_color.b)
                 Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
                         size=self.c_size, group=str(self.clicks))
-                self.points.append((touch.x, touch.y, self.twidth))
+                self.points.append((touch.x, touch.y, self.t_width))
                 self.curr_line = Line(points=[], width=self.line_width, group=str(self.clicks + 1))
             # Draw line between last point and cursor whenever cursor position changes
             Window.bind(mouse_pos=self.draw_line)
@@ -214,7 +220,7 @@ class Marker(ui.widget.Widget):
                 self.add_widget(number)
                 # Use width from previous marker
                 if len(self.parent.children) > 1:
-                    self.twidth = self.parent.children[1].twidth
+                    self.t_width = self.parent.children[1].t_width
 
     def draw_line(self, instance, pos):
         """

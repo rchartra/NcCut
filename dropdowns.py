@@ -9,7 +9,6 @@ Static aspects are in the cutview.kv file.
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.app import App
-import xarray as xr
 
 
 class ViewDropDown(DropDown):
@@ -42,34 +41,35 @@ class ViewDropDown(DropDown):
 
     def pass_setting(self, setting, value):
         """
-        Passes setting changes to the HomeScreen instance.
+        Passes setting changes to the viewer.
 
         Args:
             setting: String name of setting being changed.
             value: New setting value of appropriate data type for setting
         """
-        self.home.update_settings(setting, value)
+        if self.home.file_on:
+            self.home.display.update_settings(setting, value)
 
     def rotate(self):
         """
-        Call for a 45 degree rotation of current image or NetCDF file by 45 degrees
+        Call for a 45 degree rotation of current display by 45 degrees
         """
-        if self.home.fileon:
-            self.home.img.rotate()
+        if self.home.file_on:
+            self.home.display.rotate()
 
     def flip_v(self):
         """
-        Call for a vertical flip of view of current image or NetCDF file
+        Call for a vertical flip of view of current display
         """
-        if self.home.fileon:
-            self.home.img.flip_vertically()
+        if self.home.file_on:
+            self.home.display.flip_vertically()
 
     def flip_h(self):
         """
-        Call for a horizontal flip of view of current image or NetCDF file
+        Call for a horizontal flip of view of current display
         """
-        if self.home.fileon:
-            self.home.img.flip_horizontally()
+        if self.home.file_on:
+            self.home.display.flip_horizontally()
 
 
 class NetCDFDropDown(DropDown):
@@ -91,30 +91,35 @@ class NetCDFDropDown(DropDown):
         """
         Connects to root HomeScreen instance and defines dropdown menus.
 
-        Colormaps are defined in HomeScreen class. Variables and z dimension values come from the
+        Colormaps are defined in FileDisplay class. Variables and z dimension values come from the
         currently loaded NetCDF file.
         """
         super(NetCDFDropDown, self).__init__(**kwargs)
         self.home = App.get_running_app().root.get_screen("HomeScreen")
+        if self.home.file_on:
+            f_type = self.home.display.f_type
+        else:
+            f_type = None
 
         self.cmap_dropdown = DropDown()
-        for i in list(self.home.cmaps.keys()):
-            btn = Button(text=i, size_hint_y=None, height=30)
-            btn.bind(on_release=lambda btn: self.pass_setting("colormap", btn.text))  # Setting name: 'colormap'
-            btn.bind(on_press=self.cmap_dropdown.dismiss)
-            self.cmap_dropdown.add_widget(btn)
+        if self.home.file_on and f_type == "netcdf":
+            for i in list(self.home.display.cmaps.keys()):
+                btn = Button(text=i, size_hint_y=None, height=30)
+                btn.bind(on_release=lambda btn: self.pass_setting("colormap", btn.text))  # Setting name: 'colormap'
+                btn.bind(on_press=self.cmap_dropdown.dismiss)
+                self.cmap_dropdown.add_widget(btn)
 
         self.var_dropdown = DropDown()
-        if isinstance(self.home.file, str) and self.home.nc:
-            for i in list(xr.open_dataset(self.home.file).keys()):
+        if self.home.file_on and f_type == "netcdf":
+            for i in list(self.home.display.config["netcdf"]["file"].keys()):
                 btn = Button(text=i, size_hint_y=None, height=30)
                 btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text))  # Setting name: 'variable'
                 btn.bind(on_release=self.var_dropdown.dismiss)
                 self.var_dropdown.add_widget(btn)
 
         self.depth_dropdown = DropDown()
-        if isinstance(self.home.file, str) and self.home.nc and self.home.netcdf['z'] != "Select...":
-            for i in list(self.home.netcdf['file'][self.home.netcdf['z']].data):
+        if self.home.file_on and f_type == "netcdf" and self.home.display.config['netcdf']['z'] != "Select...":
+            for i in list(self.home.display.config["netcdf"]['file'][self.home.display.config["netcdf"]['z']].data):
                 btn = Button(text=str(i), size_hint_y=None, height=30)
                 btn.bind(on_press=lambda btn: self.pass_setting("depth", btn.text))  # Setting name: 'depth'
                 btn.bind(on_release=self.depth_dropdown.dismiss)
@@ -122,10 +127,11 @@ class NetCDFDropDown(DropDown):
 
     def pass_setting(self, setting, value):
         """
-        Pass setting changes to home screen.
+        Pass setting changes to display.
 
         Args:
             setting: String name of setting being changed.
             value: New setting value of appropriate data type for setting
         """
-        self.home.update_settings(setting, value)
+        if self.home.file_on:
+            self.home.display.update_settings(setting, value)
