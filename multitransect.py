@@ -70,14 +70,15 @@ class MultiTransect(ui.widget.Widget):
             Window.unbind(mouse_pos=self.children[0].draw_line)
             self.remove_widget(self.children[0])
             self.lines = self.lines[:-1]
-            # Add plot button to sidebar
-            self.home.img.current.insert(0, self.p_btn)
+            # Add plot button to sidebar if not the last transect
+            if len(self.lines) != 0:
+                self.home.display.current.insert(0, self.p_btn)
         elif self.children[0].circles == 2:
             # Case where point is end of a transect
             self.children[0].del_point()
-            if self.p_btn in self.home.img.current:
+            if self.p_btn in self.home.display.current:
                 # Remove plot button from sidebar
-                self.home.img.current.remove(self.p_btn)
+                self.home.display.current.remove(self.p_btn)
         if self.clicks == 2:
             self.clicks = 0
         self.clicks += 1
@@ -101,7 +102,7 @@ class MultiTransect(ui.widget.Widget):
             data["Cut " + str(count)] = i.line.points
             count += 1
         # Open plotting popup
-        PlotPopup({"Multi": data}, self.home)
+        PlotPopup({"Multi": data}, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """

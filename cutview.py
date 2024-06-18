@@ -1,8 +1,7 @@
 """
-Builds app and file settings menu.
+Builds app and sets initial window.
 
-File to run to start up the GUI. Initializes the settings in the 'File' menu
-and sets the initial window size.
+File to run to start up the GUI. Creates the widget tree and sets the initial window size.
 
 Usage from command line:
 
@@ -25,11 +24,10 @@ from homescreen import HomeScreen
 
 class CutView(App):
     """
-    Builds GUI and manages setting changes.
+    Builds app and widget tree.
 
-    Defines callbacks to various events that should trigger some change to the
-    GUI's settings. On GUI start it sets the initial settings and builds the
-    app.
+    Creates the initial window and ensures font sizes in the app update uniformly
+    when the window resizes.
 
     Attributes:
         Inherits attributes from kivy.app.App (see kivy docs)
@@ -38,8 +36,7 @@ class CutView(App):
         """
         Sets initial window size according to operating system.
         """
-        # Kivy has a mobile app emulator that needs to be turned off for
-        # computer app
+        # Kivy has a mobile app emulator that needs to be turned off for computer app
         kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
 
         win = kivy.core.window.Window

@@ -42,16 +42,16 @@ class SingleTransect(ui.widget.Widget):
         self.line = Line()
         self.circles = 0
         self.home = home
-        self.size = self.home.img.size
-        self.pos = self.home.img.pos
-        color = self.home.l_col
+        self.size = self.home.display.size
+        self.pos = self.home.display.pos
+        color = self.home.display.l_col
         if color == "Blue":
             self.l_color = Color(0.28, 0.62, 0.86)
         elif color == "Green":
             self.l_color = Color(0.39, 0.78, 0.47)
         else:
             self.l_color = Color(0.74, 0.42, 0.13)
-        size = home.cir_size
+        size = self.home.display.cir_size
         self.c_size = (dp(size), dp(size))
         self.line_width = dp(size / 5)
 

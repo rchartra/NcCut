@@ -106,6 +106,34 @@ def check_file(path, fname, extension):
     return fname
 
 
+def sel_data(config):
+    """
+    Selects data from NetCDF file according to dimension and variable selections.
+
+    Args:
+        config: Dictionary of key details about NetCDF file as outlined in check_values method
+            of NetCDFConfig.
+
+    Returns:
+        2D array of data from NetCDF file.
+    """
+    # Selects data based on user dimension and variable selections
+    if config['z'] == 'Select...':
+        # 2D NetCDF data
+        ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
+        ds = ds.transpose('x', 'y')
+        data = ds.sel(x=ds['x'], y=ds['y'])
+        data = data.data
+    else:
+        # 3D NetCDF data
+        ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
+        ds = ds.transpose('x', 'y', 'z')
+        ds['z'] = ds['z'].astype(str)
+        data = ds.sel(x=ds['x'], y=ds['y'], z=config['z_val'])
+        data = data.data
+    return data
+
+
 def ip_get_points(points, curr, nc):
     """
     Creates a data frame containing x, y, and value of points on transect line

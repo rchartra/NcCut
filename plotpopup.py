@@ -18,6 +18,7 @@ from kivy.uix.dropdown import DropDown
 import functions as func
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
+from PIL import Image as im
 import numpy as np
 import copy
 import pandas as pd
@@ -73,6 +74,8 @@ class PlotPopup(Popup):
             of transects if marker tool was used with a constant transect width.
         f_type: String, If file is NetCDF file: 'NC' if only 2 dimensions, 'NC_Z' if 3 dimensions. If
             file is a JPG or PNG: 'Img'.
+        config: Information necessary for accessing the file. For images this is the file path and for NetCDF files this
+            is a dictionary of configuration values (see check inputs method of NetCDFConfig class).
         active_z: List of selected Z values. Empty list if 2D NetCDF or Image file.
         active_vars: List of selected variables. Empty list if image file.
         plot: Image containing plot.
@@ -86,7 +89,7 @@ class PlotPopup(Popup):
 
         Inherits additional attributes from kivy.uix.popup.Popup (see kivy docs)
     """
-    def __init__(self, transects, home, **kwargs):
+    def __init__(self, transects, home, config, **kwargs):
         """
         Defines popup UI elements and opens popup.
 
@@ -95,8 +98,10 @@ class PlotPopup(Popup):
             home: Reference to root HomeScreen instance.
         """
         super(PlotPopup, self).__init__(**kwargs)
-        self.home = home
         self.all_transects = transects
+        self.home = home
+        self.f_type = list(config.keys())[0]
+        self.config = config[self.f_type]
         if list(self.all_transects.keys())[0][0:-2] == "Marker":
             self.t_type = "Marker"
         else:
@@ -133,16 +138,13 @@ class PlotPopup(Popup):
                 self.active_transects[first]["Average"] = False
 
         # Initialize dropdown selections
-        if self.home.nc:
-            if self.home.netcdf['z'] == "Select...":
-                self.f_type = "NC"
+        if self.f_type == "netcdf":
+            if self.config['z'] == "Select...":
                 self.active_z = []
             else:
-                self.f_type = "NC_Z"
-                self.active_z = [self.home.netcdf['z_val']]
-            self.active_vars = [self.home.netcdf["var"]]
+                self.active_z = [self.config['z_val']]
+            self.active_vars = [self.config["var"]]
         else:
-            self.f_type = "Img"
             self.active_vars = []
             self.active_z = []
 
@@ -196,7 +198,7 @@ class PlotPopup(Popup):
         self.t_select.bind(on_press=lambda x: t_drop.open(self.t_select))
         sidebar.add_widget(t_box)
 
-        if self.home.nc:
+        if self.f_type == "netcdf":
             # Variable Selection
             v_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
             v_box.add_widget(Label(text="Select Variables: ", size_hint=(0.3, 1), font_size=self.home.font))
@@ -206,7 +208,7 @@ class PlotPopup(Popup):
             v_drop = self.get_var_dropdown()
             self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
             sidebar.add_widget(v_box)
-            if self.home.netcdf['z'] != "Select...":
+            if self.config['z'] != "Select...":
                 # Z Selection
                 z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
                 z_box.add_widget(Label(text="Select Z Values: ", size_hint=(0.3, 1), font_size=self.home.font))
@@ -384,10 +386,10 @@ class PlotPopup(Popup):
             return
         else:
             dat = {}
-            ds = self.home.netcdf['file']
-            z_len = len(ds.coords[self.home.netcdf['z']].data)
+            ds = self.config['file']
+            z_len = len(ds.coords[self.config['z']].data)
             for var in self.active_vars:
-                config = copy.copy(self.home.netcdf)
+                config = copy.copy(self.config)
                 config['var'] = var
                 ds = ds[config['var']]
                 dat[var] = {}
@@ -409,7 +411,7 @@ class PlotPopup(Popup):
                                     dat[var][d][key][cut] = self.get_average(key, curr)
                                 else:
                                     dat[var][d][key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
-                                                                               self.home.nc)
+                                                                               self.f_type == "netcdf")
                         if len(dat[var][d][key]) == 0:
                             dat[var][d].pop(key)
 
@@ -510,10 +512,10 @@ class PlotPopup(Popup):
         Returns:
             BackgroundDropdown menu of variable options
         """
-        file = self.home.netcdf['file']
+        file = self.config['file']
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for var in list(file.keys()):
-            if file[self.home.netcdf['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
+            if file[self.config['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
                 v_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
                                                width=dp(180))
                 lab = Label(text=var, size_hint=(0.5, 1))
@@ -563,7 +565,7 @@ class PlotPopup(Popup):
             BackgroundDropDown menu of z value options
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
-        for z in list(self.home.netcdf['file'].coords[self.home.netcdf['z']].data):
+        for z in list(self.config['file'].coords[self.config['z']].data):
             z_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
                                            width=dp(180))
             lab = Label(text=str(z), size_hint=(0.5, 1))
@@ -698,9 +700,9 @@ class PlotPopup(Popup):
         points = self.all_transects[marker][tran]
         width = len(z[marker][tran]['x'])
 
-        ds = self.home.netcdf['file']
-        z_len = len(ds.coords[self.home.netcdf['z']].data)
-        config = copy.copy(self.home.netcdf)
+        ds = self.config['file']
+        z_len = len(ds.coords[self.config['z']].data)
+        config = copy.copy(self.config)
         config['var'] = var
         ds = ds[config['var']]
 
@@ -718,13 +720,13 @@ class PlotPopup(Popup):
         for d in range(0, z_len):
             # Get transect data for each z level and add to array
             curr = ds[:, :, d]
-            dat = func.ip_get_points(points, curr, self.home.nc)
+            dat = func.ip_get_points(points, curr, self.f_type == "netcdf")
             all_z[c, :] = dat['Cut']
             c += 1
 
         # Plot array
         pos = ax.imshow(all_z)
-        ax.set_ylabel(self.home.netcdf['z'])
+        ax.set_ylabel(self.config['z'])
         ax.set_xlabel("Along Transect Point")
         ax.set_title(var)
         return pos
@@ -749,7 +751,7 @@ class PlotPopup(Popup):
                 row = int((num + 1) / 2)
         fig, ax = plt.subplots(row, col)
 
-        if self.f_type == "Img":  # If image just plot
+        if self.f_type == "image":  # If image just plot
             names = self.plot_single(self.active_data, ax, "Mean RGB Value")
         else:
             count = 0
@@ -822,7 +824,7 @@ class PlotPopup(Popup):
         ax.plot(axis, df)
 
         ax.set_ylabel(label.capitalize())
-        if not self.home.nc:
+        if not self.f_type == "netcdf":
             ax.set_ylim(ymin=0)
         ax.set_xlabel("Normalized Long Transect Distance")
         plt.tight_layout()
@@ -839,7 +841,7 @@ class PlotPopup(Popup):
             If only 2D NetCDF file there is no Z values level. If an image there is no Variables or Z Values level.
         """
         # Get transect data for list of active transect points
-        config = copy.copy(self.home.netcdf)
+        config = copy.copy(self.config)
         values = {}
         if len(self.active_vars) >= 1:
             # If data has variables
@@ -852,7 +854,7 @@ class PlotPopup(Popup):
                         # Multi Z selection
                         values[var][z] = {}
                         config["z_val"] = z
-                        curr = self.home.sel_data(config)
+                        curr = func.sel_data(config)
                         for key in list(self.active_transects.keys()):
                             # All markers selected
                             values[var][z][key] = {}
@@ -863,11 +865,11 @@ class PlotPopup(Popup):
                                         values[var][z][key][cut] = self.get_average(key, curr)
                                     else:
                                         values[var][z][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                                      curr, self.home.nc)
+                                                                                      curr, self.f_type == "netcdf")
                             if len(values[var][z][key]) == 0:
                                 values[var][z].pop(key)
                 else:
-                    curr = self.home.sel_data(config)
+                    curr = func.sel_data(config)
                     # Single Z Selection
                     for key in list(self.active_transects.keys()):
                         # All markers selected
@@ -879,11 +881,11 @@ class PlotPopup(Popup):
                                     values[var][key][cut] = self.get_average(key, curr)
                                 else:
                                     values[var][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                               curr, self.home.nc)
+                                                                               curr, self.f_type == "netcdf")
                         if len(values[var][key]) == 0:
                             values[var].pop(key)
         else:
-            curr = self.home.rgb
+            curr = im.open(config)
             # Image data (no variables, no Z levels)
             for key in list(self.active_transects.keys()):
                 # All markers selected
@@ -894,7 +896,8 @@ class PlotPopup(Popup):
                         if cut == "Average":
                             values[key][cut] = self.get_average(key, curr)
                         else:
-                            values[key][cut] = func.ip_get_points(self.all_transects[key][cut], curr, self.home.nc)
+                            values[key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
+                                                                  self.f_type == "netcdf")
                 if len(values[key]) == 0:
                     values.pop(key)
         return values
@@ -914,6 +917,6 @@ class PlotPopup(Popup):
         # Assumes all transects are same length
         dat = np.zeros(self.all_transects[key]['Width'][0])
         for cut in list(self.all_transects[key].keys())[3:]:
-            dat += func.ip_get_points(self.all_transects[key][cut], curr, self.home.nc)['Cut']
+            dat += func.ip_get_points(self.all_transects[key][cut], curr, self.f_type == "netcdf")['Cut']
         dat = dat / len(list(self.all_transects[key].keys())[3:])
         return list(dat)
