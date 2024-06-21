@@ -469,6 +469,7 @@ class Test(unittest.TestCase):
 
         # Rotation
         display.rotate()
+        print(display.rotation)
         self.assertAlmostEqual(float(display.rotation), 45, "Rotate 45 degrees")
         display.rotate()
         self.assertAlmostEqual(float(display.rotation), 90, "Rotated another 45 degrees")

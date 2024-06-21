@@ -44,7 +44,7 @@ jobs:
     - name: Test with unittest
       run: |
         cd cutview
-        python -m poetry run python -m pytest
+        python -m poetry run python -m pytest -s
         
   windows_test:
     runs-on: windows-latest
