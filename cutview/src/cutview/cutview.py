@@ -19,7 +19,7 @@ import kivy.uix as ui
 from kivy.app import App
 from kivy.metrics import dp
 import platform
-from homescreen import HomeScreen
+from cutview.homescreen import HomeScreen
 
 
 class CutView(App):
@@ -66,7 +66,3 @@ class CutView(App):
         root = ui.screenmanager.ScreenManager()
         root.add_widget(HomeScreen(name="HomeScreen"))
         return root
-
-
-if __name__ == "__main__":
-    CutView().run()

@@ -12,10 +12,10 @@ from kivy.uix.label import Label
 from kivy.core.window import Window
 from os.path import exists
 import json
-import functions as func
-from marker import Marker
-from markerwidth import MarkerWidth
-from plotpopup import PlotPopup
+import cutview.functions as func
+from cutview.marker import Marker
+from cutview.markerwidth import MarkerWidth
+from cutview.plotpopup import PlotPopup
 
 
 class Click:

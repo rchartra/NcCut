@@ -60,7 +60,7 @@ Model LLC4320 simulation is being displayed (accessed via \verb|xmitgcm| https:/
 
 ![a.) The viewing interface shown with a NetCDF4 file of ocean temperature in the gulf stream region. b.) 
 The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
-menu for loading NetCDF4 files. ](images/paper_fig_1.png)
+menu for loading NetCDF4 files. ](../images/paper_fig_1.png)
 
 ## Cut
 
@@ -77,7 +77,7 @@ can be drawn on the same file and plotted together. For use on large projects wo
 marker data saved from the plotting menu can be reloaded back into CutView and continued.
 
 ![a.) The simple transect tool used over two features in a loaded NetCDF file. b.) The marker tool used to take multiple 
-transects orthogonal to a linear feature.](images/paper_fig_2.png)
+transects orthogonal to a linear feature.](../images/paper_fig_2.png)
 
 In the plotting menu (Figure 3) users can select which transects/markers to plot, and if the file is a NetCDF file the 
 user can additionally plot multiple variables (Figure 4) and values along the chosen z dimension. Additionally, users can see a 
@@ -89,8 +89,8 @@ organized data structure aims to be easily loaded and understood using minimal p
 as Python or R.
 
 ![a.) A simple transect of a feature plotted at multiple values along the z dimension. b.) A vertical cross section of 
-the data along a simple transect.](images/paper_fig_3.png)
+the data along a simple transect.](../images/paper_fig_3.png)
 
-![Simple transects taken over various variables in the NetCDF4 file.](images/paper_fig_4.png)
+![Simple transects taken over various variables in the NetCDF4 file.](../images/paper_fig_4.png)
 
 # References

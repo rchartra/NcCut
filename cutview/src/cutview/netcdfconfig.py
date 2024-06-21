@@ -11,7 +11,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.dropdown import DropDown
-import functions as func
+import cutview.functions as func
 import xarray as xr
 
 
@@ -130,8 +130,9 @@ class NetCDFConfig(Popup):
         vals = {'x': self.x_select.text, 'y': self.y_select.text,
                 'z': self.z_select.text, 'z_val': self.depth_select.text,
                 'var': self.var_select.text, 'file': self.data}
-        if len(set(list(vals.values())[:-3])) != len(list(vals.values())[:-3]):
-            self.error.text = "All X, Y, Z variables must be unique"
+        selects = [(self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
+        if self.var_select.text == "Select...":
+            self.error.text = "Please Select a Variable"
             return
         if len(self.data[self.var_select.text].dims) > 3:
             self.error.text = "This variable has more than 3 dimensions"
@@ -139,11 +140,13 @@ class NetCDFConfig(Popup):
         if len(self.data[self.var_select.text].dims) < 2:
             self.error.text = "This variable has less than 2 dimensions"
             return
-        selects = [(self.var_select, "Variable"), (self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
         for sel in selects:
             if sel[0].text == 'Select...':
                 self.error.text = "Please Select a " + sel[1]
                 return
+        if len(set(list(vals.values())[:-3])) != len(list(vals.values())[:-3]):
+            self.error.text = "All X, Y, Z variables must be unique"
+            return
         if len(self.data[self.var_select.text].dims) == 3:
             if self.z_select.text == "Select...":
                 self.error.text = "Please Select a Z dimension"

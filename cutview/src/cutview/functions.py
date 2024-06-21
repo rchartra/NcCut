@@ -11,7 +11,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from functools import partial
-from scipy import interpolate
+from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import math
 import re
@@ -195,7 +195,7 @@ def ip_get_points(points, curr, nc):
         z = np.mean(z, axis=2)
     z = np.flipud(z)
     # numpy arrays are indexed by row, column NOT x, y, but interp object does do x y
-    int_pol = interpolate.RegularGridInterpolator((iy, ix), z, method='linear')
+    int_pol = RegularGridInterpolator((iy, ix), z, method='linear')
 
     if line[0] > line[2]:
         xarr = np.arange(int(line[2]), int(line[0]))

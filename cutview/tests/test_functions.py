@@ -8,8 +8,10 @@ import numpy as np
 from pathlib import Path
 import json
 import xarray as xr
-import functions as func
-from multimarker import marker_find
+import cutview.functions as func
+from cutview.multimarker import marker_find
+
+SUPPORT_FILE_PATH = "cutview/support/"
 
 
 class Test(unittest.TestCase):
@@ -18,7 +20,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken horizontally on an image
         """
         # Setup
-        img = Im.open("support/example.jpg").convert('RGB')
+        img = Im.open(SUPPORT_FILE_PATH + "example.jpg").convert('RGB')
         points = [1000, 200, 1200, 200]
 
         # App result
@@ -36,7 +38,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken at 45 on an image
         """
         # Setup
-        img = Im.open("support/example.jpg").convert('RGB')
+        img = Im.open(SUPPORT_FILE_PATH + "example.jpg").convert('RGB')
         points = [1000, 200, 1200, 400]
 
         # App result
@@ -57,7 +59,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken vertically on an image
         """
         # Setup
-        img = Im.open("support/example.jpg").convert('RGB')
+        img = Im.open(SUPPORT_FILE_PATH + "example.jpg").convert('RGB')
         points = [1000, 100, 1000, 400]
 
         # App result
@@ -76,7 +78,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken horizontally on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset("support/example.nc")['Divergence'].data
+        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example.nc")['Divergence'].data
         points = [1000, 200, 1200, 200]
 
         # App result
@@ -94,7 +96,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken at 45 degrees on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset("support/example.nc")['Divergence'].data
+        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example.nc")['Divergence'].data
         points = [1000, 200, 1200, 400]
 
         # App result
@@ -114,7 +116,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken vertically on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset("support/example.nc")['Divergence'].data
+        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example.nc")['Divergence'].data
         points = [1000, 100, 1000, 400]
 
         # App result
@@ -137,12 +139,12 @@ class Test(unittest.TestCase):
         # Test output file name rules
         self.assertFalse(func.check_file(rel_path, "", ".jpg"), "No blank file name")
         self.assertFalse(func.check_file(rel_path, "test$", ".json"), "No special characters")
-        self.assertFalse(func.check_file(rel_path, "support/dir1/dir2/dir3/test", ".json"),
+        self.assertFalse(func.check_file(rel_path, SUPPORT_FILE_PATH + "dir1/dir2/dir3/test", ".json"),
                          "Directories must exist")
         self.assertEqual(func.check_file(rel_path, "test.jpg", ".jpg"), "test",
                          "Remove user entered extensions")
-        self.assertEqual(func.check_file(rel_path, "support/example", ".jpg"),
-                         "support/example(1)",
+        self.assertEqual(func.check_file(rel_path, SUPPORT_FILE_PATH + "example", ".jpg"),
+                         SUPPORT_FILE_PATH + "example(1)",
                          "If file already exists add (#)")
 
     def test_marker_find(self):
@@ -150,7 +152,7 @@ class Test(unittest.TestCase):
         Test whether valid project files can be accurately identified
         """
         # Data from a valid file is correctly extracted
-        proper_json = open("support/example.json")
+        proper_json = open(SUPPORT_FILE_PATH + "example.json")
         proper_data = json.load(proper_json)
         marker_result = marker_find(proper_data, [])
 
@@ -182,6 +184,21 @@ class Test(unittest.TestCase):
         bad_data_result = marker_find(bad_data, [])
 
         self.assertEqual(bad_data_result, [], "Random dictionaries don't pass")
+
+    def test_sel_data(self):
+        """
+        Test whether correct netcdf data is collected from user configurations
+        """
+        data = xr.open_dataset(SUPPORT_FILE_PATH + "example.nc")
+        config1 = {"x": "x", "y": "y", "z": "Select...", "var": "Vorticity", "file": data}
+        res1 = func.sel_data(config1)
+        exp1 = data["Vorticity"].data
+        self.assertEqual(res1.all(), exp1.all(), "Basic settings are correct")
+
+        config2 = {"x": "y", "y": "x", "z": "Select...", "var": "Divergence", "file": data}
+        res2 = func.sel_data(config2)
+        exp2 = np.swapaxes(data["Divergence"].data, 0, 1)
+        self.assertEqual(res2.all(), exp2.all(), "Swapped dimension settings are correct")
 
 
 if __name__ == '__main__':

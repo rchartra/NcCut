@@ -7,7 +7,7 @@ transect marker tool.
 
 import kivy.uix as ui
 from kivy.uix.textinput import TextInput
-import functions as func
+import cutview.functions as func
 
 
 class MarkerWidth(ui.boxlayout.BoxLayout):

@@ -49,7 +49,7 @@ class SingleTransect(ui.widget.Widget):
             self.l_color = Color(0.28, 0.62, 0.86)
         elif color == "Green":
             self.l_color = Color(0.39, 0.78, 0.47)
-        else:
+        elif color == "Orange":
             self.l_color = Color(0.74, 0.42, 0.13)
         size = self.home.display.cir_size
         self.c_size = (dp(size), dp(size))

@@ -15,7 +15,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
-import functions as func
+import cutview.functions as func
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im

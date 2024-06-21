@@ -16,9 +16,11 @@ import numpy as np
 import cv2
 import copy
 import io
-import functions as func
-from multitransect import MultiTransect
-from multimarker import MultiMarker
+import cutview.functions as func
+from cutview.multitransect import MultiTransect
+from cutview.multimarker import MultiMarker
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 

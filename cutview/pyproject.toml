@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "cutview"
+version = "0.2.1"
+description = 'CutView is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
+authors = ["rchartra <rchartra@uw.edu>"]
+readme = "README.md"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/rchartra/CutView"
+documentation = "https://github.com/rchartra/CutView/wiki"
+keywords = ["NetCDF", "GUI"]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python",
+  "Operating System :: OS Independent"
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^1.4.3"
+numpy = "^1.26.4"
+scipy = "^1.8"
+matplotlib = "^3.5.2"
+Cython = "^3.0.2"
+xarray = "^2022.6.0"
+netCDF4 = "^1.6.0"
+opencv-python = "^4.8.0.74"
+img2pdf = "^0.4.4"
+Kivy = "^2.1.0"
+flake8 = "^7.0.0"
+pytest = "^7.4.0"
+pooch = "^1.8.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

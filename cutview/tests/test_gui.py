@@ -6,17 +6,22 @@ import unittest
 import os
 import time
 import copy
+import pooch
 import json
+import cv2
 import numpy as np
 from functools import partial
+from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.button import Button
-from multimarker import Click, marker_find
-from markerwidth import MarkerWidth
-import functions
-from cutview import CutView
+from cutview.multimarker import Click, marker_find
+from cutview.markerwidth import MarkerWidth
+import cutview.functions as functions
+from cutview.cutview import CutView
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+SUPPORT_FILE_PATH = "cutview/support/"
+TEST_NC_PATH = pooch.retrieve(url="doi:10.5281/zenodo.12208969/test_nc.nc", known_hash=None)
 
 
 class AppInfo:
@@ -51,7 +56,7 @@ def get_app():
 
 
 def load_nc(variable):
-    run_app.home.ids.file_in.text = "support/example.nc"
+    run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.nc"
     run_app.home.go_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = variable
@@ -63,7 +68,7 @@ def load_nc(variable):
 
 def select_sidebar_button(text):
     sidebar = run_app.home.ids.sidebar
-    but = next((but for but in sidebar.children if but.text == text), None)
+    but = next((but for but in sidebar.children if isinstance(but, Button) and but.text == text), None)
     but.dispatch('on_press')
     but.dispatch('on_release')
 
@@ -87,7 +92,7 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = ""
         run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "No empty file names")
-        run_app.home.ids.file_in.text = "test_gui.py"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.json"
         run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
@@ -98,8 +103,9 @@ class Test(unittest.TestCase):
         """
         Check that viewer window is clean after removing tools
         """
-        run_app.home.ids.file_in.text = "support/example.jpg"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
+        self.assertEqual(run_app.home.file_on, True, "File loaded")
 
         # Run for all tools in sidebar
         og_side = copy.copy(run_app.home.ids.sidebar.children)
@@ -121,9 +127,10 @@ class Test(unittest.TestCase):
         og_side = copy.copy(run_app.home.ids.sidebar.children)
 
         # Open a file and use a tool
-        run_app.home.ids.file_in.text = "support/example.nc"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.nc"
         run_app.home.go_btn()
         load_nc("Vorticity")
+        self.assertEqual(len(run_app.home.ids.colorbar.children), 1, "Colorbar Added")
         select_sidebar_button("Transect Marker")
         x = run_app.home.size[0]
         y = run_app.home.size[1]
@@ -135,7 +142,7 @@ class Test(unittest.TestCase):
         for i in range(len(incs)):
             tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
 
-        run_app.home.ids.file_in.text = "support/example.jpg"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
 
         self.assertEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar restored")
@@ -149,14 +156,14 @@ class Test(unittest.TestCase):
         Assumes 'support/example.json' exists and is a valid project file for 'support/example.jpg' with
         a variable 'Vorticity' and three markers.
         """
-        run_app.home.ids.file_in.text = "support/example.jpg"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
 
         # Open Transect Marker tool
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f1 = open("support/example.json")
+        f1 = open(SUPPORT_FILE_PATH + "example.json")
         project1 = json.load(f1)
 
         # Upload Project File
@@ -176,7 +183,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Load File
-        f2 = open("support/test_project_file.json")
+        f2 = open(SUPPORT_FILE_PATH + "test_project_file.json")
         project2 = json.load(f2)
 
         # Upload Project File
@@ -188,9 +195,9 @@ class Test(unittest.TestCase):
 
     def test_marker_transect(self):
         """
-        Test marker and marker point deletion.
+        Test transect marker tool management.
         """
-        run_app.home.ids.file_in.text = "support/example.jpg"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
 
         # Open Transect Marker tool
@@ -198,7 +205,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f = open("support/example.json")
+        f = open(SUPPORT_FILE_PATH + "example.json")
         project = json.load(f)
 
         # Upload Project File
@@ -259,17 +266,18 @@ class Test(unittest.TestCase):
                          "Points were selected with appropriate width adjustments")
 
         # Test Drag Mode
-        d_but = next((but for but in sidebar.children if isinstance(but, Button) and but.text == "Drag Mode"), None)
-        d_but.dispatch('on_press')
-        d_but.dispatch('on_release')
+        select_sidebar_button("Drag Mode")
         multi_mark_instance.on_touch_down(Click(0.43 * x, 0.43 * y))
         self.assertEqual(multi_mark_instance.children[0].points, list(zip(x_arr, y_arr, w_arr)),
                          "No new point was added")
 
     def test_multi_transect(self):
-
-        run_app.home.ids.file_in.text = "support/example.jpg"
+        """
+        Test transect tool
+        """
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
+        self.assertEqual(run_app.home.file_on, True, "File loaded")
 
         # Open Transect Marker tool
         select_sidebar_button("Transect")
@@ -295,12 +303,173 @@ class Test(unittest.TestCase):
                               "Plot Button added")
         self.assertEqual(len(tran_instance.children), 1, "Only one transect")
 
-        # Third Click : No plot, new transect
+        # Third Click
+        tran_instance.on_touch_down(Click(x_arr[2], y_arr[2]))
+        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
+                          "Plot Button Removed")
+        self.assertEqual(len(tran_instance.children), 2, "New Transect Added")
 
-        # Fourth Click
+        # Repeat Click
+        tran_instance.on_touch_down(Click(x_arr[2], y_arr[2]))
+        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
+                          "No change when same point clicked")
+        self.assertEqual(len(tran_instance.children), 2, "No change when same point clicked")
 
         # Drag Mode
+        select_sidebar_button("Drag Mode")
+        tran_instance.on_touch_down(Click(x_arr[3], y_arr[3]))
+        self.assertEqual(len(tran_instance.children), 2, "No new point added when in drag mode")
 
         # Edit Mode: Delete Line, Delete point
+        select_sidebar_button("Transect Mode")
+        tran_instance.on_touch_down(Click(x_arr[3], y_arr[3]))
+        select_sidebar_button("Edit Mode")
+        select_sidebar_button("Delete Last Line")
+        self.assertEqual(len(tran_instance.children), 1, "Only one transect now")
 
-        # Final click, check continues now only transect
+        select_sidebar_button("Delete Last Point")
+        self.assertEqual(len(tran_instance.children), 1, "Only one transect now")
+        self.assertEqual(len(tran_instance.children[0].line.points), 2, "Point deleted from transect")
+
+        select_sidebar_button("Back")
+        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
+                          "Plot Button Removed")
+
+    def test_netcdf_config(self):
+        """
+        Test netcdf configuration popup ensures valid netcdf configuration settings
+        """
+        run_app.home.ids.file_in.text = TEST_NC_PATH
+        run_app.home.go_btn()
+        popup = run_app.home.nc_popup
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "Please Select a Variable", "Variable must be selected")
+
+        popup.var_select.dispatch('on_press')
+        popup.var_select.dispatch('on_release')
+        popup.var_drop.select("v3")
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.x_select.text, "i", "X dimension automatically selected")
+        self.assertEqual(popup.y_select.text, "j", "Y dimension automatically selected")
+        self.assertEqual(popup.z_select.text, "k", "Z dimension automatically selected")
+        self.assertEqual(popup.error.text, "Please Select a Z Value", "3D variables need a Z value selected")
+
+        popup.z_select.text = "j"
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
+
+        popup.z_select.text = "Select..."
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "Please Select a Z dimension", "3D variables need a Z Dimension")
+
+        popup.z_select.text = "k"
+        popup.depth_select.text = "8"
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertTrue(run_app.home.file_on, "File loads when there is a proper configuration")
+
+        run_app.home.ids.file_in.text = TEST_NC_PATH
+        run_app.home.go_btn()
+        popup = run_app.home.nc_popup
+
+        popup.var_select.dispatch('on_press')
+        popup.var_select.dispatch('on_release')
+        popup.var_drop.select("v2")
+        self.assertEqual(popup.z_select.text, "Select...", "2D Variables don't have a third dimension")
+
+        popup.z_select.text = "j"
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
+
+        popup.z_select.text = "Select..."
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertTrue(run_app.home.file_on, "File loads when there is a proper configuration")
+
+        run_app.home.ids.file_in.text = TEST_NC_PATH
+        run_app.home.go_btn()
+        popup = run_app.home.nc_popup
+        popup.var_select.dispatch('on_press')
+        popup.var_select.dispatch('on_release')
+        popup.var_drop.select("v4")
+        popup.depth_select.text = "70"
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "This variable has more than 3 dimensions", "Can't support more than 3 dims")
+
+        run_app.home.ids.file_in.text = TEST_NC_PATH
+        run_app.home.go_btn()
+        popup = run_app.home.nc_popup
+        popup.var_select.dispatch('on_press')
+        popup.var_select.dispatch('on_release')
+        popup.var_drop.select("v1")
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "This variable has less than 2 dimensions", "Can't support less than 2 dims")
+
+    def test_setting_changes(self):
+        """
+        Tests implementation of setting changes. Does not test UI aspects (dropdowns) only the callback.
+        """
+        load_nc("Vorticity")
+        display = run_app.home.display
+
+        # Contrast updates
+        og_img = copy.copy(display.img.texture)
+        display.update_settings("contrast", 30)
+        self.assertEqual(display.contrast, 30, "Contrast Updated")
+        self.assertNotEqual(og_img, display.img.texture, "Image Updated")
+
+        # Colormap updates
+        og_img = copy.copy(display.img.texture)
+        display.update_settings("colormap", "Inferno")
+        self.assertEqual(display.colormap, cv2.COLORMAP_INFERNO, "Colormap Updated")
+        self.assertNotEqual(og_img, display.img.texture, "Image Updated")
+
+        # Variable
+        og_img = copy.copy(display.img.texture)
+        display.update_settings("variable", "Divergence")
+        self.assertEqual(display.config["netcdf"]["var"], "Divergence", "Variable updated")
+        self.assertNotEqual(og_img, display.img.texture, "Image Updated")
+
+        # Circle Size
+        x = run_app.home.size[0]
+        y = run_app.home.size[1]
+        display.update_settings("cir_size", 20)
+        self.assertEqual(display.cir_size, 20, "Display circle size updated")
+        select_sidebar_button("Transect")
+        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)), "Transect graphics updated")
+
+        select_sidebar_button("Transect Marker")
+        select_sidebar_button("Transect Marker")
+        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)), "Marker graphics updated")
+
+        # Reset
+        sidebar = run_app.home.ids.sidebar
+        select_sidebar_button("Transect")
+
+        # Line Color
+        display.update_settings("l_color", "Orange")
+        self.assertEqual(display.l_col, "Orange", "Display line color updated")
+
+        select_sidebar_button("Transect")
+        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13], "Transect graphics updated")
+
+        select_sidebar_button("Transect Marker")
+        select_sidebar_button("Transect Marker")
+        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13], "Marker graphics updated")
+
+        # Rotation
+        display.rotate()
+        self.assertEqual(display.rotation, 45, "Rotate 45 degrees")
+        display.rotate()
+        self.assertEqual(display.rotation, 90, "Rotated another 45 degrees")
