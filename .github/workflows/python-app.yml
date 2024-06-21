@@ -35,6 +35,7 @@ jobs:
         python -m pip install poetry
     - name: Install dependencies
       run: |
+        cd cutview
         python -m poetry install
     - name: Lint with flake8
       run: |
@@ -61,6 +62,7 @@ jobs:
         python -m pip install poetry
     - name: Install dependencies
       run: |
+        cd cutview
         python -m poetry install
     - name: Lint with flake8
       run: |
