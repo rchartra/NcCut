@@ -452,7 +452,6 @@ class Test(unittest.TestCase):
         self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)), "Marker graphics updated")
 
         # Reset
-        sidebar = run_app.home.ids.sidebar
         select_sidebar_button("Transect")
 
         # Line Color
