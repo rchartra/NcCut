@@ -39,9 +39,11 @@ jobs:
         python -m poetry install
     - name: Lint with flake8
       run: |
+        cd cutview
         python -m poetry run python -m flake8 --ignore=E402,E501
     - name: Test with unittest
       run: |
+        cd cutview
         python -m poetry run python -m pytest
         
   windows_test:
@@ -66,9 +68,11 @@ jobs:
         python -m poetry install
     - name: Lint with flake8
       run: |
+        cd cutview
         python -m poetry run python -m flake8 --ignore=E402,E501
     - name: Test with unittest
       run: |
+        cd cutview
         python -m poetry run python -m pytest
 
   paper:
@@ -81,7 +85,7 @@ jobs:
         uses: openjournals/openjournals-draft-action@master
         with:
           journal: joss
-          paper-path: paper.md
+          paper-path: cutview/paper.md
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
