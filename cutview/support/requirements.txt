@@ -1,9 +1,0 @@
-pandas
-numpy
-scipy
-kivy
-matplotlib
-xarray
-netCDF4
-opencv-python
-img2pdf
