@@ -20,7 +20,7 @@ import cutview.functions as functions
 from cutview.cutview import CutView
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-SUPPORT_FILE_PATH = "cutview/support/"
+SUPPORT_FILE_PATH = "support/"
 TEST_NC_PATH = pooch.retrieve(url="doi:10.5281/zenodo.12208969/test_nc.nc", known_hash=None)
 
 
