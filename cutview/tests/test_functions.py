@@ -11,7 +11,7 @@ import xarray as xr
 import cutview.functions as func
 from cutview.multimarker import marker_find
 
-SUPPORT_FILE_PATH = "cutview/support/"
+SUPPORT_FILE_PATH = "support/"
 
 
 class Test(unittest.TestCase):
