@@ -14,7 +14,6 @@ import os
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('PIL.Image').setLevel(logging.WARNING)
-os.environ["KIVY_GL_BACKEND"] = "angle_sdl2"
 import kivy
 import kivy.uix as ui
 from kivy.app import App

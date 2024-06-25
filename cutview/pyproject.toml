@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cutview"
-version = "0.2.1"
+version = "0.2.2"
 description = 'CutView is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
