@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from PIL import Image as im
 import numpy as np
 import copy
+import os
 import pandas as pd
 import json
 import cv2
@@ -323,6 +324,7 @@ class PlotPopup(Popup):
             cv2.imwrite(str(ipath.absolute()), img)
             with open(str(ppath.absolute()), "wb") as f:
                 f.write(img2pdf.convert(str(ipath.absolute())))
+            os.remove(ipath)
             func.alert("Download Complete", self.home)
 
     def download_data(self, f_name):
@@ -791,6 +793,7 @@ class PlotPopup(Popup):
         # Create a non-nested dictionary of selections with appropriate labels
         dat = copy.copy(data)
         plot_dat = {}
+
         if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0] != "Multi":
             # Gather data for all transects selected across all markers for all Z levels selected
             for z in list(dat.keys()):

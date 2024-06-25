@@ -87,7 +87,8 @@ jobs:
           python-version: "3.10"
       - name: OpenGL management
         run: |
-           system_profiler SPHardwareDataType
+          brew install glfw3
+          brew install glew
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip

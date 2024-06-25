@@ -25,6 +25,7 @@ class MultiTransect(ui.widget.Widget):
         home: Reference to root HomeScreen instance
         p_btn: RoundedButton, Plot button which opens PlotPopup
         dragging: Boolean, Whether in dragging mode
+        plotting: PlotPopup, reference to plotting menu when opened
 
         Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
@@ -42,6 +43,7 @@ class MultiTransect(ui.widget.Widget):
         self.p_btn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
         self.p_btn.bind(on_press=lambda x: self.popup())
         self.dragging = False
+        self.plotting = None
 
     def font_adapt(self, font):
         """
@@ -102,7 +104,7 @@ class MultiTransect(ui.widget.Widget):
             data["Cut " + str(count)] = i.line.points
             count += 1
         # Open plotting popup
-        PlotPopup({"Multi": data}, self.home, self.home.display.config)
+        self.plotting = PlotPopup({"Multi": data}, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """

@@ -68,6 +68,7 @@ class HomeScreen(Screen):
             t_type: String, Tool type: 'transect' or 'transect_marker'
         """
         if self.file_on:
+            self.font_adapt()
             self.display.manage_tool(t_type)
 
     def go_btn(self):
