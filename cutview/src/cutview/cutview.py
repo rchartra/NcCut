@@ -10,7 +10,6 @@ python cutview.py
 """
 
 # Turns off debug messages from matplotlib and PIL
-import os
 import logging
 logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('PIL.Image').setLevel(logging.WARNING)
