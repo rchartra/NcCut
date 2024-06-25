@@ -190,7 +190,7 @@ def ip_get_points(points, curr, nc):
     b = line[1] - m * (line[0])
     imgA = np.asarray(img)
     z = imgA[-(iy[-1] + 1):-(iy[0]), ix[0]:ix[-1] + 1]
-    if not nc:
+    if not nc and len(z.shape) == 3:
         # If image, take average of RGB values as point value
         z = np.mean(z, axis=2)
     z = np.flipud(z)

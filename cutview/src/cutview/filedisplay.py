@@ -171,8 +171,7 @@ class FileDisplay(ScatterLayout):
             self.im = CoreImage(self.config[self.f_type])
             self.size = im.open(self.config[self.f_type]).size
 
-        self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.home.ids.view.pos,
-                                  allow_stretch=True)
+        self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.home.ids.view.pos)
         self.add_widget(self.img)
 
         # Begin at max size where you can see entire image
@@ -200,6 +199,7 @@ class FileDisplay(ScatterLayout):
         Args:
             t_type: String, Tool type: 'transect' or 'transect_marker'
         """
+
         if not self.t_mode:
             # Opens a new tool
             for w in self.action_widgets:

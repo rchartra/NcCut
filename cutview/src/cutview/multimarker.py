@@ -109,6 +109,7 @@ class MultiMarker(ui.widget.Widget):
             unless all points are deleted in which case it goes back to zero.
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New marker button
+        plotting: PlotPopup, reference to plotting menu when opened
 
         Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
@@ -128,6 +129,7 @@ class MultiMarker(ui.widget.Widget):
         self.dragging = False
         self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
+        self.plotting = None
 
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
@@ -344,7 +346,7 @@ class MultiMarker(ui.widget.Widget):
             frames["Marker " + str(c)] = data
             c += 1
 
-        PlotPopup(frames, self.home, self.home.display.config)
+        self.plotting = PlotPopup(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """
