@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cutview"
-version = "0.2.3"
+version = "0.2.5"
 description = 'CutView is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
@@ -16,18 +16,18 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pandas = "^1.4.3"
-numpy = "^1.26.4"
-scipy = "^1.8"
-matplotlib = "^3.5.2"
-Cython = "^3.0.2"
-xarray = "^2022.6.0"
-netCDF4 = "^1.6.0"
-opencv-python = "^4.8.0.74"
-img2pdf = "^0.4.4"
-Kivy = "^2.1.0"
-flake8 = "^7.0.0"
-pytest = "^7.4.0"
+pandas = "^2.2.2"
+numpy = "^2.0.0"
+scipy = "^1.13.1"
+matplotlib = "^3.9.0"
+Cython = "^3.0.10"
+xarray = "^2024.6.0"
+netCDF4 = "^1.7.1"
+opencv-python = "^4.10.0.84"
+img2pdf = "^0.5.1"
+Kivy = "^2.3.0"
+flake8 = "^7.1.0"
+pytest = "^8.2.2"
 pooch = "^1.8.2"
 
 [build-system]
