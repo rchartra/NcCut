@@ -37,7 +37,7 @@ jobs:
         python -m pip install poetry
     - name: Install dependencies
       run: |
-        python -m poetry install
+        python -m poetry install --with test
     - name: Lint with flake8
       run: |
         python -m poetry run python -m flake8 --ignore=E402,E501
@@ -65,7 +65,7 @@ jobs:
         python -m pip install poetry
     - name: Install dependencies
       run: |
-        python -m poetry install
+        python -m poetry install --with test
     - name: Lint with flake8
       run: |
         python -m poetry run python -m flake8 --ignore=E402,E501

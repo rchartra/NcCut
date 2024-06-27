@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cutview"
-version = "0.2.5"
+version = "0.2.7"
 description = 'CutView is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
@@ -26,6 +26,8 @@ netCDF4 = "^1.7.1"
 opencv-python = "^4.10.0.84"
 img2pdf = "^0.5.1"
 Kivy = "^2.3.0"
+
+[tool.poetry.group.test.dependencies]
 flake8 = "^7.1.0"
 pytest = "^8.2.2"
 pooch = "^1.8.2"
