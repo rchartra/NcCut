@@ -1,13 +1,13 @@
 # Contributions to CutView
 
-Contributions are welcome! Feel free to add features, tests, documentation, examples, whatever you think would improve the app but please follow 
+Contributions are welcome! Feel free to add features, tests, documentation, examples, whatever you think would improve the app. However please follow 
 the following guidelines to ensure a smooth contribution process.
 
 ## Testing and Submissions
 
 - Please submit a pull request for any additions or changes. Any submissions will be automatically tested upon submission through github actions and then manually reviewed.
-- If you are adding significant features to the GUI please include tests similar to those found in the [testing](../old_versions/old_t3st_app.py) file to ensure backwards compatibility with the GUI.
-- Please include instructions on how to use your feature to add to the documentation. You can submit these as part of you pull request or as a GitHub issue. 
+- If you are adding significant features to the GUI please perform rigorous testing before submission. There should be no way for the app to crash when the user uses the app. Instead, there should be an alert banner notifying the user as to what they did wrong. You should also include unit tests similar to those found in the existing test suite to ensure backwards compatibility with the GUI later on.
+- Please include detailed instructions on how to use your feature to add to the documentation. You can submit these as part of you pull request or as a GitHub issue. 
 
 ## Code style
 
