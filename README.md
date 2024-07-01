@@ -72,7 +72,7 @@ If you are having trouble installing CutView please refer to the Troubleshooting
 
 # Usage Instructions
 
-* If you would like to try out the app there are example image and NetCDF files in the support folder of this repository
+* If you would like to try out the app there are example image and NetCDF files in the [support](https://github.com/rchartra/CutView/tree/master/support) folder of this repository
     * Relative file paths:
 
         `support/example.jpg`\
