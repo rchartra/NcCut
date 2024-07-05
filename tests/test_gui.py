@@ -269,9 +269,10 @@ class Test(unittest.TestCase):
         y = run_app.home.size[1]
 
         incs = np.linspace(0.4, 0.8, 10)
-        x_arr = incs * x
-        y_arr = incs * y
+        x_arr = (incs * x).tolist()
+        y_arr = (incs * y).tolist()
         w_arr = [int(n * 100) for n in incs]
+        w_arr[0] = 44
         multi_mark_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
         w_wid = next((but for but in sidebar.children if isinstance(but, MarkerWidth)), None)
         for i in range(1, len(incs)):
