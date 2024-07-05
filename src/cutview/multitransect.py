@@ -4,7 +4,7 @@ Widget for Transect tool
 Manages having multiple SingleTransects on screen at once.
 """
 import kivy.uix as ui
-from plotpopup import PlotPopup
+from cutview.plotpopup import PlotPopup
 from cutview.singletransect import SingleTransect
 import cutview.functions as func
 from kivy.core.window import Window

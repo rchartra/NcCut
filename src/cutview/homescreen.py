@@ -12,7 +12,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 import re
 import os
-import functions as func
+import cutview.functions as func
 from pathlib import Path
 from cutview.filedisplay import FileDisplay
 from cutview.netcdfconfig import NetCDFConfig
