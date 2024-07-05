@@ -4,7 +4,7 @@ Widget for Transect tool
 Manages having multiple SingleTransects on screen at once.
 """
 import kivy.uix as ui
-from cutview.plotpopup import PlotPopup
+from plotpopup import PlotPopup
 from cutview.singletransect import SingleTransect
 import cutview.functions as func
 from kivy.core.window import Window
@@ -19,13 +19,13 @@ class MultiTransect(ui.widget.Widget):
     orthogonally to user marked line.
 
     Attributes:
-        lines: List of SingleTransects made.
-        clicks: Int, Number of clicks made by user. Cycles between 0 and 2 depending on current stage of
+        lines (list): List of all :class:`cutview.singletransect.SingleTransect` made.
+        clicks (int): Number of clicks made by user. Cycles between 0 and 2 depending on current stage of
             transect drawing.
-        home: Reference to root HomeScreen instance
-        p_btn: RoundedButton, Plot button which opens PlotPopup
-        dragging: Boolean, Whether in dragging mode
-        plotting: PlotPopup, reference to plotting menu when opened
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        p_btn: RoundedButton, Plot button which opens :class:`cutview.plotpopup.PlotPopup`
+        dragging (bool): Whether in dragging mode
+        plotting: :class:`cutview.plotpopup.PlotPopup`, reference to plotting menu when opened
 
         Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
@@ -34,7 +34,7 @@ class MultiTransect(ui.widget.Widget):
         Initialize object and create Plot button.
 
         Args:
-            home: Reference to root HomeScreen instance
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         """
         super(MultiTransect, self).__init__(**kwargs)
         self.lines = []
@@ -50,9 +50,29 @@ class MultiTransect(ui.widget.Widget):
         Updates font size of Plot button.
 
         Args:
-            font: Float, new font size
+            font (float): New font size
         """
         self.p_btn.font_size = font
+
+    def update_l_col(self, value):
+        """
+        Asks each transect to update their line color
+
+        Args:
+            value (str): New color value: 'Blue', 'Green' or 'Orange'
+        """
+        for t in self.children:
+            t.update_l_col(value)
+
+    def update_c_size(self, value):
+        """
+       Asks each transect to update their circle size
+
+       Args:
+           value (float): New circle size
+       """
+        for t in self.children:
+            t.update_c_size(value)
 
     def del_line(self):
         """
@@ -90,13 +110,14 @@ class MultiTransect(ui.widget.Widget):
         Update whether in dragging mode
 
         Args:
-            val: Boolean, whether in dragging mode or not
+            val (bool): Whether in dragging mode or not
         """
         self.dragging = val
 
     def popup(self):
         """
-        Gathers coordinates from SingleTransects into a dictionary and calls for popup
+        Gathers coordinates from all :class:`cutview.singletransect.SingleTransect` into a dictionary and calls for
+        popup
         """
         data = {}
         count = 1
@@ -126,7 +147,7 @@ class MultiTransect(ui.widget.Widget):
                     self.add_widget(x)
                     self.lines.append(x)
                 # If clicked same point as before, do nothing
-                if [touch.x, touch.y] == self.lines[-1].line.points:
+                elif [touch.x, touch.y] == self.lines[-1].line.points:
                     return
                 # SingleTransect manages the line and dots graphics
                 self.lines[-1].on_touch_down(touch)

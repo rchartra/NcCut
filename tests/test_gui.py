@@ -15,10 +15,14 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
-from cutview.multimarker import Click, marker_find
-from cutview.markerwidth import MarkerWidth
-import cutview.functions as functions
-from cutview.cutview import CutView
+
+import sys
+sys.path.insert(0, 'src/cutview')  # Test local code not PyPI
+
+from multimarker import Click, marker_find
+from markerwidth import MarkerWidth
+import functions as functions
+from cutview import CutView
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 SUPPORT_FILE_PATH = "support/"
@@ -533,7 +537,7 @@ class Test(unittest.TestCase):
         plot_popup = tool.plotting
 
         # Initial Transect Selections
-        plot_popup.download_data("__test__")
+        plot_popup.download_selected_data("__test__")
         f = open("__test__.json")
         res1 = json.load(f)
         f.close()
@@ -562,7 +566,7 @@ class Test(unittest.TestCase):
 
         # Selecting Specific Transects
         plot_popup.on_transect_checkbox(dummy_check, "Marker 2", "Cut 2")
-        plot_popup.download_data("__test__")
+        plot_popup.download_selected_data("__test__")
         f = open("__test__.json")
         res2 = json.load(f)
         f.close()
@@ -582,7 +586,7 @@ class Test(unittest.TestCase):
         plot_popup.on_var_checkbox(dummy_check, "Vorticity")
         self.assertTrue(dummy_check.active, "User should not be able to deselect all variables")
         plot_popup.on_var_checkbox(dummy_check, "Divergence")
-        plot_popup.download_data("__test__")
+        plot_popup.download_selected_data("__test__")
         f = open("__test__.json")
         res3 = json.load(f)
         f.close()
@@ -617,7 +621,7 @@ class Test(unittest.TestCase):
         self.assertTrue(dummy_check.active, "User should not be able to deselect all z values")
         plot_popup.on_z_checkbox(dummy_check, "30")
         plot_popup.on_z_checkbox(dummy_check, "60")
-        plot_popup.download_data("__test__")
+        plot_popup.download_selected_data("__test__")
         f = open("__test__.json")
         res1 = json.load(f)
         f.close()

@@ -15,7 +15,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
-import cutview.functions as func
+import functions as func
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im
@@ -66,24 +66,25 @@ class PlotPopup(Popup):
     plots and/or selected data.
 
     Attributes:
-        home: Reference to root HomeScreen instance.
-        all_transects: Dictionary of data from all transects marked out by the user.
-        t_type: String: 'Marker' if transects came from transect marker tool or 'Multi' if transects
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance.
+        all_transects (dict): Dictionary of data from all transects marked out by the user.
+        t_type (str): 'Marker' if transects came from transect marker tool or 'Multi' if transects
             came from transect tool.
-        active_transects: Dictionary of currently selected transects. 'Click X', 'Click Y', and
+        active_transects (dict): Dictionary of currently selected transects. 'Click X', 'Click Y', and
             'Width' fields should be removed (if marker tool) to simplify plotting. Contains average
             of transects if marker tool was used with a constant transect width.
-        f_type: String, If file is NetCDF file: 'NC' if only 2 dimensions, 'NC_Z' if 3 dimensions. If
+        f_type (str): If file is NetCDF file: 'NC' if only 2 dimensions, 'NC_Z' if 3 dimensions. If
             file is a JPG or PNG: 'Img'.
-        config: Information necessary for accessing the file. For images this is the file path and for NetCDF files this
-            is a dictionary of configuration values (see check inputs method of NetCDFConfig class).
-        active_z: List of selected Z values. Empty list if 2D NetCDF or Image file.
-        active_vars: List of selected variables. Empty list if image file.
+        config (dict): Information necessary for accessing the file. For images this is the file path and for NetCDF
+            files this is a dictionary of configuration values (see
+            :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+        active_z (list): List of selected Z values. Empty list if 2D NetCDF or Image file.
+        active_vars (list): List of selected variables. Empty list if image file.
         plot: Image containing plot.
         plotting: BoxLayout that holds plot and selection sidebar.
-        title: String, popup title
+        title (str): Popup title
         content: BoxLayout containing all UI elements in popup
-        size_hint: Tuple (width, height) of relative size of popup to window
+        size_hint (tuple): (width, height) of relative size of popup to window
         t_select: RoundedButton which opens transect selection dropdown menu
         v_select: RoundedButton which opens variable selection dropdown menu (Only if NetCDF file)
         z_select: RoundedButton which opens z value selection dropdown menu (Only if 3D NetCDF file)
@@ -95,11 +96,12 @@ class PlotPopup(Popup):
         Defines popup UI elements and opens popup.
 
         Args:
-            transects: Dictionary of transect data from tool which opened popup
-            home: Reference to root HomeScreen instance.
+            transects (dict): Dictionary of transect data from tool which opened popup
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance.
         """
         super(PlotPopup, self).__init__(**kwargs)
         self.all_transects = transects
+        print("hello!")
         self.home = home
         self.f_type = list(config.keys())[0]
         self.config = config[self.f_type]
@@ -173,16 +175,21 @@ class PlotPopup(Popup):
 
         buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
 
-        data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.2, 1), font_size=self.home.font)
-        data_btn.bind(on_press=lambda x: self.file_input('data'))
+        f_m = 0.8
+        a_data_btn = func.RoundedButton(text="Save All Data", size_hint=(.15, 1), font_size=self.home.font * f_m)
+        a_data_btn.bind(on_press=lambda x: self.file_input('a_data'))
 
-        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.2, 1), font_size=self.home.font)
+        s_data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.15, 1), font_size=self.home.font * f_m)
+        s_data_btn.bind(on_press=lambda x: self.file_input('s_data'))
+
+        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.15, 1), font_size=self.home.font * f_m)
         png_btn.bind(on_press=lambda x: self.file_input('png'))
 
-        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.2, 1), font_size=self.home.font)
+        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.15, 1), font_size=self.home.font * f_m)
         pdf_btn.bind(on_press=lambda x: self.file_input('pdf'))
 
-        buttons.add_widget(data_btn)
+        buttons.add_widget(a_data_btn)
+        buttons.add_widget(s_data_btn)
         buttons.add_widget(png_btn)
         buttons.add_widget(pdf_btn)
 
@@ -227,7 +234,7 @@ class PlotPopup(Popup):
                 zp_box.add_widget(zp_btn)
                 sidebar.add_widget(zp_box)
 
-                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1), font_size=self.home.font)
+                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1), font_size=self.home.font * f_m)
                 allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
                 buttons.add_widget(allz_btn)
             else:
@@ -251,7 +258,7 @@ class PlotPopup(Popup):
         Popup window for user to give name for plot/json file to be saved.
 
         Args:
-            type: String corresponding to what is being saved:
+            type (str): String corresponding to what is being saved:
                 'data': Transect data for selections
                 'all_z_data': Transect data for selections for all z dimension values
                 'png': Current plot as a PNG file
@@ -262,8 +269,10 @@ class PlotPopup(Popup):
         txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
         content.add_widget(txt)
         go = Button(text="Ok", size_hint=(0.1, 1))
-        if type == "data":
-            go.bind(on_press=lambda x: self.download_data(txt.text))
+        if type == "s_data":
+            go.bind(on_press=lambda x: self.download_selected_data(txt.text))
+        elif type == "a_data":
+            go.bind(on_press=lambda x: self.download_all_data(txt.text))
         elif type == "all_z":
             go.bind(on_press=lambda x: self.download_all_z_data(txt.text))
         elif type == "png":
@@ -292,7 +301,7 @@ class PlotPopup(Popup):
         Download the current plot as a PNG file if valid file name given
 
         Args:
-            f_name: String, proposed file name
+            f_name (str): Proposed file name
         """
         file = func.check_file(self.home.rel_path, f_name, ".png")
         if file is False:
@@ -310,7 +319,7 @@ class PlotPopup(Popup):
         Download the current plot as a PDF file if valid file name given
 
         Args:
-            f_name: String, proposed file name
+            f_name (str): Proposed file name
         """
         file = func.check_file(self.home.rel_path, f_name, ".pdf")
         if file is False:
@@ -327,12 +336,12 @@ class PlotPopup(Popup):
             os.remove(ipath)
             func.alert("Download Complete", self.home)
 
-    def download_data(self, f_name):
+    def download_selected_data(self, f_name):
         """
-        Downloads transect data for selections into a JSON file if valid file name given.
+        Downloads selected transect data into a JSON file if valid file name given.
 
         Args:
-            f_name: String, proposed file name
+            f_name (str): Proposed file name
         """
         file = func.check_file(self.home.rel_path, f_name, ".json")
         if file is False:
@@ -357,15 +366,31 @@ class PlotPopup(Popup):
 
             func.alert("Download Complete", self.home)
 
+    def download_all_data(self, f_name):
+        """
+        Downloads all transect data into a JSON file if valid file name given.
+
+        Args:
+            f_name (str): Proposed file name
+        """
+        file = func.check_file(self.home.rel_path, f_name, ".json")
+        if file is False:
+            func.alert("Invalid File Name", self.home)
+            return
+        else:  # Build JSON file
+            with open(self.home.rel_path / (file + ".json"), "w") as f:
+                json.dump(self.all_transects, f)
+            func.alert("Download Complete", self.home)
+
     def add_marker_info(self, dicti):
         """
         Adds back fields removed for plotting purposes if marker tool was used
 
         Args:
-            dicti: Dictionary of transect data from either transect marker or regular transect tool
+            dicti (dict): Dictionary of transect data from either transect marker or regular transect tool
 
         Returns:
-            dicti: Dictionary of transect data with 'Click X', 'Click Y', and 'Width' fields added back
+            Dictionary of transect data with 'Click X', 'Click Y', and 'Width' fields added back
                 in if transect marker tool was used.
         """
         if list(dicti.keys())[0] != "Multi":
@@ -380,7 +405,7 @@ class PlotPopup(Popup):
         Get and download data for all selected variables for all z dimension values.
 
         Args:
-            f_name: String, proposed file name
+            f_name (str): Proposed file name
         """
         file = func.check_file(self.home.rel_path, f_name, ".json")
         if file is False:
@@ -426,7 +451,7 @@ class PlotPopup(Popup):
         Build dropdown menu for marker options with sub-menus for the individual transects
 
         Returns:
-            BackgroundDropDown for marker options
+            :class:`cutview.plotpopup.BackgroundDropDown` for marker options
         """
         # Get dropdown for marker options
         marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
@@ -444,7 +469,7 @@ class PlotPopup(Popup):
         Attaches transect dropdowns to marker buttons in marker dropdown menu
 
         Args:
-            marker: String, marker label 'Marker #'
+            marker (str): Marker label 'Marker #'
             button: RoundedButton, marker's button in marker dropdown menu
         """
         temp_cut_drop = self.get_cut_dropdown(marker)
@@ -455,13 +480,17 @@ class PlotPopup(Popup):
         Build dropdown menu for selecting transects.
 
         Args:
-            key: String, name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
+            key (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
 
         Returns:
-            BackgroundDropDown for transect options
+            :class:`cutview.plotpopup.BackgroundDropDown` for transect options
         """
         # Get dropdown for transect options
         drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
+        all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+                                         width=dp(180))
+        drop.add_widget(all_box)
+        all_btn = func.RoundedButton(text="Select All", size_hint=(0.5, 1))
         for i in list(self.active_transects[key].keys()):
             c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(40), width=dp(180))
             lab = Label(text=i, size_hint=(0.5, 1))
@@ -470,7 +499,26 @@ class PlotPopup(Popup):
             check.bind(active=lambda x, y, m=key, t=i: self.on_transect_checkbox(x, m, t))
             c_box.add_widget(check)
             drop.add_widget(c_box)
+        all_btn.bind(on_press=lambda x: self.select_all(drop.children[0].children[:-1]))
+        all_box.add_widget(all_btn)
         return drop
+
+    def select_all(self, boxes):
+        """
+        If all checkboxes are checked, uncheck all boxes. Otherwise check all boxes. If a box is the only box checked
+        across all markers it will remain checked no matter what.
+
+        Args:
+            boxes: List of BoxLayouts containing checkbox widgets
+        """
+        all_true = True
+        for c_box in boxes:
+            if not c_box.children[0].active:
+                c_box.children[0].active = not c_box.children[0].active
+                all_true = False
+        if all_true:
+            for c_box in boxes:
+                c_box.children[0].active = False
 
     def on_transect_checkbox(self, check, marker, cut, *args):
         """
@@ -478,9 +526,9 @@ class PlotPopup(Popup):
         is always selected.
 
         Args:
-            check: Reference to checkbox in transect list
-            marker: String, name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
-            cut: String, name of transect 'Cut #'
+            check: Reference to kivy.uix.checkbox.CheckBox in transect list
+            marker (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
+            cut (str): Name of transect 'Cut #'
         """
         # Select or deselect transect
         self.active_transects[marker][cut] = not self.active_transects[marker][cut]
@@ -512,7 +560,7 @@ class PlotPopup(Popup):
         Get dropdown for NetCDF variable options. Variable only available if dimensions match current variable
 
         Returns:
-            BackgroundDropdown menu of variable options
+            :class:`cutview.plotpopup.BackgroundDropdown` menu of variable options
         """
         file = self.config['file']
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
@@ -534,8 +582,8 @@ class PlotPopup(Popup):
         is always selected.
 
         Args:
-            check: Reference to checkbox in variable list
-            var: String, name of variable
+            check: Reference to kivy.uix.checkbox.CheckBox in variable list
+            var (str): String, name of variable
         """
         if var in self.active_vars:
             self.active_vars.remove(var)
@@ -564,7 +612,7 @@ class PlotPopup(Popup):
         Get dropdown for NetCDF z value selections
 
         Returns:
-            BackgroundDropDown menu of z value options
+            :class:`cutview.plotpopup.BackgroundDropDown` menu of z value options
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for z in list(self.config['file'].coords[self.config['z']].data):
@@ -584,8 +632,9 @@ class PlotPopup(Popup):
         is always selected.
 
         Args:
-            check: Reference to checkbox in variable list
-            z: String, name of z value
+            check: Reference to kivy.uix.checkbox.CheckBox in variable list
+            z (str): Name of z value
+            *args: Unused args passed to method
         """
         if z in self.active_z:
             self.active_z.remove(z)
@@ -688,7 +737,7 @@ class PlotPopup(Popup):
         Gather data and plot all z values for given variable
 
         Args:
-            var: String, Variable name
+            var (str): Variable name
             ax: Plot axis on which to make plot
 
         Returns:
@@ -910,7 +959,7 @@ class PlotPopup(Popup):
         Finds average of all transects in a marker. Transect width must be the same for the entire marker.
 
         Args:
-            key: String, 'Marker #'
+            key (str): 'Marker #'
             curr: 2D array, currently loaded dataset
 
         Returns:

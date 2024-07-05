@@ -12,7 +12,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 import re
 import os
-import cutview.functions as func
+import functions as func
 from pathlib import Path
 from cutview.filedisplay import FileDisplay
 from cutview.netcdfconfig import NetCDFConfig
@@ -24,9 +24,9 @@ class HomeScreen(Screen):
     to execute GUI operations.
 
     Attributes:
-        file_on: Boolean, is there a file currently loaded in viewer
+        file_on (bool): Whether there is a file currently loaded in viewer
         rel_path: pathlib.Path object to use as output directory
-        font: Float, current font size for all buttons
+        font (float): Current font size for all buttons
         display: FileDisplay object (draggable image) created when a file is loaded
         nc_popup: Reference to NetCDF configuration popup
 
@@ -65,7 +65,7 @@ class HomeScreen(Screen):
         """
         Calls for the creation and deletion of tools.
         Args:
-            t_type: String, Tool type: 'transect' or 'transect_marker'
+            t_type (str): Tool type: 'transect' or 'transect_marker'
         """
         if self.file_on:
             self.font_adapt()
@@ -113,7 +113,7 @@ class HomeScreen(Screen):
         Load NetCDF file
 
         Args:
-            config: Dictionary of verified NetCDF file configuration settings. Check FileDisplay for more details
+            config (dict): Dictionary of verified NetCDF file configuration settings. Check FileDisplay for more details
         """
         self.display = FileDisplay(home=self, f_config={"netcdf": config})
         self.ids.view.add_widget(self.display)

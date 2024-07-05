@@ -1,10 +1,10 @@
-import json
-
-f = open("../../support/example.json")
-data = json.load(f)
-
-
 def project_file_printer(data, tab):
+    """
+    Recursively prints the contents of an output data file from CutView in a readable fashion.
+
+    data (dict): Dictionary output from CutView
+    tab (int): Always use 0, used in the recursive process for indentation
+    """
     for key in list(data.keys()):
         print(" " * tab, end="")
         if isinstance(data[key], list):
@@ -12,6 +12,3 @@ def project_file_printer(data, tab):
         else:
             print(key + ":")
             project_file_printer(data[key], tab + 4)
-
-
-project_file_printer(data, 0)

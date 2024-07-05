@@ -23,7 +23,7 @@ class NetCDFConfig(Popup):
     is in a viable configuration for the viewer.
 
     Attributes:
-        home: Reference to root HomeScreen instance
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         data: xarray.Dataset, Opened NetCDF file
         var_select: RoundedButton, Variable select button
         var_drop: Dropdown(), Dropdown of variable options
@@ -34,7 +34,7 @@ class NetCDFConfig(Popup):
         error: Label for displaying error alerts
         title: Popup title
         content: BoxLayout containing all widgets of the popup
-        size_hint: Tuple (width, height) of relative size of popup to window
+        size_hint (tuple): Tuple (width, height) of relative size of popup to window
 
         Inherits additional attributes from kivy.uix.popup.Popup (see kivy docs)
     """
@@ -43,8 +43,8 @@ class NetCDFConfig(Popup):
         Defines UI elements and opens popup.
 
         Args:
-            file: String, file path of NetCDF file. Must exist and be a valid NetCDF file
-            home: Reference to root HomeScreen instance
+            file (str): File path of NetCDF file. Must exist and be a valid NetCDF file
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         """
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
@@ -113,7 +113,7 @@ class NetCDFConfig(Popup):
 
     def clean(self):
         """
-        Resets file related attributes of the HomeScreen
+        Resets file related attributes of the root :class:`cutview.homescreen.HomeScreen` instance
         """
         if not self.home.file_on:
             self.home.clean_file()
@@ -162,6 +162,10 @@ class NetCDFConfig(Popup):
         When a variable is selected updates var_select button text to the variable name. Then finds first
         two or three dimensions of the variable and sets them as the X, Y, and Z (if three) dimension
         selections.
+
+        Args:
+            var (str): Variable selected
+            *args: Unused arguments passed to method
         """
         setattr(self.var_select, 'text', var)
         dims = list(self.data[self.var_select.text].dims)
@@ -183,6 +187,7 @@ class NetCDFConfig(Popup):
 
         Args:
             dim: x_select, y_select, or z_select Button
+            *args: Unused arguments passed to method
         """
         if self.var_select.text != "Select...":
             dim_drop = ListDropDown(['Select...'] + list(self.data[self.var_select.text].dims), dim)
@@ -193,6 +198,9 @@ class NetCDFConfig(Popup):
     def depth_options(self, *args):
         """
         Creates dropdown for the value of Z dimension if third dimension is selected.
+
+        Args:
+            *args: Unused arguments passed to method
         """
         if self.z_select.text != "Select...":
             depth_drop = ListDropDown(['Select...'] + list(self.data.coords[self.z_select.text].data), self.depth_select)

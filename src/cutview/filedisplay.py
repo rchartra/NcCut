@@ -16,7 +16,7 @@ import numpy as np
 import cv2
 import copy
 import io
-import cutview.functions as func
+import functions as func
 from cutview.multitransect import MultiTransect
 from cutview.multimarker import MultiMarker
 import matplotlib
@@ -31,29 +31,31 @@ class FileDisplay(ScatterLayout):
     If file is a NetCDF file it turns dataset into an image according to settings. Loads image and updates it when
     settings are changed. Also manages the scrolling, flipping, and rotating of the image.
 
+    Inherits additional attributes from kivy.uix.scatterlayout.ScatterLayout (see kivy docs)
+
     Attributes:
-        config: A dictionary holding info about the file necessary for loading, updating, and accessing data from
+        config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data from
             the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
             value is the necessary configuration settings. For images, the config dictionary has form
-            {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see check
-            inputs method of NetCDFConfig class).
-        f_type: File type being loaded ("image" or "netcdf")
-        home: Reference to root HomeScreen instance
-        pos: Position of viewer. Used to properly place transect widgets on screen.
-        sidebar: Reference to list of sidebar buttons
-        og_sidebar: Original state of sidebar before any tools added widgets
+            {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
+            :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+        f_type (str): File type being loaded ("image" or "netcdf")
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        pos (tuple): Position of viewer. Used to properly place transect widgets on screen.
+        sidebar (list): Reference to list of sidebar buttons
+        og_sidebar (list): Original state of sidebar before any tools added widgets
         im: kivy.core.CoreImage made from data array
         byte: io.BytesIO object containing image made from NetCDF dataset loaded in memory
         img: kivy.uix.image.Image UI element which displays the image over the scatter object
         tool: Reference to currently loaded tool
         nc_data: If file is a NetCDF file, actively loaded data array
-        dragging: Boolean, whether in dragging mode or not
-        editing: Boolean, whether in editing mode or not
-        t_mode: Boolean, whether a tool is currently loaded
-        contrast: Int from -127 to 127, contrast value to use when making image from NetCDF file
-        l_col: String, line color for transect tools
-        cir_size: Float, circle size for transect tools
-        cmaps: Dictionary of colormap names mapping to colormap values from cv2
+        dragging (bool): Whether in dragging mode or not
+        editing (bool): Whether in editing mode or not
+        t_mode (bool): Whether a tool is currently loaded
+        contrast (int): Int from -127 to 127, contrast value to use when making image from NetCDF file
+        l_col (str): Line color for transect tools: 'Blue', 'Green' or 'Orange'
+        cir_size (float): Circle size for transect tools
+        cmaps (dict): Dictionary of colormap names mapping to colormap values from cv2
         colormap: current colormap data
         action_lbl: Actions label to be loaded when in transect mode
         drag_btn: Drag button to be loaded when in transect mode
@@ -61,22 +63,20 @@ class FileDisplay(ScatterLayout):
         back_btn: Back button for editing mode
         delete_line_btn: Delete line button
         delete_point_btn: Delete point button
-        edit_widgets: List of widgets that must be added to screen when entering editing mode
-        current: List to hold other widgets when they are replaced by editing mode widgets
-
-        Inherits additional attributes from kivy.uix.scatterlayout.ScatterLayout (see kivy docs)
+        edit_widgets (list): List of widgets that must be added to screen when entering editing mode
+        current (list): List to hold other widgets when they are replaced by editing mode widgets
     """
     def __init__(self, home, f_config, **kwargs):
         """
         Initializes settings and defines editing mode buttons.
 
         Args:
-            home: Reference to root HomeScreen reference
-            f_config: A dictionary holding info about the file necessary for loading, updating, and accessing data from
-            the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
-            value is the necessary configuration settings. For images, the config dictionary has form
-            {"image": str(file)}. For a netcdf file the value is a dictionary of configuration values (see check inputs
-            method of NetCDFConfig class).
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` reference
+            f_config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing
+                data from the file. Highest level should have one key that is the name of the file type ("image" or
+                "netcdf") whose value is the necessary configuration settings. For images, the config dictionary has
+                form {"image": str(file)}. For a netcdf file the value is a dictionary of configuration values (see
+                :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         """
         super(FileDisplay, self).__init__(**kwargs)
 
@@ -147,7 +147,7 @@ class FileDisplay(ScatterLayout):
         Update editing mode button font sizes.
 
         Args:
-            font: Float, new font size
+            font (float): New font size
         """
         self.action_lbl.font_size = font
         self.drag_btn.font_size = font
@@ -197,7 +197,7 @@ class FileDisplay(ScatterLayout):
         and clean up. If not, load indicated tool and switches cursor to a cross.
 
         Args:
-            t_type: String, Tool type: 'transect' or 'transect_marker'
+            t_type (str): Tool type: 'transect' or 'transect_marker'
         """
 
         if not self.t_mode:
@@ -281,13 +281,17 @@ class FileDisplay(ScatterLayout):
         Updates app settings depending on context of setting
 
         Args:
-            setting: String, name of setting being changed
+            setting (str): Name of setting being changed
             value: New setting value of appropriate data type
         """
         if setting == "l_color":
             self.l_col = value
+            if self.t_mode:
+                self.tool.update_l_col(value)
         elif setting == "cir_size":
             self.cir_size = float(value)
+            if self.t_mode:
+                self.tool.update_c_size(float(value))
         elif setting == "contrast":
             if self.f_type == "netcdf":
                 self.contrast = float(value)
@@ -317,7 +321,7 @@ class FileDisplay(ScatterLayout):
 
     def netcdf_to_image(self):
         """
-        Creates image from NetCDF dataset defined in f_config
+        Creates image from NetCDF dataset defined in :attribute:`cutview.filedisplay.FileDisplay.f_config`
 
         Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
         and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
@@ -377,7 +381,7 @@ class FileDisplay(ScatterLayout):
 
         Args:
             data: 2D array to which to apply contrast change
-            contrast: Desired contrast value
+            contrast (int): Desired contrast value
 
         Return:
             Data with contrast adjusted

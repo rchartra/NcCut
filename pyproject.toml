@@ -32,6 +32,11 @@ flake8 = "^7.1.0"
 pytest = "^8.2.2"
 pooch = "^1.8.2"
 
+[tool.poetry.group.docs.dependencies]
+Sphinx = "^7.3.7"
+sphinx-rtd-theme = "^2.0.0"
+sphinxcontrib-video = "^0.2.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

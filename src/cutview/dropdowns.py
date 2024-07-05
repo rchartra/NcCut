@@ -17,11 +17,11 @@ class ViewDropDown(DropDown):
 
     Creates the line color dropdown menu and manages the execution of all setting options.
 
-    Attributes:
-        home: Reference to root HomeScreen instance
-        l_color_drop: Line color selection kivy.uix.dropdown.Dropdown object
+    Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
 
-        Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
+    Attributes:
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        l_color_drop: Line color selection kivy.uix.dropdown.Dropdown object
     """
 
     def __init__(self, **kwargs):
@@ -44,7 +44,7 @@ class ViewDropDown(DropDown):
         Passes setting changes to the viewer.
 
         Args:
-            setting: String name of setting being changed.
+            setting (str): Name of setting being changed.
             value: New setting value of appropriate data type for setting
         """
         if self.home.file_on:
@@ -79,20 +79,20 @@ class NetCDFDropDown(DropDown):
     Creates all dropdown lists and executes all setting changes. Other settings are
     defined statically in cutview.kv file.
 
+    Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
+
     Attributes:
-        home: Reference to root HomeScreen instance
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         cmap_dropdown: Color map selection kivy.uix.dropdown.Dropdown object
         var_dropdown: Variable selection kivy.uix.dropdown.Dropdown object
         depth_dropdown: Z dimension value selection kivy.uix.dropdown.Dropdown object
-
-        Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
     """
     def __init__(self, **kwargs):
         """
         Connects to root HomeScreen instance and defines dropdown menus.
 
-        Colormaps are defined in FileDisplay class. Variables and z dimension values come from the
-        currently loaded NetCDF file.
+        Colormaps are defined in :class:`cutview.filedisplay.FileDisplay` class. Variables and z dimension values come
+        from the currently loaded NetCDF file.
         """
         super(NetCDFDropDown, self).__init__(**kwargs)
         self.home = App.get_running_app().root.get_screen("HomeScreen")
@@ -130,7 +130,7 @@ class NetCDFDropDown(DropDown):
         Pass setting changes to display.
 
         Args:
-            setting: String name of setting being changed.
+            setting (str): Name of setting being changed.
             value: New setting value of appropriate data type for setting
         """
         if self.home.file_on:

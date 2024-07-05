@@ -21,13 +21,16 @@ class SingleTransect(ui.widget.Widget):
 
     Attributes:
         line: Line object which holds endpoint data
-        circles: Number of circles drawn, ie points clicked by user
-        home: Reference to root HomeScreen instance
+        c1: Ellipse object for first point clicked
+        c2: Ellipse object for second point clicked
+        number: Label, reference to number label
+        circles (int): Number of circles drawn, ie points clicked by user
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         size: 2 element array of ints, Size of widget
         pos: 2 element array of ints, Position of widget
         l_color: kivy.graphics.Color, Color to use for graphics
-        c_size: 2 element tuple of floats that defines size of circles
-        line_width: Float, width of lines
+        c_size (tuple): 2 element tuple of floats that defines size of circles and other graphics
+        line_width (float): Float, width of lines
 
         Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
@@ -36,10 +39,13 @@ class SingleTransect(ui.widget.Widget):
         Sets initial settings for transect according to attributes of HomeScreen root
 
         Args:
-            home: Reference to root HomeScreen instance
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         """
         super(SingleTransect, self).__init__(**kwargs)
-        self.line = Line()
+        self.line = None
+        self.c1 = None
+        self.c2 = None
+        self.number = None
         self.circles = 0
         self.home = home
         self.size = self.home.display.size
@@ -55,6 +61,45 @@ class SingleTransect(ui.widget.Widget):
         self.c_size = (dp(size), dp(size))
         self.line_width = dp(size / 5)
 
+    def update_l_col(self, color):
+        """
+        Updates the line color for the transect and redraws canvas elements
+
+        Args:
+            color (str): New color value: 'Blue', 'Green' or 'Orange'
+        """
+        if color == "Blue":
+            self.l_color = Color(0.28, 0.62, 0.86)
+        elif color == "Green":
+            self.l_color = Color(0.39, 0.78, 0.47)
+        elif color == "Orange":
+            self.l_color = Color(0.74, 0.42, 0.13)
+        graphics = [self.c1, self.c2, self.line]
+        for g in graphics:
+            if g:
+                self.canvas.remove(g)
+        self.canvas.add(self.l_color)
+        for g in graphics:
+            if g:
+                self.canvas.add(g)
+
+    def update_c_size(self, value):
+        """
+        Updates graphic sizes according to the new value.
+
+        Args:
+            value (float): New graphics size
+        """
+        self.line_width = dp(value / 5)
+        self.line.width = self.line_width
+        for c in [self.c1, self.c2]:
+            c.size = (dp(value), dp(value))
+            c.pos = (c.pos[0] + self.c_size[0] / 2 - dp(value) / 2, c.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
+        self.number.font_size = dp(value) * 2
+        self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
+                           self.number.pos[1] + self.c_size[1] - dp(value))
+        self.c_size = (dp(value), dp(value))
+
     def on_touch_down(self, touch):
         """
         Draws points and lines depending on which parts of the transect have already been drawn.
@@ -65,14 +110,16 @@ class SingleTransect(ui.widget.Widget):
         if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
             if self.circles == 0:  # If first click, add number, one circle, and draw line between point and cursor
                 self.circles += 1
-                number = Label(text=str(len(self.parent.children)), pos=(touch.x, touch.y), font_size=self.c_size[0])
-                self.add_widget(number)
+                self.number = Label(text=str(len(self.parent.children)),
+                                    pos=(touch.x + self.c_size[0], touch.y + self.c_size[0]),
+                                    font_size=self.c_size[0] * 2)
+                self.add_widget(self.number)
                 with self.canvas:
                     # Add points and start line
                     Color(self.l_color.r, self.l_color.g, self.l_color.b)
                     self.line = Line(points=[], width=self.line_width, group='end')
-                    Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
-                            size=self.c_size, group='start')
+                    self.c1 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
+                                      size=self.c_size, group='start')
                     self.line.points = (touch.x, touch.y)
                 # Bind line drawing to any time user mouse position changes
                 Window.bind(mouse_pos=self.draw_line)
@@ -85,8 +132,8 @@ class SingleTransect(ui.widget.Widget):
                 if [touch.x, touch.y] == self.line.points:  # If clicked the same point as before, do nothing
                     return
                 with self.canvas:  # Second circle and sets line between the two circles.
-                    Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
-                            size=self.c_size, group='end')
+                    self.c2 = Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
+                                      size=self.c_size, group='end')
                     self.line.points += (touch.x, touch.y)
 
     def draw_line(self, instance, pos):
@@ -98,7 +145,7 @@ class SingleTransect(ui.widget.Widget):
 
         Args:
             instance: WindowSDL instance, current window loaded (not used by method)
-            pos: 2 element tuple of floats, x and y coord of cursor position
+            pos (tuple): 2 element tuple of floats, x and y coord of cursor position
         """
         if not self.parent.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
