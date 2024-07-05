@@ -94,7 +94,7 @@ jobs:
       -name: Build Docs
         run: |
           cd docs
-          .\make html
+          sphinx-build -M html source build
 
   paper:
       runs-on: ubuntu-latest
