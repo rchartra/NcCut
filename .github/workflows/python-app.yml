@@ -94,7 +94,7 @@ jobs:
       - name: Build Docs
         run: |
           cd docs
-          sphinx-build -M html source build
+          python -m poetry run sphinx-build -M html source build
 
   paper:
       runs-on: ubuntu-latest

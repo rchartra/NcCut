@@ -19,10 +19,10 @@ from kivy.uix.checkbox import CheckBox
 import sys
 sys.path.insert(0, 'src/cutview')  # Test local code not PyPI
 
-from multimarker import Click, marker_find
-from markerwidth import MarkerWidth
-import functions as functions
-from cutview import CutView
+from cutview.multimarker import Click, marker_find
+from cutview.markerwidth import MarkerWidth
+import cutview.functions as functions
+from cutview.cutview import CutView
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 SUPPORT_FILE_PATH = "support/"
