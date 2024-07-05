@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage &mdash; CutView 0.2.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=58050c01"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial Videos" href="example.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CutView
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loading-a-file">Loading a File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tools">Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transect-tool">Transect Tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transect-marker">Transect Marker</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_output.html">Data Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribution.html">Contribution Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CutView</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
+<ol class="arabic">
+<li><p>To install the app refer to the <a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> instructions.</p></li>
+<li><p>To run the app execute the following Python code:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cutview.cutview</span> <span class="kn">import</span> <span class="n">CutView</span>
+<span class="n">CutView</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<p>For video walkthroughs of CutView’s basic usage, refer to the <a class="reference internal" href="example.html"><span class="doc">Tutorial Videos</span></a> section.</p>
+<section id="loading-a-file">
+<h2>Loading a File<a class="headerlink" href="#loading-a-file" title="Link to this heading"></a></h2>
+<p>CutView supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.</p>
+<ol class="arabic">
+<li><p>To load an image or NetCDF file type the absolute or relative file path to your file in the file entry text box</p>
+<blockquote>
+<div><ul>
+<li><p>If you are loading a NetCDF file a popup window will appear with additional selections:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Select which variable from your file you would like to see.</p></li>
+<li><p>Confirm or select which dimensions you would like to use as the X and Y axes for your variable.</p></li>
+<li><p>If your variable has data in a third dimension select the Z dimension and an initial Z value to display. You will be able to toggle between z values later.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Select <strong>Go</strong> to load the selected data</p></li>
+<li><p>You can scroll to zoom in and out of the image and can click and drag the image to move it around.</p></li>
+<li><p>From the <strong>View</strong> menu in the settings bar you can rotate or flip the image as well as change graphic settings for the tools.</p></li>
+<li><p>If you are loading a NetCDF file, from the <strong>NetCDF</strong> menu in the settings bar you can change which variable or z value you’d like to see as well as change the color map or contrast of the image.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Changing the contrast and colormap only affects the displayed image. Transect data is taken from the dataset itself.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+</section>
+<section id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>
+<p>CutView has two types of tools for making transects. The simpler <a class="reference internal" href="#transect"><span class="std std-ref">Transect</span></a> tool allows you to individually draw lines across features where transects will be taken when plotted:</p>
+<blockquote>
+<div><img alt="_images/transect.png" src="_images/transect.png" />
+</div></blockquote>
+<p>The <a class="reference internal" href="#transect-marker"><span class="std std-ref">Transect Marker</span></a> tool allows you to draw a line along a feature, and transects will be automatically made orthogonal to the line you’ve drawn with a set width:</p>
+<blockquote>
+<div><img alt="_images/transect_marker.png" src="_images/transect_marker.png" />
+</div></blockquote>
+<section id="transect-tool">
+<span id="transect"></span><h3>Transect Tool<a class="headerlink" href="#transect-tool" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p>Hit the <strong>Transect</strong> button to enter transect mode</p></li>
+<li><p>Click two points you’d like to make a transect between</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Select <strong>Drag Mode</strong> from the actions sidebar to drag the image without selecting points, and select <strong>Transect Mode</strong> to go back.</p></li>
+<li><p>Select <strong>Edit Mode</strong> to delete either the last point clicked or the last transect drawn.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Repeat for as many transects as you’d like</p></li>
+<li><p>When done select the <strong>Plot</strong> button and a popup will appear with a plot of all transects and downloading options.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>You can select which transects you’d like to plot</p></li>
+<li><p>If using a NetCDF file you can select multiple variables and Z values you’d like to see your selected transects plotted from.</p></li>
+<li><p>If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see the <a class="reference internal" href="data_output.html#data-output"><span class="std std-ref">Data Output</span></a> section for more on how data is formatted).</p></li>
+<li><p>Click anywhere around the popup or the close button to dismiss plotting window.</p></li>
+</ol>
+</section>
+<section id="transect-marker">
+<span id="id1"></span><h3>Transect Marker<a class="headerlink" href="#transect-marker" title="Link to this heading"></a></h3>
+<p>Using this tool multiple lines or <em>Markers</em> can be drawn onto a loaded file. These <em>Markers</em> can all be saved together as a <em>project</em> and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.</p>
+<ol class="arabic">
+<li><p>Hit the <strong>Transect Marker</strong> button to enter transect mode.</p></li>
+<li><p>Click points along the feature you’d like to make transects across. Dots will appear on either side of the line drawn indicating the start and end points of the transects that will be made.</p>
+<blockquote>
+<div><ul>
+<li><p>Select <strong>Drag Mode</strong> from the actions sidebar to drag the image without selecting points, and select <strong>Transect Mode</strong> to go back.</p></li>
+<li><p>Select <strong>Edit Mode</strong> to delete either the last point clicked or the last marker drawn.</p></li>
+<li><p>To change the width of the transects being made you may enter the number of pixels into the <strong>Width</strong> text box. Select <strong>Go</strong> to change the width for all future transects.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>This will not change the width of transects already drawn</p></li>
+<li><p>The default width is 40 pixels, you can enter any width within 0 and 400</p></li>
+<li><p>If you change the width of a marker any new markers will continue to use that same width unless you change it again.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Select <strong>New Line</strong> to begin a new marker and repeat for as many markers as you’d like.</p></li>
+<li><p>When done select the <strong>Plot</strong> button and a popup will appear with a plot of all transects from the first marker and downloading options.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>You can select which transects from which markers you’d like to plot</p></li>
+<li><p>If using a NetCDF file you can select which variables and Z values you’d like to see your selected transects plotted from.</p></li>
+<li><p>If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see the <a class="reference internal" href="data_output.html#data-output"><span class="std std-ref">Data Output</span></a> section of this wiki for more on how data is formatted).</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If you want to continue working on your project at a later time, <em>select all the transects</em> and save the data to JSON format. Refer to section below for reloading that data.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Click anywhere around the popup or the close button to dismiss</p></li>
+</ol>
+<p>To upload a previously worked on project:</p>
+<ol class="arabic simple">
+<li><p>Load the same dataset/image you worked on previously.</p></li>
+<li><p>Hit the <strong>Transect Marker</strong> button to enter transect mode.</p></li>
+<li><p>Instead of clicking new points, select the <strong>Upload Project</strong> button.</p></li>
+<li><p>Enter the file name of the transect data you saved previously and select <strong>Ok</strong>.</p></li>
+<li><p>All markers from the file will load onto the viewer and you can continue working on the project.</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example.html" class="btn btn-neutral float-right" title="Tutorial Videos" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Robin Chartrand.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

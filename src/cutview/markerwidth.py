@@ -18,11 +18,11 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
     transect marker tool.
 
     Attributes:
-        txt: TextInput widget where user enters their desired width
+        txt: kivy.uix.textinput.TextInput widget where user enters their desired width
         btn: 'Go' Button
-        marker: Current MultiMarker instance
-        min: Int, minimum width allowed
-        max: Int, maximum width allowed
+        marker: Current :class:`cutview.multimarker.MultiMarker` instance
+        min (int): Minimum width allowed
+        max (int): Maximum width allowed
 
         Inherits additional attributes from kivy.uix.boxlayout.Boxlayout (see kivy docs)
     """
@@ -31,7 +31,7 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         Defines graphical elements.
 
         Args:
-            marker: Active MultiMarker instance
+            marker: Active :class:`cutview.multimarker.MultiMarker` instance
         """
         super(MarkerWidth, self).__init__(**kwargs)
         self.txt = TextInput(hint_text="Width", size_hint=(.7, 1))
@@ -48,7 +48,7 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         Update go button font size
 
         Args:
-            font: Float, new font size
+            font (float): New font size
         """
         self.btn.font_size = font
 

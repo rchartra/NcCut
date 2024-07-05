@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CutView API Reference &mdash; CutView 0.2.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=58050c01"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Contribution Guide" href="contribution.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CutView
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_output.html">Data Output</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="contribution.html">Contribution Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="contribution.html#submission">Submission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribution.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contribution.html#documentation">Documentation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="contribution.html#tips-for-adding-a-new-tool">Tips for Adding a New Tool</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CutView API Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.cutview">cutview.cutview module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.dropdowns">cutview.dropdowns module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.filedisplay">cutview.filedisplay module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.functions">cutview.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.homescreen">cutview.homescreen module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.marker">cutview.marker module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.markerwidth">cutview.markerwidth module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.multimarker">cutview.multimarker module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.multitransect">cutview.multitransect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.netcdfconfig">cutview.netcdfconfig module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.plotpopup">cutview.plotpopup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cutview-project-file-printer-module">cutview.project_file_printer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview.singletransect">cutview.singletransect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutview">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CutView</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="contribution.html">Contribution Guide</a></li>
+      <li class="breadcrumb-item active">CutView API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cutview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cutview-api-reference">
+<h1>CutView API Reference<a class="headerlink" href="#cutview-api-reference" title="Link to this heading"></a></h1>
+<p>This section serves as reference for contributors who are looking to understand CutView’s underlying structure. This is not a user facing API.</p>
+<section id="module-cutview.cutview">
+<span id="cutview-cutview-module"></span><h2>cutview.cutview module<a class="headerlink" href="#module-cutview.cutview" title="Link to this heading"></a></h2>
+<p>Builds app and sets initial window.</p>
+<p>File to run to start up the GUI. Creates the widget tree and sets the initial window size.</p>
+<p>Usage from command line:</p>
+<p>python cutview.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.cutview.CutView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.cutview.</span></span><span class="sig-name descname"><span class="pre">CutView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.cutview.CutView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">App</span></code></p>
+<p>Builds app and widget tree.</p>
+<p>Creates the initial window and ensures font sizes in the app update uniformly
+when the window resizes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.app.App</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.cutview.CutView.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.cutview.CutView.build" title="Link to this definition"></a></dt>
+<dd><p>Override App class build method and return widget tree.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.cutview.CutView.on_resize">
+<span class="sig-name descname"><span class="pre">on_resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.cutview.CutView.on_resize" title="Link to this definition"></a></dt>
+<dd><p>Triggers font adjustments when the window size is adjusted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – Accepts args App class supplies though they aren’t needed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.cutview.CutView.on_start">
+<span class="sig-name descname"><span class="pre">on_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.cutview.CutView.on_start" title="Link to this definition"></a></dt>
+<dd><p>Sets initial window size according to operating system.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.dropdowns">
+<span id="cutview-dropdowns-module"></span><h2>cutview.dropdowns module<a class="headerlink" href="#module-cutview.dropdowns" title="Link to this heading"></a></h2>
+<p>Functionality for View and NetCDF setting menus.</p>
+<p>Creates the dropdown lists for the ‘View’ and ‘NetCDF’ setting menus. Manages the execution
+of setting changes when they occur. This module only defines the dynamic aspect of the menus.
+Static aspects are in the cutview.kv file.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.dropdowns.NetCDFDropDown">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.dropdowns.</span></span><span class="sig-name descname"><span class="pre">NetCDFDropDown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.NetCDFDropDown" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DropDown</span></code></p>
+<p>Dynamic elements of the NetCDF setting menu</p>
+<p>Creates all dropdown lists and executes all setting changes. Other settings are
+defined statically in cutview.kv file.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.dropdowns.NetCDFDropDown.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.dropdowns.NetCDFDropDown.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.dropdowns.NetCDFDropDown.cmap_dropdown">
+<span class="sig-name descname"><span class="pre">cmap_dropdown</span></span><a class="headerlink" href="#cutview.dropdowns.NetCDFDropDown.cmap_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Color map selection kivy.uix.dropdown.Dropdown object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.dropdowns.NetCDFDropDown.var_dropdown">
+<span class="sig-name descname"><span class="pre">var_dropdown</span></span><a class="headerlink" href="#cutview.dropdowns.NetCDFDropDown.var_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Variable selection kivy.uix.dropdown.Dropdown object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.dropdowns.NetCDFDropDown.depth_dropdown">
+<span class="sig-name descname"><span class="pre">depth_dropdown</span></span><a class="headerlink" href="#cutview.dropdowns.NetCDFDropDown.depth_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Z dimension value selection kivy.uix.dropdown.Dropdown object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.dropdown.Dropdown</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.dropdowns.NetCDFDropDown.pass_setting">
+<span class="sig-name descname"><span class="pre">pass_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setting</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.NetCDFDropDown.pass_setting" title="Link to this definition"></a></dt>
+<dd><p>Pass setting changes to display.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setting</strong> – String name of setting being changed.</p></li>
+<li><p><strong>value</strong> – New setting value of appropriate data type for setting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.dropdowns.</span></span><span class="sig-name descname"><span class="pre">ViewDropDown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DropDown</span></code></p>
+<p>Dynamic elements of the ‘View’ settings menu.</p>
+<p>Creates the line color dropdown menu and manages the execution of all setting options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown.l_color_drop">
+<span class="sig-name descname"><span class="pre">l_color_drop</span></span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown.l_color_drop" title="Link to this definition"></a></dt>
+<dd><p>Line color selection kivy.uix.dropdown.Dropdown object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.dropdown.Dropdown</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown.flip_h">
+<span class="sig-name descname"><span class="pre">flip_h</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown.flip_h" title="Link to this definition"></a></dt>
+<dd><p>Call for a horizontal flip of view of current display</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown.flip_v">
+<span class="sig-name descname"><span class="pre">flip_v</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown.flip_v" title="Link to this definition"></a></dt>
+<dd><p>Call for a vertical flip of view of current display</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown.pass_setting">
+<span class="sig-name descname"><span class="pre">pass_setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setting</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown.pass_setting" title="Link to this definition"></a></dt>
+<dd><p>Passes setting changes to the viewer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setting</strong> – String name of setting being changed.</p></li>
+<li><p><strong>value</strong> – New setting value of appropriate data type for setting</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.dropdowns.ViewDropDown.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.dropdowns.ViewDropDown.rotate" title="Link to this definition"></a></dt>
+<dd><p>Call for a 45 degree rotation of current display by 45 degrees</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.filedisplay">
+<span id="cutview-filedisplay-module"></span><h2>cutview.filedisplay module<a class="headerlink" href="#module-cutview.filedisplay" title="Link to this heading"></a></h2>
+<p>Functionality for viewing window and interactive display.</p>
+<p>This module manages the scrolling, rotation, and flipping of the image. It also executes the creation of
+and updates made to the image/dataset being displayed. The dragability of the image is managed by the parent
+ScatterLayout class. Manages the creation and deletion of tools.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.filedisplay.</span></span><span class="sig-name descname"><span class="pre">FileDisplay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ScatterLayout</span></code></p>
+<p>Creation and management of the interactive display.</p>
+<p>If file is a NetCDF file it turns dataset into an image according to settings. Loads image and updates it when
+settings are changed. Also manages the scrolling, flipping, and rotating of the image.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.config" title="Link to this definition"></a></dt>
+<dd><p>A dictionary holding info about the file necessary for loading, updating, and accessing data from
+the file. Highest level should have one key that is the name of the file type (“image” or “netcdf”) whose
+value is the necessary configuration settings. For images, the config dictionary has form
+{“image”: str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see check
+inputs method of NetCDFConfig class).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.f_type">
+<span class="sig-name descname"><span class="pre">f_type</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.f_type" title="Link to this definition"></a></dt>
+<dd><p>File type being loaded (“image” or “netcdf”)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.pos" title="Link to this definition"></a></dt>
+<dd><p>Position of viewer. Used to properly place transect widgets on screen.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.sidebar">
+<span class="sig-name descname"><span class="pre">sidebar</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.sidebar" title="Link to this definition"></a></dt>
+<dd><p>Reference to list of sidebar buttons</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.og_sidebar">
+<span class="sig-name descname"><span class="pre">og_sidebar</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.og_sidebar" title="Link to this definition"></a></dt>
+<dd><p>Original state of sidebar before any tools added widgets</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.im">
+<span class="sig-name descname"><span class="pre">im</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.im" title="Link to this definition"></a></dt>
+<dd><p>kivy.core.CoreImage made from data array</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.byte">
+<span class="sig-name descname"><span class="pre">byte</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.byte" title="Link to this definition"></a></dt>
+<dd><p>io.BytesIO object containing image made from NetCDF dataset loaded in memory</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.img">
+<span class="sig-name descname"><span class="pre">img</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.img" title="Link to this definition"></a></dt>
+<dd><p>kivy.uix.image.Image UI element which displays the image over the scatter object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.tool">
+<span class="sig-name descname"><span class="pre">tool</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.tool" title="Link to this definition"></a></dt>
+<dd><p>Reference to currently loaded tool</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.nc_data">
+<span class="sig-name descname"><span class="pre">nc_data</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.nc_data" title="Link to this definition"></a></dt>
+<dd><p>If file is a NetCDF file, actively loaded data array</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.dragging">
+<span class="sig-name descname"><span class="pre">dragging</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.dragging" title="Link to this definition"></a></dt>
+<dd><p>Boolean, whether in dragging mode or not</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.editing">
+<span class="sig-name descname"><span class="pre">editing</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.editing" title="Link to this definition"></a></dt>
+<dd><p>Boolean, whether in editing mode or not</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.t_mode">
+<span class="sig-name descname"><span class="pre">t_mode</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.t_mode" title="Link to this definition"></a></dt>
+<dd><p>Boolean, whether a tool is currently loaded</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.contrast">
+<span class="sig-name descname"><span class="pre">contrast</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.contrast" title="Link to this definition"></a></dt>
+<dd><p>Int from -127 to 127, contrast value to use when making image from NetCDF file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.l_col">
+<span class="sig-name descname"><span class="pre">l_col</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.l_col" title="Link to this definition"></a></dt>
+<dd><p>String, line color for transect tools</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.cir_size">
+<span class="sig-name descname"><span class="pre">cir_size</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.cir_size" title="Link to this definition"></a></dt>
+<dd><p>Float, circle size for transect tools</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.cmaps">
+<span class="sig-name descname"><span class="pre">cmaps</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.cmaps" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of colormap names mapping to colormap values from cv2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.colormap">
+<span class="sig-name descname"><span class="pre">colormap</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.colormap" title="Link to this definition"></a></dt>
+<dd><p>current colormap data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.action_lbl">
+<span class="sig-name descname"><span class="pre">action_lbl</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.action_lbl" title="Link to this definition"></a></dt>
+<dd><p>Actions label to be loaded when in transect mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.drag_btn">
+<span class="sig-name descname"><span class="pre">drag_btn</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.drag_btn" title="Link to this definition"></a></dt>
+<dd><p>Drag button to be loaded when in transect mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.edit_btn">
+<span class="sig-name descname"><span class="pre">edit_btn</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.edit_btn" title="Link to this definition"></a></dt>
+<dd><p>Edit button to be loaded when in transect mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.back_btn">
+<span class="sig-name descname"><span class="pre">back_btn</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.back_btn" title="Link to this definition"></a></dt>
+<dd><p>Back button for editing mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.delete_line_btn">
+<span class="sig-name descname"><span class="pre">delete_line_btn</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.delete_line_btn" title="Link to this definition"></a></dt>
+<dd><p>Delete line button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.delete_point_btn">
+<span class="sig-name descname"><span class="pre">delete_point_btn</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.delete_point_btn" title="Link to this definition"></a></dt>
+<dd><p>Delete point button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.edit_widgets">
+<span class="sig-name descname"><span class="pre">edit_widgets</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.edit_widgets" title="Link to this definition"></a></dt>
+<dd><p>List of widgets that must be added to screen when entering editing mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.current">
+<span class="sig-name descname"><span class="pre">current</span></span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.current" title="Link to this definition"></a></dt>
+<dd><p>List to hold other widgets when they are replaced by editing mode widgets</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.scatterlayout.ScatterLayout</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.apply_contrast">
+<span class="sig-name descname"><span class="pre">apply_contrast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contrast</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.apply_contrast" title="Link to this definition"></a></dt>
+<dd><p>Perform contrast level adjustment to data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – 2D array to which to apply contrast change</p></li>
+<li><p><strong>contrast</strong> – Desired contrast value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data with contrast adjusted</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.drag_mode">
+<span class="sig-name descname"><span class="pre">drag_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.drag_mode" title="Link to this definition"></a></dt>
+<dd><p>Calls for transecting tool to turn dragging mode on if off and off if on</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – Unused arguments passed to method when called.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.edit_mode">
+<span class="sig-name descname"><span class="pre">edit_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.edit_mode" title="Link to this definition"></a></dt>
+<dd><p>Turns editing mode on if off and off if on.</p>
+<p>When editing mode is being turned on, all sidebar buttons below ‘Actions’ label are added to
+a temporary holding list and then replaced with editing buttons. When editing mode is turned
+off, the editing buttons are removed and the original buttons are returned to the sidebar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> – Unused arguments passed to method when called.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.flip_horizontally">
+<span class="sig-name descname"><span class="pre">flip_horizontally</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.flip_horizontally" title="Link to this definition"></a></dt>
+<dd><p>Flips display horizontally</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.flip_vertically">
+<span class="sig-name descname"><span class="pre">flip_vertically</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.flip_vertically" title="Link to this definition"></a></dt>
+<dd><p>Flips display vertically</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.font_adapt">
+<span class="sig-name descname"><span class="pre">font_adapt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.font_adapt" title="Link to this definition"></a></dt>
+<dd><p>Update editing mode button font sizes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>font</strong> – Float, new font size</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.get_color_bar">
+<span class="sig-name descname"><span class="pre">get_color_bar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.get_color_bar" title="Link to this definition"></a></dt>
+<dd><p>Create color bar image according to colormap and dataset</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.load_image">
+<span class="sig-name descname"><span class="pre">load_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.load_image" title="Link to this definition"></a></dt>
+<dd><p>Creates UI Image element, loads it in viewer, and scales it to window size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.manage_tool">
+<span class="sig-name descname"><span class="pre">manage_tool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.manage_tool" title="Link to this definition"></a></dt>
+<dd><p>Manages the creation and deletion of each tool.</p>
+<p>If a tool is currently loaded, remove it, switch cursor to an arrow
+and clean up. If not, load indicated tool and switches cursor to a cross.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>t_type</strong> – String, Tool type: ‘transect’ or ‘transect_marker’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.netcdf_to_image">
+<span class="sig-name descname"><span class="pre">netcdf_to_image</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.netcdf_to_image" title="Link to this definition"></a></dt>
+<dd><p>Creates image from NetCDF dataset defined in f_config</p>
+<p>Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
+and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
+can make image out of an array.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.on_touch_down">
+<span class="sig-name descname"><span class="pre">on_touch_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">touch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.on_touch_down" title="Link to this definition"></a></dt>
+<dd><p>If touch is of a scrolling type zoom in or out of the image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>touch</strong> – MouseMotionEvent, see kivy docs for details</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.reset_sidebar">
+<span class="sig-name descname"><span class="pre">reset_sidebar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.reset_sidebar" title="Link to this definition"></a></dt>
+<dd><p>Revert sidebar to pre-tool state</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.rotate" title="Link to this definition"></a></dt>
+<dd><p>Rotates display 45 degrees counterclockwise</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.update_color_bar">
+<span class="sig-name descname"><span class="pre">update_color_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colorbar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.update_color_bar" title="Link to this definition"></a></dt>
+<dd><p>Adds colorbar image to settings bar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>colorbar</strong> – kivy.uix.image.Image, colorbar graphic</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.update_netcdf">
+<span class="sig-name descname"><span class="pre">update_netcdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.update_netcdf" title="Link to this definition"></a></dt>
+<dd><p>Reload netcdf image when netcdf data is changed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.filedisplay.FileDisplay.update_settings">
+<span class="sig-name descname"><span class="pre">update_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setting</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.filedisplay.FileDisplay.update_settings" title="Link to this definition"></a></dt>
+<dd><p>Updates app settings depending on context of setting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setting</strong> – String, name of setting being changed</p></li>
+<li><p><strong>value</strong> – New setting value of appropriate data type</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.functions">
+<span id="cutview-functions-module"></span><h2>cutview.functions module<a class="headerlink" href="#module-cutview.functions" title="Link to this heading"></a></h2>
+<p>Miscellaneous helper functions to support other widgets.</p>
+<p>Provides reference to custom UI elements defined in cutview.kv file so they can be used in python scripts.
+Contains error banner functionality, file management function, and transect taking function.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.functions.BackgroundLabel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">BackgroundLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.BackgroundLabel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Label</span></code></p>
+<p>Code for this is in cutview.kv. Referenced here so it can be used in scripts.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.functions.RoundedButton">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">RoundedButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.RoundedButton" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Button</span></code></p>
+<p>Code for this is in cutview.kv. Referenced here so it can be used in scripts.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.functions.alert">
+<span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">home</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.alert" title="Link to this definition"></a></dt>
+<dd><p>Creates alert banner.</p>
+<p>Creates alert banner with given text and adds it to top left corner of the home screen.
+Schedules it to be removed after 2 seconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – String of alert banner message</p></li>
+<li><p><strong>home</strong> – Active HomeScreen reference</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.functions.check_file">
+<span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">check_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.check_file" title="Link to this definition"></a></dt>
+<dd><p>Checks if a filename is valid and prevents overwriting.</p>
+<p>Checks a file name doesn’t have any problematic characters. If file name is a file path
+ensures that the directories exists. If a file name is the same as one that already
+exists it adds a (#) to avoid overwriting existing file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – pathlib.Path object of current output directory</p></li>
+<li><p><strong>fname</strong> – String of user proposed file name</p></li>
+<li><p><strong>extension</strong> – String of file extension for file type being created</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If all checks are passed the file name is returned, possibly with added (#). If checks aren’t passed
+returns False.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.functions.ip_get_points">
+<span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">ip_get_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.ip_get_points" title="Link to this definition"></a></dt>
+<dd><p>Creates a data frame containing x, y, and value of points on transect line</p>
+<p>From end points finds points of line connecting them. Interpolates higher resolution version of
+relevant section of data set, and then grabs data values at each line point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> – 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]</p></li>
+<li><p><strong>curr</strong> – 2D indexable array of current dataset loaded in viewer</p></li>
+<li><p><strong>nc</strong> – Boolean of whether current file is NetCDF or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>‘x’: 1D array of x-coordinates of transect points
+‘y’: 1D array of y-coordinates of transect points
+‘Cut’: 1D array of data values at each point along line connecting end points</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary with three keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.functions.remove_alert">
+<span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">remove_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">largs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.remove_alert" title="Link to this definition"></a></dt>
+<dd><p>Remove alert banner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alert</strong> – Alert kivy.uix.label.Label reference.</p></li>
+<li><p><strong>home</strong> – Active HomeScreen instance.</p></li>
+<li><p><strong>*largs</strong> – Unused args from kivy Clock class.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.functions.sel_data">
+<span class="sig-prename descclassname"><span class="pre">cutview.functions.</span></span><span class="sig-name descname"><span class="pre">sel_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.functions.sel_data" title="Link to this definition"></a></dt>
+<dd><p>Selects data from NetCDF file according to dimension and variable selections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Dictionary of key details about NetCDF file as outlined in check_values method
+of NetCDFConfig.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2D array of data from NetCDF file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-cutview.homescreen">
+<span id="cutview-homescreen-module"></span><h2>cutview.homescreen module<a class="headerlink" href="#module-cutview.homescreen" title="Link to this heading"></a></h2>
+<p>Functionality for the main screen as well as root of widget tree.</p>
+<p>This module manages the functionality of the home screen elements. It also serves as
+the root node for the app and passes necessary commands to their appropriate recipient
+further down the tree.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.homescreen.</span></span><span class="sig-name descname"><span class="pre">HomeScreen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Screen</span></code></p>
+<p>Manages the dynamic functionality of the main screen UI elements. Creates and calls upon other modules
+to execute GUI operations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.file_on">
+<span class="sig-name descname"><span class="pre">file_on</span></span><a class="headerlink" href="#cutview.homescreen.HomeScreen.file_on" title="Link to this definition"></a></dt>
+<dd><p>Boolean, is there a file currently loaded in viewer</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.rel_path">
+<span class="sig-name descname"><span class="pre">rel_path</span></span><a class="headerlink" href="#cutview.homescreen.HomeScreen.rel_path" title="Link to this definition"></a></dt>
+<dd><p>pathlib.Path object to use as output directory</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.font">
+<span class="sig-name descname"><span class="pre">font</span></span><a class="headerlink" href="#cutview.homescreen.HomeScreen.font" title="Link to this definition"></a></dt>
+<dd><p>Float, current font size for all buttons</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.display">
+<span class="sig-name descname"><span class="pre">display</span></span><a class="headerlink" href="#cutview.homescreen.HomeScreen.display" title="Link to this definition"></a></dt>
+<dd><p>FileDisplay object (draggable image) created when a file is loaded</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.nc_popup">
+<span class="sig-name descname"><span class="pre">nc_popup</span></span><a class="headerlink" href="#cutview.homescreen.HomeScreen.nc_popup" title="Link to this definition"></a></dt>
+<dd><p>Reference to NetCDF configuration popup</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.screenmanager.Screen</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.canvas_remove">
+<span class="sig-name descname"><span class="pre">canvas_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">largs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.canvas_remove" title="Link to this definition"></a></dt>
+<dd><p>Allows external sources to clear canvas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>item</strong> – Canvas item to be removed</p></li>
+<li><p><strong>*largs</strong> – Any other args that are passed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.clean_file">
+<span class="sig-name descname"><span class="pre">clean_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.clean_file" title="Link to this definition"></a></dt>
+<dd><p>Resets file related attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.font_adapt">
+<span class="sig-name descname"><span class="pre">font_adapt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.font_adapt" title="Link to this definition"></a></dt>
+<dd><p>Updates font size throughout widget tree to the size automatically determined for static UI elements.</p>
+<p>When the window is resized Kivy automatically updates the font size of UI elements defined in cutview.kv
+but not those defined in scripts. Thus this method updates font size for such elements to be the same as
+the static elements.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.go_btn">
+<span class="sig-name descname"><span class="pre">go_btn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.go_btn" title="Link to this definition"></a></dt>
+<dd><p>If file name is valid and exists, load image or NetCDF File.</p>
+<p>If a file and any transect tools are already loaded, first clears viewer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.load_netcdf">
+<span class="sig-name descname"><span class="pre">load_netcdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.load_netcdf" title="Link to this definition"></a></dt>
+<dd><p>Load NetCDF file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Dictionary of verified NetCDF file configuration settings. Check FileDisplay for more details</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.quit_btn">
+<span class="sig-name descname"><span class="pre">quit_btn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.quit_btn" title="Link to this definition"></a></dt>
+<dd><p>Quit application</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.homescreen.HomeScreen.transect_btn">
+<span class="sig-name descname"><span class="pre">transect_btn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.homescreen.HomeScreen.transect_btn" title="Link to this definition"></a></dt>
+<dd><p>Calls for the creation and deletion of tools.
+:param t_type: String, Tool type: ‘transect’ or ‘transect_marker’</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.marker">
+<span id="cutview-marker-module"></span><h2>cutview.marker module<a class="headerlink" href="#module-cutview.marker" title="Link to this heading"></a></h2>
+<p>Singular marker widget.</p>
+<p>Graphics and functionality of a singular marker created by the transect marker tool.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.marker.Marker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.marker.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></p>
+<p>Singular marker widget.</p>
+<p>Graphics and functionality of a singular marker created by the transect marker tool.
+Determines endpoints of where transects should be made orthogonally to the user marked
+out line, and then uses a MultiTransect object to manage the transects.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.clicks">
+<span class="sig-name descname"><span class="pre">clicks</span></span><a class="headerlink" href="#cutview.marker.Marker.clicks" title="Link to this definition"></a></dt>
+<dd><p>Int, Number of clicks user has made. Decreases when points are deleted.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.points">
+<span class="sig-name descname"><span class="pre">points</span></span><a class="headerlink" href="#cutview.marker.Marker.points" title="Link to this definition"></a></dt>
+<dd><p>List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.t_width">
+<span class="sig-name descname"><span class="pre">t_width</span></span><a class="headerlink" href="#cutview.marker.Marker.t_width" title="Link to this definition"></a></dt>
+<dd><p>Int, current width in pixels of orthogonal transects</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.marker.Marker.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.base">
+<span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#cutview.marker.Marker.base" title="Link to this definition"></a></dt>
+<dd><p>MultiTransect object that manages transects</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.curr_line">
+<span class="sig-name descname"><span class="pre">curr_line</span></span><a class="headerlink" href="#cutview.marker.Marker.curr_line" title="Link to this definition"></a></dt>
+<dd><p>kivy.graphics.Line, Line between cursor and last clicked point</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.size">
+<span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#cutview.marker.Marker.size" title="Link to this definition"></a></dt>
+<dd><p>2 element array of ints, Size of widget</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><a class="headerlink" href="#cutview.marker.Marker.pos" title="Link to this definition"></a></dt>
+<dd><p>2 element array of ints, Position of widget</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.l_color">
+<span class="sig-name descname"><span class="pre">l_color</span></span><a class="headerlink" href="#cutview.marker.Marker.l_color" title="Link to this definition"></a></dt>
+<dd><p>kivy.graphics.Color, Color to use for graphics</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.c_size">
+<span class="sig-name descname"><span class="pre">c_size</span></span><a class="headerlink" href="#cutview.marker.Marker.c_size" title="Link to this definition"></a></dt>
+<dd><p>2 element tuple of floats that defines size of circles</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.marker.Marker.line_width">
+<span class="sig-name descname"><span class="pre">line_width</span></span><a class="headerlink" href="#cutview.marker.Marker.line_width" title="Link to this definition"></a></dt>
+<dd><p>Float, width of lines</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.widget.Widget</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.del_point">
+<span class="sig-name descname"><span class="pre">del_point</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.del_point" title="Link to this definition"></a></dt>
+<dd><p>Remove most recent point, line, and transect points.</p>
+<p>Graphics are grouped by the number of clicks made when they were created for easier deletion.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.draw_line">
+<span class="sig-name descname"><span class="pre">draw_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.draw_line" title="Link to this definition"></a></dt>
+<dd><p>Draw line from most recent click point to user cursor.</p>
+<p>Updates anytime cursor moves. Does not draw if not current marker being drawn or if tool
+in dragging mode. Also won’t draw if marker was uploaded and it was final marker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instance</strong> – WindowSDL instance, current window loaded (not used by method)</p></li>
+<li><p><strong>pos</strong> – 2 element tuple of floats, x and y coord of cursor position</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.get_orthogonal">
+<span class="sig-name descname"><span class="pre">get_orthogonal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.get_orthogonal" title="Link to this definition"></a></dt>
+<dd><p>Get a line orthogonal to line drawn by user to use as transect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line</strong> – kivy.graphics.Line, line between two last clicked points</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Coordinates of the two endpoints of the centered
+orthogonal line with length t_width.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>4 element array of floats</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.in_bounds">
+<span class="sig-name descname"><span class="pre">in_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.in_bounds" title="Link to this definition"></a></dt>
+<dd><p>Determine if points are within bounds of image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> – List of 4 floats, X,Y coords of the two endpoints: [X1, Y1, X2, Y2]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Boolean whether both endpoints are within image bounds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.on_touch_down">
+<span class="sig-name descname"><span class="pre">on_touch_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">touch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.on_touch_down" title="Link to this definition"></a></dt>
+<dd><p>On user click draws line, endpoints and orthogonal points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>touch</strong> – MouseMotionEvent, see kivy docs for details</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.stop_drawing">
+<span class="sig-name descname"><span class="pre">stop_drawing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.stop_drawing" title="Link to this definition"></a></dt>
+<dd><p>Remove line from most recent point to cursor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.update_width">
+<span class="sig-name descname"><span class="pre">update_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.update_width" title="Link to this definition"></a></dt>
+<dd><p>Update t_width to change width for next transect made.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>width</strong> – Int, New width to use</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.marker.Marker.upload_mode">
+<span class="sig-name descname"><span class="pre">upload_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.marker.Marker.upload_mode" title="Link to this definition"></a></dt>
+<dd><p>Update whether in upload mode or not</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> – Boolean, whether in upload mode or not</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.markerwidth">
+<span id="cutview-markerwidth-module"></span><h2>cutview.markerwidth module<a class="headerlink" href="#module-cutview.markerwidth" title="Link to this heading"></a></h2>
+<p>Marker width adjustment tool.</p>
+<p>Creates sidebar element that allows the control of width of orthogonal transects made via the
+transect marker tool.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.markerwidth.</span></span><span class="sig-name descname"><span class="pre">MarkerWidth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BoxLayout</span></code></p>
+<p>Marker width adjustment tool.</p>
+<p>Creates sidebar element that allows the control of width of orthogonal transects made via the
+transect marker tool.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.txt">
+<span class="sig-name descname"><span class="pre">txt</span></span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.txt" title="Link to this definition"></a></dt>
+<dd><p>TextInput widget where user enters their desired width</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.btn">
+<span class="sig-name descname"><span class="pre">btn</span></span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.btn" title="Link to this definition"></a></dt>
+<dd><p>‘Go’ Button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.marker">
+<span class="sig-name descname"><span class="pre">marker</span></span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.marker" title="Link to this definition"></a></dt>
+<dd><p>Current MultiMarker instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.min">
+<span class="sig-name descname"><span class="pre">min</span></span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.min" title="Link to this definition"></a></dt>
+<dd><p>Int, minimum width allowed</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.max">
+<span class="sig-name descname"><span class="pre">max</span></span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.max" title="Link to this definition"></a></dt>
+<dd><p>Int, maximum width allowed</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.boxlayout.Boxlayout</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.font_adapt">
+<span class="sig-name descname"><span class="pre">font_adapt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.font_adapt" title="Link to this definition"></a></dt>
+<dd><p>Update go button font size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>font</strong> – Float, new font size</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.markerwidth.MarkerWidth.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.markerwidth.MarkerWidth.update" title="Link to this definition"></a></dt>
+<dd><p>Update width of current marker if given a valid width.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.multimarker">
+<span id="cutview-multimarker-module"></span><h2>cutview.multimarker module<a class="headerlink" href="#module-cutview.multimarker" title="Link to this heading"></a></h2>
+<p>Transect marker tool widget.</p>
+<p>Manages having multiple markers on screen at once and the uploading of previous projects.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.multimarker.Click">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.multimarker.</span></span><span class="sig-name descname"><span class="pre">Click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.Click" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object that mimics a user click.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.Click.x">
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#cutview.multimarker.Click.x" title="Link to this definition"></a></dt>
+<dd><p>Float, X coordinate of click point</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.Click.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#cutview.multimarker.Click.y" title="Link to this definition"></a></dt>
+<dd><p>Float, Y coordinate of click point</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.Click.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><a class="headerlink" href="#cutview.multimarker.Click.pos" title="Link to this definition"></a></dt>
+<dd><p>2 element tuple: (X coord, Y coord)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.multimarker.</span></span><span class="sig-name descname"><span class="pre">MultiMarker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></p>
+<p>Transect marker tool widget.</p>
+<p>Created when Transect Marker button is selected. From there on this object manages the creation,
+modification, and data packaging of markers. Manages the uploading of previous projects
+into the viewer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.m_on">
+<span class="sig-name descname"><span class="pre">m_on</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.m_on" title="Link to this definition"></a></dt>
+<dd><p>Boolean, whether there are any markers active</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.upload_fail">
+<span class="sig-name descname"><span class="pre">upload_fail</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.upload_fail" title="Link to this definition"></a></dt>
+<dd><p>Boolean, if anything has gone wrong in the project uploading process</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.dbtn">
+<span class="sig-name descname"><span class="pre">dbtn</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.dbtn" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton, Plot button to activate PlotPopup</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.dragging">
+<span class="sig-name descname"><span class="pre">dragging</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.dragging" title="Link to this definition"></a></dt>
+<dd><p>Boolean, whether viewer is in dragging mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.width_w">
+<span class="sig-name descname"><span class="pre">width_w</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.width_w" title="Link to this definition"></a></dt>
+<dd><p>MarkerWidth widget to allow for adjustable marker widths</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.clicks">
+<span class="sig-name descname"><span class="pre">clicks</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.clicks" title="Link to this definition"></a></dt>
+<dd><p>Int, number of clicks made by user. Does not decrease when points are deleted
+unless all points are deleted in which case it goes back to zero.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.up_btn">
+<span class="sig-name descname"><span class="pre">up_btn</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.up_btn" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton, Upload button for uploading a past project</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.nbtn">
+<span class="sig-name descname"><span class="pre">nbtn</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.nbtn" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton, New marker button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.plotting">
+<span class="sig-name descname"><span class="pre">plotting</span></span><a class="headerlink" href="#cutview.multimarker.MultiMarker.plotting" title="Link to this definition"></a></dt>
+<dd><p>PlotPopup, reference to plotting menu when opened</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.widget.Widget</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.change_dragging">
+<span class="sig-name descname"><span class="pre">change_dragging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.change_dragging" title="Link to this definition"></a></dt>
+<dd><p>Change whether in dragging mode or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> – Boolean, whether in dragging mode or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.check_file">
+<span class="sig-name descname"><span class="pre">check_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.check_file" title="Link to this definition"></a></dt>
+<dd><p>Checks is given file name is a properly formatted project file. If it is it uploads
+file. If not, closes popups and shows error message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – String, File path</p></li>
+<li><p><strong>popup</strong> – Popup, File name input popup (so can close if file invalid)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.del_line">
+<span class="sig-name descname"><span class="pre">del_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.del_line" title="Link to this definition"></a></dt>
+<dd><p>Delete most recent marker with some safeguards.</p>
+<p>If only one marker on screen, delete but add new marker and remove sidebar elements.
+Otherwise delete current marker and go to previous. If no markers are on screen nothing
+happens.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.del_point">
+<span class="sig-name descname"><span class="pre">del_point</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.del_point" title="Link to this definition"></a></dt>
+<dd><p>Delete most recently clicked point with some safeguards.</p>
+<p>If no markers are on screen does nothing. If only one marker exists and no points have been clicked,
+does nothing. If more than one marker exists and no points have been clicked on most recent marker,
+Deletes most recent marker and then deletes last point of previous marker. Any other conditions
+simply deletes last clicked point.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.font_adapt">
+<span class="sig-name descname"><span class="pre">font_adapt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.font_adapt" title="Link to this definition"></a></dt>
+<dd><p>Updates font of sidebar elements.
+:param font: Float, new font size</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.gather_popup">
+<span class="sig-name descname"><span class="pre">gather_popup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.gather_popup" title="Link to this definition"></a></dt>
+<dd><p>Gather data from markers and call for PlotPopup</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.new_line">
+<span class="sig-name descname"><span class="pre">new_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.new_line" title="Link to this definition"></a></dt>
+<dd><p>Creates a new marker if not in dragging or editing mode and current marker has at least two clicks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.on_touch_down">
+<span class="sig-name descname"><span class="pre">on_touch_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">touch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.on_touch_down" title="Link to this definition"></a></dt>
+<dd><p>Manages when sidebar elements are added to sidebar and clears them as needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>touch</strong> – MouseMotionEvent, see kivy docs for details</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.undo_upload">
+<span class="sig-name descname"><span class="pre">undo_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.undo_upload" title="Link to this definition"></a></dt>
+<dd><p>Remove any previous markers that had been uploaded if upload fails</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>markers</strong> – Int, Number of markers added so far</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.update_width">
+<span class="sig-name descname"><span class="pre">update_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.update_width" title="Link to this definition"></a></dt>
+<dd><p>Update width of active marker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num</strong> – Int, new width value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.upload_data">
+<span class="sig-name descname"><span class="pre">upload_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.upload_data" title="Link to this definition"></a></dt>
+<dd><p>Loads markers from project file.</p>
+<p>Adds markers by ‘clicking’ the points in the file with the marker width denoted by the file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> – Properly formatted nested list from marker_find() function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.upload_fail_alert">
+<span class="sig-name descname"><span class="pre">upload_fail_alert</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.upload_fail_alert" title="Link to this definition"></a></dt>
+<dd><p>Indicate upload has failed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multimarker.MultiMarker.upload_pop">
+<span class="sig-name descname"><span class="pre">upload_pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.MultiMarker.upload_pop" title="Link to this definition"></a></dt>
+<dd><p>Opens popup to ask for name of project file user wishes to upload.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.multimarker.correct_test">
+<span class="sig-prename descclassname"><span class="pre">cutview.multimarker.</span></span><span class="sig-name descname"><span class="pre">correct_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.correct_test" title="Link to this definition"></a></dt>
+<dd><p>Check if dictionary has necessary fields to be a marker</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> – Dictionary to be tested.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Boolean, whether dictionary has necessary keys with a list has the value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cutview.multimarker.marker_find">
+<span class="sig-prename descclassname"><span class="pre">cutview.multimarker.</span></span><span class="sig-name descname"><span class="pre">marker_find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multimarker.marker_find" title="Link to this definition"></a></dt>
+<dd><p>Recursively examines dictionary and finds marker click coordinates and transect widths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Dictionary to examine</p></li>
+<li><p><strong>res</strong> – Empty list to fill with marker click coordinates and transect widths</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>click X coords, click y coords, and the transect width for each click point in the marker.
+If no qualifying data was found returns empty list. If duplicate data is found (ex: multiple
+variables in a file) only returns one instance of marker data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nested List. A list containing a list for each marker which each contains three lists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-cutview.multitransect">
+<span id="cutview-multitransect-module"></span><h2>cutview.multitransect module<a class="headerlink" href="#module-cutview.multitransect" title="Link to this heading"></a></h2>
+<p>Widget for Transect tool</p>
+<p>Manages having multiple SingleTransects on screen at once.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.multitransect.</span></span><span class="sig-name descname"><span class="pre">MultiTransect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></p>
+<p>Creates, stores, and manages multiple SingleTransects</p>
+<p>Created when Transect button is selected. From there on this object manages the creation, modification,
+and data packaging of transects made by user. Also used by marker to manage SingleTransects made
+orthogonally to user marked line.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.lines">
+<span class="sig-name descname"><span class="pre">lines</span></span><a class="headerlink" href="#cutview.multitransect.MultiTransect.lines" title="Link to this definition"></a></dt>
+<dd><p>List of SingleTransects made.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.clicks">
+<span class="sig-name descname"><span class="pre">clicks</span></span><a class="headerlink" href="#cutview.multitransect.MultiTransect.clicks" title="Link to this definition"></a></dt>
+<dd><p>Int, Number of clicks made by user. Cycles between 0 and 2 depending on current stage of
+transect drawing.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.multitransect.MultiTransect.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.p_btn">
+<span class="sig-name descname"><span class="pre">p_btn</span></span><a class="headerlink" href="#cutview.multitransect.MultiTransect.p_btn" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton, Plot button which opens PlotPopup</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.dragging">
+<span class="sig-name descname"><span class="pre">dragging</span></span><a class="headerlink" href="#cutview.multitransect.MultiTransect.dragging" title="Link to this definition"></a></dt>
+<dd><p>Boolean, Whether in dragging mode</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.plotting">
+<span class="sig-name descname"><span class="pre">plotting</span></span><a class="headerlink" href="#cutview.multitransect.MultiTransect.plotting" title="Link to this definition"></a></dt>
+<dd><p>PlotPopup, reference to plotting menu when opened</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.widget.Widget</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.change_dragging">
+<span class="sig-name descname"><span class="pre">change_dragging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect.change_dragging" title="Link to this definition"></a></dt>
+<dd><p>Update whether in dragging mode</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>val</strong> – Boolean, whether in dragging mode or not</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.del_line">
+<span class="sig-name descname"><span class="pre">del_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect.del_line" title="Link to this definition"></a></dt>
+<dd><p>Delete all clicked points in most recent transect</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.del_point">
+<span class="sig-name descname"><span class="pre">del_point</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect.del_point" title="Link to this definition"></a></dt>
+<dd><p>Delete most recent clicked point</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.font_adapt">
+<span class="sig-name descname"><span class="pre">font_adapt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">font</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect.font_adapt" title="Link to this definition"></a></dt>
+<dd><p>Updates font size of Plot button.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>font</strong> – Float, new font size</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.on_touch_down">
+<span class="sig-name descname"><span class="pre">on_touch_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">touch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect.on_touch_down" title="Link to this definition"></a></dt>
+<dd><p>Creating transects and managing Plot button based on which of 3 click stages user is in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>touch</strong> – MouseMotionEvent, see kivy docs for details</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.multitransect.MultiTransect.popup">
+<span class="sig-name descname"><span class="pre">popup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.multitransect.MultiTransect.popup" title="Link to this definition"></a></dt>
+<dd><p>Gathers coordinates from SingleTransects into a dictionary and calls for popup</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.netcdfconfig">
+<span id="cutview-netcdfconfig-module"></span><h2>cutview.netcdfconfig module<a class="headerlink" href="#module-cutview.netcdfconfig" title="Link to this heading"></a></h2>
+<p>UI and functionality for NetCDF configuration popup</p>
+<p>Creates the NetCDF configuration popup that opens when a user loads a NetCDF file. Ensures that the file
+is in a viable configuration for the viewer.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.ListDropDown">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.netcdfconfig.</span></span><span class="sig-name descname"><span class="pre">ListDropDown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.ListDropDown" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DropDown</span></code></p>
+<p>Standard dropdown for all selections in the menu.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.dropdown.Dropdown</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.netcdfconfig.</span></span><span class="sig-name descname"><span class="pre">NetCDFConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Popup</span></code></p>
+<p>UI and functionality for NetCDF configuration popup</p>
+<p>Creates the NetCDF configuration popup that opens when a user loads a NetCDF file. Ensures that the file
+is in a viable configuration for the viewer.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.data" title="Link to this definition"></a></dt>
+<dd><p>xarray.Dataset, Opened NetCDF file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.var_select">
+<span class="sig-name descname"><span class="pre">var_select</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.var_select" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton, Variable select button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.var_drop">
+<span class="sig-name descname"><span class="pre">var_drop</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.var_drop" title="Link to this definition"></a></dt>
+<dd><p>Dropdown(), Dropdown of variable options</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.x_select">
+<span class="sig-name descname"><span class="pre">x_select</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.x_select" title="Link to this definition"></a></dt>
+<dd><p>Rounded Button, X dimension select button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.y_select">
+<span class="sig-name descname"><span class="pre">y_select</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.y_select" title="Link to this definition"></a></dt>
+<dd><p>Rounded Button, Y dimension select button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.z_select">
+<span class="sig-name descname"><span class="pre">z_select</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.z_select" title="Link to this definition"></a></dt>
+<dd><p>Rounded Button, Z dimension select button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.depth_select">
+<span class="sig-name descname"><span class="pre">depth_select</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.depth_select" title="Link to this definition"></a></dt>
+<dd><p>Rounded Button, Z dimension value select button</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.error">
+<span class="sig-name descname"><span class="pre">error</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.error" title="Link to this definition"></a></dt>
+<dd><p>Label for displaying error alerts</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.title">
+<span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.title" title="Link to this definition"></a></dt>
+<dd><p>Popup title</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.content">
+<span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.content" title="Link to this definition"></a></dt>
+<dd><p>BoxLayout containing all widgets of the popup</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.size_hint">
+<span class="sig-name descname"><span class="pre">size_hint</span></span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.size_hint" title="Link to this definition"></a></dt>
+<dd><p>Tuple (width, height) of relative size of popup to window</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.popup.Popup</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.check_inputs">
+<span class="sig-name descname"><span class="pre">check_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.check_inputs" title="Link to this definition"></a></dt>
+<dd><p>Check selected configurations are valid before loading dataset</p>
+<p>When values are selected the button text changes to the selection. This method
+accesses values from the text of the buttons. If all checks are passed sends
+dictionary of configurations to HomeScreen instance and closes popup. Otherwise
+an error message is displayed and popup stays open.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.clean" title="Link to this definition"></a></dt>
+<dd><p>Resets file related attributes of the HomeScreen</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.depth_options">
+<span class="sig-name descname"><span class="pre">depth_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.depth_options" title="Link to this definition"></a></dt>
+<dd><p>Creates dropdown for the value of Z dimension if third dimension is selected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.dim_options">
+<span class="sig-name descname"><span class="pre">dim_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.dim_options" title="Link to this definition"></a></dt>
+<dd><p>Creates dropdown for X, Y, or Z dimension selection button. If variable is already selected
+options listed are all dimensions for selected variable. If variable is not selected sets button
+to ‘Select …’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dim</strong> – x_select, y_select, or z_select Button</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.netcdfconfig.NetCDFConfig.var_update">
+<span class="sig-name descname"><span class="pre">var_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.netcdfconfig.NetCDFConfig.var_update" title="Link to this definition"></a></dt>
+<dd><p>When a variable is selected updates var_select button text to the variable name. Then finds first
+two or three dimensions of the variable and sets them as the X, Y, and Z (if three) dimension
+selections.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview.plotpopup">
+<span id="cutview-plotpopup-module"></span><h2>cutview.plotpopup module<a class="headerlink" href="#module-cutview.plotpopup" title="Link to this heading"></a></h2>
+<p>UI and functionality for plotting and saving popup.</p>
+<p>Creates UI elements of the popup and manages the creation of plots based on user input.
+Manages the saving of the plots and user selected data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.plotpopup.BackgroundDropDown">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.plotpopup.</span></span><span class="sig-name descname"><span class="pre">BackgroundDropDown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.BackgroundDropDown" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DropDown</span></code></p>
+<p>General class for a dropdown menu with a background color</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.BackgroundDropDown.rect">
+<span class="sig-name descname"><span class="pre">rect</span></span><a class="headerlink" href="#cutview.plotpopup.BackgroundDropDown.rect" title="Link to this definition"></a></dt>
+<dd><p>Rectangle object that serves as background to the dropdown.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.dropdown.Dropdown</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.BackgroundDropDown.open">
+<span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.BackgroundDropDown.open" title="Link to this definition"></a></dt>
+<dd><p>Overwrites DropDown open method to also draw a background rectangle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>widget</strong> – RoundedButton to which dropdown is bound</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.BackgroundDropDown.update_canvas">
+<span class="sig-name descname"><span class="pre">update_canvas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.BackgroundDropDown.update_canvas" title="Link to this definition"></a></dt>
+<dd><p>Update graphics if window size is changed</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.plotpopup.</span></span><span class="sig-name descname"><span class="pre">PlotPopup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Popup</span></code></p>
+<p>Popup with plotting and saving selections.</p>
+<p>Creates UI elements of the popup, creates plots according to user selections, and saves
+plots and/or selected data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.all_transects">
+<span class="sig-name descname"><span class="pre">all_transects</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.all_transects" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of data from all transects marked out by the user.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.t_type">
+<span class="sig-name descname"><span class="pre">t_type</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.t_type" title="Link to this definition"></a></dt>
+<dd><p>String: ‘Marker’ if transects came from transect marker tool or ‘Multi’ if transects
+came from transect tool.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.active_transects">
+<span class="sig-name descname"><span class="pre">active_transects</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.active_transects" title="Link to this definition"></a></dt>
+<dd><p>Dictionary of currently selected transects. ‘Click X’, ‘Click Y’, and
+‘Width’ fields should be removed (if marker tool) to simplify plotting. Contains average
+of transects if marker tool was used with a constant transect width.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.f_type">
+<span class="sig-name descname"><span class="pre">f_type</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.f_type" title="Link to this definition"></a></dt>
+<dd><p>String, If file is NetCDF file: ‘NC’ if only 2 dimensions, ‘NC_Z’ if 3 dimensions. If
+file is a JPG or PNG: ‘Img’.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.config" title="Link to this definition"></a></dt>
+<dd><p>Information necessary for accessing the file. For images this is the file path and for NetCDF files this
+is a dictionary of configuration values (see check inputs method of NetCDFConfig class).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.active_z">
+<span class="sig-name descname"><span class="pre">active_z</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.active_z" title="Link to this definition"></a></dt>
+<dd><p>List of selected Z values. Empty list if 2D NetCDF or Image file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.active_vars">
+<span class="sig-name descname"><span class="pre">active_vars</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.active_vars" title="Link to this definition"></a></dt>
+<dd><p>List of selected variables. Empty list if image file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.plot" title="Link to this definition"></a></dt>
+<dd><p>Image containing plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.plotting">
+<span class="sig-name descname"><span class="pre">plotting</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.plotting" title="Link to this definition"></a></dt>
+<dd><p>BoxLayout that holds plot and selection sidebar.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.title">
+<span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.title" title="Link to this definition"></a></dt>
+<dd><p>String, popup title</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.content">
+<span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.content" title="Link to this definition"></a></dt>
+<dd><p>BoxLayout containing all UI elements in popup</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.size_hint">
+<span class="sig-name descname"><span class="pre">size_hint</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.size_hint" title="Link to this definition"></a></dt>
+<dd><p>Tuple (width, height) of relative size of popup to window</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.t_select">
+<span class="sig-name descname"><span class="pre">t_select</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.t_select" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton which opens transect selection dropdown menu</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.v_select">
+<span class="sig-name descname"><span class="pre">v_select</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.v_select" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton which opens variable selection dropdown menu (Only if NetCDF file)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.z_select">
+<span class="sig-name descname"><span class="pre">z_select</span></span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.z_select" title="Link to this definition"></a></dt>
+<dd><p>RoundedButton which opens z value selection dropdown menu (Only if 3D NetCDF file)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.popup.Popup</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.add_marker_info">
+<span class="sig-name descname"><span class="pre">add_marker_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dicti</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.add_marker_info" title="Link to this definition"></a></dt>
+<dd><p>Adds back fields removed for plotting purposes if marker tool was used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dicti</strong> – Dictionary of transect data from either transect marker or regular transect tool</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dictionary of transect data with ‘Click X’, ‘Click Y’, and ‘Width’ fields added back</dt><dd><p>in if transect marker tool was used.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dicti</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.close_popups">
+<span class="sig-name descname"><span class="pre">close_popups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpop</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.close_popups" title="Link to this definition"></a></dt>
+<dd><p>Close file name popup and plot popup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fpop</strong> – reference to file name popup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.cut_drop">
+<span class="sig-name descname"><span class="pre">cut_drop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">button</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.cut_drop" title="Link to this definition"></a></dt>
+<dd><p>Attaches transect dropdowns to marker buttons in marker dropdown menu</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>marker</strong> – String, marker label ‘Marker #’</p></li>
+<li><p><strong>button</strong> – RoundedButton, marker’s button in marker dropdown menu</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.download_all_z_data">
+<span class="sig-name descname"><span class="pre">download_all_z_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.download_all_z_data" title="Link to this definition"></a></dt>
+<dd><p>Get and download data for all selected variables for all z dimension values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>f_name</strong> – String, proposed file name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.download_data">
+<span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.download_data" title="Link to this definition"></a></dt>
+<dd><p>Downloads transect data for selections into a JSON file if valid file name given.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>f_name</strong> – String, proposed file name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.download_pdf_plot">
+<span class="sig-name descname"><span class="pre">download_pdf_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.download_pdf_plot" title="Link to this definition"></a></dt>
+<dd><p>Download the current plot as a PDF file if valid file name given</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>f_name</strong> – String, proposed file name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.download_png_plot">
+<span class="sig-name descname"><span class="pre">download_png_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.download_png_plot" title="Link to this definition"></a></dt>
+<dd><p>Download the current plot as a PNG file if valid file name given</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>f_name</strong> – String, proposed file name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.file_input">
+<span class="sig-name descname"><span class="pre">file_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.file_input" title="Link to this definition"></a></dt>
+<dd><p>Popup window for user to give name for plot/json file to be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>type</strong> – String corresponding to what is being saved:
+‘data’: Transect data for selections
+‘all_z_data’: Transect data for selections for all z dimension values
+‘png’: Current plot as a PNG file
+‘pdf’: Current plot as a PDF file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_all_z_plot">
+<span class="sig-name descname"><span class="pre">get_all_z_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_all_z_plot" title="Link to this definition"></a></dt>
+<dd><p>Determines if settings are okay to do an all z value plot. If so calls for plot, if not creates an error
+popup.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_average">
+<span class="sig-name descname"><span class="pre">get_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_average" title="Link to this definition"></a></dt>
+<dd><p>Finds average of all transects in a marker. Transect width must be the same for the entire marker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – String, ‘Marker #’</p></li>
+<li><p><strong>curr</strong> – 2D array, currently loaded dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D array of length of transect width containing average transect values for the marker.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_cut_dropdown">
+<span class="sig-name descname"><span class="pre">get_cut_dropdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_cut_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Build dropdown menu for selecting transects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> – String, name of marker selecting from ‘Marker #’ or ‘Multi’ if marker tool wasn’t used</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>BackgroundDropDown for transect options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_data">
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_data" title="Link to this definition"></a></dt>
+<dd><p>Gathers transect data for currently selected variables, z values, and transects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Variables -&gt; Z values -&gt; Markers/Multi -&gt; Transects -&gt; X,Y, Cut
+If only 2D NetCDF file there is no Z values level. If an image there is no Variables or Z Values level.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nested dictionary of transect data with hierarchy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_marker_dropdown">
+<span class="sig-name descname"><span class="pre">get_marker_dropdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_marker_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Build dropdown menu for marker options with sub-menus for the individual transects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BackgroundDropDown for marker options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_var_dropdown">
+<span class="sig-name descname"><span class="pre">get_var_dropdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_var_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Get dropdown for NetCDF variable options. Variable only available if dimensions match current variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BackgroundDropdown menu of variable options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.get_z_dropdown">
+<span class="sig-name descname"><span class="pre">get_z_dropdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.get_z_dropdown" title="Link to this definition"></a></dt>
+<dd><p>Get dropdown for NetCDF z value selections</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BackgroundDropDown menu of z value options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.on_transect_checkbox">
+<span class="sig-name descname"><span class="pre">on_transect_checkbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.on_transect_checkbox" title="Link to this definition"></a></dt>
+<dd><p>Updates plot when a transect checkbox is clicked. Safeguards so at least one transect
+is always selected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>check</strong> – Reference to checkbox in transect list</p></li>
+<li><p><strong>marker</strong> – String, name of marker selecting from ‘Marker #’ or ‘Multi’ if marker tool wasn’t used</p></li>
+<li><p><strong>cut</strong> – String, name of transect ‘Cut #’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.on_var_checkbox">
+<span class="sig-name descname"><span class="pre">on_var_checkbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.on_var_checkbox" title="Link to this definition"></a></dt>
+<dd><p>Updates plot when a variable checkbox is clicked. Safeguards so at least one variable
+is always selected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>check</strong> – Reference to checkbox in variable list</p></li>
+<li><p><strong>var</strong> – String, name of variable</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.on_z_checkbox">
+<span class="sig-name descname"><span class="pre">on_z_checkbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.on_z_checkbox" title="Link to this definition"></a></dt>
+<dd><p>Updates plot when a z value checkbox is clicked. Safeguards so at least one z value
+is always selected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>check</strong> – Reference to checkbox in variable list</p></li>
+<li><p><strong>z</strong> – String, name of z value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.plot_active">
+<span class="sig-name descname"><span class="pre">plot_active</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.plot_active" title="Link to this definition"></a></dt>
+<dd><p>Creates figure of plots of currently selected data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Final completed figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.plot_all_z">
+<span class="sig-name descname"><span class="pre">plot_all_z</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.plot_all_z" title="Link to this definition"></a></dt>
+<dd><p>Gather all z value plots for all selected variables into one figure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Final completed figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.plot_single">
+<span class="sig-name descname"><span class="pre">plot_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.plot_single" title="Link to this definition"></a></dt>
+<dd><p>Creates a single plot of selected transect data for a single variable (if NetCDF)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Currently selected transect data. Either self.active_data itself or a sub-dictionary</p></li>
+<li><p><strong>ax</strong> – Plot axis on which to make plot</p></li>
+<li><p><strong>label</strong> – Label for the y axis of plot. If NetCDF use variable if Image use ‘Mean RGB Value’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of string labels for the plot’s legend</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.plotpopup.PlotPopup.z_ip">
+<span class="sig-name descname"><span class="pre">z_ip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.plotpopup.PlotPopup.z_ip" title="Link to this definition"></a></dt>
+<dd><p>Gather data and plot all z values for given variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var</strong> – String, Variable name</p></li>
+<li><p><strong>ax</strong> – Plot axis on which to make plot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Axis with completed plot</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="cutview-project-file-printer-module">
+<h2>cutview.project_file_printer module<a class="headerlink" href="#cutview-project-file-printer-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-cutview.singletransect">
+<span id="cutview-singletransect-module"></span><h2>cutview.singletransect module<a class="headerlink" href="#module-cutview.singletransect" title="Link to this heading"></a></h2>
+<p>Graphics for a single transect whether drawn by user or used to hold data by marker tool.</p>
+<p>Draws circle at each user click point. When one point has been clicked, draws line from that
+point to user cursor.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cutview.singletransect.</span></span><span class="sig-name descname"><span class="pre">SingleTransect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">home</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.singletransect.SingleTransect" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></p>
+<p>Graphics for a single transect whether drawn by user or used to hold data by marker tool.</p>
+<p>Draws circle at each user click point. When one point has been clicked, draws line from that
+point to user cursor.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.line">
+<span class="sig-name descname"><span class="pre">line</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.line" title="Link to this definition"></a></dt>
+<dd><p>Line object which holds endpoint data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.circles">
+<span class="sig-name descname"><span class="pre">circles</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.circles" title="Link to this definition"></a></dt>
+<dd><p>Number of circles drawn, ie points clicked by user</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.home">
+<span class="sig-name descname"><span class="pre">home</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.home" title="Link to this definition"></a></dt>
+<dd><p>Reference to root HomeScreen instance</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.size">
+<span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.size" title="Link to this definition"></a></dt>
+<dd><p>2 element array of ints, Size of widget</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.pos" title="Link to this definition"></a></dt>
+<dd><p>2 element array of ints, Position of widget</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.l_color">
+<span class="sig-name descname"><span class="pre">l_color</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.l_color" title="Link to this definition"></a></dt>
+<dd><p>kivy.graphics.Color, Color to use for graphics</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.c_size">
+<span class="sig-name descname"><span class="pre">c_size</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.c_size" title="Link to this definition"></a></dt>
+<dd><p>2 element tuple of floats that defines size of circles</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.line_width">
+<span class="sig-name descname"><span class="pre">line_width</span></span><a class="headerlink" href="#cutview.singletransect.SingleTransect.line_width" title="Link to this definition"></a></dt>
+<dd><p>Float, width of lines</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">Inherits</span> <span class="pre">additional</span> <span class="pre">attributes</span> <span class="pre">from</span> <span class="pre">kivy.uix.widget.Widget</span></span></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>see kivy docs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.del_point">
+<span class="sig-name descname"><span class="pre">del_point</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.singletransect.SingleTransect.del_point" title="Link to this definition"></a></dt>
+<dd><p>Delete most recently clicked point and reset</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.draw_line">
+<span class="sig-name descname"><span class="pre">draw_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.singletransect.SingleTransect.draw_line" title="Link to this definition"></a></dt>
+<dd><p>When one point is clicked and user mouse is just hovering, continuously update line end point
+to be at mouse cursor</p>
+<p>Updates anytime cursor moves. Does not draw if tool in dragging mode or cursor not in viewing window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instance</strong> – WindowSDL instance, current window loaded (not used by method)</p></li>
+<li><p><strong>pos</strong> – 2 element tuple of floats, x and y coord of cursor position</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cutview.singletransect.SingleTransect.on_touch_down">
+<span class="sig-name descname"><span class="pre">on_touch_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">touch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.singletransect.SingleTransect.on_touch_down" title="Link to this definition"></a></dt>
+<dd><p>Draws points and lines depending on which parts of the transect have already been drawn.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>touch</strong> – MouseMotionEvent, see kivy docs for details</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-cutview">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cutview" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contribution.html" class="btn btn-neutral float-left" title="Contribution Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Robin Chartrand.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

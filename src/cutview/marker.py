@@ -25,35 +25,38 @@ class Marker(ui.widget.Widget):
     out line, and then uses a MultiTransect object to manage the transects.
 
     Attributes:
-        clicks: Int, Number of clicks user has made. Decreases when points are deleted.
-        points: List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
-        t_width: Int, current width in pixels of orthogonal transects
-        home: Reference to root HomeScreen instance
-        base: MultiTransect object that manages transects
-        curr_line: kivy.graphics.Line, Line between cursor and last clicked point
+        clicks (int): Number of clicks user has made. Decreases when points are deleted.
+        points (list): List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
+        t_width (int): Current width in pixels of orthogonal transects
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        base: :class:`cutview.multitransect.MultiTransect` object that manages transects
+        curr_line: kivy.graphics.Line, Line between cursor and last clicked
+        number: kivy.uix.label.Label, Reference to the number label
         size: 2 element array of ints, Size of widget
         pos: 2 element array of ints, Position of widget
         l_color: kivy.graphics.Color, Color to use for graphics
         c_size: 2 element tuple of floats that defines size of circles
-        line_width: Float, width of lines
+        line_width (float): Width of lines
 
         Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
-    def __init__(self, home, **kwargs):
+    def __init__(self, home, width, **kwargs):
         """
         Sets initial settings and initializes object.
 
         Args:
-            home: Reference to root HomeScreen instance
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+            width (int): Initial transect width to use.
         """
         super(Marker, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
-        self.t_width = 40
+        self.t_width = width
         self.uploaded = False
         self.home = home
         self.base = MultiTransect(home=self.home)
         self.curr_line = Line()
+        self.number = None
         self.size = self.home.display.size
         self.pos = self.home.display.pos
         color = self.home.display.l_col
@@ -67,21 +70,72 @@ class Marker(ui.widget.Widget):
         self.c_size = (dp(size), dp(size))
         self.line_width = dp(size / 5)
 
+    def update_l_col(self, color):
+        """
+        Update the line color and redraw all items on canvas.
+
+        Args:
+            color (str): New line color to use
+        """
+        if color == "Blue":
+            self.l_color = Color(0.28, 0.62, 0.86)
+        elif color == "Green":
+            self.l_color = Color(0.39, 0.78, 0.47)
+        elif color == "Orange":
+            self.l_color = Color(0.74, 0.42, 0.13)
+        groups = []
+        for c in range(1, self.clicks + 1):
+            group = self.canvas.get_group(str(c))
+            groups.append(group)
+        self.canvas.clear()
+        self.remove_widget(self.number)
+        self.canvas.add(self.l_color)
+        for g in groups:
+            for i in g:
+                self.canvas.add(i)
+        self.canvas.add(self.curr_line)
+        self.add_widget(self.number)
+
+    def update_c_size(self, value):
+        """
+        Updates graphic sizes according to the new value.
+
+        Args:
+            value (float): New graphics size
+        """
+        self.line_width = dp(value / 5)
+        for c in range(1, self.clicks + 1):
+            group = self.canvas.get_group(str(c))
+            for i in group:
+                if isinstance(i, Ellipse):
+                    i.size = (dp(value), dp(value))
+                    i.pos = (i.pos[0] + self.c_size[0] / 2 - dp(value) / 2,
+                             i.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
+                elif isinstance(i, Line):
+                    i.width = self.line_width
+        self.number.font_size = dp(value) * 2
+        self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
+                           self.number.pos[1] + self.c_size[1] - dp(value))
+        self.curr_line.width = self.line_width
+        self.c_size = (dp(value), dp(value))
+
     def update_width(self, width):
         """
         Update t_width to change width for next transect made.
 
         Args:
-            width: Int, New width to use
+            width (int): New width to use
         """
         self.t_width = width
+        if len(self.points) == 1:  # Update extra width entry at start of list so avg can be taken
+            self.points[0] = (self.points[0][0], self.points[0][1], width)
 
     def upload_mode(self, val):
         """
         Update whether in upload mode or not
 
         Args:
-            val: Boolean, whether in upload mode or not
+            val (bool): Whether in upload mode or not
         """
         self.uploaded = val
 
@@ -92,7 +146,7 @@ class Marker(ui.widget.Widget):
         Args:
             line: kivy.graphics.Line, line between two last clicked points
 
-        Return:
+        Returns:
             4 element array of floats: Coordinates of the two endpoints of the centered
             orthogonal line with length t_width.
         """
@@ -125,8 +179,9 @@ class Marker(ui.widget.Widget):
 
         # Calculate orthogonal line points
         b = mid[1] - m * mid[0]
-        xarr = np.arange(int(mid[0] - self.t_width / 2), int(mid[0] + self.t_width / 2 + 1))
-        yarr = xarr * m + b
+        xarr = np.arange(int(mid[0] - self.t_width / 2), int(mid[0] + self.t_width / 2 + 1), dtype=float)
+        yarr = (xarr * m + b).tolist()
+        xarr = xarr.tolist()
 
         # Draw points at ends of transect
         with self.canvas:
@@ -172,7 +227,7 @@ class Marker(ui.widget.Widget):
         # Draws marker line and points.
         proceed = False
         if self.uploaded:  # If being uploaded, just needs to be within image bounds
-            if self.collide_point(*touch.pos):
+            if touch.pos[0] < self.size[0] and touch.pos[1] < self.size[1]:
                 proceed = True
             else:
                 self.parent.upload_fail_alert()  # Upload failed
@@ -194,6 +249,7 @@ class Marker(ui.widget.Widget):
             if self.clicks != 1:
                 # If 2nd or more click, create a line inbetween click points
                 with self.canvas:
+                    Color(self.l_color.r, self.l_color.g, self.l_color.b)
                     line = Line(points=[self.points[-2][0:2], self.points[-1][0:2]],
                                 width=self.line_width, group=str(self.clicks))
                 # Stores orthogonal line in a SingleTransect which gets stored in base MultiTransect
@@ -216,11 +272,8 @@ class Marker(ui.widget.Widget):
 
             else:
                 # If first click, adds marker number
-                number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=30)
-                self.add_widget(number)
-                # Use width from previous marker
-                if len(self.parent.children) > 1:
-                    self.t_width = self.parent.children[1].t_width
+                self.number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=self.c_size[0] * 2)
+                self.add_widget(self.number)
 
     def draw_line(self, instance, pos):
         """
@@ -231,13 +284,14 @@ class Marker(ui.widget.Widget):
 
         Args:
             instance: WindowSDL instance, current window loaded (not used by method)
-            pos: 2 element tuple of floats, x and y coord of cursor position
+            pos (tuple): 2 element tuple of floats, x and y coord of cursor position
         """
         if self.parent.children[0] == self and not self.parent.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
                 mouse = self.to_widget(*pos)
                 if self.size[0] >= mouse[0] >= 0 and self.size[1] >= mouse[1] >= 0:
                     with self.canvas:
+                        Color(self.l_color.r, self.l_color.g, self.l_color.b)
                         self.curr_line.points = [self.points[-1][0:2], self.to_widget(pos[0], pos[1])]
         else:
             # Don't draw if not current marker or in dragging mode
@@ -248,6 +302,7 @@ class Marker(ui.widget.Widget):
         Remove line from most recent point to cursor.
         """
         with self.canvas:
+            Color(self.l_color.r, self.l_color.g, self.l_color.b)
             self.curr_line.points = self.curr_line.points[0:2]
 
     def in_bounds(self, points):
@@ -255,7 +310,7 @@ class Marker(ui.widget.Widget):
         Determine if points are within bounds of image.
 
         Args:
-            points: List of 4 floats, X,Y coords of the two endpoints: [X1, Y1, X2, Y2]
+            points (list): List of 4 floats, X,Y coords of the two endpoints: [X1, Y1, X2, Y2]
         Returns:
             Boolean whether both endpoints are within image bounds
         """

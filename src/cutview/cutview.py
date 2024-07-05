@@ -3,10 +3,6 @@ Builds app and sets initial window.
 
 File to run to start up the GUI. Creates the widget tree and sets the initial window size.
 
-Usage from command line:
-
-python cutview.py
-
 """
 
 # Turns off debug messages from matplotlib and PIL
@@ -28,8 +24,7 @@ class CutView(App):
     Creates the initial window and ensures font sizes in the app update uniformly
     when the window resizes.
 
-    Attributes:
-        Inherits attributes from kivy.app.App (see kivy docs)
+    Inherits attributes from kivy.app.App (see kivy docs)
     """
     def on_start(self):
         """

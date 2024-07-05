@@ -73,19 +73,42 @@ jobs:
       run: |
         python -m poetry run python -m pytest
 
-  paper:
-    runs-on: ubuntu-latest
-    name: Paper Draft
+  docs:
+    runs-on: windows-latest
+    env:
+      KIVY_GL_BACKEND: 'angle_sdl2'
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build draft PDF
-        uses: openjournals/openjournals-draft-action@master
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v5
         with:
-          journal: joss
-          paper-path: paper.md
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: paper
-          path: paper.pdf
+          python-version: "3.12"
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+      - name: Install dependencies
+        run: |
+          python -m poetry install --with docs
+      -name: Build Docs
+        run: |
+          cd docs
+          .\make html
+
+  paper:
+      runs-on: ubuntu-latest
+      name: Paper Draft
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - name: Build draft PDF
+          uses: openjournals/openjournals-draft-action@master
+          with:
+            journal: joss
+            paper-path: paper.md
+        - name: Upload
+          uses: actions/upload-artifact@v4
+          with:
+            name: paper
+            path: paper.pdf

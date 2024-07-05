@@ -38,7 +38,7 @@ def remove_alert(alert, home, *largs):
 
     Args:
         alert: Alert kivy.uix.label.Label reference.
-        home: Active HomeScreen instance.
+        home: Active :class:`cutview.homescreen.HomeScreen` instance.
         *largs: Unused args from kivy Clock class.
     """
     home.remove_widget(alert)
@@ -53,7 +53,7 @@ def alert(text, home):
 
     Args:
         text: String of alert banner message
-        home: Active HomeScreen reference
+        home: Active :class:`cutview.homescreen.HomeScreen` reference
     """
 
     screen = kivy.core.window.Window.size
@@ -76,8 +76,8 @@ def check_file(path, fname, extension):
 
     Args:
         path: pathlib.Path object of current output directory
-        fname: String of user proposed file name
-        extension: String of file extension for file type being created
+        fname (str): User proposed file name
+        extension (str): File extension for file type being created
 
     Returns:
         If all checks are passed the file name is returned, possibly with added (#). If checks aren't passed
@@ -111,8 +111,8 @@ def sel_data(config):
     Selects data from NetCDF file according to dimension and variable selections.
 
     Args:
-        config: Dictionary of key details about NetCDF file as outlined in check_values method
-            of NetCDFConfig.
+        config: Dictionary of key details about NetCDF file as outlined in
+        :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs`
 
     Returns:
         2D array of data from NetCDF file.
@@ -144,7 +144,7 @@ def ip_get_points(points, curr, nc):
     Args:
         points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
         curr: 2D indexable array of current dataset loaded in viewer
-        nc: Boolean of whether current file is NetCDF or not
+        nc (bool): Whether current file is NetCDF or not
 
     Returns:
         Dictionary with three keys:

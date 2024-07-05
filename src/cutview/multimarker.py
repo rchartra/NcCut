@@ -23,9 +23,9 @@ class Click:
     Object that mimics a user click.
 
     Attributes:
-        x: Float, X coordinate of click point
-        y: Float, Y coordinate of click point
-        pos: 2 element tuple: (X coord, Y coord)
+        x (float): X coordinate of click point
+        y (float): Y coordinate of click point
+        pos (tuple): 2 element tuple: (X coord, Y coord)
     """
     def __init__(self, x, y):
         self.x = x
@@ -38,7 +38,7 @@ def correct_test(data):
     Check if dictionary has necessary fields to be a marker
 
     Args:
-        data: Dictionary to be tested.
+        data (dict): Dictionary to be tested.
 
     Returns:
         Boolean, whether dictionary has necessary keys with a list has the value
@@ -59,8 +59,8 @@ def marker_find(data, res):
     Recursively examines dictionary and finds marker click coordinates and transect widths.
 
     Args:
-        data: Dictionary to examine
-        res: Empty list to fill with marker click coordinates and transect widths
+        data (dict): Dictionary to examine
+        res (list): Empty list to fill with marker click coordinates and transect widths
 
     Returns:
         Nested List. A list containing a list for each marker which each contains three lists:
@@ -99,18 +99,18 @@ class MultiMarker(ui.widget.Widget):
     into the viewer.
 
     Attributes:
-        m_on: Boolean, whether there are any markers active
-        upload_fail: Boolean, if anything has gone wrong in the project uploading process
-        home: Reference to root HomeScreen instance
+        m_on (bool): Whether there are any markers active
+        upload_fail (bool): If anything has gone wrong in the project uploading process
+        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         dbtn: RoundedButton, Plot button to activate PlotPopup
-        dragging: Boolean, whether viewer is in dragging mode
-        width_w: MarkerWidth widget to allow for adjustable marker widths
-        clicks: Int, number of clicks made by user. Does not decrease when points are deleted
+        dragging (bool): Whether viewer is in dragging mode
+        width_w: :class:`cutview.markerwidth.MarkerWidth` widget to allow for adjustable marker widths
+        clicks (int): Number of clicks made by user. Does not decrease when points are deleted
             unless all points are deleted in which case it goes back to zero.
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New marker button
-        plotting: PlotPopup, reference to plotting menu when opened
-
+        plotting: :class:`cutview.plotpopup.PlotPopup`, reference to plotting menu when opened
+        curr_width (int): Current marker width being used. Used to initialize width of new markers.
         Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
     def __init__(self, home, **kwargs):
@@ -118,7 +118,7 @@ class MultiMarker(ui.widget.Widget):
         Defines sidebar elements and initializes widget
 
         Args:
-            home: Reference to root HomeScreen instance
+            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         """
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
@@ -130,6 +130,7 @@ class MultiMarker(ui.widget.Widget):
         self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
         self.plotting = None
+        self.curr_width = 40
 
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
@@ -146,19 +147,39 @@ class MultiMarker(ui.widget.Widget):
         """
         Updates font of sidebar elements.
         Args:
-            font: Float, new font size
+            font (float): New font size
         """
         self.dbtn.font_size = font
         self.upbtn.font_size = font
         self.nbtn.font_size = font
         self.width_w.font_adapt(font)
 
+    def update_l_col(self, color):
+        """
+        Asks each marker to update their line color
+
+        Args:
+            color (str): New color value: 'Blue', 'Green' or 'Orange'
+        """
+        for m in self.children:
+            m.update_l_col(color)
+
+    def update_c_size(self, value):
+        """
+       Asks each marker to update their circle size
+
+       Args:
+           value (float): New circle size
+       """
+        for m in self.children:
+            m.update_c_size(value)
+
     def change_dragging(self, val):
         """
         Change whether in dragging mode or not.
 
         Args:
-            val: Boolean, whether in dragging mode or not.
+            val (bool): Whether in dragging mode or not.
         """
         self.dragging = val
 
@@ -184,8 +205,8 @@ class MultiMarker(ui.widget.Widget):
         file. If not, closes popups and shows error message.
 
         Args:
-            file: String, File path
-            popup: Popup, File name input popup (so can close if file invalid)
+            file (str): File path
+            popup: kivy.uix.popup.Popup, File name input popup (so can close if file invalid)
         """
         if exists(file):
             if file[-5:] == ".json":
@@ -220,8 +241,9 @@ class MultiMarker(ui.widget.Widget):
         Adds markers by 'clicking' the points in the file with the marker width denoted by the file
 
         Args:
-            points: Properly formatted nested list from marker_find() function.
+            points: Properly formatted nested list from :class:`cutview.multimarker.marker_find()` function.
         """
+        self.upload_fail = False
         if len(self.children) != 0:  # If markers already exist in viewer
             self.children[0].stop_drawing()
             if self.children[0].clicks < 2:  # If any existing markers are incomplete, remove them
@@ -229,7 +251,7 @@ class MultiMarker(ui.widget.Widget):
                     self.children[0].del_point()
                 self.remove_widget(self.children[0])
         for m in range(0, len(points)):
-            marker = Marker(home=self.home)
+            marker = Marker(home=self.home, width=self.curr_width)
             clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
             marker.upload_mode(True)
             self.add_widget(marker)
@@ -237,6 +259,7 @@ class MultiMarker(ui.widget.Widget):
                 touch = Click(i[0], i[1])
                 marker.t_width = i[2]
                 marker.on_touch_down(touch)
+                self.clicks += 1
             marker.upload_mode(False)
             if self.upload_fail:  # If upload goes wrong, stop and undo everything
                 self.undo_upload(m)
@@ -248,7 +271,7 @@ class MultiMarker(ui.widget.Widget):
         Remove any previous markers that had been uploaded if upload fails
 
         Args:
-            markers: Int, Number of markers added so far
+            markers (int): Number of markers added so far
         """
         for m in range(0, markers + 1):
             Window.unbind(mouse_pos=self.children[0].draw_line)
@@ -272,8 +295,9 @@ class MultiMarker(ui.widget.Widget):
         Update width of active marker.
 
         Args:
-            num: Int, new width value
+            num (int): New width value
         """
+        self.curr_width = num
         self.children[0].update_width(num)
 
     def del_line(self):
@@ -327,12 +351,12 @@ class MultiMarker(ui.widget.Widget):
             if len(self.children) == 0 or self.children[0].clicks >= 2:
                 if len(self.children) != 0:
                     self.children[0].stop_drawing()
-                m = Marker(home=self.home)
+                m = Marker(home=self.home, width=self.curr_width)
                 self.add_widget(m)
 
     def gather_popup(self):
         """
-        Gather data from markers and call for PlotPopup
+        Gather data from markers and call for :class:`cutview.plotpopup.PlotPopup`
         """
         frames = {}
         c = 1
@@ -345,7 +369,6 @@ class MultiMarker(ui.widget.Widget):
                 count += 1
             frames["Marker " + str(c)] = data
             c += 1
-
         self.plotting = PlotPopup(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
