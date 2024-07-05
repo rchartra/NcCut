@@ -91,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m poetry install --with docs
-      -name: Build Docs
+      - name: Build Docs
         run: |
           cd docs
           sphinx-build -M html source build
