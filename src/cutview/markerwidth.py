@@ -23,8 +23,6 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         marker: Current :class:`cutview.multimarker.MultiMarker` instance
         min (int): Minimum width allowed
         max (int): Maximum width allowed
-
-        Inherits additional attributes from kivy.uix.boxlayout.Boxlayout (see kivy docs)
     """
     def __init__(self, marker, **kwargs):
         """

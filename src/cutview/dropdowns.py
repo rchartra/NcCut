@@ -17,8 +17,6 @@ class ViewDropDown(DropDown):
 
     Creates the line color dropdown menu and manages the execution of all setting options.
 
-    Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
-
     Attributes:
         home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         l_color_drop: Line color selection kivy.uix.dropdown.Dropdown object
@@ -78,8 +76,6 @@ class NetCDFDropDown(DropDown):
 
     Creates all dropdown lists and executes all setting changes. Other settings are
     defined statically in cutview.kv file.
-
-    Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
 
     Attributes:
         home: Reference to root :class:`cutview.homescreen.HomeScreen` instance

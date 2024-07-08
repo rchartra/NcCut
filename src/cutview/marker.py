@@ -37,8 +37,6 @@ class Marker(ui.widget.Widget):
         l_color: kivy.graphics.Color, Color to use for graphics
         c_size: 2 element tuple of floats that defines size of circles
         line_width (float): Width of lines
-
-        Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
     def __init__(self, home, width, **kwargs):
         """

@@ -29,8 +29,6 @@ class HomeScreen(Screen):
         font (float): Current font size for all buttons
         display: FileDisplay object (draggable image) created when a file is loaded
         nc_popup: Reference to NetCDF configuration popup
-
-        Inherits additional attributes from kivy.uix.screenmanager.Screen (see kivy docs)
     """
     def __init__(self, **kwargs):
         """

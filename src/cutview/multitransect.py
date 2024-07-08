@@ -26,8 +26,6 @@ class MultiTransect(ui.widget.Widget):
         p_btn: RoundedButton, Plot button which opens :class:`cutview.plotpopup.PlotPopup`
         dragging (bool): Whether in dragging mode
         plotting: :class:`cutview.plotpopup.PlotPopup`, reference to plotting menu when opened
-
-        Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
     def __init__(self, home, **kwargs):
         """

@@ -31,8 +31,6 @@ class FileDisplay(ScatterLayout):
     If file is a NetCDF file it turns dataset into an image according to settings. Loads image and updates it when
     settings are changed. Also manages the scrolling, flipping, and rotating of the image.
 
-    Inherits additional attributes from kivy.uix.scatterlayout.ScatterLayout (see kivy docs)
-
     Attributes:
         config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data from
             the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
