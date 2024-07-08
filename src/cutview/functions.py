@@ -112,7 +112,7 @@ def sel_data(config):
 
     Args:
         config: Dictionary of key details about NetCDF file as outlined in
-        :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs`
+            :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs`
 
     Returns:
         2D array of data from NetCDF file.
