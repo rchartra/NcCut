@@ -6,7 +6,7 @@ authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/rchartra/CutView"
-documentation = "https://github.com/rchartra/CutView/wiki"
+documentation = "https://cutview.readthedocs.io/en/latest/index.html"
 keywords = ["NetCDF", "GUI"]
 classifiers = [
   "Intended Audience :: Science/Research",
