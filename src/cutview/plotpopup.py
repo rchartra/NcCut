@@ -34,8 +34,6 @@ class BackgroundDropDown(DropDown):
 
     Attributes:
         rect: Rectangle object that serves as background to the dropdown.
-
-        Inherits additional attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
     """
     def open(self, widget):
         """
@@ -88,8 +86,6 @@ class PlotPopup(Popup):
         t_select: RoundedButton which opens transect selection dropdown menu
         v_select: RoundedButton which opens variable selection dropdown menu (Only if NetCDF file)
         z_select: RoundedButton which opens z value selection dropdown menu (Only if 3D NetCDF file)
-
-        Inherits additional attributes from kivy.uix.popup.Popup (see kivy docs)
     """
     def __init__(self, transects, home, config, **kwargs):
         """

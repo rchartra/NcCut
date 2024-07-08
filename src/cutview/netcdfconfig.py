@@ -35,8 +35,6 @@ class NetCDFConfig(Popup):
         title: Popup title
         content: BoxLayout containing all widgets of the popup
         size_hint (tuple): Tuple (width, height) of relative size of popup to window
-
-        Inherits additional attributes from kivy.uix.popup.Popup (see kivy docs)
     """
     def __init__(self, file, home, **kwargs):
         """

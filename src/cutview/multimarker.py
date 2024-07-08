@@ -111,7 +111,6 @@ class MultiMarker(ui.widget.Widget):
         nbtn: RoundedButton, New marker button
         plotting: :class:`cutview.plotpopup.PlotPopup`, reference to plotting menu when opened
         curr_width (int): Current marker width being used. Used to initialize width of new markers.
-        Inherits additional attributes from kivy.uix.widget.Widget (see kivy docs)
     """
     def __init__(self, home, **kwargs):
         """
