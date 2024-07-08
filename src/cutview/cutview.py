@@ -6,10 +6,10 @@ File to run to start up the GUI. Creates the widget tree and sets the initial wi
 """
 
 # Turns off debug messages from matplotlib and PIL
-import logging
-if __name__ == '__main__':
-    logging.getLogger('matplotlib.font_manager').disabled = True
-    logging.getLogger('PIL.Image').setLevel(logging.WARNING)
+# import logging
+# if __name__ == '__main__':
+#     logging.getLogger('matplotlib.font_manager').disabled = True
+#     logging.getLogger('PIL.Image').setLevel(logging.WARNING)
 import kivy
 import kivy.uix as ui
 from kivy.app import App
