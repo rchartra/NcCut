@@ -321,7 +321,7 @@ class FileDisplay(ScatterLayout):
 
     def netcdf_to_image(self):
         """
-        Creates image from NetCDF dataset defined in :attribute:`cutview.filedisplay.FileDisplay.f_config`
+        Creates image from NetCDF dataset defined in :attr:`cutview.filedisplay.FileDisplay.f_config`
 
         Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
         and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
