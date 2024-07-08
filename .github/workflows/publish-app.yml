@@ -21,6 +21,6 @@ jobs:
           python -m pip install poetry
       - name: Build and Publish
         run: |
-          python -m poetry version patch
+          python -m poetry version ${{ github.event.release.tag_name }}
           python -m poetry build
           python -m poetry publish
