@@ -3,6 +3,12 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# -- Module Location ---------------------------------------------------------
+
+import sys
+import os
+sys.path.insert(0, os.path.abspath('../../src/cutview'))
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
