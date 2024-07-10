@@ -216,7 +216,7 @@ class Test(unittest.TestCase):
 
         config2 = {"x": "j", "y": "k", "z": "i", "z_val": "3000", "var": "Theta", "file": data}
         res2 = func.sel_data(config2)
-        exp2 = np.flip(data.transpose("j", "k", "i")["Theta"].sel(i=3000).data, 0)
+        exp2 = np.flip(data.transpose("k", "j", "i")["Theta"].sel(i=3000).data, 0)
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
                         "Swapped dimension settings do not match original dataset")
 
