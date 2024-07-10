@@ -5,7 +5,6 @@ File to run to start up the GUI. Creates the widget tree and sets the initial wi
 
 """
 
-# Turns off debug messages from matplotlib and PIL
 import kivy
 import kivy.uix as ui
 from kivy.app import App
