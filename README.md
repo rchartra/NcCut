@@ -6,7 +6,7 @@ CutView is a GUI for getting pixel data from images and data values from NetCDF 
 
 Users can display a plot of the data as well as package the data into a downloadable JSON file. When extracting values from the image/dataset, the program uses linear interpolation to interpolate between the values of the pixels to ensure the most accurate portrayal of the line drawn. 
 
-Please refer to the repo wiki for installation and usage instructions. This is an open source project. For contribution guidelines please refer to this [document](https://github.com/rchartra/CutView/blob/master/CONTRIBUTING.md).
+Please refer to the repo wiki for installation and usage instructions. This is an open source project. For contribution guidelines please refer to the contribution section of the [docs](https://cutview.readthedocs.io/en/latest/contribution.html).
 
 # Installation Instructions
 
@@ -68,7 +68,7 @@ deactivate
 venv\Scripts\activate
 ```
 
-If you are having trouble installing CutView please refer to the Troubleshooting section of the [Wiki](https://github.com/rchartra/CutView/wiki)
+If you are having trouble installing CutView please refer to the Troubleshooting section of the [docs](https://cutview.readthedocs.io/en/latest/installation.html)
 
 # Usage Instructions
 
@@ -122,7 +122,7 @@ CutView().run()
     * You can select which transects you'd like to plot
     * If using a NetCDF file you can select multiple variables and Z values you'd like to see your selected transects plotted from.
     * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
-5. You can save the current plot to .PNG or .PDF formats. You can also save the **currently selected** data or the currently selected data over all Z variables to a JSON file (see "Data Output" section of the [Wiki](https://github.com/rchartra/CutView/wiki) for more on how data is formatted).
+5. You can save the current plot to .PNG or .PDF formats. You can also save the **currently selected** data or the currently selected data over all Z variables to a JSON file (see "Data Output" section of the [docs](https://cutview.readthedocs.io/en/latest/data_output.html) for more on how data is formatted).
 6. Click anywhere around the popup or the close button to dismiss plotting window.
 
 ### Marker
@@ -145,7 +145,7 @@ CutView().run()
     * You can select which transects from which markers you'd like to plot
     * If using a NetCDF file you can select which variables and Z values you'd like to see your selected transects plotted from.
     * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset.
-5. You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see "Data Output" section of the [Wiki](https://github.com/rchartra/CutView/wiki) for more on how data is formatted).
+5. You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see "Data Output" section of the [docs](https://cutview.readthedocs.io/en/latest/data_output.html) for more on how data is formatted).
     * If you want to continue working on your project at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
 6. Click anywhere around the popup or the close button to dismiss
 
