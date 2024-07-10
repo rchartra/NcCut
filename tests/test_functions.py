@@ -195,12 +195,12 @@ class Test(unittest.TestCase):
         data = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")
         config1 = {"x": "x", "y": "y", "z": "Select...", "z_val": "Select...", "var": "Vorticity", "file": data}
         res1 = func.sel_data(config1)
-        exp1 = data["Vorticity"].data
+        exp1 = np.flip(data["Vorticity"].transpose("y", "x").data, 0)
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
         config2 = {"x": "y", "y": "x", "z": "Select...", "z_val": "Select...", "var": "Divergence", "file": data}
         res2 = func.sel_data(config2)
-        exp2 = np.swapaxes(data["Divergence"].data, 0, 1)
+        exp2 = np.flip(np.swapaxes(data["Divergence"].transpose("y", "x").data, 0, 1), 0)
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
                         "Swapped dimension settings do not match original dataset")
 
@@ -211,12 +211,12 @@ class Test(unittest.TestCase):
         data = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")
         config1 = {"x": "i", "y": "j", "z": "k", "z_val": "15", "var": "Theta", "file": data}
         res1 = func.sel_data(config1)
-        exp1 = data["Theta"].sel(k=15).data
+        exp1 = np.flip(data["Theta"].sel(k=15).transpose("j", "i").data, 0)
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
         config2 = {"x": "j", "y": "k", "z": "i", "z_val": "3000", "var": "Theta", "file": data}
         res2 = func.sel_data(config2)
-        exp2 = data.transpose("j", "k", "i")["Theta"].sel(i=3000).data
+        exp2 = np.flip(data.transpose("j", "k", "i")["Theta"].sel(i=3000).data, 0)
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
                         "Swapped dimension settings do not match original dataset")
 
