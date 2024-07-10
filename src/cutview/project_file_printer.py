@@ -2,8 +2,9 @@ def project_file_printer(data, tab):
     """
     Recursively prints the contents of an output data file from CutView in a readable fashion.
 
-    data (dict): Dictionary output from CutView
-    tab (int): Always use 0, used in the recursive process for indentation
+    Attributes:
+        data (dict): Dictionary output from CutView
+        tab (int): Always use 0, used in the recursive process for indentation
     """
     for key in list(data.keys()):
         print(" " * tab, end="")

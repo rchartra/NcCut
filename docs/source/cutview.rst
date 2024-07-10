@@ -91,14 +91,6 @@ cutview.plotpopup module
    :undoc-members:
    :show-inheritance:
 
-cutview.project\_file\_printer module
--------------------------------------
-
-.. automodule:: cutview.project_file_printer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 cutview.singletransect module
 -----------------------------
 
