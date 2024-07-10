@@ -334,8 +334,9 @@ class FileDisplay(ScatterLayout):
 
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
-        is_success, img = cv2.imencode(".png", img)
-        self.byte = io.BytesIO(img)
+        is_success, img_b = cv2.imencode(".png", img)
+        cv2.imwrite("__nc_test__.png", img)
+        self.byte = io.BytesIO(img_b)
 
     def update_color_bar(self, colorbar):
         """
