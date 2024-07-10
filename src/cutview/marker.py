@@ -92,7 +92,8 @@ class Marker(ui.widget.Widget):
             for i in g:
                 self.canvas.add(i)
         self.canvas.add(self.curr_line)
-        self.add_widget(self.number)
+        if self.clicks > 0:
+            self.add_widget(self.number)
 
     def update_c_size(self, value):
         """
@@ -111,9 +112,10 @@ class Marker(ui.widget.Widget):
                              i.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
                 elif isinstance(i, Line):
                     i.width = self.line_width
-        self.number.font_size = dp(value) * 2
-        self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
-                           self.number.pos[1] + self.c_size[1] - dp(value))
+        if self.clicks > 0:
+            self.number.font_size = dp(value) * 2
+            self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
+                               self.number.pos[1] + self.c_size[1] - dp(value))
         self.curr_line.width = self.line_width
         self.c_size = (dp(value), dp(value))
 

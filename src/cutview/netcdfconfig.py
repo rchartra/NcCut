@@ -25,6 +25,7 @@ class NetCDFConfig(Popup):
     Attributes:
         home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
         data: xarray.Dataset, Opened NetCDF file
+        running (bool): Whether the 'Go' button has been pressed. Used to prevent user from spamming the button.
         var_select: RoundedButton, Variable select button
         var_drop: Dropdown(), Dropdown of variable options
         x_select: Rounded Button, X dimension select button
@@ -47,6 +48,7 @@ class NetCDFConfig(Popup):
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
         self.data = xr.open_dataset(file)
+        self.running = False
         content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(20), padding=dp(20))
 
         # Variable Selection
@@ -125,35 +127,44 @@ class NetCDFConfig(Popup):
         dictionary of configurations to HomeScreen instance and closes popup. Otherwise
         an error message is displayed and popup stays open.
         """
-        vals = {'x': self.x_select.text, 'y': self.y_select.text,
-                'z': self.z_select.text, 'z_val': self.depth_select.text,
-                'var': self.var_select.text, 'file': self.data}
-        selects = [(self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
-        if self.var_select.text == "Select...":
-            self.error.text = "Please Select a Variable"
-            return
-        if len(self.data[self.var_select.text].dims) > 3:
-            self.error.text = "This variable has more than 3 dimensions"
-            return
-        if len(self.data[self.var_select.text].dims) < 2:
-            self.error.text = "This variable has less than 2 dimensions"
-            return
-        for sel in selects:
-            if sel[0].text == 'Select...':
-                self.error.text = "Please Select a " + sel[1]
+        if not self.running:
+            self.running = True
+            vals = {'x': self.x_select.text, 'y': self.y_select.text,
+                    'z': self.z_select.text, 'z_val': self.depth_select.text,
+                    'var': self.var_select.text, 'file': self.data}
+            selects = [(self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
+            if self.var_select.text == "Select...":
+                self.error.text = "Please Select a Variable"
+                self.running = False
                 return
-        if len(set(list(vals.values())[:-3])) != len(list(vals.values())[:-3]):
-            self.error.text = "All X, Y, Z variables must be unique"
-            return
-        if len(self.data[self.var_select.text].dims) == 3:
-            if self.z_select.text == "Select...":
-                self.error.text = "Please Select a Z dimension"
+            if len(self.data[self.var_select.text].dims) > 3:
+                self.error.text = "This variable has more than 3 dimensions"
+                self.running = False
                 return
-            if self.depth_select.text == 'Select...':
-                self.error.text = "Please Select a Z Value"
+            if len(self.data[self.var_select.text].dims) < 2:
+                self.error.text = "This variable has less than 2 dimensions"
+                self.running = False
                 return
-        self.home.load_netcdf(vals)
-        self.dismiss()
+            for sel in selects:
+                if sel[0].text == 'Select...':
+                    self.error.text = "Please Select a " + sel[1]
+                    self.running = False
+                    return
+            if len(set(list(vals.values())[:-3])) != len(list(vals.values())[:-3]):
+                self.error.text = "All X, Y, Z variables must be unique"
+                self.running = False
+                return
+            if len(self.data[self.var_select.text].dims) == 3:
+                if self.z_select.text == "Select...":
+                    self.error.text = "Please Select a Z dimension"
+                    self.running = False
+                    return
+                if self.depth_select.text == 'Select...':
+                    self.error.text = "Please Select a Z Value"
+                    self.running = False
+                    return
+            self.home.load_netcdf(vals)
+            self.dismiss()
 
     def var_update(self, var, *args):
         """
