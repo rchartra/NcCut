@@ -117,21 +117,19 @@ def sel_data(config):
     Returns:
         2D array of data from NetCDF file.
     """
-    # Selects data based on user dimension and variable selections
+    # IMPORTANT: Numpy indexes (row, column) with (0, 0) at top left corner
     if config['z'] == 'Select...':
         # 2D NetCDF data
         ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
-        ds = ds.transpose('x', 'y')
-        data = ds.sel(x=ds['x'], y=ds['y'])
-        data = data.data
+        ds = ds.transpose('y', 'x')
+        data = ds.sel(y=ds['y'], x=ds['x'])
     else:
         # 3D NetCDF data
         ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
-        ds = ds.transpose('x', 'y', 'z')
+        ds = ds.transpose('y', 'x', 'z')
         ds['z'] = ds['z'].astype(str)
-        data = ds.sel(x=ds['x'], y=ds['y'], z=config['z_val'])
-        data = data.data
-    return data
+        data = ds.sel(y=ds['y'], x=ds['x'], z=config['z_val'])
+    return np.flip(data.data, 0)
 
 
 def ip_get_points(points, curr, nc):
@@ -144,8 +142,7 @@ def ip_get_points(points, curr, nc):
     Args:
         points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
         curr: 2D indexable array of current dataset loaded in viewer
-        nc (bool): Whether current file is NetCDF or not
-
+        nc (bool): Whether data is from a NetCDF file
     Returns:
         Dictionary with three keys:
             'x': 1D array of x-coordinates of transect points

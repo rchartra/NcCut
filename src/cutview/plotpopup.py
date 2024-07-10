@@ -97,7 +97,6 @@ class PlotPopup(Popup):
         """
         super(PlotPopup, self).__init__(**kwargs)
         self.all_transects = transects
-        print("hello!")
         self.home = home
         self.f_type = list(config.keys())[0]
         self.config = config[self.f_type]
@@ -410,7 +409,7 @@ class PlotPopup(Popup):
         else:
             dat = {}
             ds = self.config['file']
-            z_len = len(ds.coords[self.config['z']].data)
+            z_arr = ds.coords[self.config['z']].data
             for var in self.active_vars:
                 config = copy.copy(self.config)
                 config['var'] = var
@@ -418,25 +417,27 @@ class PlotPopup(Popup):
                 dat[var] = {}
                 ds.load()
                 ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-                ds = ds.transpose('x', 'y', 'z')
+                ds = ds.transpose('y', 'x', 'z')
                 ds['z'] = ds['z'].astype(str)
-                ds = ds.data
-                for d in range(0, z_len):
-                    dat[var][d] = {}
+                ds = np.flip(ds.data, 0)
+                for d, d_lab in enumerate(z_arr):
+                    dat[var][str(d_lab)] = {}
                     curr = ds[:, :, d]
                     for key in list(self.active_transects.keys()):
                         # All markers selected (if marker tool used)
-                        dat[var][d][key] = {}
+                        dat[var][str(d_lab)][key] = {}
                         for cut in list(self.active_transects[key].keys()):
                             # All selected transects
                             if self.active_transects[key][cut]:
                                 if cut == "Average":
-                                    dat[var][d][key][cut] = self.get_average(key, curr)
+                                    dat[var][str(d_lab)][key][cut] = self.get_average(key, curr)
                                 else:
-                                    dat[var][d][key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
-                                                                               self.f_type == "netcdf")
-                        if len(dat[var][d][key]) == 0:
-                            dat[var][d].pop(key)
+                                    dat[var][str(d_lab)][key][cut] = func.ip_get_points(self.all_transects[key][cut],
+                                                                                        curr,
+                                                                                        self.f_type == "netcdf")
+                        if len(dat[var][str(d_lab)][key]) == 0:
+                            dat[var][str(d_lab)].pop(key)
+                    dat[var][str(d_lab)] = self.add_marker_info(dat[var][str(d_lab)])
 
             with open(self.home.rel_path / (file + ".json"), "w") as f:
                 json.dump(dat, f)
@@ -756,9 +757,9 @@ class PlotPopup(Popup):
         # Load entire dataset (if big file this will take a while but decreases total plot time)
         ds.load()
         ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-        ds = ds.transpose('x', 'y', 'z')
+        ds = ds.transpose('y', 'x', 'z')
         ds['z'] = ds['z'].astype(str)
-        ds = ds.data
+        ds = np.flip(ds.data, 0)
 
         # Array of data values at x, y pairs for each z
         all_z = np.empty(shape=(z_len, width))
