@@ -11,6 +11,8 @@ from kivy.app import App
 from kivy.metrics import dp
 import platform
 from cutview.homescreen import HomeScreen
+from cutview.logger import get_logging_level
+import logging
 
 
 class CutView(App):
@@ -19,16 +21,17 @@ class CutView(App):
 
     Creates the initial window and ensures font sizes in the app update uniformly
     when the window resizes.
-
-    Inherits attributes from kivy.app.App (see kivy docs)
     """
     def on_start(self):
         """
         Sets initial window size according to operating system.
         """
         # Kivy has a mobile app emulator that needs to be turned off for computer app
-        kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
+        print(get_logging_level())
 
+        # Set logger level to suppress or allow dependency debug messages
+        logging.getLogger().setLevel(getattr(logging, get_logging_level().upper(), None))
+        kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
         win = kivy.core.window.Window
         if platform.system() == "Darwin":  # macOS
             win.size = (dp(500), dp(300))

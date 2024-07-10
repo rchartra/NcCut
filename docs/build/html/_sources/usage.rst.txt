@@ -105,3 +105,23 @@ To upload a previously worked on project:
 #. Enter the file name of the transect data you saved previously and select **Ok**.
 #. All markers from the file will load onto the viewer and you can continue working on the project.
 
+API
+---
+
+**CutView** has a few helper modules for configuring the app and working with the output data.
+
+cutview.project\_file\_printer module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: cutview.project_file_printer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cutview.logger module
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: cutview.logger
+   :members:
+   :undoc-members:
+   :show-inheritance:
