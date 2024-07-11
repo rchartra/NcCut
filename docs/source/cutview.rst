@@ -6,7 +6,11 @@ This section serves as reference for contributors who are looking to understand 
 cutview.cutview module
 ----------------------
 
-.. automodule:: cutview.cutview
+Builds app and sets initial window.
+
+Creates the widget tree and sets the initial window size. To load app, run ``CutView().run()``
+
+.. autoclass:: cutview.cutview.CutView
    :members:
    :undoc-members:
    :show-inheritance:
