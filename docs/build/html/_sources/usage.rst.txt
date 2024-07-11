@@ -16,7 +16,7 @@ For video walkthroughs of CutView's basic usage, refer to the :doc:`example` sec
 Loading a File
 --------------
 
-CutView supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.
+**CutView** supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.
 
 #. To load an image or NetCDF file type the absolute or relative file path to your file in the file entry text box
 
@@ -39,7 +39,7 @@ CutView supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load
 Tools
 -----
 
-CutView has two types of tools for making transects. The simpler :ref:`Transect <transect>` tool allows you to individually draw lines across features where transects will be taken when plotted:
+**CutView** has two types of tools for making transects. The simpler :ref:`Transect <transect>` tool allows you to individually draw lines across features where transects will be taken when plotted:
 
     .. image:: _media/transect.png
 
