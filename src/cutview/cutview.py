@@ -1,7 +1,7 @@
 """
 Builds app and sets initial window.
 
-File to run to start up the GUI. Creates the widget tree and sets the initial window size.
+Creates the widget tree and sets the initial window size. To load app, run ``CutView().run()``
 
 """
 
@@ -21,16 +21,16 @@ class CutView(App):
 
     Creates the initial window and ensures font sizes in the app update uniformly
     when the window resizes.
+
     """
     def on_start(self):
         """
         Sets initial window size according to operating system.
         """
-        # Kivy has a mobile app emulator that needs to be turned off for computer app
-        print(get_logging_level())
 
         # Set logger level to suppress or allow dependency debug messages
         logging.getLogger().setLevel(getattr(logging, get_logging_level().upper(), None))
+        # Kivy has a mobile app emulator that needs to be turned off for computer app
         kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
         win = kivy.core.window.Window
         if platform.system() == "Darwin":  # macOS
@@ -55,6 +55,9 @@ class CutView(App):
     def build(self):
         """
         Override App class build method and return widget tree.
+
+        Returns
+            Root of widget tree
         """
         root = ui.screenmanager.ScreenManager()
         root.add_widget(HomeScreen(name="HomeScreen"))

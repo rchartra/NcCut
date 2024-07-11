@@ -1,7 +1,7 @@
 CutView API Reference
 =====================
 
-This section serves as reference for contributors who are looking to understand CutView's underlying structure. This is not a user facing API.
+This section serves as reference for contributors who are looking to understand **CutView's** underlying structure. This is not a user facing API.
 
 cutview.cutview module
 ----------------------
@@ -10,6 +10,7 @@ cutview.cutview module
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 cutview.dropdowns module
 ------------------------

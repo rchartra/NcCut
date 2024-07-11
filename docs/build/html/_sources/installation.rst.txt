@@ -1,7 +1,7 @@
 Installation
 ============
 
-CutView can be downloaded directly from PyPI using PIP:
+**CutView** can be downloaded directly from PyPI using PIP:
 
 #. It is recommended to first create a virtual environment (if your IDE does not do it for you) before installing packages on your system to prevent package compatibility issues. From the terminal at your desired directory use:
 
