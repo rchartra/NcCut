@@ -368,8 +368,8 @@ class Test(unittest.TestCase):
         popup.var_drop.select("v3")
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
-        self.assertEqual(popup.x_select.text, "i", "X dimension automatically selected")
-        self.assertEqual(popup.y_select.text, "j", "Y dimension automatically selected")
+        self.assertEqual(popup.x_select.text, "j", "X dimension automatically selected")
+        self.assertEqual(popup.y_select.text, "i", "Y dimension automatically selected")
         self.assertEqual(popup.z_select.text, "k", "Z dimension automatically selected")
         self.assertEqual(popup.error.text, "Please Select a Z Value", "3D variables need a Z value selected")
 
