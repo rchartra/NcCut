@@ -1,4 +1,5 @@
 sphinx==7.3.7
 sphinx-rtd-theme==2.0.0
 sphinxcontrib-video==0.2.1
+rtds-action==1.1.0
 cutview
