@@ -30,3 +30,14 @@ jobs:
           python -m poetry build
       - name: Publish to Pypi
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  docs:
+    runs-on: ubuntu-latest
+    needs: pypi
+    steps:
+      - name: Trigger RTDs build
+        uses: dfm/rtds-action@v1
+        with:
+          webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
+          webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
+          commit_ref: ${{ github.ref }}

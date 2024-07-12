@@ -6,7 +6,7 @@ CutView is a GUI for getting pixel data from images and data values from NetCDF 
 
 Users can display a plot of the data as well as package the data into a downloadable JSON file. When extracting values from the image/dataset, the program uses linear interpolation to interpolate between the values of the pixels to ensure the most accurate portrayal of the line drawn. 
 
-Please refer to the repo wiki for installation and usage instructions. This is an open source project. For contribution guidelines please refer to the contribution section of the [docs](https://cutview.readthedocs.io/en/latest/contribution.html).
+Please refer to the [docs](https://cutview.readthedocs.io/en/latest/index.html) for installation and usage instructions. This is an open source project. For contribution guidelines please refer to the contribution section of the [docs](https://cutview.readthedocs.io/en/latest/contribution.html).
 
 # Installation Instructions
 
