@@ -180,12 +180,13 @@ class NetCDFConfig(Popup):
         dims = list(self.data[self.var_select.text].dims)
         if len(dims) < 3:
             while len(dims) < 3:
-                dims.append("Select...")
+                dims.insert(0, "Select...")
         elif len(dims) > 3:
             dims = dims[:3]
-        setattr(self.x_select, 'text', dims[0])
-        setattr(self.y_select, 'text', dims[1])
-        setattr(self.z_select, 'text', dims[2])
+        print(dims)
+        setattr(self.x_select, 'text', dims[-1])
+        setattr(self.y_select, 'text', dims[-2])
+        setattr(self.z_select, 'text', dims[-3])
         setattr(self.depth_select, 'text', "Select...")
 
     def dim_options(self, dim, *args):

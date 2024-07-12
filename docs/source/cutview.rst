@@ -10,7 +10,7 @@ Builds app and sets initial window.
 
 Creates the widget tree and sets the initial window size. To load app, run ``CutView().run()``
 
-.. py:class::  cutview.cutview.CutView(\*\*kwargs)
+.. py:class::  cutview.cutview.CutView(**kwargs)
 
     Bases: :class:`App`
 
