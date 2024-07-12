@@ -363,7 +363,7 @@ class PlotPopup(Popup):
 
     def download_all_data(self, f_name):
         """
-        Downloads all transect data into a JSON file if valid file name given.
+        Downloads selected data for all transects/markers into a JSON file if valid file name given.
 
         Args:
             f_name (str): Proposed file name
@@ -373,9 +373,14 @@ class PlotPopup(Popup):
             func.alert("Invalid File Name", self.home)
             return
         else:  # Build JSON file
-            with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(self.all_transects, f)
-            func.alert("Download Complete", self.home)
+            original = copy.copy(self.active_transects)
+            for m in list(self.active_transects.keys()):
+                for t in list(self.active_transects[m].keys()):
+                    self.active_transects[m][t] = True
+            self.active_data = self.get_data()
+            self.download_selected_data(f_name)
+            self.active_transects = original
+            self.active_data = self.get_data()
 
     def add_marker_info(self, dicti):
         """
@@ -407,9 +412,28 @@ class PlotPopup(Popup):
             func.alert("Invalid File Name", self.home)
             return
         else:
+            original = copy.copy(self.active_z)
+            self.active_z = [str(z) for z in self.config['file'].coords[self.config['z']].data]
+            self.active_data = self.get_data()
+            self.download_selected_data(f_name)
+            self.active_z = original
+            self.active_data = self.get_data()
+
+    def download_all_z_data2(self, f_name):
+        """
+        Get and download data for all selected variables for all z dimension values.
+
+        Args:
+            f_name (str): Proposed file name
+        """
+        file = func.check_file(self.home.rel_path, f_name, ".json")
+        if file is False:
+            func.alert("Invalid File Name", self.home)
+            return
+        else:
             dat = {}
             ds = self.config['file']
-            z_arr = ds.coords[self.config['z']].data
+            z_arr = [str(z) for z in ds.coords[self.config['z']].data]
             for var in self.active_vars:
                 config = copy.copy(self.config)
                 config['var'] = var
@@ -962,8 +986,6 @@ class PlotPopup(Popup):
         Returns:
             1D array of length of transect width containing average transect values for the marker.
         """
-        # Gets average of all transects in a marker
-        # Assumes all transects are same length
         dat = np.zeros(self.all_transects[key]['Width'][0])
         for cut in list(self.all_transects[key].keys())[3:]:
             dat += func.ip_get_points(self.all_transects[key][cut], curr, self.f_type == "netcdf")['Cut']

@@ -60,12 +60,6 @@ Transect Tool
 #. Repeat for as many transects as you'd like
 #. When done select the **Plot** button and a popup will appear with a plot of all transects and downloading options.
 
-    * You can select which transects you'd like to plot
-    * If using a NetCDF file you can select multiple variables and Z values you'd like to see your selected transects plotted from.
-    * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
-#. You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see the :ref:`Data Output <data_output>` section for more on how data is formatted).
-#. Click anywhere around the popup or the close button to dismiss plotting window.
-
 .. _transect_marker:
 
 Transect Marker
@@ -104,6 +98,22 @@ To upload a previously worked on project:
 #. Instead of clicking new points, select the **Upload Project** button.
 #. Enter the file name of the transect data you saved previously and select **Ok**.
 #. All markers from the file will load onto the viewer and you can continue working on the project.
+
+Plotting
+--------
+
+#. When you are finished using a tool, select the **Plot** button to view plots of your data and choose which data you would like to save.
+    * You can select which transects you'd like to plot
+    * If you used the marker tool you can plot an average of the markers transects if you used the same marker width throughout the whole marker
+    * If using a NetCDF file you can select multiple variables and Z values you'd like to see your selected transects plotted from.
+    * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
+#. You can save the current plot to .PNG or .PDF formats.
+#. You can also save the transect data itself from three options:
+    * **Save All Data** will save all transects from all markers. If using a NetCDF file it will do so for the currently selected variables and z values.
+    * **Save Selected Data** will save only the transects selected in the plotting menu. If using a NetCDF file it will do so for the currently selected variables and z values.
+    * **Save All Z Values** will save all z values for the selected transects and variables. This option only appears if using a NetCDF file with three dimensions.
+#. See the :ref:`Data Output <data_output>` section for how the saved data is formatted.
+#. Click anywhere around the popup or the close button to dismiss plotting window.
 
 API
 ---

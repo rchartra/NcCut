@@ -1,23 +1,26 @@
 Contribution Guide
 ==================
 
-Contributions are welcome! Feel free to add features, tests, documentation, examples, whatever you think would improve the app. However please follow the following guidelines to ensure a smooth contribution process.
+Contributions are welcome! Feel free to add new features, unit tests, documentation, examples, whatever you think would improve the app. However please follow the following guidelines to ensure a smooth contribution process.
 
 Submission
 ----------
-* To report a bug please submit an issue on `GitHub issues <https://github.com/rchartra/CutView/issues>`_. Include as much information as possible including your operating system, python version, and steps to reproduce the issue.
-* To submit new features or changes please submit a pull request on `GitHub <https://github.com/rchartra/CutView/pulls>`_. Submissions will be automatically tested and then manually reviewed.
+* To report a bug, submit an issue on `GitHub issues <https://github.com/rchartra/CutView/issues>`_. Please include as much information as possible including your operating system, python version, and steps required to reproduce the issue. If possible, attach the file you are using with the viewer as well.
+* To suggest new features or functionality changes please also submit an issue on `GitHub issues <https://github.com/rchartra/CutView/issues>`_.
+* To submit new features or changes to the code please submit a pull request on `GitHub <https://github.com/rchartra/CutView/pulls>`_ to the main branch from your forked repository. Submissions will be automatically tested and then manually reviewed to ensure compatibility.
 
 Testing
 -------
-* If you are adding new features to the GUI please additionally submit unit tests for your code. You may refer to the existing test `suite <https://github.com/rchartra/CutView/tree/master/tests>`_ for examples on how to write them.
-* Before submitting please rigorously test your feature. There should be no way for the app to crash while in use. If there is a way for the user to do something wrong, handle the case and alert the user via :py:func:`cutview.functions.alert`.
+* If you are adding new features to the GUI please write unit tests for your feature. You may refer to the existing test `suite <https://github.com/rchartra/CutView/tree/master/tests>`_ for examples on how to write them.
+* Unit tests ensure that any future changes to the GUI won't break your code making them crucial to maintaining this project long term.
+* When writing unit tests, check only that the expected user input results in the correct final behavior. Tests that look too deep into how the code itself works are vulnerable to failing over small changes even if the code overall is working correctly.
+* Please also rigorously test your feature as you are developing it. There should be no way for the app to crash while it's in use. If there is a way for a user to do something incorrectly, (for example entering an invalid file name), handle that case and alert the user via :py:func:`cutview.functions.alert`.
 
 Documentation
 -------------
-
-* Please include instructions on how to use your feature to add to the documentation.
-* Your code should be well documented with docstrings according to the Google python style `guide <https://google.github.io/styleguide/pyguide.html>`_
+* If you are adding a new feature please add instructions as to how to use your tool to the the documentation.
+* To update the documentation edit the reStructuredText files in the docs `source <>`_ folder.
+* Your code should be well documented with docstrings according to the Google python style `guide <https://google.github.io/styleguide/pyguide.html>`_. The docstrings are used to create the :doc:`cutview` section of the docs, so please ensure they are properly formatted.
 
 Code Style
 __________

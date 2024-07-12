@@ -55,7 +55,7 @@ Installation
 Troubleshooting
 ---------------
 
-* You will need to have python installed on your computer
+* You will need to have python of version at least 3.9 installed on your computer
 * Ensure you have X11 on your computer (not always the case on Macs)
 * There is occasionally a bug with the way kivy accesses it's dependencies. If the app won't run for you try running these lines in the terminal:
 
