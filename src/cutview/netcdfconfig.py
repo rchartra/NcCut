@@ -183,7 +183,6 @@ class NetCDFConfig(Popup):
                 dims.insert(0, "Select...")
         elif len(dims) > 3:
             dims = dims[:3]
-        print(dims)
         setattr(self.x_select, 'text', dims[-1])
         setattr(self.y_select, 'text', dims[-2])
         setattr(self.z_select, 'text', dims[-3])
