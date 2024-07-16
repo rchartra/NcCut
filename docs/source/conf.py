@@ -11,7 +11,7 @@ import os
 project = 'NcCut'
 copyright = '2024, Robin Chartrand'
 author = 'Robin Chartrand'
-release = '0.2.7'
+release = '0.2.10'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
