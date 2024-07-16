@@ -19,8 +19,8 @@ release = '0.2.7'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinxcontrib.video'#,
-#    'rtds_action'
+    'sphinxcontrib.video',
+    'rtds_action'
 ]
 
 templates_path = ['_templates']
@@ -36,4 +36,4 @@ html_static_path = ['_static']
 # ---- Read The Docs Upload Configuration -------------------------------------
 
 rtds_action_github_repo = "rchartra/NcCut"
-#rtds_action_github_token = os.environ["GITHUB_TOKEN"]
+rtds_action_github_token = os.environ["GITHUB_TOKEN"]
