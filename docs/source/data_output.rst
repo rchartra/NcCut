@@ -3,7 +3,7 @@
 Data Output
 ===========
 
-No matter which tool you use the GUI will download the transect data into a JSON file. If you're unfamiliar with this data structure, it is equivalent to nested python dictionaries or lists in many other programming languages. It is a common file type that is supported by many software and programming languages, however an easy way to access it is using the python ``json`` library:
+No matter which tool you use the GUI will download the transect data into a JSON file. If you're unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages, however an easy way to access it is using the python ``json`` library:
 
     .. code-block:: python
 
@@ -11,7 +11,7 @@ No matter which tool you use the GUI will download the transect data into a JSON
         f = open("_FILE_NAME_.json")
         dat = json.load(f)
 
-This will load the data into a dictionary which you can easily manipulate for your purposes.
+This will load the data into a dictionary which you can easily manipulate for your purposes. You can use :py:meth:`nccut.project_file_printer` to have the data printed for you in a readable fashion.
 
 File Structure
 --------------

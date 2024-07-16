@@ -1,5 +1,5 @@
 # NcCut
-NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of satellite imagery or other images with linear features where the brightness of the pixel can be used to gauge some physical value. Examples include measuring sea ice floe concentration or characterizing ice sheet fractures. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any dimensions and extract data along transects. NcCut is designed to make the measurement of linear features simple through it's “Transect Marker” tool where linear features can be marked out and have transects automatically be made across them. Multiple features can be marked at once on a file and saved all together as a “project” that can be reuploaded and edited later.
+NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using NcCut users can view vertical transect images of their data along a third dimension and the marked out line. In addition, NcCut is designed to make the measurement of linear features as automatic as possible through it's "Transect Marker" tool where linear features can be marked out and have transects automatically be made perpendicular to the feature. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.
 
 
 ![](images/nccut.png)
@@ -14,14 +14,14 @@ This is an open source project. For contribution guidelines please refer to the 
 
    * For Linux and Mac:
     ```
-    python3 -m venv venv
-    source venv/bin/activate
+    python3 -m venv nccut-venv
+    source nccut-venv/bin/activate
     ```
 
    * For Windows:
     ```
-    python3 -m venv venv
-    venv\Scripts\activate
+    python3 -m venv nccut-venv
+    nccut-venv\Scripts\activate
     ```
 
 2. Then install NcCut using PIP:
@@ -44,12 +44,12 @@ deactivate
 
    * For Linux and Mac:
     ```
-    source venv/bin/activate
+    source nccut-venv/bin/activate
     ```
 
    * For Windows:
     ```
-    venv\Scripts\activate
+    nccut-venv\Scripts\activate
     ```
 
 If you are having trouble installing NcCut please refer to the Troubleshooting section of the [docs](https://nccut.readthedocs.io/en/latest/installation.html)
@@ -65,7 +65,7 @@ If you are having trouble installing NcCut please refer to the Troubleshooting s
         `support/example_3d.nc`\
     * There is an example project file for upload as well:
 
-        `support/example_markers.json`
+        `support/example.json`
 
 
 

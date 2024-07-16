@@ -98,7 +98,10 @@ Plotting
     * You can select which transects you'd like to plot
     * If you used the marker tool you can plot an average of the markers transects if you used the same marker width throughout the whole marker
     * If using a NetCDF file you can select multiple variables and Z values you'd like to see your selected transects plotted from.
-    * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
+    * If using a NetCDF file with a Z dimension you can select **Plot all Z as Img** to plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
+
+    .. image:: _media/nccutgraphic.png
+
 #. You can save the current plot to .PNG or .PDF formats.
 #. You can also save the transect data itself from three options:
     * **Save All Data** will save all transects from all markers. If using a NetCDF file it will do so for the currently selected variables and z values.

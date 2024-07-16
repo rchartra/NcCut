@@ -91,8 +91,9 @@ class SingleTransect(ui.widget.Widget):
         self.line_width = dp(value / 5)
         self.line.width = self.line_width
         for c in [self.c1, self.c2]:
-            c.size = (dp(value), dp(value))
-            c.pos = (c.pos[0] + self.c_size[0] / 2 - dp(value) / 2, c.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
+            if c:
+                c.size = (dp(value), dp(value))
+                c.pos = (c.pos[0] + self.c_size[0] / 2 - dp(value) / 2, c.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
         self.number.font_size = dp(value) * 2
         self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
                            self.number.pos[1] + self.c_size[1] - dp(value))
