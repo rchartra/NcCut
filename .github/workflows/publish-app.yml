@@ -34,14 +34,17 @@ jobs:
           python -m poetry build
       - name: Commit Version Updates
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m "Update Version"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "Update Version on Release"
           git push
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
       - name: Publish to Pypi
         uses: pypa/gh-action-pypi-publish@release/v1
-
   docs:
     runs-on: ubuntu-latest
     needs: pypi
