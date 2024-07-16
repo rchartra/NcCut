@@ -44,9 +44,9 @@ simpler viewers have a way for users to take transects across NetCDF data.
 
 # Functionality
 
-As per the name, NcCut’s functions can be divided into two main categories:
+NcCut’s functions can be divided into two main categories:
 
-## View
+## Viewer
 
 NcCut allows users to load NetCDF4 files, or images in .JPG, .JPEG, or .PNG formats, and has adjustable graphics for 
 different file sizes. In the case of NetCDF4 files, the user can choose between different variables and dimensions of 
@@ -62,7 +62,7 @@ Model LLC4320 simulation is being displayed (accessed via \verb|xmitgcm| https:/
 The graphics settings for the transecting tools. c.) The setting options for NetCDF files. d.) The initial configuration 
 menu for loading NetCDF4 files. ](images/paper_fig_1.png)
 
-## Cut
+## "Cut" Making
 
 Using NcCut, users can mark out transects onto loaded images or NetCDF4 data and plot the results using two tools:
 
