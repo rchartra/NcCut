@@ -37,8 +37,8 @@ jobs:
           USER_NAME: ${{ secrets._USER_NAME_ }}
           USER_EMAIL: ${{ secrets._USER_EMAIL_ }}
         run: |
-          git config --local user.email "$USER_EMAIL"
           git config --local user.name "$USER_NAME"
+          git config --local user.email "$USER_EMAIL"
           git add .
           git commit -m "Update Version on Release"
           git push
