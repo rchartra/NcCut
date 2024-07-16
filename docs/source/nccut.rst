@@ -3,37 +3,18 @@ NcCut API Reference
 
 This section serves as reference for contributors who are looking to understand **NcCut's** underlying structure. This is not a user facing API.
 
+.. automodule:: nccut.nccut
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 nccut.nccut module
 ----------------------
 
-Builds app and sets initial window.
-
-Creates the widget tree and sets the initial window size. To load app, run ``NcCut().run()``
-
-.. py:class::  nccut.nccut.NcCut(**kwargs)
-
-    Bases: :class:`App`
-
-    Builds app and widget tree.
-
-    Creates the initial window and ensures font sizes in the app update uniformly
-    when the window resizes.
-
-    .. py:method:: build()
-
-       Override App class build method and return widget tree.
-
-       :return: Root of widget tree.
-
-    .. py:method:: on_resize(*args)
-
-       Triggers font adjustments when the window size is adjusted.
-
-       :param \*args: Accepts args :class:`App` class supplies though they aren't needed.
-
-    .. py:method:: on_start()
-
-       Sets initial window size according to operating system.
+.. automodule:: nccut.nccut
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 nccut.dropdowns module
 ------------------------
