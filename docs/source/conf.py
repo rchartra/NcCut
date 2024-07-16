@@ -3,8 +3,6 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import os
-
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -19,8 +17,7 @@ release = '0.2.10'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinxcontrib.video',
-    'rtds_action'
+    'sphinxcontrib.video'
 ]
 
 templates_path = ['_templates']
@@ -32,8 +29,3 @@ exclude_patterns = []
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-
-# ---- Read The Docs Upload Configuration -------------------------------------
-
-rtds_action_github_repo = "rchartra/NcCut"
-rtds_action_github_token = os.environ["GITHUB_TOKEN"]
