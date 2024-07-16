@@ -1,7 +1,7 @@
 Tutorial Videos
 ===============
 
-To follow along with the walkthroughs below you can download the example files from the **NcCut** `repository <https://github.com/rchartra/CutView/tree/master/support>`_:
+To follow along with the walkthroughs below you can download the example files from the **NcCut** `repository <https://github.com/rchartra/NcCut/tree/master/support>`_:
 
 * ``example.jpg`` is a satellite SAR image of sea ice floes in the arctic ocean
 * ``example.json`` is an example project file output from NcCut to practice uploading projects
