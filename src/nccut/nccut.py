@@ -1,7 +1,7 @@
 """
 Builds app and sets initial window.
 
-Creates the widget tree and sets the initial window size. To load app, run ``CutView().run()``
+Creates the widget tree and sets the initial window size. To load app, run ``NcCut().run()``
 
 """
 
@@ -10,12 +10,12 @@ import kivy.uix as ui
 from kivy.app import App
 from kivy.metrics import dp
 import platform
-from cutview.homescreen import HomeScreen
-from cutview.logger import get_logging_level
+from nccut.homescreen import HomeScreen
+from nccut.logger import get_logging_level
 import logging
 
 
-class CutView(App):
+class NcCut(App):
     """
     Builds app and widget tree.
 

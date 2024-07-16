@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "cutview"
+name = "nccut"
 version = "0.2.8"
-description = 'CutView is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
+description = 'NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/rchartra/CutView"
-documentation = "https://cutview.readthedocs.io/en/latest/index.html"
+repository = "https://github.com/rchartra/NcCut"
+documentation = "https://nccut.readthedocs.io/en/latest/index.html"
 keywords = ["NetCDF", "GUI"]
 classifiers = [
   "Intended Audience :: Science/Research",

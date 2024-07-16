@@ -3,7 +3,7 @@ Functionality for View and NetCDF setting menus.
 
 Creates the dropdown lists for the 'View' and 'NetCDF' setting menus. Manages the execution
 of setting changes when they occur. This module only defines the dynamic aspect of the menus.
-Static aspects are in the cutview.kv file.
+Static aspects are in the nccut.kv file.
 """
 
 from kivy.uix.button import Button
@@ -18,7 +18,7 @@ class ViewDropDown(DropDown):
     Creates the line color dropdown menu and manages the execution of all setting options.
 
     Attributes:
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         l_color_drop: Line color selection kivy.uix.dropdown.Dropdown object
     """
 
@@ -75,10 +75,10 @@ class NetCDFDropDown(DropDown):
     Dynamic elements of the NetCDF setting menu
 
     Creates all dropdown lists and executes all setting changes. Other settings are
-    defined statically in cutview.kv file.
+    defined statically in nccut.kv file.
 
     Attributes:
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         cmap_dropdown: Color map selection kivy.uix.dropdown.Dropdown object
         var_dropdown: Variable selection kivy.uix.dropdown.Dropdown object
         depth_dropdown: Z dimension value selection kivy.uix.dropdown.Dropdown object
@@ -87,7 +87,7 @@ class NetCDFDropDown(DropDown):
         """
         Connects to root HomeScreen instance and defines dropdown menus.
 
-        Colormaps are defined in :class:`cutview.filedisplay.FileDisplay` class. Variables and z dimension values come
+        Colormaps are defined in :class:`nccut.filedisplay.FileDisplay` class. Variables and z dimension values come
         from the currently loaded NetCDF file.
         """
         super(NetCDFDropDown, self).__init__(**kwargs)

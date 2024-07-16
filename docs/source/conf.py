@@ -8,7 +8,7 @@ import os
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'CutView'
+project = 'NcCut'
 copyright = '2024, Robin Chartrand'
 author = 'Robin Chartrand'
 release = '0.2.7'
@@ -35,5 +35,5 @@ html_static_path = ['_static']
 
 # ---- Read The Docs Upload Configuration -------------------------------------
 
-rtds_action_github_repo = "rchartra/CutView"
+rtds_action_github_repo = "rchartra/NcCut"
 rtds_action_github_token = os.environ["GITHUB_TOKEN"]

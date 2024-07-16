@@ -11,7 +11,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.dropdown import DropDown
-import cutview.functions as func
+import nccut.functions as func
 import xarray as xr
 
 
@@ -23,7 +23,7 @@ class NetCDFConfig(Popup):
     is in a viable configuration for the viewer.
 
     Attributes:
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         data: xarray.Dataset, Opened NetCDF file
         running (bool): Whether the 'Go' button has been pressed. Used to prevent user from spamming the button.
         var_select: RoundedButton, Variable select button
@@ -43,7 +43,7 @@ class NetCDFConfig(Popup):
 
         Args:
             file (str): File path of NetCDF file. Must exist and be a valid NetCDF file
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         """
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
@@ -113,7 +113,7 @@ class NetCDFConfig(Popup):
 
     def clean(self):
         """
-        Resets file related attributes of the root :class:`cutview.homescreen.HomeScreen` instance
+        Resets file related attributes of the root :class:`nccut.homescreen.HomeScreen` instance
         """
         if not self.home.file_on:
             self.home.clean_file()

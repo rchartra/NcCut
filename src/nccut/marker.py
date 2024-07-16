@@ -11,9 +11,9 @@ from kivy.uix.label import Label
 import math
 import numpy as np
 from kivy.core.window import Window
-import cutview.functions as functions
-from cutview.singletransect import SingleTransect
-from cutview.multitransect import MultiTransect
+import nccut.functions as functions
+from nccut.singletransect import SingleTransect
+from nccut.multitransect import MultiTransect
 
 
 class Marker(ui.widget.Widget):
@@ -28,8 +28,8 @@ class Marker(ui.widget.Widget):
         clicks (int): Number of clicks user has made. Decreases when points are deleted.
         points (list): List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
         t_width (int): Current width in pixels of orthogonal transects
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
-        base: :class:`cutview.multitransect.MultiTransect` object that manages transects
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+        base: :class:`nccut.multitransect.MultiTransect` object that manages transects
         curr_line: kivy.graphics.Line, Line between cursor and last clicked
         number: kivy.uix.label.Label, Reference to the number label
         size: 2 element array of ints, Size of widget
@@ -43,7 +43,7 @@ class Marker(ui.widget.Widget):
         Sets initial settings and initializes object.
 
         Args:
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
             width (int): Initial transect width to use.
         """
         super(Marker, self).__init__(**kwargs)

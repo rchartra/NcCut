@@ -1,9 +1,9 @@
 Installation
 ============
 
-**CutView** can be downloaded directly from PyPI using PIP:
+**NcCut** can be downloaded directly from PyPI using PIP:
 
-#. It is recommended to first create a virtual environment (if your IDE does not do it for you) before installing packages on your system to prevent package compatibility issues. From the terminal at your desired directory use:
+#. It is recommended to first create a virtual environment before installing packages on your system to prevent package compatibility issues. From the terminal at your desired directory use:
 
     * For Linux and Mac:
 
@@ -19,18 +19,18 @@ Installation
             python3 -m venv venv
             venv\Scripts\activate
 
-#. Then install CutView using PIP:
+#. Then install NcCut using PIP:
 
     .. code-block:: console
 
-        pip install cutview
+        pip install nccut
 
 #. To run the app execute the following Python code:
 
     .. code-block:: python
 
-        from cutview.cutview import CutView
-        CutView().run()
+        from nccut.nccut import NcCut
+        NcCut().run()
 
 #. To exit the virtual environment when finished:
 
