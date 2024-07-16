@@ -15,7 +15,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
-import cutview.functions as func
+import nccut.functions as func
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im
@@ -64,7 +64,7 @@ class PlotPopup(Popup):
     plots and/or selected data.
 
     Attributes:
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance.
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
         all_transects (dict): Dictionary of data from all transects marked out by the user.
         t_type (str): 'Marker' if transects came from transect marker tool or 'Multi' if transects
             came from transect tool.
@@ -75,7 +75,7 @@ class PlotPopup(Popup):
             file is a JPG or PNG: 'Img'.
         config (dict): Information necessary for accessing the file. For images this is the file path and for NetCDF
             files this is a dictionary of configuration values (see
-            :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         active_z (list): List of selected Z values. Empty list if 2D NetCDF or Image file.
         active_vars (list): List of selected variables. Empty list if image file.
         plot: Image containing plot.
@@ -93,7 +93,7 @@ class PlotPopup(Popup):
 
         Args:
             transects (dict): Dictionary of transect data from tool which opened popup
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance.
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
         """
         super(PlotPopup, self).__init__(**kwargs)
         self.all_transects = transects
@@ -472,7 +472,7 @@ class PlotPopup(Popup):
         Build dropdown menu for marker options with sub-menus for the individual transects
 
         Returns:
-            :class:`cutview.plotpopup.BackgroundDropDown` for marker options
+            :class:`nccut.plotpopup.BackgroundDropDown` for marker options
         """
         # Get dropdown for marker options
         marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
@@ -504,7 +504,7 @@ class PlotPopup(Popup):
             key (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
 
         Returns:
-            :class:`cutview.plotpopup.BackgroundDropDown` for transect options
+            :class:`nccut.plotpopup.BackgroundDropDown` for transect options
         """
         # Get dropdown for transect options
         drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
@@ -581,7 +581,7 @@ class PlotPopup(Popup):
         Get dropdown for NetCDF variable options. Variable only available if dimensions match current variable
 
         Returns:
-            :class:`cutview.plotpopup.BackgroundDropdown` menu of variable options
+            :class:`nccut.plotpopup.BackgroundDropdown` menu of variable options
         """
         file = self.config['file']
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
@@ -633,7 +633,7 @@ class PlotPopup(Popup):
         Get dropdown for NetCDF z value selections
 
         Returns:
-            :class:`cutview.plotpopup.BackgroundDropDown` menu of z value options
+            :class:`nccut.plotpopup.BackgroundDropDown` menu of z value options
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for z in list(self.config['file'].coords[self.config['z']].data):

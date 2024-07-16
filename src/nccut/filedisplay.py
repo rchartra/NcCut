@@ -16,9 +16,9 @@ import numpy as np
 import cv2
 import copy
 import io
-import cutview.functions as func
-from cutview.multitransect import MultiTransect
-from cutview.multimarker import MultiMarker
+import nccut.functions as func
+from nccut.multitransect import MultiTransect
+from nccut.multimarker import MultiMarker
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -36,9 +36,9 @@ class FileDisplay(ScatterLayout):
             the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
             value is the necessary configuration settings. For images, the config dictionary has form
             {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
-            :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         f_type (str): File type being loaded ("image" or "netcdf")
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         pos (tuple): Position of viewer. Used to properly place transect widgets on screen.
         sidebar (list): Reference to list of sidebar buttons
         og_sidebar (list): Original state of sidebar before any tools added widgets
@@ -69,12 +69,12 @@ class FileDisplay(ScatterLayout):
         Initializes settings and defines editing mode buttons.
 
         Args:
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` reference
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` reference
             f_config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing
                 data from the file. Highest level should have one key that is the name of the file type ("image" or
                 "netcdf") whose value is the necessary configuration settings. For images, the config dictionary has
                 form {"image": str(file)}. For a netcdf file the value is a dictionary of configuration values (see
-                :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+                :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         """
         super(FileDisplay, self).__init__(**kwargs)
 
@@ -319,7 +319,7 @@ class FileDisplay(ScatterLayout):
 
     def netcdf_to_image(self):
         """
-        Creates image from NetCDF dataset defined in :attr:`cutview.filedisplay.FileDisplay.f_config`
+        Creates image from NetCDF dataset defined in :attr:`nccut.filedisplay.FileDisplay.f_config`
 
         Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
         and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy

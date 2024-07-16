@@ -1,9 +1,9 @@
 def project_file_printer(data, tab):
     """
-    Recursively prints the contents of an output data file from CutView in a readable fashion.
+    Recursively prints the contents of an output data file from NcCut in a readable fashion.
 
     Attributes:
-        data (dict): Dictionary output from CutView
+        data (dict): Dictionary output from NcCut
         tab (int): Always use 0, used in the recursive process for indentation
     """
     for key in list(data.keys()):

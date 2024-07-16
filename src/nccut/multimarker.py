@@ -12,10 +12,10 @@ from kivy.uix.label import Label
 from kivy.core.window import Window
 from os.path import exists
 import json
-import cutview.functions as func
-from cutview.marker import Marker
-from cutview.markerwidth import MarkerWidth
-from cutview.plotpopup import PlotPopup
+import nccut.functions as func
+from nccut.marker import Marker
+from nccut.markerwidth import MarkerWidth
+from nccut.plotpopup import PlotPopup
 
 
 class Click:
@@ -101,15 +101,15 @@ class MultiMarker(ui.widget.Widget):
     Attributes:
         m_on (bool): Whether there are any markers active
         upload_fail (bool): If anything has gone wrong in the project uploading process
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         dbtn: RoundedButton, Plot button to activate PlotPopup
         dragging (bool): Whether viewer is in dragging mode
-        width_w: :class:`cutview.markerwidth.MarkerWidth` widget to allow for adjustable marker widths
+        width_w: :class:`nccut.markerwidth.MarkerWidth` widget to allow for adjustable marker widths
         clicks (int): Number of clicks made by user. Does not decrease when points are deleted
             unless all points are deleted in which case it goes back to zero.
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New marker button
-        plotting: :class:`cutview.plotpopup.PlotPopup`, reference to plotting menu when opened
+        plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
         curr_width (int): Current marker width being used. Used to initialize width of new markers.
     """
     def __init__(self, home, **kwargs):
@@ -117,7 +117,7 @@ class MultiMarker(ui.widget.Widget):
         Defines sidebar elements and initializes widget
 
         Args:
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         """
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
@@ -240,7 +240,7 @@ class MultiMarker(ui.widget.Widget):
         Adds markers by 'clicking' the points in the file with the marker width denoted by the file
 
         Args:
-            points: Properly formatted nested list from :class:`cutview.multimarker.marker_find()` function.
+            points: Properly formatted nested list from :class:`nccut.multimarker.marker_find()` function.
         """
         self.upload_fail = False
         if len(self.children) != 0:  # If markers already exist in viewer
@@ -355,7 +355,7 @@ class MultiMarker(ui.widget.Widget):
 
     def gather_popup(self):
         """
-        Gather data from markers and call for :class:`cutview.plotpopup.PlotPopup`
+        Gather data from markers and call for :class:`nccut.plotpopup.PlotPopup`
         """
         frames = {}
         c = 1

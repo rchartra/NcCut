@@ -25,7 +25,7 @@ class SingleTransect(ui.widget.Widget):
         c2: Ellipse object for second point clicked
         number: Label, reference to number label
         circles (int): Number of circles drawn, ie points clicked by user
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         size: 2 element array of ints, Size of widget
         pos: 2 element array of ints, Position of widget
         l_color: kivy.graphics.Color, Color to use for graphics
@@ -37,7 +37,7 @@ class SingleTransect(ui.widget.Widget):
         Sets initial settings for transect according to attributes of HomeScreen root
 
         Args:
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         """
         super(SingleTransect, self).__init__(**kwargs)
         self.line = None

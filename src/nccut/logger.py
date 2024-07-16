@@ -1,6 +1,6 @@
 """
-This module sets the default logging level for CutView and defines ways for the user to access and adjust the logging
-level. CutView itself does not implement logging messages but it's dependencies do.
+This module sets the default logging level for NcCut and defines ways for the user to access and adjust the logging
+level. NcCut itself does not implement logging messages but it's dependencies do.
 """
 
 

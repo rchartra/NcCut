@@ -1,16 +1,16 @@
-CutView API Reference
+NcCut API Reference
 =====================
 
-This section serves as reference for contributors who are looking to understand **CutView's** underlying structure. This is not a user facing API.
+This section serves as reference for contributors who are looking to understand **NcCut's** underlying structure. This is not a user facing API.
 
-cutview.cutview module
+nccut.nccut module
 ----------------------
 
 Builds app and sets initial window.
 
-Creates the widget tree and sets the initial window size. To load app, run ``CutView().run()``
+Creates the widget tree and sets the initial window size. To load app, run ``NcCut().run()``
 
-.. py:class::  cutview.cutview.CutView(**kwargs)
+.. py:class::  nccut.nccut.NcCut(**kwargs)
 
     Bases: :class:`App`
 
@@ -35,90 +35,90 @@ Creates the widget tree and sets the initial window size. To load app, run ``Cut
 
        Sets initial window size according to operating system.
 
-cutview.dropdowns module
+nccut.dropdowns module
 ------------------------
 
-.. automodule:: cutview.dropdowns
+.. automodule:: nccut.dropdowns
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.filedisplay module
+nccut.filedisplay module
 --------------------------
 
-.. automodule:: cutview.filedisplay
+.. automodule:: nccut.filedisplay
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.functions module
+nccut.functions module
 ------------------------
 
-.. automodule:: cutview.functions
+.. automodule:: nccut.functions
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.homescreen module
+nccut.homescreen module
 -------------------------
 
-.. automodule:: cutview.homescreen
+.. automodule:: nccut.homescreen
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.marker module
+nccut.marker module
 ---------------------
 
-.. automodule:: cutview.marker
+.. automodule:: nccut.marker
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.markerwidth module
+nccut.markerwidth module
 --------------------------
 
-.. automodule:: cutview.markerwidth
+.. automodule:: nccut.markerwidth
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.multimarker module
+nccut.multimarker module
 --------------------------
 
-.. automodule:: cutview.multimarker
+.. automodule:: nccut.multimarker
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.multitransect module
+nccut.multitransect module
 ----------------------------
 
-.. automodule:: cutview.multitransect
+.. automodule:: nccut.multitransect
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.netcdfconfig module
+nccut.netcdfconfig module
 ---------------------------
 
-.. automodule:: cutview.netcdfconfig
+.. automodule:: nccut.netcdfconfig
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.plotpopup module
+nccut.plotpopup module
 ------------------------
 
-.. automodule:: cutview.plotpopup
+.. automodule:: nccut.plotpopup
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.singletransect module
+nccut.singletransect module
 -----------------------------
 
-.. automodule:: cutview.singletransect
+.. automodule:: nccut.singletransect
    :members:
    :undoc-members:
    :show-inheritance:

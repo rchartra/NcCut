@@ -7,7 +7,7 @@ transect marker tool.
 
 import kivy.uix as ui
 from kivy.uix.textinput import TextInput
-import cutview.functions as func
+import nccut.functions as func
 
 
 class MarkerWidth(ui.boxlayout.BoxLayout):
@@ -20,7 +20,7 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
     Attributes:
         txt: kivy.uix.textinput.TextInput widget where user enters their desired width
         btn: 'Go' Button
-        marker: Current :class:`cutview.multimarker.MultiMarker` instance
+        marker: Current :class:`nccut.multimarker.MultiMarker` instance
         min (int): Minimum width allowed
         max (int): Maximum width allowed
     """
@@ -29,7 +29,7 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         Defines graphical elements.
 
         Args:
-            marker: Active :class:`cutview.multimarker.MultiMarker` instance
+            marker: Active :class:`nccut.multimarker.MultiMarker` instance
         """
         super(MarkerWidth, self).__init__(**kwargs)
         self.txt = TextInput(hint_text="Width", size_hint=(.7, 1))

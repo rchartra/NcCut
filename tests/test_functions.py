@@ -8,8 +8,8 @@ import numpy as np
 from pathlib import Path
 import json
 import xarray as xr
-import cutview.functions as func
-from cutview.multimarker import marker_find
+import nccut.functions as func
+from nccut.multimarker import marker_find
 
 SUPPORT_FILE_PATH = "support/"
 

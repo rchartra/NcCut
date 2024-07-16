@@ -17,12 +17,12 @@ from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 
 import sys
-sys.path.insert(0, 'src/cutview')  # Test local code not PyPI
+sys.path.insert(0, 'src/nccut')  # Test local code not PyPI
 
-from cutview.multimarker import Click, marker_find
-from cutview.markerwidth import MarkerWidth
-import cutview.functions as functions
-from cutview.cutview import CutView
+from nccut.multimarker import Click, marker_find
+from nccut.markerwidth import MarkerWidth
+import nccut.functions as functions
+from nccut.nccut import NcCut
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 SUPPORT_FILE_PATH = "support/"
@@ -54,7 +54,7 @@ def run_tests(app, *args):
 
 def get_app():
     # Run app enough to test without fully loading it
-    app = CutView()
+    app = NcCut()
     p = partial(run_tests, app)
     Clock.schedule_once(p, 0.000001)
     app.run()

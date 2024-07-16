@@ -1,5 +1,5 @@
 ---
-title: 'Cutview: A NetCDF Viewer and Transecting Tool'
+title: 'NcCut: A NetCDF Viewer and Transecting Tool'
 tags:
   - Python
   - Oceanography
@@ -26,8 +26,8 @@ bibliography: paper.bib
 
 # Statement of Need
 
-CutView is a simple yet flexible NetCDF4 file and image viewer that is designed to require no programming or GIS 
-experience to use.  In addition to being a GUI for generating "quick" visualizations of NetCDF4 data, CutView allows a 
+NcCut is a simple yet flexible NetCDF4 file and image viewer that is designed to require no programming or GIS 
+experience to use.  In addition to being a GUI for generating "quick" visualizations of NetCDF4 data, NcCut allows a 
 user to view and produce plots of transects of NetCDF4 data along various dimensions.  This is a 
 commonly performed task in oceanography and atmospheric sciences research used to understand the vertical composition of 
 a section of ocean or atmosphere. For example, @Sivkov:2021 used such vertical transects to study the vertical 
@@ -37,18 +37,18 @@ transects of modeled climate and ocean data in Greenland to study air-sea intera
 Such transect selecting tools are a common feature in GIS software (@qgis, @transectizer, @GRASS_GIS) and are present in 
 some more complex viewers that work with unstructured data [@odv], but these options are all either meant for more 
 complicated data formats or require a user to spend a great amount of time learning how to use the software before they 
-can do any meaningful data analysis. CutView provides this transecting functionality with a GUI interface, allowing for 
+can do any meaningful data analysis. NcCut provides this transecting functionality with a GUI interface, allowing for 
 rapid selection of transects, which is often very useful in initial investigation or feature selection applications. 
 There are many simple NetCDF viewers that already serve this audience (@Ncview, @Panoply, @ncvue), but none of these 
 simpler viewers have a way for users to take transects across NetCDF data.
 
 # Functionality
 
-As per the name, CutView’s functions can be divided into two main categories:
+As per the name, NcCut’s functions can be divided into two main categories:
 
 ## View
 
-CutView allows users to load NetCDF4 files, or images in .JPG, .JPEG, or .PNG formats, and has adjustable graphics for 
+NcCut allows users to load NetCDF4 files, or images in .JPG, .JPEG, or .PNG formats, and has adjustable graphics for 
 different file sizes. In the case of NetCDF4 files, the user can choose between different variables and dimensions of 
 the data to view. The user can select which dimensions to use as the x, y and z dimensions for the viewer, and once 
 displayed the user can switch between different displays of the x, y dimensions at different z values. This is intuitive 
@@ -64,7 +64,7 @@ menu for loading NetCDF4 files. ](images/paper_fig_1.png)
 
 ## Cut
 
-Using CutView, users can mark out transects onto loaded images or NetCDF4 data and plot the results using two tools:
+Using NcCut, users can mark out transects onto loaded images or NetCDF4 data and plot the results using two tools:
 
 The first is the simple transect tool, where users can click on two endpoints and a line will be drawn between them (Figure 2a). If 
 the loaded file is an image, the mean of the RGB values of each pixel along that line will be selected. The pixels are 
@@ -74,7 +74,7 @@ transects can be drawn and plotted all together in the plotting menu (Figure 3a)
 Using this tool users can click points along a feature and transects of a set width will be made orthogonal to the line 
 marked out by the user (Figure 2b). This width can be adjusted at any point in the marking process and multiple markers 
 can be drawn on the same file and plotted together. For use on large projects worked on over multiple sessions, the 
-marker data saved from the plotting menu can be reloaded back into CutView and continued.
+marker data saved from the plotting menu can be reloaded back into NcCut and continued.
 
 ![a.) The simple transect tool used over two features in a loaded NetCDF file. b.) The marker tool used to take multiple 
 transects orthogonal to a linear feature.](images/paper_fig_2.png)

@@ -12,10 +12,10 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 import re
 import os
-import cutview.functions as func
+import nccut.functions as func
 from pathlib import Path
-from cutview.filedisplay import FileDisplay
-from cutview.netcdfconfig import NetCDFConfig
+from nccut.filedisplay import FileDisplay
+from nccut.netcdfconfig import NetCDFConfig
 
 
 class HomeScreen(Screen):
@@ -34,7 +34,7 @@ class HomeScreen(Screen):
         """
         Initialize main screen with default settings.
 
-        Creates editing buttons, most UI elements defined in cutview.kv
+        Creates editing buttons, most UI elements defined in nccut.kv
         """
         super(HomeScreen, self).__init__(**kwargs)
         self.file_on = False
@@ -47,7 +47,7 @@ class HomeScreen(Screen):
         """
         Updates font size throughout widget tree to the size automatically determined for static UI elements.
 
-        When the window is resized Kivy automatically updates the font size of UI elements defined in cutview.kv
+        When the window is resized Kivy automatically updates the font size of UI elements defined in nccut.kv
         but not those defined in scripts. Thus this method updates font size for such elements to be the same as
         the static elements.
         """

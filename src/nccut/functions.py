@@ -1,7 +1,7 @@
 """
 Miscellaneous helper functions to support other widgets.
 
-Provides reference to custom UI elements defined in cutview.kv file so they can be used in python scripts.
+Provides reference to custom UI elements defined in nccut.kv file so they can be used in python scripts.
 Contains error banner functionality, file management function, and transect taking function.
 
 """
@@ -20,14 +20,14 @@ from pathlib import Path
 
 class RoundedButton(Button):
     """
-    Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    Code for this is in nccut.kv. Referenced here so it can be used in scripts.
     """
     pass
 
 
 class BackgroundLabel(Label):
     """
-    Code for this is in cutview.kv. Referenced here so it can be used in scripts.
+    Code for this is in nccut.kv. Referenced here so it can be used in scripts.
     """
     pass
 
@@ -38,7 +38,7 @@ def remove_alert(alert, home, *largs):
 
     Args:
         alert: Alert kivy.uix.label.Label reference.
-        home: Active :class:`cutview.homescreen.HomeScreen` instance.
+        home: Active :class:`nccut.homescreen.HomeScreen` instance.
         *largs: Unused args from kivy Clock class.
     """
     home.remove_widget(alert)
@@ -53,7 +53,7 @@ def alert(text, home):
 
     Args:
         text: String of alert banner message
-        home: Active :class:`cutview.homescreen.HomeScreen` reference
+        home: Active :class:`nccut.homescreen.HomeScreen` reference
     """
 
     screen = kivy.core.window.Window.size
@@ -112,7 +112,7 @@ def sel_data(config):
 
     Args:
         config: Dictionary of key details about NetCDF file as outlined in
-            :meth:`cutview.netcdfconfig.NetCDFConfig.check_inputs`
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs`
 
     Returns:
         2D array of data from NetCDF file.

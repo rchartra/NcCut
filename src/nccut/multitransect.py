@@ -4,9 +4,9 @@ Widget for Transect tool
 Manages having multiple SingleTransects on screen at once.
 """
 import kivy.uix as ui
-from cutview.plotpopup import PlotPopup
-from cutview.singletransect import SingleTransect
-import cutview.functions as func
+from nccut.plotpopup import PlotPopup
+from nccut.singletransect import SingleTransect
+import nccut.functions as func
 from kivy.core.window import Window
 
 
@@ -19,20 +19,20 @@ class MultiTransect(ui.widget.Widget):
     orthogonally to user marked line.
 
     Attributes:
-        lines (list): List of all :class:`cutview.singletransect.SingleTransect` made.
+        lines (list): List of all :class:`nccut.singletransect.SingleTransect` made.
         clicks (int): Number of clicks made by user. Cycles between 0 and 2 depending on current stage of
             transect drawing.
-        home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
-        p_btn: RoundedButton, Plot button which opens :class:`cutview.plotpopup.PlotPopup`
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+        p_btn: RoundedButton, Plot button which opens :class:`nccut.plotpopup.PlotPopup`
         dragging (bool): Whether in dragging mode
-        plotting: :class:`cutview.plotpopup.PlotPopup`, reference to plotting menu when opened
+        plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
     """
     def __init__(self, home, **kwargs):
         """
         Initialize object and create Plot button.
 
         Args:
-            home: Reference to root :class:`cutview.homescreen.HomeScreen` instance
+            home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         """
         super(MultiTransect, self).__init__(**kwargs)
         self.lines = []
@@ -114,7 +114,7 @@ class MultiTransect(ui.widget.Widget):
 
     def popup(self):
         """
-        Gathers coordinates from all :class:`cutview.singletransect.SingleTransect` into a dictionary and calls for
+        Gathers coordinates from all :class:`nccut.singletransect.SingleTransect` into a dictionary and calls for
         popup
         """
         data = {}

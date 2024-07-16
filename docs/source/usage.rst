@@ -7,16 +7,16 @@ Usage
 
     .. code-block:: python
 
-        from cutview.cutview import CutView
-        CutView().run()
+        from nccut.nccut import NcCut
+        NcCut().run()
 
 
-For video walkthroughs of CutView's basic usage, refer to the :doc:`example` section.
+For video walkthroughs of NcCut's basic usage, refer to the :doc:`example` section.
 
 Loading a File
 --------------
 
-**CutView** supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.
+**NcCut** supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.
 
 #. To load an image or NetCDF file type the absolute or relative file path to your file in the file entry text box
 
@@ -39,7 +39,7 @@ Loading a File
 Tools
 -----
 
-**CutView** has two types of tools for making transects. The simpler :ref:`Transect <transect>` tool allows you to individually draw lines across features where transects will be taken when plotted:
+**NcCut** has two types of tools for making transects. The simpler :ref:`Transect <transect>` tool allows you to individually draw lines across features where transects will be taken when plotted:
 
     .. image:: _media/transect.png
 
@@ -81,14 +81,6 @@ Using this tool multiple lines or *Markers* can be drawn onto a loaded file. The
 #. Select **New Line** to begin a new marker and repeat for as many markers as you'd like.
 #. When done select the **Plot** button and a popup will appear with a plot of all transects from the first marker and downloading options.
 
-    * You can select which transects from which markers you'd like to plot
-    * If using a NetCDF file you can select which variables and Z values you'd like to see your selected transects plotted from.
-    * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset.
-
-#. You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see the :ref:`Data Output <data_output>` section of this wiki for more on how data is formatted).
-
-    * If you want to continue working on your project at a later time, *select all the transects* and save the data to JSON format. Refer to section below for reloading that data.
-
 #. Click anywhere around the popup or the close button to dismiss
 
 To upload a previously worked on project:
@@ -118,20 +110,20 @@ Plotting
 API
 ---
 
-**CutView** has a few helper modules for configuring the app and working with the output data.
+**NcCut** has a few helper modules for configuring the app and working with the output data.
 
-cutview.project\_file\_printer module
+nccut.project\_file\_printer module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: cutview.project_file_printer
+.. automodule:: nccut.project_file_printer
    :members:
    :undoc-members:
    :show-inheritance:
 
-cutview.logger module
+nccut.logger module
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: cutview.logger
+.. automodule:: nccut.logger
    :members:
    :undoc-members:
    :show-inheritance:
