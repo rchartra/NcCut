@@ -38,7 +38,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add .
           git commit -m "Update Version on Release"
-          git pull --tags
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
