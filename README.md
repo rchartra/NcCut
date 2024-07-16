@@ -1,12 +1,12 @@
-# CutView
-CutView is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of satellite imagery or other images with linear features where the brightness of the pixel can be used to gauge some physical value. Examples include measuring sea ice floe concentration or characterizing ice sheet fractures. For NetCDF files, CutView serves as an easy way to view datasets quickly along any dimensions and extract data along transects. CutView is designed to make the measurement of linear features simple through it's “Transect Marker” tool where linear features can be marked out and have transects automatically be made across them. Multiple features can be marked at once on a file and saved all together as a “project” that can be reuploaded and edited later.
+# NcCut
+NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of satellite imagery or other images with linear features where the brightness of the pixel can be used to gauge some physical value. Examples include measuring sea ice floe concentration or characterizing ice sheet fractures. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any dimensions and extract data along transects. NcCut is designed to make the measurement of linear features simple through it's “Transect Marker” tool where linear features can be marked out and have transects automatically be made across them. Multiple features can be marked at once on a file and saved all together as a “project” that can be reuploaded and edited later.
 
 
 ![](images/nccut.png)
 
 Users can display a plot of the data as well as package the data into a downloadable JSON file. When extracting values from the image/dataset, the program uses linear interpolation to interpolate between the values of the pixels to ensure an accurate portrayal of the line drawn. 
 
-This is an open source project. For contribution guidelines please refer to the contribution section of the [docs](https://cutview.readthedocs.io/en/latest/contribution.html).
+This is an open source project. For contribution guidelines please refer to the contribution section of the [docs](https://nccut.readthedocs.io/en/latest/contribution.html).
 
 # <ins>Installation</ins>
 
@@ -24,15 +24,15 @@ This is an open source project. For contribution guidelines please refer to the 
     venv\Scripts\activate
     ```
 
-2. Then install CutView using PIP:
+2. Then install NcCut using PIP:
 
 ```
-pip install cutview
+pip install nccut
 ```
 3. To run the app execute the following Python code:
 ```
-from cutview.cutview import CutView
-CutView().run()
+from nccut.nccut import NcCut
+NcCut().run()
 ```
 4. To exit virtual environment when finished:
  
@@ -52,11 +52,11 @@ deactivate
     venv\Scripts\activate
     ```
 
-If you are having trouble installing CutView please refer to the Troubleshooting section of the [docs](https://cutview.readthedocs.io/en/latest/installation.html)
+If you are having trouble installing NcCut please refer to the Troubleshooting section of the [docs](https://nccut.readthedocs.io/en/latest/installation.html)
 
 # <ins>Using the App</ins>
 
-* If you would like to try out the app there are example image and NetCDF files in the [support](https://github.com/rchartra/CutView/tree/master/support) folder of this repository
+* If you would like to try out the app there are example image and NetCDF files in the [support](https://github.com/rchartra/NcCut/tree/master/support) folder of this repository
     * Relative file paths:
 
         `support/example.jpg`\
@@ -74,8 +74,8 @@ If you are having trouble installing CutView please refer to the Troubleshooting
 1. To install the app, refer to installation instructions for your OS
 2. Execute the following python code:
 ```
-from cutview.cutview import CutView
-CutView().run()
+from nccut.nccut import NcCut
+NcCut().run()
 ```
 
 ## Loading a File
@@ -125,4 +125,4 @@ CutView().run()
 4. Enter the file name of the transect data you saved previously and select "Ok".
 5. All markers from the file will load onto the viewer and you can continue working on the project.
 
-For more on these tools please refer to [usage section](https://cutview.readthedocs.io/en/latest/usage.html) of the docs.
+For more on these tools please refer to [usage section](https://nccut.readthedocs.io/en/latest/usage.html) of the docs.

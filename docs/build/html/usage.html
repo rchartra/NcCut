@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; CutView 0.2.7 documentation</title>
+  <title>Usage &mdash; NcCut 0.2.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -34,7 +34,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            CutView
+            NcCut
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -54,18 +54,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#transect-marker">Transect Marker</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#plotting">Plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-cutview.project_file_printer">cutview.project_file_printer module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cutview.project_file_printer.project_file_printer"><code class="docutils literal notranslate"><span class="pre">project_file_printer()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cutview.project_file_printer.data"><code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cutview.project_file_printer.tab"><code class="docutils literal notranslate"><span class="pre">tab</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#module-cutview.logger">cutview.logger module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cutview.logger.get_logging_level"><code class="docutils literal notranslate"><span class="pre">get_logging_level()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cutview.logger.set_logging_level"><code class="docutils literal notranslate"><span class="pre">set_logging_level()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#nccut-project-file-printer-module">nccut.project_file_printer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nccut-logger-module">nccut.logger module</a></li>
 </ul>
 </li>
 </ul>
@@ -81,7 +73,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">CutView</a>
+          <a href="index.html">NcCut</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -105,17 +97,17 @@
 <li><p>To install the app refer to the <a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> instructions.</p></li>
 <li><p>To run the app execute the following Python code:</p>
 <blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cutview.cutview</span> <span class="kn">import</span> <span class="n">CutView</span>
-<span class="n">CutView</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nccut.nccut</span> <span class="kn">import</span> <span class="n">NcCut</span>
+<span class="n">NcCut</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 </div></blockquote>
 </li>
 </ol>
-<p>For video walkthroughs of CutView’s basic usage, refer to the <a class="reference internal" href="example.html"><span class="doc">Tutorial Videos</span></a> section.</p>
+<p>For video walkthroughs of NcCut’s basic usage, refer to the <a class="reference internal" href="example.html"><span class="doc">Tutorial Videos</span></a> section.</p>
 <section id="loading-a-file">
 <h2>Loading a File<a class="headerlink" href="#loading-a-file" title="Link to this heading"></a></h2>
-<p><strong>CutView</strong> supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.</p>
+<p><strong>NcCut</strong> supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.</p>
 <ol class="arabic">
 <li><p>To load an image or NetCDF file type the absolute or relative file path to your file in the file entry text box</p>
 <blockquote>
@@ -146,7 +138,7 @@
 </section>
 <section id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>
-<p><strong>CutView</strong> has two types of tools for making transects. The simpler <a class="reference internal" href="#transect"><span class="std std-ref">Transect</span></a> tool allows you to individually draw lines across features where transects will be taken when plotted:</p>
+<p><strong>NcCut</strong> has two types of tools for making transects. The simpler <a class="reference internal" href="#transect"><span class="std std-ref">Transect</span></a> tool allows you to individually draw lines across features where transects will be taken when plotted:</p>
 <blockquote>
 <div><img alt="_images/transect.png" src="_images/transect.png" />
 </div></blockquote>
@@ -167,17 +159,7 @@
 </div></blockquote>
 </li>
 <li><p>Repeat for as many transects as you’d like</p></li>
-<li><p>When done select the <strong>Plot</strong> button and a popup will appear with a plot of all transects and downloading options.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>You can select which transects you’d like to plot</p></li>
-<li><p>If using a NetCDF file you can select multiple variables and Z values you’d like to see your selected transects plotted from.</p></li>
-<li><p>If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p>You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see the <a class="reference internal" href="data_output.html#data-output"><span class="std std-ref">Data Output</span></a> section for more on how data is formatted).</p></li>
-<li><p>Click anywhere around the popup or the close button to dismiss plotting window.</p></li>
+<li><p>When done select the <strong>Plot</strong> button and a popup will appear with a plot of all transects and downloading options.</p></li>
 </ol>
 </section>
 <section id="transect-marker">
@@ -203,22 +185,7 @@
 </div></blockquote>
 </li>
 <li><p>Select <strong>New Line</strong> to begin a new marker and repeat for as many markers as you’d like.</p></li>
-<li><p>When done select the <strong>Plot</strong> button and a popup will appear with a plot of all transects from the first marker and downloading options.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>You can select which transects from which markers you’d like to plot</p></li>
-<li><p>If using a NetCDF file you can select which variables and Z values you’d like to see your selected transects plotted from.</p></li>
-<li><p>If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset.</p></li>
-</ul>
-</div></blockquote>
-</li>
-<li><p>You can save the current plot to .PNG or .PDF formats. You can also save the currently selected data or the currently selected data over all Z variables to a JSON file (see the <a class="reference internal" href="data_output.html#data-output"><span class="std std-ref">Data Output</span></a> section of this wiki for more on how data is formatted).</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>If you want to continue working on your project at a later time, <em>select all the transects</em> and save the data to JSON format. Refer to section below for reloading that data.</p></li>
-</ul>
-</div></blockquote>
-</li>
+<li><p>When done select the <strong>Plot</strong> button and a popup will appear with a plot of all transects from the first marker and downloading options.</p></li>
 <li><p>Click anywhere around the popup or the close button to dismiss</p></li>
 </ol>
 <p>To upload a previously worked on project:</p>
@@ -231,70 +198,41 @@
 </ol>
 </section>
 </section>
+<section id="plotting">
+<h2>Plotting<a class="headerlink" href="#plotting" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>When you are finished using a tool, select the <strong>Plot</strong> button to view plots of your data and choose which data you would like to save.</dt><dd><ul class="simple">
+<li><p>You can select which transects you’d like to plot</p></li>
+<li><p>If you used the marker tool you can plot an average of the markers transects if you used the same marker width throughout the whole marker</p></li>
+<li><p>If using a NetCDF file you can select multiple variables and Z values you’d like to see your selected transects plotted from.</p></li>
+<li><p>If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>You can save the current plot to .PNG or .PDF formats.</p></li>
+<li><dl class="simple">
+<dt>You can also save the transect data itself from three options:</dt><dd><ul class="simple">
+<li><p><strong>Save All Data</strong> will save all transects from all markers. If using a NetCDF file it will do so for the currently selected variables and z values.</p></li>
+<li><p><strong>Save Selected Data</strong> will save only the transects selected in the plotting menu. If using a NetCDF file it will do so for the currently selected variables and z values.</p></li>
+<li><p><strong>Save All Z Values</strong> will save all z values for the selected transects and variables. This option only appears if using a NetCDF file with three dimensions.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>See the <a class="reference internal" href="data_output.html#data-output"><span class="std std-ref">Data Output</span></a> section for how the saved data is formatted.</p></li>
+<li><p>Click anywhere around the popup or the close button to dismiss plotting window.</p></li>
+</ol>
+</section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
-<p><strong>CutView</strong> has a few helper modules for configuring the app and working with the output data.</p>
-<section id="module-cutview.project_file_printer">
-<span id="cutview-project-file-printer-module"></span><h3>cutview.project_file_printer module<a class="headerlink" href="#module-cutview.project_file_printer" title="Link to this heading"></a></h3>
-<dl class="py function">
-<dt class="sig sig-object py" id="cutview.project_file_printer.project_file_printer">
-<span class="sig-prename descclassname"><span class="pre">cutview.project_file_printer.</span></span><span class="sig-name descname"><span class="pre">project_file_printer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.project_file_printer.project_file_printer" title="Link to this definition"></a></dt>
-<dd><p>Recursively prints the contents of an output data file from CutView in a readable fashion.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="cutview.project_file_printer.data">
-<span class="sig-prename descclassname"><span class="pre">cutview.project_file_printer.</span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#cutview.project_file_printer.data" title="Link to this definition"></a></dt>
-<dd><p>Dictionary output from CutView</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="cutview.project_file_printer.tab">
-<span class="sig-prename descclassname"><span class="pre">cutview.project_file_printer.</span></span><span class="sig-name descname"><span class="pre">tab</span></span><a class="headerlink" href="#cutview.project_file_printer.tab" title="Link to this definition"></a></dt>
-<dd><p>Always use 0, used in the recursive process for indentation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<p><strong>NcCut</strong> has a few helper modules for configuring the app and working with the output data.</p>
+<section id="nccut-project-file-printer-module">
+<h3>nccut.project_file_printer module<a class="headerlink" href="#nccut-project-file-printer-module" title="Link to this heading"></a></h3>
 </section>
-<section id="module-cutview.logger">
-<span id="cutview-logger-module"></span><h3>cutview.logger module<a class="headerlink" href="#module-cutview.logger" title="Link to this heading"></a></h3>
-<p>This module sets the default logging level for CutView and defines ways for the user to access and adjust the logging
-level. CutView itself does not implement logging messages but it’s dependencies do.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="cutview.logger.get_logging_level">
-<span class="sig-prename descclassname"><span class="pre">cutview.logger.</span></span><span class="sig-name descname"><span class="pre">get_logging_level</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cutview.logger.get_logging_level" title="Link to this definition"></a></dt>
-<dd><p>Get the current logging level for the root logger.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The current logging level (e.g., ‘DEBUG’, ‘INFO’, ‘WARNING’, ‘ERROR’, ‘CRITICAL’)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="cutview.logger.set_logging_level">
-<span class="sig-prename descclassname"><span class="pre">cutview.logger.</span></span><span class="sig-name descname"><span class="pre">set_logging_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cutview.logger.set_logging_level" title="Link to this definition"></a></dt>
-<dd><p>Set the logging level for the root logger and specific dependency loggers.
-This allows end users to change the logging level.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>level</strong> (<em>str</em>) – The logging level to set (e.g., ‘DEBUG’, ‘INFO’, ‘WARNING’, ‘ERROR’, ‘CRITICAL’)</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="nccut-logger-module">
+<h3>nccut.logger module<a class="headerlink" href="#nccut-logger-module" title="Link to this heading"></a></h3>
 </section>
 </section>
 </section>
