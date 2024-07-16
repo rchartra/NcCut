@@ -36,7 +36,8 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -a -m "Update Version on Release"
+          gti add .
+          git commit -m "Update Version on Release"
           git push
       - name: Push Changes
         uses: ad-m/github-push-action@master
