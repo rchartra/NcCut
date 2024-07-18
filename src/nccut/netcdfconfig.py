@@ -39,7 +39,8 @@ class NetCDFConfig(Popup):
     """
     def __init__(self, file, home, **kwargs):
         """
-        Defines UI elements and opens popup.
+        Defines UI elements and opens popup. By default it selects the first variable of the NetCDF file and if it has
+        3 dimensions it selects the first value in the third dimension as the Z value.
 
         Args:
             file (str): File path of NetCDF file. Must exist and be a valid NetCDF file
@@ -54,42 +55,56 @@ class NetCDFConfig(Popup):
         # Variable Selection
         var_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         var_box.add_widget(Label(text="Variable: ", size_hint=(0.3, 1)))
-        self.var_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1))
+        self.var_select = func.RoundedButton(text=list(self.data.keys())[0], size_hint=(0.7, 1),
+                                             halign='center', valign='middle')
         self.var_drop = DropDown()
         for item in list(self.data.keys()):
-            btn = Button(text=str(item), size_hint_y=None, height=30)
-            btn.bind(on_release=lambda btn: self.var_drop.select(btn.text))
-            btn.bind(on_press=self.var_drop.dismiss)
+            btn = Button(text=str(item), size_hint_y=None, height=dp(30), halign='center',
+                         valign='middle')
+            btn.bind(on_release=lambda btn: self.var_drop.select(btn.text),
+                     on_press=self.var_drop.dismiss, size=func.text_wrap)
             self.var_drop.add_widget(btn)
         self.var_drop.bind(on_select=lambda instance, x: self.var_update(x))
-        self.var_select.bind(on_release=self.var_drop.open)
+        self.var_select.bind(on_release=self.var_drop.open, size=func.text_wrap)
         var_box.add_widget(self.var_select)
         content.add_widget(var_box)
 
         # X, Y Selection
+        dims = list(self.data[self.var_select.text].dims)
+        if len(dims) < 3:
+            while len(dims) < 3:
+                dims.insert(0, "N/A")
+        elif len(dims) > 3:
+            dims = dims[:3]
+
         xy_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         xy_box.add_widget(Label(text="X: ", size_hint=(0.2, 1)))
-        self.x_select = func.RoundedButton(text="Select...", size_hint=(0.3, 1))
-        self.x_select.bind(on_release=lambda x: self.dim_options(self.x_select))
+        self.x_select = func.RoundedButton(text=dims[-1], size_hint=(0.3, 1), halign='center', valign='middle')
+        self.x_select.bind(on_release=lambda x: self.dim_options(self.x_select), size=func.text_wrap)
         xy_box.add_widget(self.x_select)
 
         xy_box.add_widget(Label(text="Y: ", size_hint=(0.2, 1)))
-        self.y_select = func.RoundedButton(text="Select...", size_hint=(0.3, 1))
-        self.y_select.bind(on_release=lambda x: self.dim_options(self.y_select))
+        self.y_select = func.RoundedButton(text=dims[-2], size_hint=(0.3, 1), halign='center', valign='middle')
+        self.y_select.bind(on_release=lambda x: self.dim_options(self.y_select), size=func.text_wrap)
         xy_box.add_widget(self.y_select)
         content.add_widget(xy_box)
 
         # Z selection (not always required)
         z_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         z_box.add_widget(Label(text="Z Variable: ", size_hint=(0.2, 1)))
-        self.z_select = func.RoundedButton(text="Select...", size_hint=(0.3, 1))
-        self.z_select.bind(on_release=lambda x: self.dim_options(self.z_select))
+        self.z_select = func.RoundedButton(text=dims[-3], size_hint=(0.3, 1), halign='center', valign='middle')
+        self.z_select.bind(on_release=lambda x: self.dim_options(self.z_select),
+                           text=self.update_depth_btn, size=func.text_wrap)
         z_box.add_widget(self.z_select)
 
         z_box.add_widget(Label(text="Z Value: ", size_hint=(0.2, 1)))
-        self.depth_select = func.RoundedButton(text="Select...", size_hint=(0.3, 1))
+        if self.z_select.text == "N/A":
+            d_text = "N/A"
+        else:
+            d_text = str(list(self.data.coords[self.z_select.text].data)[0])
+        self.depth_select = func.RoundedButton(text=d_text, size_hint=(0.3, 1), halign='center', valign='middle')
+        self.depth_select.bind(size=func.text_wrap, on_release=self.depth_options)
         z_box.add_widget(self.depth_select)
-        self.depth_select.bind(on_release=self.depth_options)
         content.add_widget(z_box)
 
         # Popup Controls
@@ -110,6 +125,17 @@ class NetCDFConfig(Popup):
         self.size_hint = (0.8, 0.8)
         self.bind(on_dismiss=lambda x: self.clean())
         self.open()
+
+    def update_depth_btn(self, *args):
+        """
+        Updates selected depth option to be the first z value from the currently selected z dimension if variable
+        has three dimensions.
+
+        Args:
+            *args: Unused args passed by event handler
+        """
+        if not self.z_select.text == "N/A":
+            self.depth_select.text = str(list(self.data.coords[self.z_select.text].data)[0])
 
     def clean(self):
         """
@@ -133,10 +159,6 @@ class NetCDFConfig(Popup):
                     'z': self.z_select.text, 'z_val': self.depth_select.text,
                     'var': self.var_select.text, 'file': self.data}
             selects = [(self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
-            if self.var_select.text == "Select...":
-                self.error.text = "Please Select a Variable"
-                self.running = False
-                return
             if len(self.data[self.var_select.text].dims) > 3:
                 self.error.text = "This variable has more than 3 dimensions"
                 self.running = False
@@ -146,7 +168,7 @@ class NetCDFConfig(Popup):
                 self.running = False
                 return
             for sel in selects:
-                if sel[0].text == 'Select...':
+                if sel[0].text == 'N/A':
                     self.error.text = "Please Select a " + sel[1]
                     self.running = False
                     return
@@ -154,15 +176,6 @@ class NetCDFConfig(Popup):
                 self.error.text = "All X, Y, Z variables must be unique"
                 self.running = False
                 return
-            if len(self.data[self.var_select.text].dims) == 3:
-                if self.z_select.text == "Select...":
-                    self.error.text = "Please Select a Z dimension"
-                    self.running = False
-                    return
-                if self.depth_select.text == 'Select...':
-                    self.error.text = "Please Select a Z Value"
-                    self.running = False
-                    return
             self.home.load_netcdf(vals)
             self.dismiss()
 
@@ -180,13 +193,16 @@ class NetCDFConfig(Popup):
         dims = list(self.data[self.var_select.text].dims)
         if len(dims) < 3:
             while len(dims) < 3:
-                dims.insert(0, "Select...")
+                dims.insert(0, "N/A")
         elif len(dims) > 3:
             dims = dims[:3]
         setattr(self.x_select, 'text', dims[-1])
         setattr(self.y_select, 'text', dims[-2])
         setattr(self.z_select, 'text', dims[-3])
-        setattr(self.depth_select, 'text', "Select...")
+        if self.z_select.text == "N/A":
+            setattr(self.depth_select, 'text', "N/A")
+        else:
+            setattr(self.depth_select, 'text', str(list(self.data.coords[self.z_select.text].data)[0]))
 
     def dim_options(self, dim, *args):
         """
@@ -198,11 +214,9 @@ class NetCDFConfig(Popup):
             dim: x_select, y_select, or z_select Button
             *args: Unused arguments passed to method
         """
-        if self.var_select.text != "Select...":
-            dim_drop = ListDropDown(['Select...'] + list(self.data[self.var_select.text].dims), dim)
+        if not dim.text == "N/A":
+            dim_drop = ListDropDown(list(self.data[self.var_select.text].dims), dim)
             dim_drop.open(dim)
-        else:
-            dim.text = "Select..."
 
     def depth_options(self, *args):
         """
@@ -211,11 +225,9 @@ class NetCDFConfig(Popup):
         Args:
             *args: Unused arguments passed to method
         """
-        if self.z_select.text != "Select...":
-            depth_drop = ListDropDown(['Select...'] + list(self.data.coords[self.z_select.text].data), self.depth_select)
+        if not self.z_select.text == "N/A":
+            depth_drop = ListDropDown(list(self.data.coords[self.z_select.text].data), self.depth_select)
             depth_drop.open(self.depth_select)
-        else:
-            self.depth_select.text = "Select..."
 
 
 class ListDropDown(DropDown):
@@ -236,8 +248,8 @@ class ListDropDown(DropDown):
         """
         super(ListDropDown, self).__init__(**kwargs)
         for item in items:
-            btn = Button(text=str(item), size_hint_y=None, height=30)
-            btn.bind(on_release=lambda btn: self.select(btn.text))
-            btn.bind(on_press=self.dismiss)
+            btn = Button(text=str(item), size_hint_y=None, height=dp(30),
+                         halign='center', valign='middle', shorten=True)
+            btn.bind(on_release=lambda btn: self.select(btn.text), on_press=self.dismiss, size=func.text_wrap)
             self.add_widget(btn)
         self.bind(on_select=lambda instance, x: setattr(button, 'text', x))

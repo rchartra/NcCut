@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nccut"
-version = "v0.3.2"
+version = "0.3.33"
 description = 'NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
@@ -36,6 +36,9 @@ pooch = "^1.8.2"
 sphinx = "^7.3.7"
 sphinx-rtd-theme = "^2.0.0"
 sphinxcontrib-video = "^0.2.1"
+
+[tool.poetry.scripts]
+nccut = "nccut.nccut:run"
 
 [[tool.poetry_bumpversion.replacements]]
 files = ["docs/source/conf.py"]
