@@ -375,19 +375,18 @@ class Test(unittest.TestCase):
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
         popup.var_drop.select("v2")
-        self.assertEqual(popup.y_select.text, "i", "Y dimension not selected correctly")
 
-        self.assertEqual(popup.x_select.text, "j", "X dimension not selected correctly")
-        self.assertEqual(popup.y_select.text, "i", "Y dimension not selected correctly")
+        self.assertEqual(popup.x_select.text, "i", "X dimension not selected correctly")
+        self.assertEqual(popup.y_select.text, "j", "Y dimension not selected correctly")
         self.assertEqual(popup.z_select.text, "N/A", "Third dimension detected for a 2D variable")
         self.assertEqual(popup.z_select.text, "N/A", "Z dimension value chosen for 2D variable")
 
-        popup.y_select.text = "j"
+        popup.y_select.text = "i"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
 
-        popup.y_select.text = "i"
+        popup.y_select.text = "j"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
@@ -399,19 +398,18 @@ class Test(unittest.TestCase):
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
         popup.var_drop.select("v3")
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
-        self.assertEqual(popup.x_select.text, "k", "X dimension not selected correctly")
+
+        self.assertEqual(popup.x_select.text, "i", "X dimension not selected correctly")
         self.assertEqual(popup.y_select.text, "j", "Y dimension not selected correctly")
-        self.assertEqual(popup.z_select.text, "i", "Z dimension not selected correctly")
-        self.assertEqual(popup.z_select.text, "0", "First Z dimension value not chosen for 3D variable")
+        self.assertEqual(popup.z_select.text, "k", "Z dimension not selected correctly")
+        self.assertEqual(popup.depth_select.text, "0", "First Z dimension value not chosen for 3D variable")
 
         popup.z_select.text = "j"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
 
-        popup.z_select.text = "i"
+        popup.z_select.text = "k"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
