@@ -375,6 +375,8 @@ class Test(unittest.TestCase):
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
         popup.var_drop.select("v2")
+        self.assertEqual(popup.y_select.text, "i", "Y dimension not selected correctly")
+
         self.assertEqual(popup.x_select.text, "j", "X dimension not selected correctly")
         self.assertEqual(popup.y_select.text, "i", "Y dimension not selected correctly")
         self.assertEqual(popup.z_select.text, "N/A", "Third dimension detected for a 2D variable")
