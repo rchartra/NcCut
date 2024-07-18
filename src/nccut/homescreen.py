@@ -6,12 +6,13 @@ the root node for the app and passes necessary commands to their appropriate rec
 further down the tree.
 
 """
-
 import kivy
+import numpy as np
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 import re
 import os
+import platform
 import nccut.functions as func
 from pathlib import Path
 from nccut.filedisplay import FileDisplay
@@ -25,23 +26,49 @@ class HomeScreen(Screen):
 
     Attributes:
         file_on (bool): Whether there is a file currently loaded in viewer
+        loaded (bool): Whether or not the window has fully loaded
+        win_load_size: Height and width of fully loaded window on Windows OS
         rel_path: pathlib.Path object to use as output directory
         font (float): Current font size for all buttons
         display: FileDisplay object (draggable image) created when a file is loaded
         nc_popup: Reference to NetCDF configuration popup
+        file: File if one was given on start up from command line, otherwise None
     """
-    def __init__(self, **kwargs):
+    def __init__(self, file=None, **kwargs):
         """
         Initialize main screen with default settings.
 
         Creates editing buttons, most UI elements defined in nccut.kv
+
+        Args:
+            file: (Optional) File if one was given on start up from command line, otherwise None
         """
         super(HomeScreen, self).__init__(**kwargs)
         self.file_on = False
+        self.loaded = False
+        self.win_load_size = np.array([899.3000000000001, 525.21])
+        self.mac_load_size = np.array([1540.0, 902.0000000000001])
         self.rel_path = Path(os.getcwd())
         self.font = self.ids.transect.font_size
         self.display = None
         self.nc_popup = None
+        self.file = file
+
+    def initial_load(self):
+        """
+        If a file was given on start up, wait until app is fully loaded and then load given file.
+        """
+        if platform.system() == "Darwin":
+            load_size = self.mac_load_size
+        else:
+            load_size = self.win_load_size
+        if not self.loaded and np.array_equal(np.array(self.ids.view.size), load_size):
+            if self.file:
+                self.ids.file_in.text = str(self.file)
+                self.go_btn()
+                if str(self.file)[-3:] == ".nc":
+                    self.nc_popup.go.dispatch("on_press")
+            self.loaded = True
 
     def font_adapt(self):
         """

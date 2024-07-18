@@ -114,7 +114,7 @@ class NetCDFDropDown(DropDown):
                 self.var_dropdown.add_widget(btn)
 
         self.depth_dropdown = DropDown()
-        if self.home.file_on and f_type == "netcdf" and self.home.display.config['netcdf']['z'] != "Select...":
+        if self.home.file_on and f_type == "netcdf" and self.home.display.config['netcdf']['z'] != "N/A":
             for i in list(self.home.display.config["netcdf"]['file'][self.home.display.config["netcdf"]['z']].data):
                 btn = Button(text=str(i), size_hint_y=None, height=30)
                 btn.bind(on_press=lambda btn: self.pass_setting("depth", btn.text))  # Setting name: 'depth'

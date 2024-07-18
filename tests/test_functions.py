@@ -193,12 +193,12 @@ class Test(unittest.TestCase):
         Test whether correct netcdf data is collected from user configurations for a 2D netcdf dataset
         """
         data = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")
-        config1 = {"x": "x", "y": "y", "z": "Select...", "z_val": "Select...", "var": "Vorticity", "file": data}
+        config1 = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": data}
         res1 = func.sel_data(config1)
         exp1 = np.flip(data["Vorticity"].transpose("y", "x").data, 0)
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
-        config2 = {"x": "y", "y": "x", "z": "Select...", "z_val": "Select...", "var": "Divergence", "file": data}
+        config2 = {"x": "y", "y": "x", "z": "N/A", "z_val": "N/A", "var": "Divergence", "file": data}
         res2 = func.sel_data(config2)
         exp2 = np.flip(np.swapaxes(data["Divergence"].transpose("y", "x").data, 0, 1), 0)
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),

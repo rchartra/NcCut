@@ -2,7 +2,7 @@ name: Python application
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "executable"]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:

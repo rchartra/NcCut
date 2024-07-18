@@ -45,7 +45,7 @@ class BackgroundDropDown(DropDown):
         super(BackgroundDropDown, self).open(widget)
         with self.canvas.before:
             Color(rgb=[0.2, 0.2, 0.2])
-            self.rect = Rectangle(size=self.size, pos=self.pos, radius=[10, ])
+            self.rect = Rectangle(size=self.size, pos=self.pos, radius=[dp(10), ])
         self.bind(pos=self.update_canvas, size=self.update_canvas)
 
     def update_canvas(self, *args):
@@ -137,7 +137,7 @@ class PlotPopup(Popup):
 
         # Initialize dropdown selections
         if self.f_type == "netcdf":
-            if self.config['z'] == "Select...":
+            if self.config['z'] == "N/A":
                 self.active_z = []
             else:
                 self.active_z = [self.config['z_val']]
@@ -211,7 +211,7 @@ class PlotPopup(Popup):
             v_drop = self.get_var_dropdown()
             self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
             sidebar.add_widget(v_box)
-            if self.config['z'] != "Select...":
+            if self.config['z'] != "N/A":
                 # Z Selection
                 z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
                 z_box.add_widget(Label(text="Select Z Values: ", size_hint=(0.3, 1), font_size=self.home.font))
@@ -697,7 +697,7 @@ class PlotPopup(Popup):
             temp.seek(0)
             plt.close()
             self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                       size_hint=(0.7, 1))
+                                       size_hint=(0.7, 1), fit_mode="contain")
             self.plotting.add_widget(self.plot, len(self.plotting.children))
         else:
             # Error popup if more than one transect is selected
@@ -867,11 +867,15 @@ class PlotPopup(Popup):
         if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0] != "Multi":
             # Gather data for all transects selected across all markers for all Z levels selected
             for z in list(dat.keys()):
+                if len(z) >= 12:
+                    z_name = z[:12] + "..."
+                else:
+                    z_name = z
                 for obj in list(dat[z].keys()):
                     if obj == "Multi":
-                        title = "Z: " + z + " "
+                        title = "Z: " + z_name + " "
                     else:
-                        title = "Z: " + z + " M" + obj[-1] + " "
+                        title = "Z: " + z_name + " M" + obj[-1] + " "
                     for cut in list(dat[z][obj].keys()):
                         if cut == "Average":
                             plot_dat[title + cut] = dat[z][obj][cut]
