@@ -3,13 +3,26 @@ Usage
 
 #. To install the app refer to the :doc:`installation` instructions.
 
-#. To run the app execute the following Python code:
+#. To run the app there are two options:
 
-    .. code-block:: python
+    * From Command Line:
 
-        from nccut.nccut import NcCut
-        NcCut().run()
+        .. code-block:: console
 
+            nccut
+
+        You can also pass a file directly into the app via the command line:
+
+        .. code-block:: console
+
+            nccut _FILE_NAME_OR_PATH_
+
+    * From Python:
+
+        .. code-block:: python
+
+            from nccut.nccut import NcCut
+            NcCut().run()
 
 For video walkthroughs of NcCut's basic usage, refer to the :doc:`example` section.
 

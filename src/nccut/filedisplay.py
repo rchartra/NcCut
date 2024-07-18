@@ -110,18 +110,18 @@ class FileDisplay(ScatterLayout):
         self.colormap = self.cmaps['Viridis']
 
         # Action Widgets
-        self.action_lbl = func.BackgroundLabel(text="Actions", size_hint=(1, 0.1), text_size=self.size,
+        self.action_lbl = func.BackgroundLabel(text="Actions", size_hint=(1, 0.1),
                                                halign='center', valign='center', font_size=self.home.font)
-        self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint=(1, 0.1), text_size=self.size,
+        self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint=(1, 0.1),
                                            halign='center', valign='center', font_size=self.home.font)
         self.drag_btn.bind(on_press=self.drag_mode)
-        self.edit_btn = func.RoundedButton(text="Edit Mode", size_hint=(1, 0.1), text_size=self.size,
+        self.edit_btn = func.RoundedButton(text="Edit Mode", size_hint=(1, 0.1),
                                            halign='center', valign='center', font_size=self.home.font)
         self.edit_btn.bind(on_press=self.edit_mode)
         self.action_widgets = [self.action_lbl, self.drag_btn, self.edit_btn]
 
         # Editing Mode widgets
-        self.back_btn = func.RoundedButton(text="Back", size_hint=(1, 0.1), text_size=self.size,
+        self.back_btn = func.RoundedButton(text="Back", size_hint=(1, 0.1),
                                            halign='center', valign='center', font_size=self.home.font)
         self.back_btn.bind(on_press=self.edit_mode)
         self.delete_line_btn = func.RoundedButton(text="Delete Last Line", size_hint=(1, 0.1),
@@ -303,7 +303,7 @@ class FileDisplay(ScatterLayout):
                 self.config['netcdf']['var'] = value
                 self.update_netcdf()
         elif setting == "depth":
-            if self.f_type == "netcdf" and self.config['netcdf']['z'] != 'Select...':
+            if self.f_type == "netcdf" and self.config['netcdf']['z'] != 'N/A':
                 self.config['netcdf']['z_val'] = value
                 self.update_netcdf()
 
@@ -335,7 +335,6 @@ class FileDisplay(ScatterLayout):
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
         is_success, img_b = cv2.imencode(".png", img)
-        cv2.imwrite("__nc_test__.png", img)
         self.byte = io.BytesIO(img_b)
 
     def update_color_bar(self, colorbar):
