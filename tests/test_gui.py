@@ -362,7 +362,7 @@ class Test(unittest.TestCase):
 
         # Check Default Values and rejection of a 1D Variable
         self.assertEqual(popup.var_select.text, "v1", "First variable was not automatically selected on start up")
-        self.assertEqual(popup.x_select.text, "k", "X dimension not selected correctly")
+        self.assertEqual(popup.x_select.text, "i", "X dimension not selected correctly")
         self.assertEqual(popup.y_select.text, "N/A", "Y dimension detected for 1D variable")
         self.assertEqual(popup.z_select.text, "N/A", "Z dimension detected for 1D variable")
         self.assertEqual(popup.z_select.text, "N/A", "Z dimension value chosen for 1D variable")
