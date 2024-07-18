@@ -33,5 +33,5 @@ def get_logging_level():
     Returns:
         str: The current logging level (e.g., 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
     """
-    level = logging.getLogger().getEffectiveLevel()
+    level = logging.getLogger().level
     return logging.getLevelName(level)

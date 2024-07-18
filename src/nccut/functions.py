@@ -32,6 +32,16 @@ class BackgroundLabel(Label):
     pass
 
 
+def text_wrap(*args):
+    """
+    Updates a widgets text box so that it is always within the bounds of the widget.
+
+    Args:
+        args: List where first item is a Button or Label and the second item is a tuple of that widgets current size.
+    """
+    args[0].text_size = (args[1][0] - 8, args[1][1] - 8)
+
+
 def remove_alert(alert, home, *largs):
     """
     Remove alert banner.
@@ -118,7 +128,7 @@ def sel_data(config):
         2D array of data from NetCDF file.
     """
     # IMPORTANT: Numpy indexes (row, column) with (0, 0) at top left corner
-    if config['z'] == 'Select...':
+    if config['z'] == 'N/A':
         # 2D NetCDF data
         ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
         ds = ds.transpose('y', 'x')

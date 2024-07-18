@@ -359,75 +359,71 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = TEST_NC_PATH
         run_app.home.go_btn()
         popup = run_app.home.nc_popup
+
+        # Check Default Values and rejection of a 1D Variable
+        self.assertEqual(popup.var_select.text, "v1", "First variable was not automatically selected on start up")
+        self.assertEqual(popup.x_select.text, "i", "X dimension not selected correctly")
+        self.assertEqual(popup.y_select.text, "N/A", "Y dimension detected for 1D variable")
+        self.assertEqual(popup.z_select.text, "N/A", "Z dimension detected for 1D variable")
+        self.assertEqual(popup.z_select.text, "N/A", "Z dimension value chosen for 1D variable")
+
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
-        self.assertEqual(popup.error.text, "Please Select a Variable", "Variable must be selected")
+        self.assertEqual(popup.error.text, "This variable has less than 2 dimensions", "Can't support less than 2 dims")
 
+        # Check 2D Variable behavior
+        popup.var_select.dispatch('on_press')
+        popup.var_select.dispatch('on_release')
+        popup.var_drop.select("v2")
+        self.assertEqual(popup.x_select.text, "j", "X dimension not selected correctly")
+        self.assertEqual(popup.y_select.text, "i", "Y dimension not selected correctly")
+        self.assertEqual(popup.z_select.text, "N/A", "Third dimension detected for a 2D variable")
+        self.assertEqual(popup.z_select.text, "N/A", "Z dimension value chosen for 2D variable")
+
+        popup.y_select.text = "j"
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
+
+        popup.y_select.text = "i"
+        popup.go.dispatch('on_press')
+        popup.go.dispatch('on_release')
+        self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
+
+        # Check 3D Variable behavior
+        run_app.home.ids.file_in.text = TEST_NC_PATH
+        run_app.home.go_btn()
+        popup = run_app.home.nc_popup
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
         popup.var_drop.select("v3")
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
-        self.assertEqual(popup.x_select.text, "i", "X dimension automatically selected")
-        self.assertEqual(popup.y_select.text, "j", "Y dimension automatically selected")
-        self.assertEqual(popup.z_select.text, "k", "Z dimension automatically selected")
-        self.assertEqual(popup.error.text, "Please Select a Z Value", "3D variables need a Z value selected")
+        self.assertEqual(popup.x_select.text, "k", "X dimension not selected correctly")
+        self.assertEqual(popup.y_select.text, "j", "Y dimension not selected correctly")
+        self.assertEqual(popup.z_select.text, "i", "Z dimension not selected correctly")
+        self.assertEqual(popup.z_select.text, "0", "First Z dimension value not chosen for 3D variable")
 
         popup.z_select.text = "j"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
 
-        popup.z_select.text = "Select..."
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
-        self.assertEqual(popup.error.text, "Please Select a Z dimension", "3D variables need a Z Dimension")
-
-        popup.z_select.text = "k"
-        popup.depth_select.text = "8"
+        popup.z_select.text = "i"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
 
-        run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.go_btn()
-        popup = run_app.home.nc_popup
-
-        popup.var_select.dispatch('on_press')
-        popup.var_select.dispatch('on_release')
-        popup.var_drop.select("v2")
-        self.assertEqual(popup.z_select.text, "Select...", "2D Variables don't have a third dimension")
-
-        popup.z_select.text = "j"
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
-        self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
-
-        popup.z_select.text = "Select..."
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
-        self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
-
+        # Check Rejection of a 4D Variable
         run_app.home.ids.file_in.text = TEST_NC_PATH
         run_app.home.go_btn()
         popup = run_app.home.nc_popup
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
         popup.var_drop.select("v4")
-        popup.depth_select.text = "70"
         popup.go.dispatch('on_press')
         popup.go.dispatch('on_release')
         self.assertEqual(popup.error.text, "This variable has more than 3 dimensions", "Can't support more than 3 dims")
-
-        run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.go_btn()
-        popup = run_app.home.nc_popup
-        popup.var_select.dispatch('on_press')
-        popup.var_select.dispatch('on_release')
-        popup.var_drop.select("v1")
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
-        self.assertEqual(popup.error.text, "This variable has less than 2 dimensions", "Can't support less than 2 dims")
 
     def test_netcdf_settings(self):
         """

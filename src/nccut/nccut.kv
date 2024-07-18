@@ -7,7 +7,7 @@
 #:import NetCDFDropDown nccut.dropdowns.NetCDFDropDown
 
 
-<BackgroundLabel@Label>
+<BackgroundLabel>
     background_color: 0.2, 0.2, 0.2, 1
     canvas.before:
         Color:
@@ -17,7 +17,7 @@
             pos: self.pos
             radius: [5,]
 
-<RoundedButton@Button>:
+<RoundedButton>:
     background_color: 0,0,0,0
     canvas.before:
         Color:
@@ -27,7 +27,7 @@
             size: self.size
             radius: [15,]
 
-<ViewDropDown@DropDown>
+<ViewDropDown>
     auto_width: False
     height: dp(210)
     width: dp(300)
@@ -123,7 +123,7 @@
                 on_press: root.flip_h()
 
 
-<NetCDFDropDown@DropDown>
+<NetCDFDropDown>
     auto_width: False
     height: dp(300)
     width: dp(300)
@@ -291,7 +291,7 @@
             StencilView:
                 id: view
                 size_hint: (1, 1)
-
+                on_size: root.initial_load()
                 canvas:
                     Color:
                         rgb: [.7, .7, .7]
