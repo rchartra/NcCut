@@ -3,7 +3,7 @@ Tutorial Videos
 
 To follow along with the walkthroughs below you can download the example files from the **NcCut** `repository <https://github.com/rchartra/NcCut/tree/master/support>`_:
 
-* ``example.jpg`` is a satellite SAR image of sea ice floes in the arctic ocean
+* ``example.jpg`` is a SAR image of sea ice floes in the arctic ocean from the Sentinel-1 satellite
 * ``example.json`` is an example project file output from NcCut to practice uploading projects
 * ``example_3d.nc`` is a subsection of a modeled ocean temperature dataset from the MITgcm LLC4320 Model near the gulf stream
 * ``example_4v.nc`` is a dataset of various ocean circulation metrics calculated from velocity data from the MITgcm LLC4320 Model near the gulf stream

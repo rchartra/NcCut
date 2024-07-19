@@ -5,17 +5,17 @@ Usage
 
 #. To run the app there are two options:
 
-    * From Command Line:
+    * From the command Line:
 
         .. code-block:: console
 
             nccut
 
-        You can also pass a file directly into the app via the command line:
+        You can also pass a NetCDF or image file directly into the app via the command line:
 
         .. code-block:: console
 
-            nccut _FILE_NAME_OR_PATH_
+            nccut file_name
 
     * From Python:
 
