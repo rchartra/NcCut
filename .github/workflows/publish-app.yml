@@ -28,9 +28,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install poetry
           python -m poetry self add poetry-bumpversion
+      - name: Format version
+        run: |
+          TAG=${{ github.event.release.tag_name }}
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
       - name: Build
         run: |
-          python -m poetry version ${{ github.event.release.tag_name }}
+          python -m poetry version $VERSION
           python -m poetry build
       - name: Commit Version Updates
         run: |
