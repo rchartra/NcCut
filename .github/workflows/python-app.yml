@@ -87,4 +87,4 @@ jobs:
             path: paper.pdf
         - name: Version Test
           run: |
-            echo ${{ github.ref_name }}:1
+            echo ${{{ github.ref_name }}:1}
