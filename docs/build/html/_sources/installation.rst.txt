@@ -9,15 +9,15 @@ Installation
 
         .. code-block:: console
 
-            python3 -m venv venv
-            source venv/bin/activate
+            python3 -m venv nccut-venv
+            source nccut-venv/bin/activate
 
     * For Windows:
 
         .. code-block:: console
 
-            python3 -m venv venv
-            venv\Scripts\activate
+            python3 -m venv nccut-venv
+            nccut-venv\Scripts\activate
 
 #. Then install NcCut using PIP:
 
@@ -25,12 +25,26 @@ Installation
 
         pip install nccut
 
-#. To run the app execute the following Python code:
+#. To run the app there are two options:
 
-    .. code-block:: python
+    * From the command Line:
 
-        from nccut.nccut import NcCut
-        NcCut().run()
+        .. code-block:: console
+
+            nccut
+
+        You can also pass a NetCDF or image file directly into the app via the command line:
+
+        .. code-block:: console
+
+            nccut file_name
+
+    * From Python:
+
+        .. code-block:: python
+
+            from nccut.nccut import NcCut
+            NcCut().run()
 
 #. To exit the virtual environment when finished:
 
@@ -44,18 +58,18 @@ Installation
 
         .. code-block:: console
 
-            source venv/bin/activate
+            source nccut-venv/bin/activate
 
     * For Windows:
 
         .. code-block:: console
 
-            venv\Scripts\activate
+            nccut-venv\Scripts\activate
 
 Troubleshooting
 ---------------
 
-* You will need to have python of version at least 3.9 installed on your computer
+* You will need to have python of version *at least 3.9* installed on your computer
 * Ensure you have X11 on your computer (not always the case on Macs)
 * There is occasionally a bug with the way kivy accesses it's dependencies. If the app won't run for you try running these lines in the terminal:
 
