@@ -142,7 +142,7 @@ def sel_data(config):
     return np.flip(data.data, 0)
 
 
-def ip_get_points(points, curr, nc):
+def ip_get_points(line, curr, nc):
     """
     Creates a data frame containing x, y, and value of points on transect line
 
@@ -150,7 +150,7 @@ def ip_get_points(points, curr, nc):
     relevant section of data set, and then grabs data values at each line point.
 
     Args:
-        points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
+        line: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
         curr: 2D indexable array of current dataset loaded in viewer
         nc (bool): Whether data is from a NetCDF file
     Returns:
@@ -164,8 +164,7 @@ def ip_get_points(points, curr, nc):
     data = []
     xyswap = False
 
-    img = curr
-    line = points
+    img = np.asarray(curr)
 
     # Always read from left point to right
     if line[0] > line[2]:
@@ -174,12 +173,34 @@ def ip_get_points(points, curr, nc):
     # Get interpolation object
 
     # Get x values
-    ix = np.arange(int(line[0] - 3), int(line[2] + 4))
-    # Get y values increasing in value w/o changing og object
-    if line[1] > line[3]:
-        iy = np.arange(int(line[3] - 3), int(line[1] + 4))
+    # Include margin if possible
+    if int(line[0]) < 3:
+        x_start = line[0]
     else:
-        iy = np.arange(int(line[1] - 3), int(line[3] + 4))
+        x_start = line[0] - 3
+    if int(line[2]) > img.shape[1] - 4:
+        x_end = line[2]
+    else:
+        x_end = line[2] + 4
+    ix = np.arange(int(x_start), int(x_end))
+
+    # Get y values increasing in value w/o changing og object
+    # Include margin if possible
+
+    if line[1] > line[3]:
+        y_points = [line[3], line[1]]
+    else:
+        y_points = [line[1], line[3]]
+    if int(y_points[0]) < 3:
+        y_start = y_points[0]
+    else:
+        y_start = y_points[0] - 3
+    if int(y_points[1]) > img.shape[1] - 4:
+        y_end = y_points[1]
+    else:
+        y_end = y_points[1] + 4
+    iy = np.arange(int(y_start), int(y_end))
+
     # Get line slope
     if line[2] - line[0] == 0:
         m = (line[3] - line[1]) / .001
@@ -195,12 +216,12 @@ def ip_get_points(points, curr, nc):
         else:
             m = (line[3] - line[1]) / (line[2] - line[0])
     b = line[1] - m * (line[0])
-    imgA = np.asarray(img)
-    z = imgA[-(iy[-1] + 1):-(iy[0]), ix[0]:ix[-1] + 1]
+    z = img[-(iy[-1] + 1):-(iy[0]), ix[0]:ix[-1] + 1]
     if not nc and len(z.shape) == 3:
         # If image, take average of RGB values as point value
         z = np.mean(z, axis=2)
     z = np.flipud(z)
+
     # numpy arrays are indexed by row, column NOT x, y, but interp object does do x y
     int_pol = RegularGridInterpolator((iy, ix), z, method='linear')
 

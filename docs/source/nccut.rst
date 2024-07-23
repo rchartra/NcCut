@@ -1,5 +1,5 @@
-NcCut API Reference
-=====================
+Python API
+==========
 
 This section serves as reference for contributors who are looking to understand **NcCut's** underlying structure. This is not a user facing API.
 
