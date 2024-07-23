@@ -152,7 +152,7 @@ class Test(unittest.TestCase):
         Test whether valid project files can be accurately identified
         """
         # Data from a valid file is correctly extracted
-        proper_json = open(SUPPORT_FILE_PATH + "example.json")
+        proper_json = open(SUPPORT_FILE_PATH + "project_example.json")
         proper_data = json.load(proper_json)
         marker_result = marker_find(proper_data, [])
 

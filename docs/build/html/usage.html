@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; NcCut 0.2.7 documentation</title>
+  <title>Usage &mdash; NcCut 0.4.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,13 +15,14 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=58050c01"></script>
+        <script src="_static/documentation_options.js?v=5bfaad31"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorial Videos" href="example.html" />
+    <link rel="next" title="Tutorials" href="example.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -55,16 +56,20 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#plotting">Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#nccut-project-file-printer-module">nccut.project_file_printer module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nccut-logger-module">nccut.logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-logger-settings">Changing Logger Settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-nccut.logger">nccut.logger module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nccut.logger.get_logging_level"><code class="docutils literal notranslate"><span class="pre">get_logging_level()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nccut.logger.set_logging_level"><code class="docutils literal notranslate"><span class="pre">set_logging_level()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial Videos</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_output.html">Data Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contribution.html">Contribution Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nccut.html">Python API</a></li>
 </ul>
 
         </div>
@@ -95,7 +100,21 @@
 <h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
 <ol class="arabic">
 <li><p>To install the app refer to the <a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> instructions.</p></li>
-<li><p>To run the app execute the following Python code:</p>
+<li><p>To run the app there are two options:</p>
+<blockquote>
+<div><ul>
+<li><p>From the command Line:</p>
+<blockquote>
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">nccut</span>
+</pre></div>
+</div>
+<p>You can also pass a NetCDF or image file directly into the app via the command line:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">nccut file_name</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>From Python:</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nccut.nccut</span> <span class="kn">import</span> <span class="n">NcCut</span>
 <span class="n">NcCut</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -103,8 +122,11 @@
 </div>
 </div></blockquote>
 </li>
+</ul>
+</div></blockquote>
+</li>
 </ol>
-<p>For video walkthroughs of NcCut’s basic usage, refer to the <a class="reference internal" href="example.html"><span class="doc">Tutorial Videos</span></a> section.</p>
+<p>For video walkthroughs of NcCut’s basic usage, refer to the <a class="reference internal" href="example.html"><span class="doc">Tutorials</span></a> section.</p>
 <section id="loading-a-file">
 <h2>Loading a File<a class="headerlink" href="#loading-a-file" title="Link to this heading"></a></h2>
 <p><strong>NcCut</strong> supports .jpg, .jpeg, and .png image files and NetCDF .nc files. To load the file you must either know the absolute path to your file on your system or move the files into the same directory as your code. In this case you can use the relative file path.</p>
@@ -118,6 +140,7 @@
 <li><p>Select which variable from your file you would like to see.</p></li>
 <li><p>Confirm or select which dimensions you would like to use as the X and Y axes for your variable.</p></li>
 <li><p>If your variable has data in a third dimension select the Z dimension and an initial Z value to display. You will be able to toggle between z values later.</p></li>
+<li><p>At the moment NcCut can only load variables with 2 or 3 dimensions.</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -200,14 +223,15 @@
 </section>
 <section id="plotting">
 <h2>Plotting<a class="headerlink" href="#plotting" title="Link to this heading"></a></h2>
-<ol class="arabic simple">
-<li><dl class="simple">
+<ol class="arabic">
+<li><dl>
 <dt>When you are finished using a tool, select the <strong>Plot</strong> button to view plots of your data and choose which data you would like to save.</dt><dd><ul class="simple">
 <li><p>You can select which transects you’d like to plot</p></li>
 <li><p>If you used the marker tool you can plot an average of the markers transects if you used the same marker width throughout the whole marker</p></li>
 <li><p>If using a NetCDF file you can select multiple variables and Z values you’d like to see your selected transects plotted from.</p></li>
-<li><p>If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.</p></li>
+<li><p>If using a NetCDF file with a Z dimension you can select <strong>Plot all Z as Img</strong> to plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.</p></li>
 </ul>
+<img alt="_images/nccutgraphic.png" src="_images/nccutgraphic.png" />
 </dd>
 </dl>
 </li>
@@ -225,14 +249,38 @@
 <li><p>Click anywhere around the popup or the close button to dismiss plotting window.</p></li>
 </ol>
 </section>
-<section id="api">
-<h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
-<p><strong>NcCut</strong> has a few helper modules for configuring the app and working with the output data.</p>
-<section id="nccut-project-file-printer-module">
-<h3>nccut.project_file_printer module<a class="headerlink" href="#nccut-project-file-printer-module" title="Link to this heading"></a></h3>
-</section>
-<section id="nccut-logger-module">
-<h3>nccut.logger module<a class="headerlink" href="#nccut-logger-module" title="Link to this heading"></a></h3>
+<section id="changing-logger-settings">
+<h2>Changing Logger Settings<a class="headerlink" href="#changing-logger-settings" title="Link to this heading"></a></h2>
+<section id="module-nccut.logger">
+<span id="nccut-logger-module"></span><h3>nccut.logger module<a class="headerlink" href="#module-nccut.logger" title="Link to this heading"></a></h3>
+<p>This module sets the default logging level for NcCut and defines ways for the user to access and adjust the logging
+level. NcCut itself does not implement logging messages but it’s dependencies do.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="nccut.logger.get_logging_level">
+<span class="sig-prename descclassname"><span class="pre">nccut.logger.</span></span><span class="sig-name descname"><span class="pre">get_logging_level</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nccut.logger.get_logging_level" title="Link to this definition"></a></dt>
+<dd><p>Get the current logging level for the root logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The current logging level (e.g., ‘DEBUG’, ‘INFO’, ‘WARNING’, ‘ERROR’, ‘CRITICAL’)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nccut.logger.set_logging_level">
+<span class="sig-prename descclassname"><span class="pre">nccut.logger.</span></span><span class="sig-name descname"><span class="pre">set_logging_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nccut.logger.set_logging_level" title="Link to this definition"></a></dt>
+<dd><p>Set the logging level for the root logger and specific dependency loggers.
+This allows end users to change the logging level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>level</strong> (<em>str</em>) – The logging level to set (e.g., ‘DEBUG’, ‘INFO’, ‘WARNING’, ‘ERROR’, ‘CRITICAL’)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 </section>
@@ -242,7 +290,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example.html" class="btn btn-neutral float-right" title="Tutorial Videos" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

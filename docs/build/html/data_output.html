@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Output &mdash; NcCut 0.2.7 documentation</title>
+  <title>Data Output &mdash; NcCut 0.4.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,14 +15,15 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=58050c01"></script>
+        <script src="_static/documentation_options.js?v=5bfaad31"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contribution Guide" href="contribution.html" />
-    <link rel="prev" title="Tutorial Videos" href="example.html" /> 
+    <link rel="prev" title="Tutorials" href="example.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,12 +49,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data Output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#file-structure">File Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-structure">File Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-nccut.project_file_printer">nccut.project_file_printer module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nccut.project_file_printer.project_file_printer"><code class="docutils literal notranslate"><span class="pre">project_file_printer()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contribution.html">Contribution Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nccut.html">Python API</a></li>
 </ul>
 
         </div>
@@ -82,7 +90,7 @@
              
   <section id="data-output">
 <span id="id1"></span><h1>Data Output<a class="headerlink" href="#data-output" title="Link to this heading"></a></h1>
-<p>No matter which tool you use the GUI will download the transect data into a JSON file. If you’re unfamiliar with this data structure, it is equivalent to nested python dictionaries or lists in many other programming languages. It is a common file type that is supported by many software and programming languages, however an easy way to access it is using the python <code class="docutils literal notranslate"><span class="pre">json</span></code> library:</p>
+<p>No matter which tool you use the GUI will download the transect data into a JSON file. If you’re unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages, however an easy way to access it is using the python <code class="docutils literal notranslate"><span class="pre">json</span></code> library:</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;_FILE_NAME_.json&quot;</span><span class="p">)</span>
@@ -90,7 +98,7 @@
 </pre></div>
 </div>
 </div></blockquote>
-<p>This will load the data into a dictionary which you can easily manipulate for your purposes.</p>
+<p>This will load the data into a dictionary which you can easily manipulate for your purposes. You can use <a class="reference internal" href="#module-nccut.project_file_printer" title="nccut.project_file_printer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">nccut.project_file_printer()</span></code></a> to have the data printed for you in a readable fashion.</p>
 <section id="file-structure">
 <h2>File Structure<a class="headerlink" href="#file-structure" title="Link to this heading"></a></h2>
 <p>The output JSON file has a hierarchical data structure that depends on the tool you used and the file you loaded.</p>
@@ -110,6 +118,38 @@
 </ul>
 <img alt="_images/nc_diagram.png" src="_images/nc_diagram.png" />
 </div></blockquote>
+<p><strong>NcCut</strong> has a few helper modules for configuring the app and working with the output data.</p>
+<section id="module-nccut.project_file_printer">
+<span id="nccut-project-file-printer-module"></span><h3>nccut.project_file_printer module<a class="headerlink" href="#module-nccut.project_file_printer" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="nccut.project_file_printer.project_file_printer">
+<span class="sig-prename descclassname"><span class="pre">nccut.project_file_printer.</span></span><span class="sig-name descname"><span class="pre">project_file_printer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nccut.project_file_printer.project_file_printer" title="Link to this definition"></a></dt>
+<dd><p>Recursively prints the contents of an output data file from NcCut in a readable fashion.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nccut.project_file_printer.data">
+<span class="sig-prename descclassname"><span class="pre">nccut.project_file_printer.</span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#nccut.project_file_printer.data" title="Link to this definition"></a></dt>
+<dd><p>Dictionary output from NcCut</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nccut.project_file_printer.tab">
+<span class="sig-prename descclassname"><span class="pre">nccut.project_file_printer.</span></span><span class="sig-name descname"><span class="pre">tab</span></span><a class="headerlink" href="#nccut.project_file_printer.tab" title="Link to this definition"></a></dt>
+<dd><p>Always use 0, used in the recursive process for indentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 </section>
 
@@ -117,7 +157,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example.html" class="btn btn-neutral float-left" title="Tutorial Videos" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="contribution.html" class="btn btn-neutral float-right" title="Contribution Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

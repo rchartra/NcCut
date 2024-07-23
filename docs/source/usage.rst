@@ -38,6 +38,7 @@ Loading a File
         * Select which variable from your file you would like to see.
         * Confirm or select which dimensions you would like to use as the X and Y axes for your variable.
         * If your variable has data in a third dimension select the Z dimension and an initial Z value to display. You will be able to toggle between z values later.
+        * At the moment NcCut can only load variables with 2 or 3 dimensions.
 
 #. Select **Go** to load the selected data
 
@@ -123,18 +124,8 @@ Plotting
 #. See the :ref:`Data Output <data_output>` section for how the saved data is formatted.
 #. Click anywhere around the popup or the close button to dismiss plotting window.
 
-API
----
-
-**NcCut** has a few helper modules for configuring the app and working with the output data.
-
-nccut.project\_file\_printer module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nccut.project_file_printer
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Changing Logger Settings
+------------------------
 
 nccut.logger module
 ^^^^^^^^^^^^^^^^^^^^^
