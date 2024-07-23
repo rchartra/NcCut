@@ -3,13 +3,26 @@ Usage
 
 #. To install the app refer to the :doc:`installation` instructions.
 
-#. To run the app execute the following Python code:
+#. To run the app there are two options:
 
-    .. code-block:: python
+    * From the command Line:
 
-        from nccut.nccut import NcCut
-        NcCut().run()
+        .. code-block:: console
 
+            nccut
+
+        You can also pass a NetCDF or image file directly into the app via the command line:
+
+        .. code-block:: console
+
+            nccut file_name
+
+    * From Python:
+
+        .. code-block:: python
+
+            from nccut.nccut import NcCut
+            NcCut().run()
 
 For video walkthroughs of NcCut's basic usage, refer to the :doc:`example` section.
 
@@ -25,6 +38,7 @@ Loading a File
         * Select which variable from your file you would like to see.
         * Confirm or select which dimensions you would like to use as the X and Y axes for your variable.
         * If your variable has data in a third dimension select the Z dimension and an initial Z value to display. You will be able to toggle between z values later.
+        * At the moment NcCut can only load variables with 2 or 3 dimensions.
 
 #. Select **Go** to load the selected data
 
@@ -98,7 +112,10 @@ Plotting
     * You can select which transects you'd like to plot
     * If you used the marker tool you can plot an average of the markers transects if you used the same marker width throughout the whole marker
     * If using a NetCDF file you can select multiple variables and Z values you'd like to see your selected transects plotted from.
-    * If using a NetCDF file with a Z dimension you can plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
+    * If using a NetCDF file with a Z dimension you can select **Plot all Z as Img** to plot an image of a single transect taken over all Z values of your dataset. To use this option only one transect can be selected.
+
+    .. image:: _media/nccutgraphic.png
+
 #. You can save the current plot to .PNG or .PDF formats.
 #. You can also save the transect data itself from three options:
     * **Save All Data** will save all transects from all markers. If using a NetCDF file it will do so for the currently selected variables and z values.
@@ -107,18 +124,8 @@ Plotting
 #. See the :ref:`Data Output <data_output>` section for how the saved data is formatted.
 #. Click anywhere around the popup or the close button to dismiss plotting window.
 
-API
----
-
-**NcCut** has a few helper modules for configuring the app and working with the output data.
-
-nccut.project\_file\_printer module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nccut.project_file_printer
-   :members:
-   :undoc-members:
-   :show-inheritance:
+Changing Logger Settings
+------------------------
 
 nccut.logger module
 ^^^^^^^^^^^^^^^^^^^^^

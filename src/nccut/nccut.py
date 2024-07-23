@@ -5,6 +5,8 @@ Creates the widget tree and sets the initial window size. To load app, run ``NcC
 
 """
 
+from progress.bar import ChargingBar
+bar = ChargingBar("Loading App", max=3)
 import os
 import re
 import logging
@@ -13,6 +15,7 @@ from nccut.logger import get_logging_level
 _LOG_LEVEL_ = copy.copy(get_logging_level())
 os.environ["KIVY_NO_ARGS"] = "true"
 os.environ["KCFG_KIVY_LOG_LEVEL"] = _LOG_LEVEL_.lower()
+bar.next()
 from kivy.metrics import dp
 import kivy
 import kivy.uix as ui
@@ -20,6 +23,7 @@ from kivy.app import App
 import platform
 import argparse
 logging.getLogger().setLevel(getattr(logging, _LOG_LEVEL_, None))
+bar.next()
 from nccut.homescreen import HomeScreen
 
 
@@ -47,6 +51,7 @@ class NcCut(App):
         logging.getLogger().setLevel(getattr(logging, get_logging_level().upper(), None))
         # Kivy has a mobile app emulator that needs to be turned off for computer app
         kivy.config.Config.set('input', 'mouse', 'mouse,disable_multitouch')
+        kivy.config.Config.set('kivy', 'exit_on_escape', '0')
         win = kivy.core.window.Window
         logging.getLogger("kivy").setLevel(logging.ERROR)
         if platform.system() == "Darwin":  # macOS
@@ -85,11 +90,14 @@ def run():
     """
     Runs app with command line file entry
     """
+    bar.next()
     parser = argparse.ArgumentParser()
     parser.add_argument('file', nargs='?', default=None, help="File path for image or NetCDF file")
     args = parser.parse_args()
     file = args.file
     if not file:
+        bar.next()
+        bar.finish()
         NcCut().run()
     elif not os.path.isfile(file):
         print("ERROR: File Not Found")
@@ -98,4 +106,6 @@ def run():
     elif not os.path.splitext(file)[1] in [".jpg", ".jpeg", ".png", ".nc"]:
         print("ERROR: File not an Image or NetCDF File")
     else:
+        bar.next()
+        bar.finish()
         NcCut(file).run()

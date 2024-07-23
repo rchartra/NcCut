@@ -157,7 +157,7 @@ class PlotPopup(Popup):
         # Popup Graphics Code
 
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                   size_hint=(0.7, 1))
+                                   size_hint=(0.7, 1), fit_mode="contain")
         # Plot
         self.plotting = ui.boxlayout.BoxLayout(spacing=dp(20), size_hint=(1, 0.9))
         self.plotting.add_widget(self.plot)
@@ -573,7 +573,7 @@ class PlotPopup(Popup):
             temp.seek(0)
             plt.close()
             self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                       size_hint=(0.7, 1))
+                                       size_hint=(0.7, 1), fit_mode="contain")
             self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_var_dropdown(self):
@@ -625,7 +625,7 @@ class PlotPopup(Popup):
         temp.seek(0)
         plt.close()
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                   size_hint=(0.7, 1))
+                                   size_hint=(0.7, 1), fit_mode="contain")
         self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_z_dropdown(self):
@@ -676,7 +676,7 @@ class PlotPopup(Popup):
         temp.seek(0)
         plt.close()
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                   size_hint=(0.7, 1))
+                                   size_hint=(0.7, 1), fit_mode="contain")
         self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_all_z_plot(self):

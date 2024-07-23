@@ -31,3 +31,13 @@ When taken from a NetCDF file the markers are further nested into dictionaries f
     * The transect values are the value of the corresponding dataset of the file at that x, y coordinate. The data is interpolated for smoothness.
 
     .. image:: _media/nc_diagram.png
+
+**NcCut** has a few helper modules for configuring the app and working with the output data.
+
+nccut.project\_file\_printer module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nccut.project_file_printer
+   :members:
+   :undoc-members:
+   :show-inheritance:

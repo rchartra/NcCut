@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to NcCut’s documentation! &mdash; NcCut 0.2.7 documentation</title>
+  <title>Welcome to NcCut’s documentation! &mdash; NcCut 0.4.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,9 +15,10 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=58050c01"></script>
+        <script src="_static/documentation_options.js?v=5bfaad31"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -47,9 +48,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial Videos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_output.html">Data Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contribution.html">Contribution Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nccut.html">Python API</a></li>
 </ul>
 
         </div>
@@ -78,7 +80,7 @@
              
   <section id="welcome-to-nccut-s-documentation">
 <h1>Welcome to NcCut’s documentation!<a class="headerlink" href="#welcome-to-nccut-s-documentation" title="Link to this heading"></a></h1>
-<p><strong>NcCut</strong> is a GUI for getting pixel data from images and data values from NetCDF files along a linear transects. This simplifies the analysis of satellite imagery or other images with linear features where the brightness of the pixel can be used to gauge some physical value. Examples include measuring sea ice floe concentration or characterizing ice sheet fractures. For NetCDF files, <strong>NcCut</strong> serves as an easy way to view datasets quickly along any dimensions and extract data along transects. <strong>NcCut</strong> is designed to make the measurement of linear features as automatic as possible through “marker” tools where linear features can be marked out and have transects automatically be made across. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.</p>
+<p><strong>NcCut</strong> is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, <strong>NcCut</strong> serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using <strong>NcCut</strong> users can view vertical transect images of their data along a third dimension and the marked out line. In addition, <strong>NcCut</strong> is designed to make the measurement of linear features as automatic as possible through it’s <em>Transect Marker</em> tool where linear features can be marked out and have transects automatically be made perpendicular to the feature. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.</p>
 <p>Here you will find installation and usage instructions, trouble shooting tips, example tutorials, and code documentation for contributors.</p>
 <img alt="_images/nccutgraphic.png" src="_images/nccutgraphic.png" />
 <div class="toctree-wrapper compound">
@@ -93,12 +95,13 @@
 <li class="toctree-l2"><a class="reference internal" href="usage.html#loading-a-file">Loading a File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#tools">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#plotting">Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#changing-logger-settings">Changing Logger Settings</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial Videos</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="example.html#taking-transects-on-a-netcdf-file">Taking Transects on a NetCDF File</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example.html#using-the-transect-marker-tool">Using the Transect Marker Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html#working-with-the-output-data">Working with the Output Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="data_output.html">Data Output</a><ul>
@@ -110,6 +113,23 @@
 <li class="toctree-l2"><a class="reference internal" href="contribution.html#testing">Testing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contribution.html#documentation">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contribution.html#tips-for-adding-a-new-tool">Tips for Adding a New Tool</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nccut.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#nccut.nccut.NcCut"><code class="docutils literal notranslate"><span class="pre">NcCut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#nccut.nccut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-0">nccut.nccut module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.dropdowns">nccut.dropdowns module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.filedisplay">nccut.filedisplay module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.functions">nccut.functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.homescreen">nccut.homescreen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.marker">nccut.marker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.markerwidth">nccut.markerwidth module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.multimarker">nccut.multimarker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.multitransect">nccut.multitransect module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.netcdfconfig">nccut.netcdfconfig module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.plotpopup">nccut.plotpopup module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nccut.html#module-nccut.singletransect">nccut.singletransect module</a></li>
 </ul>
 </li>
 </ul>
