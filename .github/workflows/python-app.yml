@@ -85,6 +85,10 @@ jobs:
           with:
             name: paper
             path: paper.pdf
+        - name: Get edited string
+          run: |
+            TAG=${{ github.event.release.tag_name }}
+            echo "VERSION=${TAG#v}" >> $GITHUB_ENV
         - name: Version Test
           run: |
-            echo ${{{ github.ref_name }}:1}
+            echo $VERSION
