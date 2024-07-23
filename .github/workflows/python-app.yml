@@ -2,7 +2,6 @@ name: Python application
 
 on:
   push:
-    branches: [ "master", "executable"]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
@@ -86,3 +85,6 @@ jobs:
           with:
             name: paper
             path: paper.pdf
+        - name: Version Test
+          run: |
+            echo ${{ github.ref_name }:1}

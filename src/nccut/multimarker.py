@@ -360,14 +360,15 @@ class MultiMarker(ui.widget.Widget):
         frames = {}
         c = 1
         for i in reversed(self.children):
-            data = {}
-            data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
-            count = 1
-            for j in i.base.lines:
-                data["Cut " + str(count)] = j.line.points
-                count += 1
-            frames["Marker " + str(c)] = data
-            c += 1
+            if i.clicks > 0:  # Ignore empty markers
+                data = {}
+                data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
+                count = 1
+                for j in i.base.lines:
+                    data["Cut " + str(count)] = j.line.points
+                    count += 1
+                frames["Marker " + str(c)] = data
+                c += 1
         self.plotting = PlotPopup(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
