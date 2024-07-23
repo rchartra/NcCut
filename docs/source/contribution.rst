@@ -44,8 +44,3 @@ Tips for Adding a New Tool
 * Editing mode will also put the app in dragging mode, however editing mode will additionally add buttons “**Delete Last Line** and **Delete Last Point** to the sidebar. If these don’t make sense with your tool you can choose to not add an edit button by editing the :py:func:`nccut.filedisplay.FileDisplay.manage_tool()` method. Otherwise your tool must have a ``del_line()`` and ``del_point()`` method.
 * If you’d like to create a plotting popup menu for your tool’s output data you can either edit the :py:func:`nccut.plotpopup.PlotPopup` code to work with your data or use :py:func:`nccut.plotpopup.PlotPopup` as an example and create a new popup class for your tool. Unless your tool is very similar to the two current tools I recommend the latter.
 
-
-.. toctree::
-   :maxdepth: 4
-
-   nccut

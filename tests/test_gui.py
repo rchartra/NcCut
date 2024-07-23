@@ -108,7 +108,7 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = ""
         run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Empty file names are invalid")
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.json"
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "project_example.json"
         run_app.home.go_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
@@ -169,7 +169,7 @@ class Test(unittest.TestCase):
         """
         Tests the project upload function of the Transect Marker tool.
 
-        Assumes 'support/example.json' exists and is a valid project file for 'support/example.jpg' with
+        Assumes 'support/project_example.json' exists and is a valid project file for 'support/example.jpg' with
         a variable 'Vorticity' and three markers.
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
@@ -179,9 +179,8 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f1 = open(SUPPORT_FILE_PATH + "example.json")
+        f1 = open(SUPPORT_FILE_PATH + "project_example.json")
         project1 = json.load(f1)
-
         # Upload Project File
         multi_mark_instance = run_app.home.display.tool
         multi_mark_instance.upload_data(marker_find(project1, []))
@@ -222,7 +221,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f = open(SUPPORT_FILE_PATH + "example.json")
+        f = open(SUPPORT_FILE_PATH + "project_example.json")
         project = json.load(f)
 
         # Upload Project File

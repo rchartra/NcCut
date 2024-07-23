@@ -1,20 +1,20 @@
 Contribution Guide
 ==================
 
-Contributions are welcome! Feel free to add new features, unit tests, documentation, examples, whatever you think would improve the app. However please follow the following guidelines to ensure a smooth contribution process.
+Contributions are welcome! Feel free to add new features, unit tests, documentation, examples, bug fixes, or even just a suggestion. However please follow the following guidelines to ensure a smooth contribution process.
 
 Submission
 ----------
 * To report a bug, submit an issue on `GitHub issues <https://github.com/rchartra/NcCut/issues>`_. Please include as much information as possible including your operating system, python version, and steps required to reproduce the issue. If possible, attach the file you are using with the viewer as well.
-* To suggest new features or functionality changes please also submit an issue on `GitHub issues <https://github.com/rchartra/NcCut/issues>`_.
-* To submit new features or changes to the code please submit a pull request on `GitHub <https://github.com/rchartra/NcCut/pulls>`_ to the main branch from your forked repository. Submissions will be automatically tested and then manually reviewed to ensure compatibility.
+* To suggest new features or functionality changes please submit an issue on `GitHub issues <https://github.com/rchartra/NcCut/issues>`_.
+* To submit new features or changes to the code please submit a pull request on `GitHub <https://github.com/rchartra/NcCut/pulls>`_ to the main branch from your forked repository. Submissions will be automatically tested and then manually reviewed to ensure backwards compatibility with the current GUI.
 
 Testing
 -------
 * If you are adding new features to the GUI please write unit tests for your feature. You may refer to the existing test `suite <https://github.com/rchartra/NcCut/tree/master/tests>`_ for examples on how to write them.
 * Unit tests ensure that any future changes to the GUI won't break your code making them crucial to maintaining this project long term.
 * When writing unit tests, check only that the expected user input results in the correct final behavior. Tests that look too deep into how the code itself works are vulnerable to failing over small changes even if the code overall is working correctly.
-* Please also rigorously test your feature as you are developing it. There should be no way for the app to crash while it's in use. If there is a way for a user to do something incorrectly, (for example entering an invalid file name), handle that case and alert the user via :py:func:`nccut.functions.alert`.
+* Please test your feature from a user's perspective as you are developing it. There should be no way for the app to crash while it's in use. If there is a way for a user to do something incorrectly, (for example entering an invalid file name), handle that case and alert the user via :py:func:`nccut.functions.alert`.
 
 Documentation
 -------------
@@ -44,8 +44,3 @@ Tips for Adding a New Tool
 * Editing mode will also put the app in dragging mode, however editing mode will additionally add buttons “**Delete Last Line** and **Delete Last Point** to the sidebar. If these don’t make sense with your tool you can choose to not add an edit button by editing the :py:func:`nccut.filedisplay.FileDisplay.manage_tool()` method. Otherwise your tool must have a ``del_line()`` and ``del_point()`` method.
 * If you’d like to create a plotting popup menu for your tool’s output data you can either edit the :py:func:`nccut.plotpopup.PlotPopup` code to work with your data or use :py:func:`nccut.plotpopup.PlotPopup` as an example and create a new popup class for your tool. Unless your tool is very similar to the two current tools I recommend the latter.
 
-
-.. toctree::
-   :maxdepth: 4
-
-   nccut

@@ -23,3 +23,4 @@ Here you will find installation and usage instructions, trouble shooting tips, e
    example
    data_output
    contribution
+   nccut
