@@ -18,6 +18,7 @@ from kivy.uix.dropdown import DropDown
 import nccut.functions as func
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from PIL import Image as im
 import numpy as np
 import copy
@@ -446,54 +447,6 @@ class PlotPopup(Popup):
             self.active_z = original
             self.active_data = self.get_data()
 
-    def download_all_z_data2(self, f_name):
-        """
-        Get and download data for all selected variables for all z dimension values.
-
-        Args:
-            f_name (str): Proposed file name
-        """
-        file = func.check_file(self.home.rel_path, f_name, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
-        else:
-            dat = {}
-            ds = self.config['file']
-            z_arr = [str(z) for z in ds.coords[self.config['z']].data]
-            for var in self.active_vars:
-                config = copy.copy(self.config)
-                config['var'] = var
-                ds = ds[config['var']]
-                dat[var] = {}
-                ds.load()
-                ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-                ds = ds.transpose('y', 'x', 'z')
-                ds['z'] = ds['z'].astype(str)
-                ds = np.flip(ds.data, 0)
-                for d, d_lab in enumerate(z_arr):
-                    dat[var][str(d_lab)] = {}
-                    curr = ds[:, :, d]
-                    for key in list(self.active_transects.keys()):
-                        # All markers selected (if marker tool used)
-                        dat[var][str(d_lab)][key] = {}
-                        for cut in list(self.active_transects[key].keys()):
-                            # All selected transects
-                            if self.active_transects[key][cut]:
-                                if cut == "Average":
-                                    dat[var][str(d_lab)][key][cut] = self.get_average(key, curr)
-                                else:
-                                    dat[var][str(d_lab)][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                                        curr,
-                                                                                        self.f_type == "netcdf")
-                        if len(dat[var][str(d_lab)][key]) == 0:
-                            dat[var][str(d_lab)].pop(key)
-                    dat[var][str(d_lab)] = self.add_marker_info(dat[var][str(d_lab)])
-
-            with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(dat, f)
-            func.alert("Download Complete", self.home)
-
     def get_marker_dropdown(self):
         """
         Build dropdown menu for marker options with sub-menus for the individual transects
@@ -802,7 +755,8 @@ class PlotPopup(Popup):
         width = len(z[marker][tran]['x'])
 
         ds = self.config['file']
-        z_len = len(ds.coords[self.config['z']].data)
+        z_vals = ds.coords[self.config['z']].data
+        z_len = len(z_vals)
         config = copy.copy(self.config)
         config['var'] = var
         ds = ds[config['var']]
@@ -826,9 +780,19 @@ class PlotPopup(Popup):
             c += 1
 
         # Plot array
+
+        # Set y-axis to NetCDF Z coordinate values
+
+        def format_fn(tick_val, tick_pos):
+            if int(tick_val) in range(z_len):
+                return z_vals[int(tick_val)]
+            else:
+                return ''
+
         pos = ax.imshow(all_z)
         ax.set_ylabel(self.config['z'])
         ax.set_xlabel("Along Transect Point")
+        ax.yaxis.set_major_formatter(format_fn)
         ax.set_title(var)
         return pos
 
