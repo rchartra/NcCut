@@ -45,12 +45,14 @@ class MultiTransect(ui.widget.Widget):
 
     def font_adapt(self, font):
         """
-        Updates font size of Plot button.
+        Updates font size of Plot button and plotting menu if open.
 
         Args:
             font (float): New font size
         """
         self.p_btn.font_size = font
+        if self.plotting:
+            self.plotting.font_adapt(font)
 
     def update_l_col(self, value):
         """

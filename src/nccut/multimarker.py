@@ -144,7 +144,7 @@ class MultiMarker(ui.widget.Widget):
 
     def font_adapt(self, font):
         """
-        Updates font of sidebar elements.
+        Updates font of sidebar elements and plotting menu if loaded.
         Args:
             font (float): New font size
         """
@@ -152,6 +152,8 @@ class MultiMarker(ui.widget.Widget):
         self.upbtn.font_size = font
         self.nbtn.font_size = font
         self.width_w.font_adapt(font)
+        if self.plotting:
+            self.plotting.font_adapt(font)
 
     def update_l_col(self, color):
         """
