@@ -30,6 +30,8 @@ This walkthrough uses ``example.jpg``
 
 |
 
+.. _output:
+
 Working with the Output Data
 ----------------------------
 

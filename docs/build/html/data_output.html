@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Output &mdash; NcCut 0.4.3 documentation</title>
+  <title>Data Output &mdash; NcCut 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,10 +15,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5bfaad31"></script>
+        <script src="_static/documentation_options.js?v=ff822928"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -90,6 +89,10 @@
              
   <section id="data-output">
 <span id="id1"></span><h1>Data Output<a class="headerlink" href="#data-output" title="Link to this heading"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For an example of how to work with the output data look <a class="reference internal" href="example.html#output"><span class="std std-ref">here</span></a>.</p>
+</div>
 <p>No matter which tool you use the GUI will download the transect data into a JSON file. If you’re unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages, however an easy way to access it is using the python <code class="docutils literal notranslate"><span class="pre">json</span></code> library:</p>
 <blockquote>
 <div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
@@ -118,7 +121,7 @@
 </ul>
 <img alt="_images/nc_diagram.png" src="_images/nc_diagram.png" />
 </div></blockquote>
-<p><strong>NcCut</strong> has a few helper modules for configuring the app and working with the output data.</p>
+<p><strong>NcCut</strong> has a helper module for viewing the output data in a readable fashion.</p>
 <section id="module-nccut.project_file_printer">
 <span id="nccut-project-file-printer-module"></span><h3>nccut.project_file_printer module<a class="headerlink" href="#module-nccut.project_file_printer" title="Link to this heading"></a></h3>
 <dl class="py function">
