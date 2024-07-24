@@ -83,7 +83,10 @@ class PlotPopup(Popup):
         title (str): Popup title
         content: BoxLayout containing all UI elements in popup
         size_hint (tuple): (width, height) of relative size of popup to window
+        buttons: BoxLayout containing the save buttons and the close button
+        f_m: Multiplier for the font size for the save buttons since they need to be slightly smaller
         t_select: RoundedButton which opens transect selection dropdown menu
+        widgets_with_text: List of widgets with text whose font size must be updated when the window is resized
         v_select: RoundedButton which opens variable selection dropdown menu (Only if NetCDF file)
         z_select: RoundedButton which opens z value selection dropdown menu (Only if 3D NetCDF file)
     """
@@ -157,42 +160,46 @@ class PlotPopup(Popup):
         # Popup Graphics Code
 
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                   size_hint=(0.7, 1), fit_mode="contain")
+                                   size_hint=(0.6, 1), fit_mode="contain")
         # Plot
         self.plotting = ui.boxlayout.BoxLayout(spacing=dp(20), size_hint=(1, 0.9))
         self.plotting.add_widget(self.plot)
         self.title = "Plot Transects"
-        self.content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(20), padding=dp(20))
+        self.content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(15), padding=dp(10))
         self.size_hint = (0.8, 0.8)
-        sidebar = ui.boxlayout.BoxLayout(orientation='vertical', size_hint=(0.3, 1), padding=dp(10), spacing=dp(20))
+        sidebar = ui.boxlayout.BoxLayout(orientation='vertical', size_hint=(0.4, 1), padding=dp(10), spacing=dp(20))
 
         # Saving Data/Plotting buttons
 
-        buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
+        self.buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
 
-        f_m = 0.8
-        a_data_btn = func.RoundedButton(text="Save All Data", size_hint=(.15, 1), font_size=self.home.font * f_m)
+        self.f_m = 0.8
+        a_data_btn = func.RoundedButton(text="Save All Data", size_hint=(.15, 1),
+                                             font_size=self.home.font * self.f_m)
         a_data_btn.bind(on_press=lambda x: self.file_input('a_data'))
 
-        s_data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.15, 1), font_size=self.home.font * f_m)
+        s_data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.15, 1),
+                                        font_size=self.home.font * self.f_m)
         s_data_btn.bind(on_press=lambda x: self.file_input('s_data'))
 
-        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.15, 1), font_size=self.home.font * f_m)
+        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.15, 1), font_size=self.home.font * self.f_m)
         png_btn.bind(on_press=lambda x: self.file_input('png'))
 
-        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.15, 1), font_size=self.home.font * f_m)
+        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.15, 1), font_size=self.home.font * self.f_m)
         pdf_btn.bind(on_press=lambda x: self.file_input('pdf'))
 
-        buttons.add_widget(a_data_btn)
-        buttons.add_widget(s_data_btn)
-        buttons.add_widget(png_btn)
-        buttons.add_widget(pdf_btn)
+        self.buttons.add_widget(a_data_btn)
+        self.buttons.add_widget(s_data_btn)
+        self.buttons.add_widget(png_btn)
+        self.buttons.add_widget(pdf_btn)
 
         # Transect selection
-        t_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-        lab = Label(text="Select Transects: ", size_hint=(0.3, 1), font_size=self.home.font)
-        t_box.add_widget(lab)
-        self.t_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1), font_size=self.home.font)
+        t_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
+        t_lab = Label(text="Select Transects: ", size_hint=(0.5, 1), font_size=self.home.font,  halign='center',
+                      valign='middle')
+        t_lab.bind(size=func.text_wrap)
+        t_box.add_widget(t_lab)
+        self.t_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1), font_size=self.home.font)
         t_box.add_widget(self.t_select)
         if self.t_type == "Marker":
             t_drop = self.get_marker_dropdown()
@@ -201,21 +208,30 @@ class PlotPopup(Popup):
         self.t_select.bind(on_press=lambda x: t_drop.open(self.t_select))
         sidebar.add_widget(t_box)
 
+        self.widgets_with_text = [t_lab, self.t_select]
+
         if self.f_type == "netcdf":
             # Variable Selection
-            v_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-            v_box.add_widget(Label(text="Select Variables: ", size_hint=(0.3, 1), font_size=self.home.font))
-            self.v_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1),
+            v_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
+            v_lab = Label(text="Select Variables: ", size_hint=(0.5, 1), font_size=self.home.font,  halign='center',
+                          valign='middle')
+            v_lab.bind(size=func.text_wrap)
+            v_box.add_widget(v_lab)
+            self.v_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1),
                                                font_size=self.home.font)
             v_box.add_widget(self.v_select)
             v_drop = self.get_var_dropdown()
             self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
             sidebar.add_widget(v_box)
+            self.widgets_with_text.extend([v_lab, self.v_select])
             if self.config['z'] != "N/A":
                 # Z Selection
-                z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
-                z_box.add_widget(Label(text="Select Z Values: ", size_hint=(0.3, 1), font_size=self.home.font))
-                self.z_select = func.RoundedButton(text="Select...", size_hint=(0.7, 1),
+                z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
+                z_lab = Label(text="Select Z Values: ", size_hint=(0.5, 1), font_size=self.home.font,  halign='center',
+                              valign='middle')
+                z_lab.bind(size=func.text_wrap)
+                z_box.add_widget(z_lab)
+                self.z_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1),
                                                    font_size=self.home.font)
                 z_box.add_widget(self.z_select)
                 z_drop = self.get_z_dropdown()
@@ -223,15 +239,17 @@ class PlotPopup(Popup):
                 sidebar.add_widget(z_box)
 
                 # All Z option
-                zp_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(30))
+                zp_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), padding=dp(10))
                 zp_btn = func.RoundedButton(text="Plot all Z as Img", font_size=self.home.font)
                 zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
                 zp_box.add_widget(zp_btn)
                 sidebar.add_widget(zp_box)
 
-                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1), font_size=self.home.font * f_m)
+                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1),
+                                              font_size=self.home.font * self.f_m)
                 allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
-                buttons.add_widget(allz_btn)
+                self.buttons.add_widget(allz_btn)
+                self.widgets_with_text.extend([z_lab, self.z_select, zp_btn, allz_btn])
             else:
                 # Spacer if 2D NetCDF
                 sidebar.add_widget(Label(text="", size_hint=(1, 0.6)))
@@ -242,11 +260,20 @@ class PlotPopup(Popup):
         self.plotting.add_widget(sidebar)
         self.content.add_widget(self.plotting)
 
-        close = func.RoundedButton(text="Close", size_hint=(.2, 1))
+        close = func.RoundedButton(text="Close", size_hint=(.2, 1), font_size=self.home.font * self.f_m)
         close.bind(on_press=self.dismiss)
-        buttons.add_widget(close)
-        self.content.add_widget(buttons)
+        self.buttons.add_widget(close)
+        self.content.add_widget(self.buttons)
         self.open()
+
+    def text_size_adapt(self, *args):
+        args[0].text_size[0] = args[1]
+
+    def font_adapt(self, font):
+        for btn in self.buttons.children:
+            btn.font_size = font * self.f_m
+        for wid in self.widgets_with_text:
+            wid.font_size = font
 
     def file_input(self, type):
         """
@@ -587,9 +614,10 @@ class PlotPopup(Popup):
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for var in list(file.keys()):
             if file[self.config['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
-                v_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+                v_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                                width=dp(180))
-                lab = Label(text=var, size_hint=(0.5, 1))
+                lab = Label(text=var, size_hint=(0.7, 1), halign='center', valign='middle', shorten=True)
+                lab.bind(size=func.text_wrap)
                 v_box.add_widget(lab)
                 check = CheckBox(active=var in self.active_vars, size_hint=(0.5, 1))
                 check.bind(active=lambda x, y, var=var: self.on_var_checkbox(x, var))
@@ -637,11 +665,12 @@ class PlotPopup(Popup):
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for z in list(self.config['file'].coords[self.config['z']].data):
-            z_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+            z_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                            width=dp(180))
-            lab = Label(text=str(z), size_hint=(0.5, 1))
+            lab = Label(text=str(z), size_hint=(0.7, 1), halign='center', valign='middle', shorten=True)
+            lab.bind(size=func.text_wrap)
             z_box.add_widget(lab)
-            check = CheckBox(active=str(z) in self.active_z, size_hint=(0.5, 1))
+            check = CheckBox(active=str(z) in self.active_z, size_hint=(0.3, 1))
             check.bind(active=lambda x, y, z=str(z): self.on_z_checkbox(x, z))
             z_box.add_widget(check)
             z_list.add_widget(z_box)

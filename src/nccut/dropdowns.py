@@ -9,6 +9,8 @@ Static aspects are in the nccut.kv file.
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
 from kivy.app import App
+from kivy.metrics import dp
+import nccut.functions as func
 
 
 class ViewDropDown(DropDown):
@@ -32,7 +34,7 @@ class ViewDropDown(DropDown):
         col_list = ["Blue", "Orange", "Green"]
         self.l_color_drop = DropDown()
         for i in col_list:
-            btn = Button(text=i, size_hint_y=None, height=30)
+            btn = Button(text=i, size_hint_y=None, height=dp(30))
             btn.bind(on_release=lambda btn: self.pass_setting("l_color", btn.text))  # Setting name: 'l_color'
             btn.bind(on_press=self.l_color_drop.dismiss)
             self.l_color_drop.add_widget(btn)
@@ -100,25 +102,26 @@ class NetCDFDropDown(DropDown):
         self.cmap_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf":
             for i in list(self.home.display.cmaps.keys()):
-                btn = Button(text=i, size_hint_y=None, height=30)
-                btn.bind(on_release=lambda btn: self.pass_setting("colormap", btn.text))  # Setting name: 'colormap'
-                btn.bind(on_press=self.cmap_dropdown.dismiss)
+                btn = Button(text=i, size_hint_y=None, height=dp(30))
+                btn.bind(on_release=lambda btn: self.pass_setting("colormap", btn.text),  # Setting name: 'colormap'
+                         on_press=self.cmap_dropdown.dismiss)
                 self.cmap_dropdown.add_widget(btn)
 
         self.var_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf":
             for i in list(self.home.display.config["netcdf"]["file"].keys()):
-                btn = Button(text=i, size_hint_y=None, height=30)
-                btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text))  # Setting name: 'variable'
-                btn.bind(on_release=self.var_dropdown.dismiss)
+                btn = Button(text=i, size_hint_y=None, height=dp(30), halign='center', valign='middle', shorten=True)
+                btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text),  size=func.text_wrap,
+                         on_release=self.var_dropdown.dismiss)  # Setting name: 'variable'
                 self.var_dropdown.add_widget(btn)
 
         self.depth_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf" and self.home.display.config['netcdf']['z'] != "N/A":
             for i in list(self.home.display.config["netcdf"]['file'][self.home.display.config["netcdf"]['z']].data):
-                btn = Button(text=str(i), size_hint_y=None, height=30)
-                btn.bind(on_press=lambda btn: self.pass_setting("depth", btn.text))  # Setting name: 'depth'
-                btn.bind(on_release=self.depth_dropdown.dismiss)
+                btn = Button(text=str(i), size_hint_y=None, height=dp(30), halign='center', valign='middle',
+                             shorten=True)
+                btn.bind(on_press=lambda btn: self.pass_setting("depth", btn.text), size=func.text_wrap,
+                         on_release=self.depth_dropdown.dismiss)  # Setting name: 'depth'
                 self.depth_dropdown.add_widget(btn)
 
     def pass_setting(self, setting, value):
