@@ -62,7 +62,7 @@ class NcCut(App):
             win.minimum_width, win.minimum_height = (dp(600), dp(350))
         logging.getLogger("kivy").setLevel(_LOG_LEVEL_)
 
-        win.bind(on_resize=self.on_resize)
+        win.bind(on_resize=self.on_resize, on_maximize=self.on_resize, on_restore=self.on_resize)
 
     def on_resize(self, *args):
         """
