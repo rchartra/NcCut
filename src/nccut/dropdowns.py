@@ -111,7 +111,7 @@ class NetCDFDropDown(DropDown):
         if self.home.file_on and f_type == "netcdf":
             for i in list(self.home.display.config["netcdf"]["file"].keys()):
                 btn = Button(text=i, size_hint_y=None, height=dp(30), halign='center', valign='middle', shorten=True)
-                btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text),  size=func.text_wrap,
+                btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text), size=func.text_wrap,
                          on_release=self.var_dropdown.dismiss)  # Setting name: 'variable'
                 self.var_dropdown.add_widget(btn)
 
