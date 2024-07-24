@@ -195,7 +195,7 @@ class PlotPopup(Popup):
 
         # Transect selection
         t_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
-        t_lab = Label(text="Select Transects: ", size_hint=(0.5, 1), font_size=self.home.font,  halign='center',
+        t_lab = Label(text="Select Transects: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
                       valign='middle')
         t_lab.bind(size=func.text_wrap)
         t_box.add_widget(t_lab)
@@ -213,7 +213,7 @@ class PlotPopup(Popup):
         if self.f_type == "netcdf":
             # Variable Selection
             v_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
-            v_lab = Label(text="Select Variables: ", size_hint=(0.5, 1), font_size=self.home.font,  halign='center',
+            v_lab = Label(text="Select Variables: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
                           valign='middle')
             v_lab.bind(size=func.text_wrap)
             v_box.add_widget(v_lab)
@@ -227,7 +227,7 @@ class PlotPopup(Popup):
             if self.config['z'] != "N/A":
                 # Z Selection
                 z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
-                z_lab = Label(text="Select Z Values: ", size_hint=(0.5, 1), font_size=self.home.font,  halign='center',
+                z_lab = Label(text="Select Z Values: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
                               valign='middle')
                 z_lab.bind(size=func.text_wrap)
                 z_box.add_widget(z_lab)
