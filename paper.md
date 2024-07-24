@@ -12,6 +12,7 @@ authors:
     orcid: 0000-0001-6948-8380
     affiliation: 1
   - name: Robert Fajber
+    orcid: 0000-0002-4656-7163
     affiliation: 2
   - name: Georgy Manucharyan
     affiliation: 1
@@ -86,7 +87,7 @@ users can choose to save the data to a .JSON file as well as save the plot to ei
 file groups the pixel data and their coordinates together and labels them by the transect number shown in the viewing interface. If 
 the marker tool was used, the transects are further grouped and labeled by their marker number. This labeled and 
 organized data structure aims to be easily loaded and understood using minimal programming experience in a language such
-as Python or R.
+as Python or R (there is a tutorial available [here](https://nccut.readthedocs.io/en/latest/example.html) on how to work with the output data using Python).
 
 ![a.) A simple transect of a feature plotted at multiple values along the z dimension. b.) A vertical cross section of 
 the data along a simple transect.](images/paper_fig_3.png)
