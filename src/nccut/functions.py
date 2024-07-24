@@ -10,6 +10,7 @@ import kivy
 from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.metrics import dp
 from functools import partial
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
@@ -39,7 +40,7 @@ def text_wrap(*args):
     Args:
         args: List where first item is a Button or Label and the second item is a tuple of that widgets current size.
     """
-    args[0].text_size = (args[1][0] - 8, args[1][1] - 8)
+    args[0].text_size = (args[1][0] - dp(12), args[1][1] - dp(12))
 
 
 def remove_alert(alert, home, *largs):
