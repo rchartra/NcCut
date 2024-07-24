@@ -266,10 +266,13 @@ class PlotPopup(Popup):
         self.content.add_widget(self.buttons)
         self.open()
 
-    def text_size_adapt(self, *args):
-        args[0].text_size[0] = args[1]
-
     def font_adapt(self, font):
+        """
+        Updates font size of all text to the given font.
+
+        Args:
+            font (float): New font size
+        """
         for btn in self.buttons.children:
             btn.font_size = font * self.f_m
         for wid in self.widgets_with_text:
