@@ -18,7 +18,6 @@ from kivy.uix.dropdown import DropDown
 import nccut.functions as func
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 from PIL import Image as im
 import numpy as np
 import copy
