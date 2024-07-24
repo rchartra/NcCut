@@ -40,6 +40,5 @@ This code example uses ``example_4v.nc`` and ``project_example.json``
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    _media/NcCut_Example
