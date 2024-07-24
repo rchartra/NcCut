@@ -17,7 +17,8 @@ release = '0.4.2'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinxcontrib.video'
+    'sphinxcontrib.video',
+    'nbsphinx'
 ]
 
 templates_path = ['_templates']

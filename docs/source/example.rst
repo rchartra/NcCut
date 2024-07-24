@@ -37,6 +37,9 @@ Working with the Output Data
 
 This code example uses ``example_4v.nc`` and ``project_example.json``
 
-.. raw:: html
 
-   :file: _media/NcCut_Example.html
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   _media/NcCut_Example
