@@ -15,6 +15,7 @@ authors:
     orcid: 0000-0002-4656-7163
     affiliation: 2
   - name: Georgy Manucharyan
+  - orcid: 0000-0001-7959-2675
     affiliation: 1
 affiliations:
   - name: University of Washington, Seattle, WA, USA
