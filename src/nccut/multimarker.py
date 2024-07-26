@@ -12,6 +12,7 @@ from kivy.uix.label import Label
 from kivy.core.window import Window
 from os.path import exists
 import json
+from scipy.interpolate import CubicSpline
 import nccut.functions as func
 from nccut.marker import Marker
 from nccut.markerwidth import MarkerWidth
@@ -361,10 +362,32 @@ class MultiMarker(ui.widget.Widget):
         """
         frames = {}
         c = 1
+        nc_cords = False
+        x_name = "X"
+        y_name = "Y"
+        if self.home.display.f_type == "netcdf":
+            config = self.home.display.config
+            x = config["netcdf"]["file"].coords[config["netcdf"]["x"]].data
+            y = config["netcdf"]["file"].coords[config["netcdf"]["y"]].data
+            try:
+                x = x.astype(float)
+                x_spline = CubicSpline(range(len(x)), x)
+
+                y = y.astype(float)
+                y_spline = CubicSpline(range(len(y)), y)
+                x_name = config["netcdf"]["x"]
+                y_name = config["netcdf"]["y"]
+                nc_cords = True
+            except ValueError:
+                pass
         for i in reversed(self.children):
             if i.clicks > 0:  # Ignore empty markers
                 data = {}
-                data['Click X'], data['Click Y'], data['Width'] = map(list, zip(*i.points))
+                cx, cy, w = map(list, zip(*i.points))
+                if nc_cords:
+                    cx = x_spline(cx)
+                    cy = y_spline(cy)
+                data['Click ' + str(x_name)], data['Click ' + str(y_name)], data['Width'] = cx, cy, w
                 count = 1
                 for j in i.base.lines:
                     data["Cut " + str(count)] = j.line.points
