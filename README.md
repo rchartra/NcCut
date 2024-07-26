@@ -1,6 +1,6 @@
 # NcCut
 
-Documentation: [NcCut Docs](https://nccut.readthedocs.io/en/latest/index.html)
+### Documentation: [NcCut Docs](https://nccut.readthedocs.io/en/latest/index.html)
 
 NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using NcCut users can view vertical transect images of their data along a third dimension and the marked out line. In addition, NcCut is designed to make the measurement of linear features as automatic as possible through it's "Transect Marker" tool where linear features can be marked out and have transects automatically be made perpendicular to the feature. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.
 
