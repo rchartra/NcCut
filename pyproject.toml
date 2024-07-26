@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nccut"
-version = "0.4.2"
+version = "0.4.3"
 description = 'NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
