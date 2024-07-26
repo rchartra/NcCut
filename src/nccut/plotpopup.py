@@ -68,7 +68,7 @@ class PlotPopup(Popup):
         all_transects (dict): Dictionary of data from all transects marked out by the user.
         t_type (str): 'Marker' if transects came from transect marker tool or 'Multi' if transects
             came from transect tool.
-        active_transects (dict): Dictionary of currently selected transects. 'Click X', 'Click Y', and
+        active_transects (dict): Dictionary of currently selected transects. 'Click <X Cord>', 'Click <Y Cord>', and
             'Width' fields should be removed (if marker tool) to simplify plotting. Contains average
             of transects if marker tool was used with a constant transect width.
         f_type (str): If file is NetCDF file: 'NC' if only 2 dimensions, 'NC_Z' if 3 dimensions. If
@@ -102,7 +102,7 @@ class PlotPopup(Popup):
         self.all_transects = transects
         self.home = home
         self.f_type = list(config.keys())[0]
-        self.config = config[self.f_type]
+        self.config = config
         if list(self.all_transects.keys())[0][0:-2] == "Marker":
             self.t_type = "Marker"
         else:
@@ -115,9 +115,8 @@ class PlotPopup(Popup):
         for key in list(act.keys()):
             self.active_transects[key] = {}
             if self.t_type == "Marker":  # Remove fields that don't get plotted
-                act[key].pop("Click X")
-                act[key].pop("Click Y")
-                act[key].pop("Width")
+                for k in list(act[key].keys())[:3]:
+                    act[key].pop(k)
             self.active_transects[key] = dict.fromkeys(act[key], False)
 
             # If marker and all values same width, add an average option
@@ -140,11 +139,11 @@ class PlotPopup(Popup):
 
         # Initialize dropdown selections
         if self.f_type == "netcdf":
-            if self.config['z'] == "N/A":
+            if self.config[self.f_type]['z'] == "N/A":
                 self.active_z = []
             else:
-                self.active_z = [self.config['z_val']]
-            self.active_vars = [self.config["var"]]
+                self.active_z = [self.config[self.f_type]['z_val']]
+            self.active_vars = [self.config[self.f_type]["var"]]
         else:
             self.active_vars = []
             self.active_z = []
@@ -224,7 +223,7 @@ class PlotPopup(Popup):
             self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
             sidebar.add_widget(v_box)
             self.widgets_with_text.extend([v_lab, self.v_select])
-            if self.config['z'] != "N/A":
+            if self.config[self.f_type]['z'] != "N/A":
                 # Z Selection
                 z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
                 z_lab = Label(text="Select Z Values: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
@@ -414,17 +413,16 @@ class PlotPopup(Popup):
         Adds back fields removed for plotting purposes if marker tool was used
 
         Args:
-            dicti (dict): Dictionary of transect data from either transect marker or regular transect tool
+            dicti (dict): Dictionary of transect data from either transect marker regular transect tool
 
         Returns:
-            Dictionary of transect data with 'Click X', 'Click Y', and 'Width' fields added back
+            Dictionary of transect data with 'Click <X Cord>', 'Click <Y Cord>', and 'Width' fields added back
                 in if transect marker tool was used.
         """
         if list(dicti.keys())[0] != "Multi":
             for marker in list(dicti.keys()):
-                dicti[marker]['Click X'] = self.all_transects[marker]['Click X']
-                dicti[marker]['Click Y'] = self.all_transects[marker]['Click Y']
-                dicti[marker]['Width'] = self.all_transects[marker]['Width']
+                for key in list(self.all_transects[marker].keys())[:3]:
+                    dicti[marker][key] = list(self.all_transects[marker][key])
         return dicti
 
     def download_all_z_data(self, f_name):
@@ -440,59 +438,11 @@ class PlotPopup(Popup):
             return
         else:
             original = copy.copy(self.active_z)
-            self.active_z = [str(z) for z in self.config['file'].coords[self.config['z']].data]
+            self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[self.config[self.f_type]['z']].data]
             self.active_data = self.get_data()
             self.download_selected_data(f_name)
             self.active_z = original
             self.active_data = self.get_data()
-
-    def download_all_z_data2(self, f_name):
-        """
-        Get and download data for all selected variables for all z dimension values.
-
-        Args:
-            f_name (str): Proposed file name
-        """
-        file = func.check_file(self.home.rel_path, f_name, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
-        else:
-            dat = {}
-            ds = self.config['file']
-            z_arr = [str(z) for z in ds.coords[self.config['z']].data]
-            for var in self.active_vars:
-                config = copy.copy(self.config)
-                config['var'] = var
-                ds = ds[config['var']]
-                dat[var] = {}
-                ds.load()
-                ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-                ds = ds.transpose('y', 'x', 'z')
-                ds['z'] = ds['z'].astype(str)
-                ds = np.flip(ds.data, 0)
-                for d, d_lab in enumerate(z_arr):
-                    dat[var][str(d_lab)] = {}
-                    curr = ds[:, :, d]
-                    for key in list(self.active_transects.keys()):
-                        # All markers selected (if marker tool used)
-                        dat[var][str(d_lab)][key] = {}
-                        for cut in list(self.active_transects[key].keys()):
-                            # All selected transects
-                            if self.active_transects[key][cut]:
-                                if cut == "Average":
-                                    dat[var][str(d_lab)][key][cut] = self.get_average(key, curr)
-                                else:
-                                    dat[var][str(d_lab)][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                                        curr,
-                                                                                        self.f_type == "netcdf")
-                        if len(dat[var][str(d_lab)][key]) == 0:
-                            dat[var][str(d_lab)].pop(key)
-                    dat[var][str(d_lab)] = self.add_marker_info(dat[var][str(d_lab)])
-
-            with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(dat, f)
-            func.alert("Download Complete", self.home)
 
     def get_marker_dropdown(self):
         """
@@ -610,10 +560,10 @@ class PlotPopup(Popup):
         Returns:
             :class:`nccut.plotpopup.BackgroundDropdown` menu of variable options
         """
-        file = self.config['file']
+        file = self.config[self.f_type]['file']
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for var in list(file.keys()):
-            if file[self.config['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
+            if file[self.config[self.f_type]['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
                 v_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                                width=dp(180))
                 lab = Label(text=var, size_hint=(0.7, 1), halign='center', valign='middle', shorten=True)
@@ -664,7 +614,7 @@ class PlotPopup(Popup):
             :class:`nccut.plotpopup.BackgroundDropDown` menu of z value options
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
-        for z in list(self.config['file'].coords[self.config['z']].data):
+        for z in list(self.config[self.f_type]['file'].coords[self.config[self.f_type]['z']].data):
             z_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                            width=dp(180))
             lab = Label(text=str(z), size_hint=(0.7, 1), halign='center', valign='middle', shorten=True)
@@ -799,11 +749,12 @@ class PlotPopup(Popup):
         marker = next(iter(z))
         tran = next(iter(z[marker]))
         points = self.all_transects[marker][tran]
-        width = len(z[marker][tran]['x'])
+        width = len(z[marker][tran]['Cut'])
 
-        ds = self.config['file']
-        z_len = len(ds.coords[self.config['z']].data)
-        config = copy.copy(self.config)
+        ds = self.config[self.f_type]['file']
+        z_len = len(ds.coords[self.config[self.f_type]['z']].data)
+        f_config = copy.copy(self.config)
+        config = f_config[self.f_type]
         config['var'] = var
         ds = ds[config['var']]
 
@@ -821,13 +772,13 @@ class PlotPopup(Popup):
         for d in range(0, z_len):
             # Get transect data for each z level and add to array
             curr = ds[:, :, d]
-            dat = func.ip_get_points(points, curr, self.f_type == "netcdf")
+            dat = func.ip_get_points(points, curr, f_config)
             all_z[c, :] = dat['Cut']
             c += 1
 
         # Plot array
         pos = ax.imshow(all_z)
-        ax.set_ylabel(self.config['z'])
+        ax.set_ylabel(self.config[self.f_type]['z'])
         ax.set_xlabel("Along Transect Point")
         ax.set_title(var)
         return pos
@@ -947,7 +898,7 @@ class PlotPopup(Popup):
             If only 2D NetCDF file there is no Z values level. If an image there is no Variables or Z Values level.
         """
         # Get transect data for list of active transect points
-        config = copy.copy(self.config)
+        config = copy.copy(self.config[self.f_type])
         values = {}
         if len(self.active_vars) >= 1:
             # If data has variables
@@ -971,7 +922,7 @@ class PlotPopup(Popup):
                                         values[var][z][key][cut] = self.get_average(key, curr)
                                     else:
                                         values[var][z][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                                      curr, self.f_type == "netcdf")
+                                                                                      curr, {self.f_type: config})
                             if len(values[var][z][key]) == 0:
                                 values[var][z].pop(key)
                 else:
@@ -987,7 +938,7 @@ class PlotPopup(Popup):
                                     values[var][key][cut] = self.get_average(key, curr)
                                 else:
                                     values[var][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                               curr, self.f_type == "netcdf")
+                                                                               curr, {self.f_type: config})
                         if len(values[var][key]) == 0:
                             values[var].pop(key)
         else:
@@ -1003,7 +954,7 @@ class PlotPopup(Popup):
                             values[key][cut] = self.get_average(key, curr)
                         else:
                             values[key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
-                                                                  self.f_type == "netcdf")
+                                                                  {self.f_type: config})
                 if len(values[key]) == 0:
                     values.pop(key)
         return values
@@ -1021,6 +972,6 @@ class PlotPopup(Popup):
         """
         dat = np.zeros(self.all_transects[key]['Width'][0])
         for cut in list(self.all_transects[key].keys())[3:]:
-            dat += func.ip_get_points(self.all_transects[key][cut], curr, self.f_type == "netcdf")['Cut']
+            dat += func.ip_get_points(self.all_transects[key][cut], curr, self.config)['Cut']
         dat = dat / len(list(self.all_transects[key].keys())[3:])
         return list(dat)
