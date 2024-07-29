@@ -32,6 +32,7 @@ When taken from a NetCDF file the markers are further nested into dictionaries f
 
     * When the data is taken with the transect tool, the dictionary is labeled as **Multi** instead of **Marker #**
     * The transect values are the value of the corresponding dataset of the file at that x, y coordinate. The data is interpolated for smoothness.
+    * If the NetCDF file has valid coordinate data the x, y coordinates of the transect points are interpolated from the dataset's coordinate values.
 
     .. image:: _media/nc_diagram.png
 
