@@ -491,10 +491,11 @@ class PlotPopup(Popup):
         all_btn = func.RoundedButton(text="Select All", size_hint=(0.5, 1))
         for i in list(self.active_transects[key].keys()):
             c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(40), width=dp(180))
-            lab = Label(text=i, size_hint=(0.5, 1))
-            c_box.add_widget(lab)
+            but = Button(text=i, size_hint=(0.5, 1), background_color=[0, 0, 0, 0])
             check = CheckBox(active=self.active_transects[key][i], size_hint=(0.5, 1))
             check.bind(active=lambda x, y, m=key, t=i: self.on_transect_checkbox(x, m, t))
+            but.bind(on_press=lambda x, c=check: self.on_check_button(c))
+            c_box.add_widget(but)
             c_box.add_widget(check)
             drop.add_widget(c_box)
         all_btn.bind(on_press=lambda x: self.select_all(drop.children[0].children[:-1]))
@@ -566,11 +567,12 @@ class PlotPopup(Popup):
             if file[self.config[self.f_type]['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
                 v_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                                width=dp(180))
-                lab = Label(text=var, size_hint=(0.7, 1), halign='center', valign='middle', shorten=True)
-                lab.bind(size=func.text_wrap)
-                v_box.add_widget(lab)
+                but = Button(text=var, size_hint=(0.7, 1), halign='center', valign='middle', shorten=True,
+                             background_color=[0, 0, 0, 0])
+                v_box.add_widget(but)
                 check = CheckBox(active=var in self.active_vars, size_hint=(0.5, 1))
                 check.bind(active=lambda x, y, var=var: self.on_var_checkbox(x, var))
+                but.bind(size=func.text_wrap, on_press=lambda x, c=check: self.on_check_button(c))
                 v_box.add_widget(check)
                 var_list.add_widget(v_box)
         return var_list
@@ -617,14 +619,25 @@ class PlotPopup(Popup):
         for z in list(self.config[self.f_type]['file'].coords[self.config[self.f_type]['z']].data):
             z_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                            width=dp(180))
-            lab = Label(text=str(z), size_hint=(0.7, 1), halign='center', valign='middle', shorten=True)
-            lab.bind(size=func.text_wrap)
-            z_box.add_widget(lab)
+            but = Button(text=str(z), size_hint=(0.7, 1), halign='center', valign='middle', shorten=True,
+                         background_color=[0, 0, 0, 0])
             check = CheckBox(active=str(z) in self.active_z, size_hint=(0.3, 1))
             check.bind(active=lambda x, y, z=str(z): self.on_z_checkbox(x, z))
+            but.bind(size=func.text_wrap, on_press=lambda x, c=check: self.on_check_button(c))
+            z_box.add_widget(but)
             z_box.add_widget(check)
             z_list.add_widget(z_box)
         return z_list
+
+    def on_check_button(self, check, *args):
+        """
+        Turns checkbox on if off and vice versa
+
+        Args:
+            check: kivy.uix.checkbox.CheckBox
+            args: Unused arguments passed by button callback
+        """
+        check.active = not check.active
 
     def on_z_checkbox(self, check, z, *args):
         """
