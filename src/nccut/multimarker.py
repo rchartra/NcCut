@@ -32,6 +32,7 @@ class Click:
         self.x = x
         self.y = y
         self.pos = (x, y)
+        self.is_double_tap = False
 
 
 def correct_test(data, need):
