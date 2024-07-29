@@ -34,12 +34,13 @@ class Click:
         self.pos = (x, y)
 
 
-def correct_test(data):
+def correct_test(data, need):
     """
     Check if dictionary has necessary fields to be a marker
 
     Args:
         data (dict): Dictionary to be tested.
+        need (list): List of required fields to qualify as a marker: ["Click <cord>", "Click <cord>", "Width"]
 
     Returns:
         Boolean, whether dictionary has necessary keys with a list has the value
@@ -48,20 +49,20 @@ def correct_test(data):
     if len(keys) == 0:
         return False
     else:
-        need = ['Click X', 'Click Y', 'Width']
         for item in need:
             if item not in keys or not isinstance(data[item], list):
                 return False
     return True
 
 
-def marker_find(data, res):
+def marker_find(data, res, need):
     """
     Recursively examines dictionary and finds marker click coordinates and transect widths.
 
     Args:
         data (dict): Dictionary to examine
         res (list): Empty list to fill with marker click coordinates and transect widths
+        need (list): List of required fields to qualify as a marker: ["Click <cord>", "Click <cord>", "Width"]
 
     Returns:
         Nested List. A list containing a list for each marker which each contains three lists:
@@ -71,21 +72,21 @@ def marker_find(data, res):
     """
     for key in list(data.keys()):
         if key[0:6] == 'Marker':
-            if correct_test(data[key]):  # Marker dict has necessary fields
+            if correct_test(data[key], need):  # Marker dict has necessary fields
                 if len(res) == 0:  # If res empty, always add marker data
-                    res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
+                    res.append([data[key][need[0]], data[key][need[1]], data[key][need[2]]])
                 else:  # If res not empty, ensure found marker data isn't already in res
                     new = True
                     for item in res:
-                        l1 = data[key]['Click X']
+                        l1 = data[key][need[0]]
                         l2 = item[0]
                         if len(l1) == len(l2) and len(l1) == sum([1 for i, j in zip(l1, l2) if i == j]):
                             new = False
                     if new:
-                        res.append([data[key]['Click X'], data[key]['Click Y'], data[key]['Width']])
+                        res.append([data[key][need[0]], data[key][need[1]], data[key][need[2]]])
         else:
             if type(data[key]) is dict:  # Can still go further in nested dictionary tree
-                marker_find(data[key], res)
+                marker_find(data[key], res, need)
             else:
                 return res
     return res
@@ -213,12 +214,27 @@ class MultiMarker(ui.widget.Widget):
         if exists(file):
             if file[-5:] == ".json":
                 data = json.load(open(file))
-                found = marker_find(data, [])
+                config = self.home.display.config
+                x_name = "X"
+                y_name = "Y"
+                nc_coords = False
+                if list(config.keys())[0] == "netcdf":
+                    try:
+                        config["netcdf"]["file"].coords[config["netcdf"]["x"]].data.astype(float)
+                        config["netcdf"]["file"].coords[config["netcdf"]["y"]].data.astype(float)
+                        x_name = config["netcdf"]["x"]
+                        y_name = config["netcdf"]["y"]
+                        nc_coords = True
+                    except ValueError:
+                        pass
+                found = marker_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"])
                 if len(found) >= 1:
                     popup.dismiss()
+                    if nc_coords:
+                        found = self.convert_found_coords(found)
                     self.upload_data(found)
                 else:
-                    content = Label(text="Incorrect File Format")
+                    content = Label(text="JSON File is not a Project for this File")
                     popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
                     popup2.open()
             else:
@@ -229,6 +245,27 @@ class MultiMarker(ui.widget.Widget):
             content = Label(text="File Not Found")
             popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
             popup2.open()
+
+    def convert_found_coords(self, found):
+        """
+        If coordinates from uploaded project file came from the currently loaded NetCDF file convert the coordinates to
+        pixel coordinates for plotting the markers on the viewer.
+
+        Args:
+            found: The found markers from the project file that have already been verified to have come from the current
+                NetCDF file. A list containing a list for each marker which contains three lists: [X Coord List,
+                Y Coord List, Width List]
+
+        Returns:
+            The original found list except the Click points have been converted to pixel coordinates
+        """
+        config = self.home.display.config
+        for marker in found:
+            for i, c in enumerate(["x", "y"]):
+                coords = config["netcdf"]["file"].coords[config["netcdf"][c]].data.astype(float)
+                c_spline = CubicSpline(coords, range(len(coords)))
+                marker[i] = c_spline(marker[i]).tolist()
+        return found
 
     def upload_fail_alert(self):
         """
@@ -362,7 +399,7 @@ class MultiMarker(ui.widget.Widget):
         """
         frames = {}
         c = 1
-        nc_cords = False
+        nc_coords = False
         x_name = "X"
         y_name = "Y"
         if self.home.display.f_type == "netcdf":
@@ -377,14 +414,14 @@ class MultiMarker(ui.widget.Widget):
                 y_spline = CubicSpline(range(len(y)), y)
                 x_name = config["netcdf"]["x"]
                 y_name = config["netcdf"]["y"]
-                nc_cords = True
+                nc_coords = True
             except ValueError:
                 pass
         for i in reversed(self.children):
             if i.clicks > 0:  # Ignore empty markers
                 data = {}
                 cx, cy, w = map(list, zip(*i.points))
-                if nc_cords:
+                if nc_coords:
                     cx = x_spline(cx)
                     cy = y_spline(cy)
                 data['Click ' + str(x_name)], data['Click ' + str(y_name)], data['Width'] = cx, cy, w

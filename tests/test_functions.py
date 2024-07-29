@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         points = [1000, 200, 1200, 200]
 
         # App result
-        app = func.ip_get_points(points, img, False)["Cut"]
+        app = func.ip_get_points(points, img, {"image": SUPPORT_FILE_PATH + "example.jpg"})["Cut"]
 
         # Manual result
         arr = np.asarray(img)
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         points = [1000, 200, 1200, 400]
 
         # App result
-        app = func.ip_get_points(points, img, False)["Cut"]
+        app = func.ip_get_points(points, img, {"image": SUPPORT_FILE_PATH + "example.jpg"})["Cut"]
 
         # Manual result
         arr = np.asarray(img)
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         points = [1000, 100, 1000, 400]
 
         # App result
-        app = func.ip_get_points(points, img, False)["Cut"]
+        app = func.ip_get_points(points, img, {"image": SUPPORT_FILE_PATH + "example.jpg"})["Cut"]
 
         # Manual result
         arr = np.asarray(img)
@@ -78,56 +78,74 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken horizontally on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")['Divergence'].data
-        points = [1000, 200, 1200, 200]
+        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
+        config = {"netcdf":{"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        points = [100, 50, 200, 50]
 
         # App result
-        app = func.ip_get_points(points, dat, True)["Cut"]
+        app = func.ip_get_points(points, dat.data, config)
 
         # Manual result
-        arr = np.asarray(dat)
+        arr = np.asarray(dat.data)
         rows = np.shape(arr)[0]
         manual = arr[rows - points[3] - 1:rows - points[1], points[0]:points[2]][0]
         # Compare
-        self.assertEqual(max(app - manual), 0, "Transect on NetCDF not accurate at zero degrees")
+        self.assertEqual(max(app["Cut"] - manual), 0, "Transect on NetCDF not accurate at zero degrees")
+        # Check Coordinates from NetCDF
+        self.assertListEqual(list(dat.coords["i"][points[0]:points[2]]), app["i"],
+                             "X Coordinates for NetCDF 0 Degree Transect Incorrect")
+        self.assertListEqual(np.repeat(dat.coords["j"][points[1]].data, len(manual)).tolist(), app["j"],
+                             "Y Coordinates for NetCDF 0 DegreeTransect Incorrect")
 
     def test_transect_45_deg_nc(self):
         """
         Test an accurate transect is made when taken at 45 degrees on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")['Divergence'].data
-        points = [1000, 200, 1200, 400]
+        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
+        config = {"netcdf":{"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        points = [100, 50, 200, 150]
 
         # App result
-        app = func.ip_get_points(points, dat, True)["Cut"]
+        app = func.ip_get_points(points, dat.data, config)
 
         # Manual result
-        arr = np.asarray(dat)
+        arr = np.asarray(dat.data)
         rows = np.shape(arr)[0]
         ix = np.arange(points[0], points[2])
         iy = np.arange(points[1], points[3])
         manual = arr[rows - iy - 1, ix]
         # Compare
-        self.assertEqual(max(app - manual), 0, "Transect on NetCDF not accurate at 45 degrees")
+        self.assertEqual(max(app["Cut"] - manual), 0, "Transect on NetCDF not accurate at 45 degrees")
+        # Check Coordinates from NetCDF
+        self.assertListEqual(list(dat.coords["i"][points[0]:points[2]]), app["i"],
+                             "X Coordinates for NetCDF 45 Degree Transect Incorrect")
+        self.assertListEqual(list(dat.coords["j"][points[1]:points[3]]), app["j"],
+                             "Y Coordinates for NetCDF 45 Degree Transect Incorrect")
 
     def test_transect_90_deg_nc(self):
         """
         Test an accurate transect is made when taken vertically on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")['Divergence'].data
-        points = [1000, 100, 1000, 400]
+        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        points = [100, 50, 100, 150]
 
         # App result
-        app = func.ip_get_points(points, dat, True)["Cut"]
+        app = func.ip_get_points(points, dat.data, config)
 
         # Manual result
-        arr = np.asarray(dat)
+        arr = np.asarray(dat.data)
         rows = np.shape(arr)[0]
         manual = np.ravel(np.flip(arr[rows - points[3]:rows - points[1], points[0]:points[2] + 1]))
         # Compare
-        self.assertEqual(max(app - manual), 0, "Transect on NetCDF not accurate at 90 degrees")
+        self.assertEqual(max(app["Cut"] - manual), 0, "Transect on NetCDF not accurate at 90 degrees")
+        # Check Coordinates from NetCDF
+        self.assertListEqual(np.repeat(dat.coords["i"][points[0]].data, len(manual)).tolist(), app["i"],
+                             "X Coordinates for NetCDF 90 Degree Transect Incorrect")
+        self.assertListEqual(list(dat.coords["j"][points[1]:points[3]]), app["j"],
+                             "Y Coordinates for NetCDF 90 Degree Transect Incorrect")
 
     def test_file_names(self):
         """
@@ -154,13 +172,13 @@ class Test(unittest.TestCase):
         # Data from a valid file is correctly extracted
         proper_json = open(SUPPORT_FILE_PATH + "project_example.json")
         proper_data = json.load(proper_json)
-        marker_result = marker_find(proper_data, [])
+        marker_result = marker_find(proper_data, [], ["Click x", "Click y", "Width"])
 
         self.assertEqual(len(marker_result), len(proper_data["Vorticity"].keys()), "All markers weren't found")
         self.assertEqual(len(marker_result[0]), 3, "All fields weren't found")
-        self.assertListEqual(marker_result[0][0], proper_data["Vorticity"]["Marker 1"]["Click X"],
+        self.assertListEqual(marker_result[0][0], proper_data["Vorticity"]["Marker 1"]["Click x"],
                              "X Coords were not correct")
-        self.assertListEqual(marker_result[1][1], proper_data["Vorticity"]["Marker 2"]["Click Y"],
+        self.assertListEqual(marker_result[1][1], proper_data["Vorticity"]["Marker 2"]["Click y"],
                              "Y coords were not orrect")
         self.assertListEqual(marker_result[2][2], proper_data["Vorticity"]["Marker 3"]["Width"],
                              "Transect widths were not correct")
@@ -168,25 +186,30 @@ class Test(unittest.TestCase):
         # Output data from non marker tool fails
         multi_data = {"Multi": {"Cut 1": {"x": [1000, 2000, 3000], "y": [100, 200, 300], "Cut": [5, 10, 15]},
                                 "Cut 2": {"x": [50, 60, 70, 80], "y": [20, 15, 10, 5], "Cut": [33, 66, 99]}}}
-        multi_result = marker_find(multi_data, [])
+        multi_result = marker_find(multi_data, [], ["Click x", "Click y", "Width"])
         self.assertEqual(len(multi_result), 0, "Files that were outputs from Transect tool should fail")
 
         # All identified markers are unique
         multi_var = {"2nd Var": proper_data["Vorticity"], "Vorticity": proper_data["Vorticity"]}
-        multi_var_result = marker_find(multi_var, [])
+        multi_var_result = marker_find(multi_var, [], ["Click x", "Click y", "Width"])
         self.assertEqual(len(multi_var_result), len(proper_data["Vorticity"].keys()), "No repeated Markers")
 
         # Markers without all necessary fields aren't included
-        del proper_data["Vorticity"]["Marker 1"]["Click X"]
-        incomplete_marker_result = marker_find(proper_data, [])
+        del proper_data["Vorticity"]["Marker 1"]["Click x"]
+        incomplete_marker_result = marker_find(proper_data, [], ["Click x", "Click y", "Width"])
 
         self.assertEqual(len(incomplete_marker_result), 2, "Incomplete markers should not be included in findings")
 
         # A random dictionary fails
         bad_data = {"Apples": ["Fuji", "Cosmic Crisp", "Honeycrisp"]}
-        bad_data_result = marker_find(bad_data, [])
+        bad_data_result = marker_find(bad_data, [], ["Click x", "Click y", "Width"])
 
         self.assertEqual(bad_data_result, [], "Random dictionaries shouldn't pass")
+
+        # Marker coordinates must match current NetCDF file
+        wrong_coords_result = marker_find(proper_data, [], ["Click Lon", "Click Lat", "Width"])
+        self.assertEqual(len(wrong_coords_result), 0,
+                         "Markers whose coords don't match current NetCDF file shouldn't be loaded")
 
     def test_sel_data_2d(self):
         """
