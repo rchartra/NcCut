@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
-        config = {"netcdf":{"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
         points = [100, 50, 200, 50]
 
         # App result
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
-        config = {"netcdf":{"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
         points = [100, 50, 200, 150]
 
         # App result
