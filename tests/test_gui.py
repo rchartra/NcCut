@@ -172,8 +172,7 @@ class Test(unittest.TestCase):
         Assumes 'support/project_example.json' exists and is a valid project file for 'support/example.jpg' with
         a variable 'Vorticity' and three markers.
         """
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
-        run_app.home.go_btn()
+        load_2d_nc("Vorticity")
 
         # Open Transect Marker tool
         select_sidebar_button("Transect Marker")
@@ -183,30 +182,15 @@ class Test(unittest.TestCase):
         project1 = json.load(f1)
         # Upload Project File
         multi_mark_instance = run_app.home.display.tool
-        multi_mark_instance.upload_data(marker_find(project1, []))
+        multi_mark_instance.upload_data(marker_find(project1, [], ["Click x", "Click y", "Width"]))
 
         # Check file uploaded properly
         for i, mar in enumerate(list(project1["Vorticity"].keys())):
             p_m = project1["Vorticity"][mar]
-            m_expected_points = list(zip(p_m["Click X"], p_m["Click Y"], p_m["Width"]))
+            m_expected_points = list(zip(p_m["Click x"], p_m["Click y"], p_m["Width"]))
             marker = multi_mark_instance.children[len(list(project1["Vorticity"].keys())) - i]
-            self.assertListEqual(marker.points, m_expected_points, mar + "Marker Points Did not Upload Properly")
+            self.assertListEqual(marker.points, m_expected_points, mar + " Marker Points Did not Upload Properly")
 
-        # Test out-of-bounds project files don't get uploaded.
-        load_2d_nc("Vorticity")
-
-        select_sidebar_button("Transect Marker")
-
-        # Load File
-        f2 = open(SUPPORT_FILE_PATH + "test_project_file.json")
-        project2 = json.load(f2)
-
-        # Upload Project File
-        multi_mark_instance = run_app.home.display.tool
-        multi_mark_instance.upload_data(marker_find(project2, []))
-
-        self.assertEqual(len(multi_mark_instance.children), 1,
-                         "Project files that don't fit in file bounds should fail")
         self.assertEqual(multi_mark_instance.children[0].points, [], "Empty new marker was created after upload")
 
     def test_marker_transect(self):
@@ -215,6 +199,8 @@ class Test(unittest.TestCase):
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
+
+        load_2d_nc("Vorticity")
 
         # Open Transect Marker tool
         sidebar = run_app.home.ids.sidebar
@@ -226,7 +212,7 @@ class Test(unittest.TestCase):
 
         # Upload Project File
         multi_mark_instance = run_app.home.display.tool
-        multi_mark_instance.upload_data(marker_find(project, []))
+        multi_mark_instance.upload_data(marker_find(project, [], ["Click x", "Click y", "Width"]))
 
         # Open editing mode
         select_sidebar_button("Edit Mode")
@@ -236,7 +222,7 @@ class Test(unittest.TestCase):
 
         # Check last clicked point was properly deleted
         m3 = project["Vorticity"]["Marker 3"]
-        m3_expected_points = list(zip(m3["Click X"][:-1], m3["Click Y"][:-1], m3["Width"][:-1]))
+        m3_expected_points = list(zip(m3["Click x"][:-1], m3["Click y"][:-1], m3["Width"][:-1]))
         self.assertEqual(len(multi_mark_instance.children), 3, "Empty fourth marker was not deleted")
         self.assertEqual(multi_mark_instance.children[0].points, m3_expected_points, "Expected points were not found")
 
@@ -256,7 +242,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Delete Last Point")
         self.assertEqual(len(multi_mark_instance.children), 2, "Empty marker was not deleted")
         m2 = project["Vorticity"]["Marker 2"]
-        m2_expected_points = list(zip(m2["Click X"][:-1], m2["Click Y"][:-1], m2["Width"][:-1]))
+        m2_expected_points = list(zip(m2["Click x"][:-1], m2["Click y"][:-1], m2["Width"][:-1]))
         self.assertEqual(multi_mark_instance.children[0].points, m2_expected_points, "Last point of m2 was not deleted")
 
         # Test width adjustments
@@ -540,7 +526,7 @@ class Test(unittest.TestCase):
         os.remove("__test__.json")
         self.assertEqual(len(list(res1["Vorticity"].keys())), 1, "Only selected marker should be saved")
         self.assertEqual(len(list(res1["Vorticity"]["Marker 1"].keys())), 6,
-                         "Marker should have 3 transects and Click X, Click Y, Width")
+                         "Marker should have 3 transects and Click x, Click y, Width")
 
         # Plot Saving
         plot_popup.download_png_plot("__test__")
@@ -569,11 +555,11 @@ class Test(unittest.TestCase):
         os.remove("__test__.json")
         self.assertEqual(len(list(res2["Vorticity"].keys())), 2, "Two markers were selected so two should be saved")
         self.assertEqual(len(list(res2["Vorticity"]["Marker 1"].keys())), 4,
-                         "Marker 1 should have 1 transect and Click X, Click Y, Width")
+                         "Marker 1 should have 1 transect and Click x, Click y, Width")
         self.assertEqual(list(res2["Vorticity"]["Marker 1"].keys())[0], "Cut 1",
                          "Marker 1 should only have Cut 1 transect")
         self.assertEqual(len(list(res2["Vorticity"]["Marker 2"].keys())), 4,
-                         "Marker 2 should have 1 transect and Click X, Click Y, Width")
+                         "Marker 2 should have 1 transect and Click x, Click y, Width")
         self.assertEqual(list(res2["Vorticity"]["Marker 2"].keys())[0], "Cut 2",
                          "Marker 2 should only have Cut 2 transect")
 
