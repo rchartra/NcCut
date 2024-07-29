@@ -442,13 +442,16 @@ class MultiMarker(ui.widget.Widget):
         """
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
-                self.clicks += 1
-                if self.clicks >= 1 and self.width_w.parent is None:
-                    self.home.ids.sidebar.add_widget(self.width_w, 1)
-                if self.clicks >= 2 and self.dbtn.parent is None:
-                    self.home.ids.sidebar.add_widget(self.dbtn, 1)
-                # If no current marker, create marker. Otherwise, pass touch to current marker.
-                if not self.m_on:
+                if touch.is_double_tap:
                     self.new_line()
-                    self.m_on = True
-                self.children[0].on_touch_down(touch)
+                else:
+                    self.clicks += 1
+                    if self.clicks >= 1 and self.width_w.parent is None:
+                        self.home.ids.sidebar.add_widget(self.width_w, 1)
+                    if self.clicks >= 2 and self.dbtn.parent is None:
+                        self.home.ids.sidebar.add_widget(self.dbtn, 1)
+                    # If no current marker, create marker. Otherwise, pass touch to current marker.
+                    if not self.m_on:
+                        self.new_line()
+                        self.m_on = True
+                    self.children[0].on_touch_down(touch)
