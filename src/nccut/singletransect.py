@@ -95,8 +95,6 @@ class SingleTransect(ui.widget.Widget):
                 c.size = (dp(value), dp(value))
                 c.pos = (c.pos[0] + self.c_size[0] / 2 - dp(value) / 2, c.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
         self.number.font_size = dp(value) * 2
-        self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
-                           self.number.pos[1] + self.c_size[1] - dp(value))
         self.c_size = (dp(value), dp(value))
 
     def on_touch_down(self, touch):
