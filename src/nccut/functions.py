@@ -12,7 +12,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.metrics import dp
 from functools import partial
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import RegularGridInterpolator, CubicSpline
 import numpy as np
 import math
 import re
@@ -143,7 +143,7 @@ def sel_data(config):
     return np.flip(data.data, 0)
 
 
-def ip_get_points(line, curr, nc):
+def ip_get_points(line, curr, config):
     """
     Creates a data frame containing x, y, and value of points on transect line
 
@@ -218,7 +218,7 @@ def ip_get_points(line, curr, nc):
             m = (line[3] - line[1]) / (line[2] - line[0])
     b = line[1] - m * (line[0])
     z = img[-(iy[-1] + 1):-(iy[0]), ix[0]:ix[-1] + 1]
-    if not nc and len(z.shape) == 3:
+    if list(config.keys())[0] == "image" and len(z.shape) == 3:
         # If image, take average of RGB values as point value
         z = np.mean(z, axis=2)
     z = np.flipud(z)
@@ -238,10 +238,32 @@ def ip_get_points(line, curr, nc):
             data.append(int_pol([yarr[i], xarr[i]])[0])
         else:
             data.append(int_pol([xarr[i], yarr[i]])[0])
-    if xyswap:
-        data = {'x': yarr, 'y': xarr, 'Cut': data}
-    else:
-        data = {'x': xarr, 'y': yarr, 'Cut': data}
-    data = {'x': data['x'].tolist(), 'y': data['y'].tolist(), 'Cut': data['Cut']}
 
+    # If NetCDF and valid coordinate data is available, return that
+
+    if list(config.keys())[0] == "netcdf":
+        x = config["netcdf"]["file"].coords[config["netcdf"]["x"]].data
+        y = config["netcdf"]["file"].coords[config["netcdf"]["y"]].data
+        try:
+            x = x.astype(float)
+            xcs = CubicSpline(range(len(x)), x)
+            xarr = xcs(xarr)
+            x_name = config["netcdf"]["x"]
+
+            y = y.astype(float)
+            ycs = CubicSpline(range(len(y)), y)
+            yarr = ycs(yarr)
+            y_name = config["netcdf"]["y"]
+        except ValueError:
+            x_name = "x"
+            y_name = "y"
+    else:
+        x_name = "x"
+        y_name = "y"
+
+    if xyswap:
+        data = {x_name: yarr, y_name: xarr, 'Cut': data}
+    else:
+        data = {x_name: xarr, y_name: yarr, 'Cut': data}
+    data = {x_name: data[x_name].tolist(), y_name: data[y_name].tolist(), 'Cut': data['Cut']}
     return data

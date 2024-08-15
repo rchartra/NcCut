@@ -92,7 +92,7 @@ Using this tool multiple lines or *Markers* can be drawn onto a loaded file. The
         * The default width is 40 pixels, you can enter any width within 0 and 400
         * If you change the width of a marker any new markers will continue to use that same width unless you change it again.
 
-#. Select **New Line** to begin a new marker and repeat for as many markers as you'd like.
+#. Double click the final point or select **New Line** to begin a new marker and repeat for as many markers as you'd like.
 #. When done select the **Plot** button and a popup will appear with a plot of all transects from the first marker and downloading options.
 
 #. Click anywhere around the popup or the close button to dismiss
