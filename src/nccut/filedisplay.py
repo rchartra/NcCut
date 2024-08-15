@@ -97,7 +97,7 @@ class FileDisplay(ScatterLayout):
 
         self.contrast = 1.0
         self.l_col = "Blue"
-        self.cir_size = 10
+        self.cir_size = 5
 
         self.cmaps = {"Autumn": cv2.COLORMAP_AUTUMN, "Bone": cv2.COLORMAP_BONE, "Jet": cv2.COLORMAP_JET,
                       "Winter": cv2.COLORMAP_WINTER, "Rainbow": cv2.COLORMAP_RAINBOW, "Ocean": cv2.COLORMAP_OCEAN,
