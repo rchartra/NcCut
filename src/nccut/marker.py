@@ -97,7 +97,7 @@ class Marker(ui.widget.Widget):
 
     def update_c_size(self, value):
         """
-        Updates graphic sizes according to the new value.
+        Updates graphic sizes according to the new circle size value.
 
         Args:
             value (float): New graphics size
@@ -114,8 +114,6 @@ class Marker(ui.widget.Widget):
                     i.width = self.line_width
         if self.clicks > 0:
             self.number.font_size = dp(value) * 2
-            self.number.pos = (self.number.pos[0] + self.c_size[0] - dp(value),
-                               self.number.pos[1] + self.c_size[1] - dp(value))
         self.curr_line.width = self.line_width
         self.c_size = (dp(value), dp(value))
 
