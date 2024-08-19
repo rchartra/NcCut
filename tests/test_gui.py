@@ -193,9 +193,9 @@ class Test(unittest.TestCase):
 
         self.assertEqual(multi_mark_instance.children[0].points, [], "Empty new marker was created after upload")
 
-    def test_marker_transect(self):
+    def test_transect_marker(self):
         """
-        Test transect marker tool management.
+        Test transect marker tool exhibits expected behavior.
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
@@ -274,15 +274,92 @@ class Test(unittest.TestCase):
         self.assertEqual(multi_mark_instance.children[0].points, list(zip(x_arr, y_arr, w_arr)),
                          "A point was added while tool in drag mode")
 
-    def test_multi_transect(self):
+    def test_transect_chain(self):
         """
-        Test transect tool
+        Test transect chain tool exhibits expected behavior
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
         run_app.home.go_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
-        # Open Transect Marker tool
+        # Open Transect Chain tool
+        select_sidebar_button("Transect Chain")
+
+        x = run_app.home.size[0]
+        y = run_app.home.size[1]
+        incs = np.array([0.4, 0.45, 0.55])
+        x_arr = incs * x
+        y_arr = incs * y
+
+        tran_instance = run_app.home.display.tool
+        # First Click
+        sidebar = run_app.home.ids.sidebar
+        tran_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
+        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
+                          "There cannot be a Plot Button on First Click")
+        self.assertEqual(len(tran_instance.children), 1, "Transect Chain Not Added")
+
+        # Second Click
+        tran_instance.on_touch_down(Click(float(x_arr[1]), float(y_arr[1])))
+        self.assertIsInstance(next((but for but in sidebar.children if but.text == "Plot")), Button,
+                              "Plot Button should be added on second click")
+        self.assertEqual(len(tran_instance.children), 1, "A transect chain was improperly deleted or added")
+
+        # Third Click
+        tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
+        self.assertIsInstance(next((but for but in sidebar.children if but.text == "Plot")), Button,
+                              "Plot Button should still exist on third click")
+        self.assertEqual(len(tran_instance.children), 1, "A transect chain was improperly deleted or added")
+
+        self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
+                         "Transect chain points were not placed correctly")
+
+        # Repeat Click
+        tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
+        self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
+                         "Point was added where there was already a point")
+
+        # Test Drag Mode
+        select_sidebar_button("Drag Mode")
+        tran_instance.on_touch_down(Click(0.43 * x, 0.43 * y))
+        self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
+                         "A point was added while tool in drag mode")
+
+        # Create new chain
+        select_sidebar_button("Transect Mode")
+        select_sidebar_button("New Chain")
+        self.assertEqual(len(tran_instance.children), 2, "Transect Chain Not Added")
+        select_sidebar_button("New Chain")
+        self.assertEqual(len(tran_instance.children), 2,
+                         "New Transect Chain was added even though previous chain had no clicks")
+        tran_instance.on_touch_down(Click(0.43 * x, 0.43 * y))
+        self.assertEqual(tran_instance.children[1].points, list(zip(x_arr, y_arr)),
+                         "A point was added to previous chain")
+        self.assertEqual(tran_instance.children[0].points, [(0.43 * x, 0.43 * y)],
+                         "Point was not added to new chain")
+
+        # Edit mode
+        select_sidebar_button("Edit Mode")
+        select_sidebar_button("Delete Last Point")
+        self.assertEqual(tran_instance.children[0].points, [], "Transect Chain point was not properly deleted")
+        select_sidebar_button("Delete Last Point")
+        self.assertEqual(len(tran_instance.children), 1,
+                         "Empty transect chain was not deleted when last point was deleted")
+        self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr))[:-1],
+                         "Transect chain point was not deleted from previous marker after current marker was removed")
+        select_sidebar_button("Delete Last Line")
+        self.assertEqual(len(tran_instance.children), 1, "When last chain is deleted, a new chain is added")
+        self.assertEqual(tran_instance.children[0].points, [], "Transect Chain was not properly deleted")
+
+    def test_multi_transect(self):
+        """
+        Test regular transect tool exhibits expected behavior
+        """
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.go_btn()
+        self.assertEqual(run_app.home.file_on, True, "File was not loaded")
+
+        # Open Transect tool
         select_sidebar_button("Transect")
 
         x = run_app.home.size[0]

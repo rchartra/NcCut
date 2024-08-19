@@ -18,7 +18,7 @@ from nccut.multitransect import MultiTransect
 
 class Marker(ui.widget.Widget):
     """
-    Singular marker widget.
+    Singular transect marker widget.
 
     Graphics and functionality of a singular marker created by the transect marker tool.
     Determines endpoints of where transects should be made orthogonally to the user marked
