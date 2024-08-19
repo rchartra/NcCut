@@ -66,8 +66,8 @@ class PlotPopup(Popup):
     Attributes:
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
         all_transects (dict): Dictionary of data from all transects marked out by the user.
-        t_type (str): 'Marker' if transects came from transect marker tool or 'Multi' if transects
-            came from transect tool.
+        t_type (str): 'Marker' if transects came from transect marker tool, 'Chain' if transects came from transect
+            chain tool or 'Multi' if transects came from transect tool.
         active_transects (dict): Dictionary of currently selected transects. 'Click <X Cord>', 'Click <Y Cord>', and
             'Width' fields should be removed (if marker tool) to simplify plotting. Contains average
             of transects if marker tool was used with a constant transect width.
@@ -105,6 +105,8 @@ class PlotPopup(Popup):
         self.config = config
         if list(self.all_transects.keys())[0][0:-2] == "Marker":
             self.t_type = "Marker"
+        elif list(self.all_transects.keys())[0][0:-2] == "Chain":
+            self.t_type = "Chain"
         else:
             self.t_type = "Multi"
 
@@ -114,8 +116,12 @@ class PlotPopup(Popup):
         act = copy.deepcopy(self.all_transects)
         for key in list(act.keys()):
             self.active_transects[key] = {}
-            if self.t_type == "Marker":  # Remove fields that don't get plotted
+            # Remove fields that don't get plotted
+            if self.t_type == "Marker":
                 for k in list(act[key].keys())[:3]:
+                    act[key].pop(k)
+            elif self.t_type == "Chain":
+                for k in list(act[key].keys())[:2]:
                     act[key].pop(k)
             self.active_transects[key] = dict.fromkeys(act[key], False)
 
@@ -127,11 +133,11 @@ class PlotPopup(Popup):
                     new.update(self.active_transects[key])
                     self.active_transects[key] = new
 
-        # If not marker, start will all transects selected
+        # Start with the first group selected
         first = list(self.active_transects.keys())[0]
         self.active_transects[first] = dict.fromkeys(self.active_transects[first], True)
 
-        # If marker start with first marker selected
+        # If marker start with average not selected
         if self.t_type == "Marker":
             w_lis = self.all_transects[first]['Width']
             if all(x == w_lis[0] for x in w_lis):
@@ -200,8 +206,8 @@ class PlotPopup(Popup):
         t_box.add_widget(t_lab)
         self.t_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1), font_size=self.home.font)
         t_box.add_widget(self.t_select)
-        if self.t_type == "Marker":
-            t_drop = self.get_marker_dropdown()
+        if self.t_type == "Marker" or self.t_type == "Chain":
+            t_drop = self.get_group_dropdown()
         else:
             t_drop = self.get_cut_dropdown('Multi')
         self.t_select.bind(on_press=lambda x: t_drop.open(self.t_select))
@@ -371,17 +377,17 @@ class PlotPopup(Popup):
         else:  # Build correctly formatted JSON file
             dat = copy.copy(self.active_data)
             if len(self.active_vars) == 0:  # If Image
-                final = self.add_marker_info(dat)
+                final = self.add_group_info(dat)
             elif len(self.active_z) == 0:  # If 2D NetCDF
                 final = {}
                 for var in list(dat.keys()):
-                    final[var] = self.add_marker_info(dat[var])
+                    final[var] = self.add_group_info(dat[var])
             else:  # If 3D NetCDF
                 final = {}
                 for var in list(dat.keys()):
                     final[var] = {}
                     for z in list(dat[var].keys()):
-                        final[var][z] = self.add_marker_info(dat[var][z])
+                        final[var][z] = self.add_group_info(dat[var][z])
             with open(self.home.rel_path / (file + ".json"), "w") as f:
                 json.dump(final, f)
 
@@ -389,7 +395,7 @@ class PlotPopup(Popup):
 
     def download_all_data(self, f_name):
         """
-        Downloads selected data for all transects/markers into a JSON file if valid file name given.
+        Downloads selected data for all transects/groups into a JSON file if valid file name given.
 
         Args:
             f_name (str): Proposed file name
@@ -408,21 +414,24 @@ class PlotPopup(Popup):
             self.active_transects = original
             self.active_data = self.get_data()
 
-    def add_marker_info(self, dicti):
+    def add_group_info(self, dicti):
         """
-        Adds back fields removed for plotting purposes if marker tool was used
+        Adds back fields removed for plotting purposes if marker or chain tool was used
 
         Args:
-            dicti (dict): Dictionary of transect data from either transect marker regular transect tool
+            dicti (dict): Dictionary of transect data from a single group
 
         Returns:
-            Dictionary of transect data with 'Click <X Cord>', 'Click <Y Cord>', and 'Width' fields added back
-                in if transect marker tool was used.
+            Dictionary of transect data with non-plotted data fields added back in.
         """
-        if list(dicti.keys())[0] != "Multi":
+        if list(dicti.keys())[0][0:6] == "Marker":
             for marker in list(dicti.keys()):
                 for key in list(self.all_transects[marker].keys())[:3]:
                     dicti[marker][key] = list(self.all_transects[marker][key])
+        elif list(dicti.keys())[0][0:5] == "Chain":
+            for chain in list(dicti.keys()):
+                for key in list(self.all_transects[chain].keys())[:2]:
+                    dicti[chain][key] = list(self.all_transects[chain][key])
         return dicti
 
     def download_all_z_data(self, f_name):
@@ -438,39 +447,40 @@ class PlotPopup(Popup):
             return
         else:
             original = copy.copy(self.active_z)
-            self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[self.config[self.f_type]['z']].data]
+            z_list = self.config[self.f_type]['z']
+            self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[z_list].data]
             self.active_data = self.get_data()
             self.download_selected_data(f_name)
             self.active_z = original
             self.active_data = self.get_data()
 
-    def get_marker_dropdown(self):
+    def get_group_dropdown(self):
         """
-        Build dropdown menu for marker options with sub-menus for the individual transects
+        Build dropdown menu for groups such as Chains and Markers with sub-menus for the individual transects.
 
         Returns:
-            :class:`nccut.plotpopup.BackgroundDropDown` for marker options
+            :class:`nccut.plotpopup.BackgroundDropDown` for group options
         """
-        # Get dropdown for marker options
-        marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
+        # Get dropdown for group options
+        group_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for i in list(self.all_transects.keys()):
-            m_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+            g_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
                                            width=dp(180))
             btn = func.RoundedButton(text=i, size_hint=(0.5, 1))
             btn.bind(on_press=lambda but=btn, txt=i: self.cut_drop(txt, but))
-            m_box.add_widget(btn)
-            marker_list.add_widget(m_box)
-        return marker_list
+            g_box.add_widget(btn)
+            group_list.add_widget(g_box)
+        return group_list
 
-    def cut_drop(self, marker, button):
+    def cut_drop(self, group, button):
         """
-        Attaches transect dropdowns to marker buttons in marker dropdown menu
+        Attaches transect dropdowns to group buttons in group dropdown menu
 
         Args:
-            marker (str): Marker label 'Marker #'
-            button: RoundedButton, marker's button in marker dropdown menu
+            group (str): Group label. Ex: 'Marker #'
+            button: RoundedButton, group's button in group dropdown menu
         """
-        temp_cut_drop = self.get_cut_dropdown(marker)
+        temp_cut_drop = self.get_cut_dropdown(group)
         temp_cut_drop.open(button)
 
     def get_cut_dropdown(self, key):
@@ -478,7 +488,7 @@ class PlotPopup(Popup):
         Build dropdown menu for selecting transects.
 
         Args:
-            key (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
+            key (str): Name of group selecting from. Ex: 'Marker #', 'Multi' if regular transect tool
 
         Returns:
             :class:`nccut.plotpopup.BackgroundDropDown` for transect options
@@ -505,7 +515,7 @@ class PlotPopup(Popup):
     def select_all(self, boxes):
         """
         If all checkboxes are checked, uncheck all boxes. Otherwise check all boxes. If a box is the only box checked
-        across all markers it will remain checked no matter what.
+        across all groups it will remain checked no matter what.
 
         Args:
             boxes: List of BoxLayouts containing checkbox widgets
@@ -519,25 +529,25 @@ class PlotPopup(Popup):
             for c_box in boxes:
                 c_box.children[0].active = False
 
-    def on_transect_checkbox(self, check, marker, cut, *args):
+    def on_transect_checkbox(self, check, group, cut, *args):
         """
         Updates plot when a transect checkbox is clicked. Safeguards so at least one transect
         is always selected.
 
         Args:
             check: Reference to kivy.uix.checkbox.CheckBox in transect list
-            marker (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
+            group (str): Name of group selecting from. Ex: 'Marker #', 'Multi' if regular transect tool
             cut (str): Name of transect 'Cut #'
         """
         # Select or deselect transect
-        self.active_transects[marker][cut] = not self.active_transects[marker][cut]
+        self.active_transects[group][cut] = not self.active_transects[group][cut]
 
         # Check this isn't the last transect selected
         count = 0
         for key in list(self.active_transects.keys()):  # Count current transects
             count += sum(self.active_transects[key].values())
         if count == 0:  # If last transect unchecked, recheck and ignore
-            self.active_transects[marker][cut] = not self.active_transects[marker][cut]
+            self.active_transects[group][cut] = not self.active_transects[group][cut]
             check.active = True
             return
         else:
@@ -759,10 +769,10 @@ class PlotPopup(Popup):
         # Get transect coordinates
         v = self.active_data[var]
         z = v[next(iter(v))]
-        marker = next(iter(z))
-        tran = next(iter(z[marker]))
-        points = self.all_transects[marker][tran]
-        width = len(z[marker][tran]['Cut'])
+        group = next(iter(z))
+        tran = next(iter(z[group]))
+        points = self.all_transects[group][tran]
+        width = len(z[group][tran]['Cut'])
 
         ds = self.config[self.f_type]['file']
         z_len = len(ds.coords[self.config[self.f_type]['z']].data)
@@ -857,8 +867,9 @@ class PlotPopup(Popup):
         dat = copy.copy(data)
         plot_dat = {}
 
-        if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0] != "Multi":
-            # Gather data for all transects selected across all markers for all Z levels selected
+        if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0] != "Multi" \
+                and list(dat.keys())[0][0:5] != "Chain":
+            # Gather data for all transects selected across all groups for all Z levels selected
             for z in list(dat.keys()):
                 if len(z) >= 12:
                     z_name = z[:12] + "..."
@@ -867,6 +878,8 @@ class PlotPopup(Popup):
                 for obj in list(dat[z].keys()):
                     if obj == "Multi":
                         title = "Z: " + z_name + " "
+                    elif obj[0:5] == "Chain":
+                        title = "Z: " + z_name + " C" + obj[-1] + " "
                     else:
                         title = "Z: " + z_name + " M" + obj[-1] + " "
                     for cut in list(dat[z][obj].keys()):
@@ -876,9 +889,11 @@ class PlotPopup(Popup):
                             plot_dat[title + cut] = dat[z][obj][cut]["Cut"]
         else:
             for obj in list(dat.keys()):
-                # Gather data for all transects selected across all markers
+                # Gather data for all transects selected across all groups
                 if obj == "Multi":
                     title = ""
+                elif obj[0:5] == "Chain":
+                    title = "C" + obj[-1] + " "
                 else:
                     title = "M" + obj[-1] + " "
                 for cut in list(dat[obj].keys()):
@@ -907,7 +922,7 @@ class PlotPopup(Popup):
 
         Returns:
             Nested dictionary of transect data with hierarchy:
-                Variables -> Z values -> Markers/Multi -> Transects -> X,Y, Cut
+                Variables -> Z values -> Groups -> Transects -> X,Y, Cut
             If only 2D NetCDF file there is no Z values level. If an image there is no Variables or Z Values level.
         """
         # Get transect data for list of active transect points
@@ -926,7 +941,7 @@ class PlotPopup(Popup):
                         config["z_val"] = z
                         curr = func.sel_data(config)
                         for key in list(self.active_transects.keys()):
-                            # All markers selected
+                            # All groups selected
                             values[var][z][key] = {}
                             for cut in list(self.active_transects[key].keys()):
                                 # All selected transects
@@ -942,7 +957,7 @@ class PlotPopup(Popup):
                     curr = func.sel_data(config)
                     # Single Z Selection
                     for key in list(self.active_transects.keys()):
-                        # All markers selected
+                        # All groups selected
                         values[var][key] = {}
                         for cut in list(self.active_transects[key].keys()):
                             if self.active_transects[key][cut]:
@@ -958,7 +973,7 @@ class PlotPopup(Popup):
             curr = im.open(config)
             # Image data (no variables, no Z levels)
             for key in list(self.active_transects.keys()):
-                # All markers selected
+                # All groups selected
                 values[key] = {}
                 for cut in list(self.active_transects[key].keys()):
                     # All transects selected

@@ -19,6 +19,7 @@ import io
 import nccut.functions as func
 from nccut.multitransect import MultiTransect
 from nccut.multimarker import MultiMarker
+from nccut.multichain import MultiChain
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -207,6 +208,8 @@ class FileDisplay(ScatterLayout):
                 self.tool = MultiTransect(home=self.home)
             elif t_type == "transect_marker":
                 self.tool = MultiMarker(home=self.home)
+            elif t_type == "transect_chain":
+                self.tool = MultiChain(home=self.home)
             self.add_widget(self.tool)
             self.t_mode = True
         else:

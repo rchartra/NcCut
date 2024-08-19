@@ -61,6 +61,10 @@ The :ref:`Transect Marker <transect_marker>` tool allows you to draw a line alon
 
     .. image:: _media/transect_marker.png
 
+The :ref:`Transect Chain <transect_chain>` tool allows you to draw multiple transects chained together along a feature.
+
+    .. image:: _media/transect_chain.png
+
 .. _transect:
 
 Transect Tool
@@ -105,6 +109,20 @@ To upload a previously worked on project:
 #. Enter the file name of the transect data you saved previously and select **Ok**.
 #. All markers from the file will load onto the viewer and you can continue working on the project.
 
+.. _transect_chain:
+
+Transect Chain
+^^^^^^^^^^^^^^
+
+Using this tool multiple transects can be chained together. Multiple such *Chains* can be drawn out at once before being plotted.
+
+#. Hit the **Transect Chain** button to enter transect mode.
+#. Click points along the feature you'd like to make transects along. Transects will be made between the points you click.
+    * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
+    * Select **Edit Mode** to delete either the last point clicked or the last chain drawn.
+#. Double click the final point or select **New Chain** to begin a new chain and repeat for as many chains as you'd like.
+#. When done select the **Plot** button and a popup will appear with a plot of all transects from the first chain and downloading options.
+
 Plotting
 --------
 
@@ -118,7 +136,7 @@ Plotting
 
 #. You can save the current plot to .PNG or .PDF formats.
 #. You can also save the transect data itself from three options:
-    * **Save All Data** will save all transects from all markers. If using a NetCDF file it will do so for the currently selected variables and z values.
+    * **Save All Data** will save all transects from all markers or chains. If using a NetCDF file it will do so for the currently selected variables and z values.
     * **Save Selected Data** will save only the transects selected in the plotting menu. If using a NetCDF file it will do so for the currently selected variables and z values.
     * **Save All Z Values** will save all z values for the selected transects and variables. This option only appears if using a NetCDF file with three dimensions.
 #. See the :ref:`Data Output <data_output>` section for how the saved data is formatted.
