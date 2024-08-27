@@ -15,10 +15,6 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
-
-import sys
-sys.path.insert(0, 'src/nccut')  # Test local code not PyPI
-
 from nccut.multimarker import Click, marker_find
 from nccut.markerwidth import MarkerWidth
 import nccut.functions as functions
@@ -146,7 +142,8 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
         run_app.home.go_btn()
         load_2d_nc("Vorticity")
-        self.assertEqual(len(run_app.home.ids.colorbar.children), 1, "Colorbar was not Added")
+        self.assertEqual(len(run_app.home.color_bar_box.children), 1, "Colorbar was not Added")
+        self.assertIsNotNone(run_app.home.color_bar_box.parent, "Colorbar box was not displayed")
         select_sidebar_button("Transect Marker")
         x = run_app.home.size[0]
         y = run_app.home.size[1]
@@ -162,7 +159,8 @@ class Test(unittest.TestCase):
         run_app.home.go_btn()
 
         self.assertEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar was not restored")
-        self.assertEqual(len(run_app.home.ids.colorbar.children), 0, "Colorbar was not removed")
+        self.assertEqual(len(run_app.home.color_bar_box.children), 0, "Colorbar was not removed")
+        self.assertIsNone(run_app.home.color_bar_box.parent, "Colorbar box was not removed")
         self.assertEqual(len(run_app.home.display.children), 1, "Not all tools were removed from display")
 
     def test_project_upload(self):

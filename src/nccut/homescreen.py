@@ -9,6 +9,9 @@ further down the tree.
 import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.graphics import Color, RoundedRectangle
+from kivy.metrics import dp
 import re
 import os
 import nccut.functions as func
@@ -32,7 +35,7 @@ class HomeScreen(Screen):
         nc_popup: Reference to NetCDF configuration popup
         file: File if one was given on start up from command line, otherwise None
     """
-    def __init__(self, file=None, **kwargs):
+    def __init__(self, btn_img_path, file=None, **kwargs):
         """
         Initialize main screen with default settings.
 
@@ -42,6 +45,7 @@ class HomeScreen(Screen):
             file: (Optional) File if one was given on start up from command line, otherwise None
         """
         super(HomeScreen, self).__init__(**kwargs)
+        self.btn_img_path = btn_img_path
         self.file_on = False
         self.loaded = False
         self.rel_path = Path(os.getcwd())
@@ -49,12 +53,27 @@ class HomeScreen(Screen):
         self.display = None
         self.nc_popup = None
         self.file = file
+        self.color_bar_box = BoxLayout(size_hint=(0.1, 1), padding=dp(3))
+        with self.color_bar_box.canvas:
+            Color(0.2, 0.2, 0.2)
+            self.cb_bg = RoundedRectangle(size=self.color_bar_box.size, pos=self.color_bar_box.pos, radius=[dp(10),])
+        self.color_bar_box.bind(size=self.update_cb_bg, pos=self.update_cb_bg)
+
+    def update_cb_bg(self, *args):
+        """
+        Update size and position of color bar box when app window is resized
+
+        Args:
+            args: 2 element list of object and the new size/position
+        """
+        self.cb_bg.pos = self.color_bar_box.pos
+        self.cb_bg.size = self.color_bar_box.size
 
     def initial_load(self):
         """
         If a file was given on start up, wait until app is fully loaded and then load given file.
         """
-        if not self.loaded and self.ids.view.size[0] / kivy.core.window.Window.size[0] >= 0.75:
+        if not self.loaded and self.ids.view_box.size[0] / kivy.core.window.Window.size[0] >= 0.75:
             if self.file:
                 self.ids.file_in.text = str(self.file)
                 self.go_btn()
@@ -73,7 +92,6 @@ class HomeScreen(Screen):
         font = self.ids.transect.font_size
 
         self.font = font
-        self.ids.view_btn.font_size = font
         self.ids.netcdf_btn.font_size = font
         if self.file_on:
             self.display.font_adapt(font)
@@ -97,7 +115,6 @@ class HomeScreen(Screen):
         if self.file_on:
             self.display.reset_sidebar()
             self.clean_file()
-
         file = self.ids.file_in.text
 
         # Limit file names to alphanumeric characters and _-./
@@ -125,6 +142,19 @@ class HomeScreen(Screen):
                     func.alert("File Not Found", self)
                     self.clean_file()
 
+    def load_colorbar(self, colorbar):
+        """
+        Adds colorbar image to viewer.
+
+        Args:
+            colorbar: kivy.uix.image.Image, colorbar graphic
+        """
+        if len(self.ids.view_box.children) == 1:
+            self.ids.view_box.add_widget(self.color_bar_box, 1)
+        else:
+            self.color_bar_box.remove_widget(self.color_bar_box.children[0])
+        self.color_bar_box.add_widget(colorbar)
+
     def load_netcdf(self, config):
         """
         Load NetCDF file
@@ -141,9 +171,12 @@ class HomeScreen(Screen):
         Resets file related attributes.
         """
         kivy.core.window.Window.set_system_cursor("arrow")
-        if len(self.ids.colorbar.children) != 0:
-            self.ids.colorbar.remove_widget(self.ids.colorbar.children[0])
+        if len(self.ids.view_box.children) > 1:
+            self.color_bar_box.remove_widget(self.color_bar_box.children[0])
+            self.ids.view_box.remove_widget(self.color_bar_box)
         if self.file_on:
+            self.ids.view.unbind(size=self.display.resize_to_fit)
+            self.ids.line_color_btn_img.source = self.btn_img_path + "blue_line_btn.png"
             self.display.parent.remove_widget(self.display)
         self.file_on = False
 
@@ -157,6 +190,27 @@ class HomeScreen(Screen):
 
         """
         self.canvas.remove(item)
+
+    def rotate(self):
+        """
+        Call for a 45 degree rotation of current display by 45 degrees
+        """
+        if self.file_on:
+            self.display.rotate()
+
+    def v_flip(self):
+        """
+        Call for a vertical flip of view of current display
+        """
+        if self.file_on:
+            self.display.flip_vertically()
+
+    def h_flip(self):
+        """
+        Call for a horizontal flip of view of current display
+        """
+        if self.file_on:
+            self.display.flip_horizontally()
 
     def quit_btn(self):
         """

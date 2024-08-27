@@ -17,6 +17,7 @@ import numpy as np
 import math
 import re
 from pathlib import Path
+import xarray as xr
 
 
 class RoundedButton(Button):
@@ -126,21 +127,63 @@ def sel_data(config):
             :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs`
 
     Returns:
-        2D array of data from NetCDF file.
+        2D Dataset from NetCDF file according to selections transposed to (y, x).
     """
     # IMPORTANT: Numpy indexes (row, column) with (0, 0) at top left corner
     if config['z'] == 'N/A':
         # 2D NetCDF data
         ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
-        ds = ds.transpose('y', 'x')
         data = ds.sel(y=ds['y'], x=ds['x'])
     else:
         # 3D NetCDF data
         ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
-        ds = ds.transpose('y', 'x', 'z')
         ds['z'] = ds['z'].astype(str)
         data = ds.sel(y=ds['y'], x=ds['x'], z=config['z_val'])
-    return np.flip(data.data, 0)
+    return data.transpose('y', 'x')
+
+
+def subset_around_transect(ds, points):
+    """
+    Determines a subset of the data with appropriate margins that surround the transect.
+
+    If room is available around
+
+    Args:
+        ds: Data to be subset from. Either a DataArray (X and Y coordinates must be named "x" and "y") or a 2D array
+        points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
+
+    Returns:
+        Subset of data, rescaled points [X1, Y1, X2, Y2], list of [Y, X] rescale factors
+    """
+    # Determine x, y bounds for subset area around transect
+    ys_xs = [sorted([points[1], points[3]]), sorted([points[0], points[2]])]
+    ys_xs = [c for cs in ys_xs for c in cs]
+    if isinstance(ds, xr.DataArray):
+        margins = [len(ds.coords["y"].data), len(ds.coords["x"].data)]
+    else:
+        margins = ds.shape
+    # Include a buffer margin if possible for interpolating
+    for i, p in enumerate(ys_xs):
+        if i % 2 == 0:  # Minimums
+            if p < 3:
+                ys_xs[i] = int(np.floor(p))
+            else:
+                ys_xs[i] = int(np.floor(p)) - 3
+        else:  # Maximums
+            if p > margins[int(i / 3)] - 3:
+                ys_xs[i] = int(np.floor(p))
+            else:
+                ys_xs[i] = int(np.floor(p)) + 3
+    # Subset dataset around the transect
+    if isinstance(ds, xr.DataArray):
+        ds = ds.isel({"y": slice(ys_xs[0], ys_xs[1] + 1), "x": slice(ys_xs[2], ys_xs[3] + 1)})
+    else:
+        ds = ds[(margins[0] - 1 - ys_xs[1]): (margins[0] - ys_xs[0]), ys_xs[2]: ys_xs[3] + 1]
+
+    points = [points[0] - ys_xs[2], points[1] - ys_xs[0], points[2] - ys_xs[2], points[3] - ys_xs[0]]
+
+    scales = [ys_xs[0], ys_xs[2]]
+    return ds, points, scales
 
 
 def ip_get_points(line, curr, config):
@@ -148,61 +191,34 @@ def ip_get_points(line, curr, config):
     Creates a data frame containing x, y, and value of points on transect line
 
     From end points finds points of line connecting them. Interpolates higher resolution version of
-    relevant section of data set, and then grabs data values at each line point.
+    given data set, and then grabs data values at each line point. If the file is a NetCDF file with valid
+    coordinates the x, y coordinates are translated to the selected NetCDF coordinates
 
     Args:
         line: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
-        curr: 2D indexable array of current dataset loaded in viewer
-        nc (bool): Whether data is from a NetCDF file
+        curr: 2D indexable array of data in which the transect was taken.
+        config (dict): Information necessary for accessing the file. For images this is the file path and for NetCDF
+            files this is a dictionary of configuration values (see
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+
     Returns:
         Dictionary with three keys:
-            'x': 1D array of x-coordinates of transect points
-            'y': 1D array of y-coordinates of transect points
-            'Cut': 1D array of data values at each point along line connecting end points
+            'x': 1D array of x-coordinates of transect points. If valid NetCDF is loaded these are interpolated from the
+                selected x dimension
+            'y': 1D array of y-coordinates of transect points. If valid NetCDF is loaded these are interpolated from the
+                selected y dimension
+            'Cut': 1D array of data values at each point along line connecting end points. If from an image the data
+                value is the mean of the pixel RGB values. If from a NetCDF file the data comes from the loaded Dataset.
     """
 
     # If angle of line is > 45 degrees will swap x and y to increase accuracy
-    data = []
     xyswap = False
-
     img = np.asarray(curr)
-
     # Always read from left point to right
     if line[0] > line[2]:
         line = [line[2], line[3], line[0], line[1]]
 
-    # Get interpolation object
-
-    # Get x values
-    # Include margin if possible
-    if int(line[0]) < 3:
-        x_start = line[0]
-    else:
-        x_start = line[0] - 3
-    if int(line[2]) > img.shape[1] - 4:
-        x_end = line[2]
-    else:
-        x_end = line[2] + 4
-    ix = np.arange(int(x_start), int(x_end))
-
-    # Get y values increasing in value w/o changing og object
-    # Include margin if possible
-
-    if line[1] > line[3]:
-        y_points = [line[3], line[1]]
-    else:
-        y_points = [line[1], line[3]]
-    if int(y_points[0]) < 3:
-        y_start = y_points[0]
-    else:
-        y_start = y_points[0] - 3
-    if int(y_points[1]) > img.shape[1] - 4:
-        y_end = y_points[1]
-    else:
-        y_end = y_points[1] + 4
-    iy = np.arange(int(y_start), int(y_end))
-
-    # Get line slope
+    # Calculate slope
     if line[2] - line[0] == 0:
         m = (line[3] - line[1]) / .001
     else:
@@ -216,34 +232,40 @@ def ip_get_points(line, curr, config):
             m = (line[3] - line[1]) / .001
         else:
             m = (line[3] - line[1]) / (line[2] - line[0])
+        x_lab = "y"
+        y_lab = "x"
+    else:
+        x_lab = "x"
+        y_lab = "y"
     b = line[1] - m * (line[0])
-    z = img[-(iy[-1] + 1):-(iy[0]), ix[0]:ix[-1] + 1]
+
+    # Get interpolation object
+    ix = np.arange(0, img.shape[1])
+    iy = np.arange(0, img.shape[0])
+    z = img[(img.shape[0] - 1 - iy[-1]):(img.shape[0] - iy[0]), ix[0]:ix[-1] + 1]
+
     if list(config.keys())[0] == "image" and len(z.shape) == 3:
-        # If image, take average of RGB values as point value
+        # If file is an image, take average of RGB values as point value
         z = np.mean(z, axis=2)
     z = np.flipud(z)
 
-    # numpy arrays are indexed by row, column NOT x, y, but interp object does do x y
-    int_pol = RegularGridInterpolator((iy, ix), z, method='linear')
-
+    int_pol = RegularGridInterpolator((iy, ix), z, method='linear', bounds_error=False, fill_value=None)
     if line[0] > line[2]:
         xarr = np.arange(int(line[2]), int(line[0]))
     else:
         xarr = np.arange(int(line[0]), int(line[2]))
     yarr = xarr * m + b
-
+    if not xyswap:
+        points = list(zip(yarr, xarr))
+    else:
+        points = list(zip(xarr, yarr))
     # Grab points from interpolation object
-    for i in range(0, xarr.size):
-        if not xyswap:
-            data.append(int_pol([yarr[i], xarr[i]])[0])
-        else:
-            data.append(int_pol([xarr[i], yarr[i]])[0])
-
+    data = int_pol(points)
     # If NetCDF and valid coordinate data is available, return that
 
     if list(config.keys())[0] == "netcdf":
-        x = config["netcdf"]["file"].coords[config["netcdf"]["x"]].data
-        y = config["netcdf"]["file"].coords[config["netcdf"]["y"]].data
+        x = config["netcdf"]["file"].coords[config["netcdf"][x_lab]].data
+        y = config["netcdf"]["file"].coords[config["netcdf"][y_lab]].data
         try:
             x = x.astype(float)
             xcs = CubicSpline(range(len(x)), x)
@@ -265,5 +287,5 @@ def ip_get_points(line, curr, config):
         data = {x_name: yarr, y_name: xarr, 'Cut': data}
     else:
         data = {x_name: xarr, y_name: yarr, 'Cut': data}
-    data = {x_name: data[x_name].tolist(), y_name: data[y_name].tolist(), 'Cut': data['Cut']}
+    data = {x_name: data[x_name].tolist(), y_name: data[y_name].tolist(), 'Cut': data['Cut'].tolist()}
     return data

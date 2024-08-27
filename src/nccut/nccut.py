@@ -41,6 +41,7 @@ class NcCut(App):
         """
         super(NcCut, self).__init__(**kwargs)
         self.file = file
+        self.btn_img_path = os.path.dirname(os.path.realpath(__file__)) + "/../../images/btn_images/"
 
     def on_start(self):
         """
@@ -81,7 +82,7 @@ class NcCut(App):
             Root of widget tree
         """
         root = ui.screenmanager.ScreenManager()
-        home = HomeScreen(name="HomeScreen", file=self.file)
+        home = HomeScreen(name="HomeScreen", btn_img_path=self.btn_img_path, file=self.file)
         root.add_widget(home)
         return root
 
