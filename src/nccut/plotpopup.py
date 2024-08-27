@@ -71,8 +71,7 @@ class PlotPopup(Popup):
         active_transects (dict): Dictionary of currently selected transects. 'Click <X Cord>', 'Click <Y Cord>', and
             'Width' fields should be removed (if marker tool) to simplify plotting. Contains average
             of transects if marker tool was used with a constant transect width.
-        f_type (str): If file is NetCDF file: 'NC' if only 2 dimensions, 'NC_Z' if 3 dimensions. If
-            file is a JPG or PNG: 'Img'.
+        f_type (str): If file is NetCDF file: 'netcdf'. If file is a JPG or PNG: 'image'.
         config (dict): Information necessary for accessing the file. For images this is the file path and for NetCDF
             files this is a dictionary of configuration values (see
             :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
@@ -773,31 +772,26 @@ class PlotPopup(Popup):
         tran = next(iter(z[group]))
         points = self.all_transects[group][tran]
         width = len(z[group][tran]['Cut'])
-
         ds = self.config[self.f_type]['file']
+
         z_len = len(ds.coords[self.config[self.f_type]['z']].data)
         f_config = copy.copy(self.config)
         config = f_config[self.f_type]
         config['var'] = var
-        ds = ds[config['var']]
+        ds = ds[config['var']].rename({config['y']: "y", config['x']: "x", config['z']: "z"})
 
-        # Load entire dataset (if big file this will take a while but decreases total plot time)
-        ds.load()
-        ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-        ds = ds.transpose('y', 'x', 'z')
-        ds['z'] = ds['z'].astype(str)
-        ds = np.flip(ds.data, 0)
+        data, scale_points, scales = func.subset_around_transect(ds, points)
+        data = data.transpose('y', 'x', 'z')
+        data['z'] = data['z'].astype(str)
+        data = np.flip(data.data, 0)
 
         # Array of data values at x, y pairs for each z
         all_z = np.empty(shape=(z_len, width))
-        c = 0
-
         for d in range(0, z_len):
             # Get transect data for each z level and add to array
-            curr = ds[:, :, d]
-            dat = func.ip_get_points(points, curr, f_config)
-            all_z[c, :] = dat['Cut']
-            c += 1
+            curr = data[:, :, d]
+            dat = func.ip_get_points(scale_points, curr, f_config)
+            all_z[d, :] = dat['Cut']
 
         # Plot array
         pos = ax.imshow(all_z)
@@ -940,52 +934,52 @@ class PlotPopup(Popup):
                         values[var][z] = {}
                         config["z_val"] = z
                         curr = func.sel_data(config)
-                        for key in list(self.active_transects.keys()):
-                            # All groups selected
-                            values[var][z][key] = {}
-                            for cut in list(self.active_transects[key].keys()):
-                                # All selected transects
-                                if self.active_transects[key][cut]:
-                                    if cut == "Average":
-                                        values[var][z][key][cut] = self.get_average(key, curr)
-                                    else:
-                                        values[var][z][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                                      curr, {self.f_type: config})
-                            if len(values[var][z][key]) == 0:
-                                values[var][z].pop(key)
+                        values[var][z] = self.get_transect_data(curr)
                 else:
                     curr = func.sel_data(config)
-                    # Single Z Selection
-                    for key in list(self.active_transects.keys()):
-                        # All groups selected
-                        values[var][key] = {}
-                        for cut in list(self.active_transects[key].keys()):
-                            if self.active_transects[key][cut]:
-                                # All transects selected
-                                if cut == "Average":
-                                    values[var][key][cut] = self.get_average(key, curr)
-                                else:
-                                    values[var][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                               curr, {self.f_type: config})
-                        if len(values[var][key]) == 0:
-                            values[var].pop(key)
+                    values[var] = self.get_transect_data(curr)
+
         else:
-            curr = im.open(config)
-            # Image data (no variables, no Z levels)
-            for key in list(self.active_transects.keys()):
-                # All groups selected
-                values[key] = {}
-                for cut in list(self.active_transects[key].keys()):
-                    # All transects selected
-                    if self.active_transects[key][cut]:
-                        if cut == "Average":
-                            values[key][cut] = self.get_average(key, curr)
-                        else:
-                            values[key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
-                                                                  {self.f_type: config})
-                if len(values[key]) == 0:
-                    values.pop(key)
+            curr = np.asarray(im.open(config))
+            values = self.get_transect_data(curr)
         return values
+
+    def get_transect_data(self, curr):
+        """
+        Iterates through the active transect points and returns the transect data.
+
+        Args:
+            curr: Either a Dataset (NetCDF) or a 2D array (Image) to take transect data from
+
+        Return:
+            Returns dictionary of nested tool group dictionaries of transect data
+        """
+        val_dict = {}
+        for key in list(self.active_transects.keys()):
+            # All groups selected
+            val_dict[key] = {}
+            for cut in list(self.active_transects[key].keys()):
+                if self.active_transects[key][cut]:
+                    # All transects selected
+                    if cut == "Average":
+                        val_dict[key][cut] = self.get_average(key, curr)
+                    else:
+                        sub_d, sub_p, scales = func.subset_around_transect(curr, self.all_transects[key][cut])
+                        if self.f_type == "image":
+                            x_lab = "x"
+                            y_lab = "y"
+                            dat = sub_d
+                        else:
+                            x_lab = self.config[self.f_type]["x"]
+                            y_lab = self.config[self.f_type]["y"]
+                            dat = np.flip(sub_d.data, 0)
+                        val_dict[key][cut] = func.ip_get_points(sub_p, dat, self.config)
+                        val_dict[key][cut][x_lab] = [x + scales[1] for x in val_dict[key][cut][x_lab]]
+                        val_dict[key][cut][y_lab] = [x + scales[0] for x in val_dict[key][cut][y_lab]]
+
+            if len(val_dict[key]) == 0:
+                val_dict.pop(key)
+        return val_dict
 
     def get_average(self, key, curr):
         """
@@ -1000,6 +994,11 @@ class PlotPopup(Popup):
         """
         dat = np.zeros(self.all_transects[key]['Width'][0])
         for cut in list(self.all_transects[key].keys())[3:]:
-            dat += func.ip_get_points(self.all_transects[key][cut], curr, self.config)['Cut']
+            sub_d, sub_p, scales = func.subset_around_transect(curr, self.all_transects[key][cut])
+            if self.f_type == "image":
+                data = sub_d
+            else:
+                data = np.flip(sub_d.data, 0)
+            dat += func.ip_get_points(sub_p, data, self.config)['Cut']
         dat = dat / len(list(self.all_transects[key].keys())[3:])
         return list(dat)

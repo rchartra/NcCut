@@ -174,10 +174,10 @@ class Marker(ui.widget.Widget):
 
         # Find midpoint
         mid = (line[0] + (line[2] - line[0]) / 2, line[1] + (line[3] - line[1]) / 2)
-
         # Calculate orthogonal line points
         b = mid[1] - m * mid[0]
-        xarr = np.arange(int(mid[0] - self.t_width / 2), int(mid[0] + self.t_width / 2 + 1), dtype=float)
+        xarr = np.arange(int(np.floor(mid[0] - self.t_width / 2)), int(np.floor(mid[0] + self.t_width / 2 + 1)),
+                         dtype=float)
         yarr = (xarr * m + b).tolist()
         xarr = xarr.tolist()
 

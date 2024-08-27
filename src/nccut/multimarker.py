@@ -423,8 +423,8 @@ class MultiMarker(ui.widget.Widget):
                 data = {}
                 cx, cy, w = map(list, zip(*i.points))
                 if nc_coords:
-                    cx = x_spline(cx)
-                    cy = y_spline(cy)
+                    cx = x_spline(cx).tolist()
+                    cy = y_spline(cy).tolist()
                 data['Click ' + str(x_name)], data['Click ' + str(y_name)], data['Width'] = cx, cy, w
                 count = 1
                 for j in i.base.lines:

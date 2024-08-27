@@ -1,7 +1,7 @@
 """
-Functionality for View and NetCDF setting menus.
+Functionality for the setting dropdown menus.
 
-Creates the dropdown lists for the 'View' and 'NetCDF' setting menus. Manages the execution
+Creates the dropdown lists for the various setting dropdown menus. Manages the execution
 of setting changes when they occur. This module only defines the dynamic aspect of the menus.
 Static aspects are in the nccut.kv file.
 """
@@ -13,63 +13,58 @@ from kivy.metrics import dp
 import nccut.functions as func
 
 
-class ViewDropDown(DropDown):
+class LineColorDropDown(DropDown):
     """
-    Dynamic elements of the 'View' settings menu.
+    Dynamic elements of the line color drop down menu.
 
-    Creates the line color dropdown menu and manages the execution of all setting options.
+    Attributes:
+        app: Reference to current running app
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+    """
+    def __init__(self, **kwargs):
+        """
+        Connects to root HomeScreen instance
+        """
+        super(LineColorDropDown, self).__init__(**kwargs)
+        self.home = App.get_running_app().root.get_screen("HomeScreen")
+
+    def pass_setting(self, line_color):
+        """
+        Passes new line color to display
+
+        Args:
+            line_color (str): New line color. Either Blue, Orange, or Green.
+        """
+        if self.home.file_on:
+            self.home.ids.line_color_btn_img.source = self.home.btn_img_path + line_color.lower() + "_line_btn.png"
+            self.home.display.update_settings("l_color", line_color)
+
+
+class CircleSizeDropDown(DropDown):
+    """
+    Dynamic elements of the circle size drop down menu.
 
     Attributes:
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
-        l_color_drop: Line color selection kivy.uix.dropdown.Dropdown object
     """
-
     def __init__(self, **kwargs):
         """
-        Connects to root HomeScreen instance and creates line color dropdown.
+        Connects to root HomeScreen instance and sets initial slider value
         """
-        super(ViewDropDown, self).__init__(**kwargs)
+        super(CircleSizeDropDown, self).__init__(**kwargs)
         self.home = App.get_running_app().root.get_screen("HomeScreen")
+        if self.home.file_on:
+            self.ids.cir_size_slider.value = str(int(self.home.display.cir_size))
 
-        col_list = ["Blue", "Orange", "Green"]
-        self.l_color_drop = DropDown()
-        for i in col_list:
-            btn = Button(text=i, size_hint_y=None, height=dp(30))
-            btn.bind(on_release=lambda btn: self.pass_setting("l_color", btn.text))  # Setting name: 'l_color'
-            btn.bind(on_press=self.l_color_drop.dismiss)
-            self.l_color_drop.add_widget(btn)
-
-    def pass_setting(self, setting, value):
+    def pass_setting(self, cir_size):
         """
-        Passes setting changes to the viewer.
+        Pass new circle size to display.
 
         Args:
-            setting (str): Name of setting being changed.
-            value: New setting value of appropriate data type for setting
+            cir_size: New circle size value
         """
         if self.home.file_on:
-            self.home.display.update_settings(setting, value)
-
-    def rotate(self):
-        """
-        Call for a 45 degree rotation of current display by 45 degrees
-        """
-        if self.home.file_on:
-            self.home.display.rotate()
-
-    def flip_v(self):
-        """
-        Call for a vertical flip of view of current display
-        """
-        if self.home.file_on:
-            self.home.display.flip_vertically()
-
-    def flip_h(self):
-        """
-        Call for a horizontal flip of view of current display
-        """
-        if self.home.file_on:
-            self.home.display.flip_horizontally()
+            self.home.display.update_settings("cir_size", cir_size)
 
 
 class NetCDFDropDown(DropDown):
