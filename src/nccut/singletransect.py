@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 University of Washington
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Graphics for a single transect whether drawn by user or used to hold data by marker tool.
 

@@ -1,7 +1,0 @@
-cutview
-=======
-
-.. toctree::
-   :maxdepth: 4
-
-   cutview
