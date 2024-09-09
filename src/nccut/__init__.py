@@ -1,3 +1,3 @@
-# SPDX-FileCopyrightText: 2024-present Robin Chartrand <rchartra@uw.edu>
+# SPDX-FileCopyrightText: 2024 University of Washington
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: BSD-3-Clause

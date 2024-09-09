@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 University of Washington
+#
+# SPDX-License-Identifier: CC0-1.0
+
 version: "2"
 
 build:
