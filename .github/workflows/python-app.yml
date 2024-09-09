@@ -70,10 +70,10 @@ jobs:
         python -m poetry run python -m pytest
   licenses:
     runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-          - name: REUSE Compliance Check
-            uses: fsfe/reuse-action@v4
+    steps:
+      - uses: actions/checkout@v4
+      - name: REUSE Compliance Check
+        uses: fsfe/reuse-action@v4
   paper:
       runs-on: ubuntu-latest
       name: Paper Draft
