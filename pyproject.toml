@@ -4,7 +4,7 @@ version = "0.4.3"
 description = 'NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects.'
 authors = ["rchartra <rchartra@uw.edu>"]
 readme = "README.md"
-license = "GPL-3.0-or-later"
+license = "BSD-3-Clause"
 repository = "https://github.com/rchartra/NcCut"
 documentation = "https://nccut.readthedocs.io/en/latest/index.html"
 keywords = ["NetCDF", "GUI"]
@@ -24,7 +24,6 @@ Cython = "^3.0.10"
 xarray = "^2024.6.0"
 netCDF4 = "^1.7.1"
 opencv-python = "^4.10.0.84"
-img2pdf = "^0.5.1"
 Kivy = "^2.3.0"
 progress = "^1.6"
 

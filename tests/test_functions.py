@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 University of Washington
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Unit tests to insure transect accuracy and protect from invalid file names
 """
