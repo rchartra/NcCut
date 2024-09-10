@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 University of Washington
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 def project_file_printer(data, tab):
     """
     Recursively prints the contents of an output data file from NcCut in a readable fashion.

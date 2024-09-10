@@ -1,0 +1,25 @@
+version = 1
+
+[[annotations]]
+
+path = "**"
+SPDX-FileCopyrightText = "2024 University of Washington"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+
+path = "images/*"
+SPDX-FileCopyrightText = "2024 University of Washington"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+
+path = "support/*"
+SPDX-FileCopyrightText = "2024 University of Washington"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+
+path = "support/example.jpg"
+SPDX-FileCopyrightText = "Credit: ESA/Sentinel-1, Unaltered"
+SPDX-License-Identifier = "CC-BY-SA-3.0-IGO"

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 University of Washington
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 This module sets the default logging level for NcCut and defines ways for the user to access and adjust the logging
 level. NcCut itself does not implement logging messages but it's dependencies do.

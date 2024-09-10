@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 University of Washington
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 UI and functionality for plotting and saving popup.
 
@@ -25,7 +29,6 @@ import os
 import pandas as pd
 import json
 import cv2
-import img2pdf
 
 
 class BackgroundDropDown(DropDown):
@@ -350,10 +353,8 @@ class PlotPopup(Popup):
             ipath = self.home.rel_path / (file + ".png")
             ppath = self.home.rel_path / (file + ".pdf")
             self.plot.texture.save(str(ipath.absolute()))
-            img = cv2.flip(cv2.imread(str(ipath.absolute())), 0)
-            cv2.imwrite(str(ipath.absolute()), img)
-            with open(str(ppath.absolute()), "wb") as f:
-                f.write(img2pdf.convert(str(ipath.absolute())))
+            img = im.fromarray(cv2.flip(cv2.imread(str(ipath.absolute())), 0))
+            img.save(ppath, "PDF")
             os.remove(ipath)
             func.alert("Download Complete", self.home)
 
