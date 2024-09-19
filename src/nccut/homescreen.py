@@ -16,6 +16,8 @@ import re
 import os
 import nccut.functions as func
 from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog
 from nccut.filedisplay import FileDisplay
 from nccut.netcdfconfig import NetCDFConfig
 
@@ -55,9 +57,11 @@ class HomeScreen(Screen):
         self.file = file
         self.color_bar_box = BoxLayout(size_hint=(0.1, 1), padding=dp(3))
         with self.color_bar_box.canvas:
-            Color(0.2, 0.2, 0.2)
+            Color(0.1, 0.1, 0.1)
             self.cb_bg = RoundedRectangle(size=self.color_bar_box.size, pos=self.color_bar_box.pos, radius=[dp(10),])
         self.color_bar_box.bind(size=self.update_cb_bg, pos=self.update_cb_bg)
+        self.netcdf_info = func.BackgroundLabel(text="", font_size=self.font, size_hint=(1, 0.08),
+                                                background_color=[0.1, 0.1, 0.1, 1], markup=True)
 
     def update_cb_bg(self, *args):
         """
@@ -93,6 +97,7 @@ class HomeScreen(Screen):
 
         self.font = font
         self.ids.netcdf_btn.font_size = font
+        self.netcdf_info.font_size = font
         if self.file_on:
             self.display.font_adapt(font)
 
@@ -142,18 +147,53 @@ class HomeScreen(Screen):
                     func.alert("File Not Found", self)
                     self.clean_file()
 
-    def load_colorbar(self, colorbar):
+    def browse(self):
         """
-        Adds colorbar image to viewer.
+        Opens native operating system file browser to allow user to select their file
+        """
+        root = tk.Tk()
+        root.withdraw()
+        self.ids.file_in.text = filedialog.askopenfilename(filetypes=[("Allowed Types", "*.png *.jpg *.jpeg *.nc")])
+        self.go_btn()
+
+    def load_colorbar_and_info(self, colorbar, config):
+        """
+        Adds colorbar image and NetCDF file information bar to viewer.
 
         Args:
             colorbar: kivy.uix.image.Image, colorbar graphic
+            config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data from
+                the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
+                value is the necessary configuration settings. For images, the config dictionary has form
+                {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
+                :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         """
         if len(self.ids.view_box.children) == 1:
             self.ids.view_box.add_widget(self.color_bar_box, 1)
+            self.ids.main_box.add_widget(self.netcdf_info, 2)
         else:
             self.color_bar_box.remove_widget(self.color_bar_box.children[0])
         self.color_bar_box.add_widget(colorbar)
+        var_attrs = config["file"][config["var"]].attrs
+        if "long_name" in list(var_attrs.keys()):
+            v_text = var_attrs["long_name"].title()
+        else:
+            v_text = config["var"].title()
+        if "units" in list(var_attrs.keys()):
+            v_text += " (" + var_attrs["units"] + ")"
+        if config["z"] != "N/A":
+            z_attrs = config["file"][config["z"]].attrs
+            if "long_name" in list(z_attrs.keys()):
+                z_text = ", " + z_attrs["long_name"].title()
+            else:
+                z_text = ", " + config["z"].title()
+            if "units" in list(z_attrs.keys()):
+                z_text += " (" + z_attrs["units"].title() + ")"
+            z_text += ": " + config["z_val"]
+        else:
+            z_text = ""
+        self.netcdf_info.text = "[b]" + v_text + z_text + "[/b]"
+        self.font_adapt()
 
     def load_netcdf(self, config):
         """
@@ -174,6 +214,8 @@ class HomeScreen(Screen):
         if len(self.ids.view_box.children) > 1:
             self.color_bar_box.remove_widget(self.color_bar_box.children[0])
             self.ids.view_box.remove_widget(self.color_bar_box)
+        if len(self.ids.main_box.children) > 3:
+            self.ids.main_box.remove_widget(self.netcdf_info)
         if self.file_on:
             self.ids.view.unbind(size=self.display.resize_to_fit)
             self.ids.line_color_btn_img.source = self.btn_img_path + "blue_line_btn.png"

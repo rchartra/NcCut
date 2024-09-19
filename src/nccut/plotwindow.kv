@@ -1,0 +1,39 @@
+# This document outlines and creates static UI features for the PlotWindow. This document uses
+# Kivy's kv language to define UI features in a more readable fashion.
+# Refer to kivy docs for syntax.
+
+<PlotWindow>
+    id: main
+    canvas:
+        Color:
+            rgb: [1, 1, 1]
+        Rectangle:
+            size: self.size
+
+    RelativeLayout:
+        id: window_box
+        size_hint: (None, None)
+
+        StencilView:
+            id: window
+            size: self.size
+            canvas:
+                Color:
+                    rgb: [0.7, 0.7, 0.7]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+    Label:
+        id: title
+        text: ""
+        color: [0, 0, 0, 1]
+        text_size: self.size
+        size_hint: (None, None)
+        halign: 'center'
+        valign: 'middle'
+
+    BoxLayout:
+        id: color_bar_box
+        size_hint: (0.2, 1)
+        pos_hint: {'right': 1}
+        padding: [dp(15), dp(15), dp(15), dp(15)]

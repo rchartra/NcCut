@@ -11,13 +11,18 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.metrics import dp
+from kivy.core.image import Image as CoreImage
+import kivy.uix as ui
 from functools import partial
 from scipy.interpolate import RegularGridInterpolator, CubicSpline
 import numpy as np
 import math
-import re
-from pathlib import Path
+import cv2
+import io
 import xarray as xr
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 class RoundedButton(Button):
@@ -78,44 +83,268 @@ def alert(text, home):
     kivy.clock.Clock.schedule_once(partial(home.canvas_remove, box), 2)
 
 
-def check_file(path, fname, extension):
+def simplicity(q, q_arr, j, l_min, l_max, l_step):
     """
-    Checks if a filename is valid and prevents overwriting.
-
-    Checks a file name doesn't have any problematic characters. If file name is a file path
-    ensures that the directories exists. If a file name is the same as one that already
-    exists it adds a (#) to avoid overwriting existing file.
+    Calculates simplicity score
 
     Args:
-        path: pathlib.Path object of current output directory
-        fname (str): User proposed file name
-        extension (str): File extension for file type being created
+        q: Current step size
+        q_arr: Preference-ordered list of 'nice numbers' to choose from
+        j: Amount of elements to skip in current step size sequence
+        l_min: Start of labeling sequence
+        l_max: End of labeling sequence
+        l_step: Labeling sequence step size
 
     Returns:
-        If all checks are passed the file name is returned, possibly with added (#). If checks aren't passed
-        returns False.
+        Simplicity score that prefers step sizes that appear earlier in Q, penalizes large j's, and rewards label
+        sequences that include 0.
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
     """
-    if fname.find(".") >= 1:
-        fname = fname[:fname.find(".")]
-    if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/:]', fname)) > 0:
-        return False
-    if "/" in fname:
-        if not Path.exists(path / fname[:fname.rfind("/") + 1]):
-            return False
+    eps = 1 * 10**-10
+    n = len(q_arr)
+    i = np.argwhere(q_arr == q)[0][0] + 1
+    if l_min - l_step * np.floor(l_min / l_step) < eps and l_min <= 0 and l_max >= 0:
+        v = 1
+    else:
+        v = 0
+    return 1 - (i - 1) / (n - 1) - j + v
 
-    exist = True
-    fcount = 0
-    while exist:
-        if Path.exists(path / (fname + extension)):
-            fcount += 1
-            if fcount == 1:
-                fname = fname + "(1)"
-            else:
-                fname = fname[:fname.find("(") + 1] + str(fcount) + ")"
+
+def simplicity_max(q, q_arr, j):
+    """
+    Calculates maximum possible simplicity score
+
+    Args:
+        q: Current step size
+        q_arr: Preference-ordered list of 'nice numbers' to choose from
+        j: Amount of elements to skip in current step size sequence
+
+    Returns:
+        Maximum possible simplicity score for current step size and skip amount
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
+    """
+    n = len(q_arr)
+    i = np.argwhere(q_arr == q)[0][0] + 1
+    v = 1
+    return 1 - (i - 1) / (n - 1) - j + v
+
+
+def coverage(d_min, d_max, l_min, l_max):
+    """
+    Calculates coverage score
+
+    Args:
+        d_min: Start of data range
+        d_max: End of data range
+        l_min: Start of proposed label sequence
+        l_max: End of proposed label sequence
+
+    Returns:
+        Coverage score that encourages balanced labels with roughly equal amounts of whitespace on both ends, with
+        rarely more than 20% whitespace
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
+    """
+    return 1 - 0.5 * ((d_max - l_max) ** 2 + (d_min - l_min) ** 2) / ((0.1 * (d_max - d_min)) ** 2)
+
+
+def coverage_max(d_min, d_max, span):
+    """
+    Calculates maximum possible coverage score
+
+    Args:
+        d_min: Start of data range
+        d_max: End of data range
+        span: Length of label range
+
+    Returns:
+         Maximum possible coverage score for the data range and current label range
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
+    """
+    d_range = d_max - d_min
+    if span > d_range:
+        half = (span - d_range) / 2
+        return 1 - 0.5 * (half ** 2 + half ** 2) / ((0.1 * d_range) ** 2)
+    else:
+        return 1
+
+
+def density(k, m, d_min, d_max, l_min, l_max):
+    """
+    Calculates density score
+
+    Args:
+        k: Number of labels in label sequence
+        m: User provided target label density
+        d_min: Start of data range
+        d_max: End of data range
+        l_min: Start of proposed label sequence
+        l_max: End of proposed label sequence
+
+    Returns:
+        Density score based on how close the label density is to the user provided target density
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
+    """
+    r = (k - 1) / (l_max - l_min)
+    rt = (m - 1) / (max(l_max, d_max) - min(d_min, l_min))
+    return 2 - max(r / rt, rt / r)
+
+
+def density_max(k, m):
+    """
+    Calculates maximum possible density score.
+
+    Args:
+        k: Number of labels in label sequence
+        m: User provided target label density
+
+    Returns:
+        Maximum possible density score given the current number of labels in the sequence and the provided target
+        density
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
+    """
+    if k >= m:
+        return 2 - (k - 1) / (m - 1)
+    else:
+        return 1
+
+
+def label_placer(d_min, d_max, m, q_arr=np.array([1, 5, 2, 4, 3]), w=np.array([0.2, 0.25, 0.5, 0.05])):
+    """
+    Algorithm for determining ideal axis labels in a way that optimizes a simplicity, legibility, coverage, and density
+    score.
+
+    Args:
+        d_min: Start of data range
+        d_max: End of data range
+        m: User provided target label density
+        q_arr: Preference-ordered list of 'nice numbers' to choose from
+        w: Four element array of weights for the four axis qualities used to calculate final score
+
+    Returns:
+        Array of selected axis labels. This implementation of Talbot (et al.)'s algorithm omits the legibility score.
+
+    References:
+        Talbot, Lin and Hanrahan, 'An Extension of Wilkinson’s Algorithm for Positioning Tick Labels on Axes',
+            IEEE Transactions on Visualization and Computer Graphics (2010)
+    """
+
+    best = {"score": -2}
+    j = 1
+    while j < np.inf:
+        for q in q_arr:
+            sm = simplicity_max(q, q_arr, j)
+            if (w[0] * sm + w[1] + w[2] + w[3]) < best["score"]:
+                j = np.inf
+                break
+            k = 2
+            while k < np.inf:  # loop over tick counts
+                dm = density_max(k, m)
+                if (w[0] * sm + w[1] + w[2] * dm + w[3]) < best["score"]:
+                    break
+                delta = (d_max - d_min) / (k + 1) / j / q
+                z = np.ceil(np.log10(delta))
+                while z < np.inf:
+                    step = j * q * 10 ** z
+                    cm = coverage_max(d_min, d_max, step * (k - 1))
+                    if (w[0] * sm + w[1] * cm + w[2] * dm + w[3]) < best["score"]:
+                        break
+                    min_start = int(np.floor(d_max / step) * j - (k - 1) * j)
+                    max_start = int(np.ceil(d_min / step) * j)
+                    if min_start > max_start:
+                        z = z + 1
+                        next
+                    for start in range(min_start, max_start):
+                        lmin = start * (step / j)
+                        lmax = lmin + step * (k - 1)
+                        lstep = step
+                        c = coverage(d_min, d_max, lmin, lmax)
+                        s = simplicity(q, q_arr, j, lmin, lmax, lstep)
+                        g = density(k, m, d_min, d_max, lmin, lmax)
+                        legibility = 1
+
+                        score = w[0] * c + w[1] * s + w[2] * g + w[3] * legibility
+
+                        if score > best["score"]:
+                            best = {"lmin": lmin, "lmax": lmax, "lstep": lstep, "score": score}
+                    z = z + 1
+                k = k + 1
+        j = j + 1
+    return np.arange(best["lmin"], best["lmax"] + best["lstep"], best["lstep"])
+
+
+def get_color_bar(colormap, data, face_color, text_color):
+    """
+    Create color bar image according to colormap and dataset
+
+    Args:
+        colormap: cv2 colormap
+        data: 2D indexable array of numerical data to apply the to
+        face_color: Color (R, G, B) to use as the background color for the image
+        text_color (str): Color to use as text color
+
+    Returns:
+        kivy.uix.image.Image object containing image of colorbar
+    """
+    c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8).T
+    c_bar = cv2.applyColorMap(c_arr, colormap)
+    c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
+    plt.figure(figsize=(1, 30))
+    plt.imshow(c_bar, origin="lower")
+
+    ax = plt.gca()
+    ax.get_xaxis().set_visible(False)
+    d_min = np.nanmin(data)
+    d_max = np.nanmax(data)
+    if d_min == d_max:
+        s_labels = [d_min]
+    elif np.isnan(d_min) or np.isnan(d_max):
+        s_labels = []
+    else:
+        s_labels = label_placer(d_min, d_max, 6)
+        s_labels = s_labels[np.where((s_labels >= d_min) & (s_labels <= d_max))]
+        if len(s_labels) < 2:
+            s_labels = [d_min, d_max]
+    if len(s_labels) > 0:
+        rep = "{:.2e}".format(s_labels[0])
+        exp_str = rep[rep.find("e"):]
+        exp = int(exp_str[1:])
+        if abs(exp) > 2:
+            formatted_labels = [round(elem / 10 ** exp, 2) for elem in s_labels]
+            exp_str = " (" + exp_str + ")"
         else:
-            exist = False
-
-    return fname
+            formatted_labels = [round(elem, 2) for elem in s_labels]
+            exp_str = ""
+        ticks = [((c - np.nanmin(data)) / (np.nanmax(data) - np.nanmin(data))) * 256 for c in s_labels]
+        ax.set_yticks(ticks=ticks, labels=formatted_labels, fontsize=dp(40))
+        ax.yaxis.label.set_color(text_color)
+        ax.tick_params(axis='y', colors=text_color)
+    else:
+        exp_str = "NaN"
+    ax.set_title("        " + exp_str, color=text_color, fontsize=dp(40))
+    temp = io.BytesIO()
+    plt.savefig(temp, facecolor=face_color, bbox_inches='tight', format="png")
+    temp.seek(0)
+    plt.close()
+    plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
+    return plot
 
 
 def sel_data(config):
@@ -213,9 +442,11 @@ def ip_get_points(line, curr, config):
 
     # If angle of line is > 45 degrees will swap x and y to increase accuracy
     xyswap = False
+    flipped = False
     img = np.asarray(curr)
     # Always read from left point to right
     if line[0] > line[2]:
+        flipped = True
         line = [line[2], line[3], line[0], line[1]]
 
     # Calculate slope
@@ -282,7 +513,14 @@ def ip_get_points(line, curr, config):
     else:
         x_name = "x"
         y_name = "y"
-
+    if line[0] > line[2] and xyswap:
+        xarr = np.flip(xarr)
+        yarr = np.flip(yarr)
+        data = np.flip(data)
+    if flipped:
+        xarr = np.flip(xarr)
+        yarr = np.flip(yarr)
+        data = np.flip(data)
     if xyswap:
         data = {x_name: yarr, y_name: xarr, 'Cut': data}
     else:

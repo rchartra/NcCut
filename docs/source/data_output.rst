@@ -21,10 +21,10 @@ File Structure
 
 The output JSON file has a hierarchical data structure that depends on the tool you used and the file you loaded.
 
-When taken from an image, the data will be simply organized into one or multiple tool group sub-dictionaries which contain one or multiple **Cut** sub-dictionaries which each contain arrays of the x coordinates, y coordinates, and the transect values of each transect.
+When taken from an image, the data will be simply organized into one or multiple tool group sub-dictionaries which contain one or multiple **Cut #** sub-dictionaries which each contain arrays of the x coordinates, y coordinates, and the transect values of each transect within the tool.
 
-    * When the data is taken with the transect tool, the tool group sub-dictionary is labeled as **Multi**.
-    * When the data is taken with the marker or chain tool the tool group sub-dictionaries are labeled as **Marker #** or **Chain #** respectively.
+    * When the data is taken with the :ref:`Transect Marker <transect_marker>` tool, the tool group sub-dictionaries are labeled as **Marker #**.
+    * When the data is taken with the :ref:`Transect Chain <transect_chain>` tool the tool group sub-dictionaries are labeled as **Chain #**. Each **Cut #** is a line segment within the chain.
     * The transect values are the mean of the RGB values of the pixel at each point. The data is interpolated for smoothness.
 
     .. image:: _media/marker_diagram.png

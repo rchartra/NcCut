@@ -5,7 +5,6 @@ Unit tests to insure transect accuracy and protect from invalid file names
 import unittest
 from PIL import Image as Im
 import numpy as np
-from pathlib import Path
 import json
 import xarray as xr
 import nccut.functions as func
@@ -146,24 +145,6 @@ class Test(unittest.TestCase):
                              "X Coordinates for NetCDF 90 Degree Transect Incorrect")
         self.assertListEqual(list(dat.coords["j"][points[1]:points[3]]), app["j"],
                              "Y Coordinates for NetCDF 90 Degree Transect Incorrect")
-
-    def test_file_names(self):
-        """
-        Test valid and invalid file names are correctly identified
-        """
-        # Setup
-        rel_path = Path().absolute()
-
-        # Test output file name rules
-        self.assertFalse(func.check_file(rel_path, "", ".jpg"), "Blank file name should not be allowed")
-        self.assertFalse(func.check_file(rel_path, "test$", ".json"), "No special characters should be allowed")
-        self.assertFalse(func.check_file(rel_path, SUPPORT_FILE_PATH + "dir1/dir2/dir3/test", ".json"),
-                         "Directories must exist")
-        self.assertEqual(func.check_file(rel_path, "test.jpg", ".jpg"), "test",
-                         "User entered extensions should be removed")
-        self.assertEqual(func.check_file(rel_path, SUPPORT_FILE_PATH + "example", ".jpg"),
-                         SUPPORT_FILE_PATH + "example(1)",
-                         "If file already exists a (#) should be added")
 
     def test_marker_find(self):
         """

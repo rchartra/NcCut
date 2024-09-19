@@ -136,6 +136,9 @@ class Test(unittest.TestCase):
                 self.assertListEqual(og_img, run_app.home.display.children[0].children, "All Tools were not removed")
 
     def test_file_cleanup(self):
+        """
+        Tests all tools, file elements, and sidebar additions are reset when a new file is opened.
+        """
         og_side = copy.copy(run_app.home.ids.sidebar.children)
 
         # Open a file and use a tool
@@ -144,6 +147,7 @@ class Test(unittest.TestCase):
         load_2d_nc("Vorticity")
         self.assertEqual(len(run_app.home.color_bar_box.children), 1, "Colorbar was not Added")
         self.assertIsNotNone(run_app.home.color_bar_box.parent, "Colorbar box was not displayed")
+        self.assertIsNotNone(run_app.home.netcdf_info.parent, "NetCDF Info bar was not displayed")
         select_sidebar_button("Transect Marker")
         x = run_app.home.size[0]
         y = run_app.home.size[1]
@@ -161,6 +165,7 @@ class Test(unittest.TestCase):
         self.assertEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar was not restored")
         self.assertEqual(len(run_app.home.color_bar_box.children), 0, "Colorbar was not removed")
         self.assertIsNone(run_app.home.color_bar_box.parent, "Colorbar box was not removed")
+        self.assertIsNone(run_app.home.netcdf_info.parent, "NetCDF info bar was not removed")
         self.assertEqual(len(run_app.home.display.children), 1, "Not all tools were removed from display")
 
     def test_project_upload(self):
@@ -232,7 +237,7 @@ class Test(unittest.TestCase):
 
         # Add new line
         select_sidebar_button("Back")
-        select_sidebar_button("New Line")
+        select_sidebar_button("New Marker")
         self.assertEqual(len(multi_mark_instance.children), 3, "New marker was not created")
 
         # Delete point
@@ -245,7 +250,7 @@ class Test(unittest.TestCase):
 
         # Test width adjustments
         select_sidebar_button("Back")
-        select_sidebar_button("New Line")
+        select_sidebar_button("New Marker")
 
         # Simulate marker press with width changes
         x = run_app.home.size[0]
@@ -348,69 +353,6 @@ class Test(unittest.TestCase):
         select_sidebar_button("Delete Last Line")
         self.assertEqual(len(tran_instance.children), 1, "When last chain is deleted, a new chain is added")
         self.assertEqual(tran_instance.children[0].points, [], "Transect Chain was not properly deleted")
-
-    def test_multi_transect(self):
-        """
-        Test regular transect tool exhibits expected behavior
-        """
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
-        run_app.home.go_btn()
-        self.assertEqual(run_app.home.file_on, True, "File was not loaded")
-
-        # Open Transect tool
-        select_sidebar_button("Transect")
-
-        x = run_app.home.size[0]
-        y = run_app.home.size[1]
-        incs = np.array([0.4, 0.45, 0.55, 0.6])
-        x_arr = incs * x
-        y_arr = incs * y
-
-        tran_instance = run_app.home.display.tool
-        # First Click
-        sidebar = run_app.home.ids.sidebar
-        tran_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
-        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
-                          "There cannot be a Plot Button on First Click")
-        self.assertEqual(len(tran_instance.children), 1, "Transect Not Added")
-
-        # Second Click
-        tran_instance.on_touch_down(Click(float(x_arr[1]), float(y_arr[1])))
-        self.assertIsInstance(next((but for but in sidebar.children if but.text == "Plot")), Button,
-                              "Plot Button should be added on second click")
-        self.assertEqual(len(tran_instance.children), 1, "A transect was improperly deleted or added")
-
-        # Third Click
-        tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
-        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
-                          "Plot Button should be Removed when a new incomplete transect is drawn")
-        self.assertEqual(len(tran_instance.children), 2, "New Transect was not Added")
-
-        # Repeat Click
-        tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
-        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
-                          "Nothing should happen when same point is clicked")
-        self.assertEqual(len(tran_instance.children), 2, "Nothing should happen when same point is clicked")
-
-        # Drag Mode
-        select_sidebar_button("Drag Mode")
-        tran_instance.on_touch_down(Click(float(x_arr[3]), float(y_arr[3])))
-        self.assertEqual(len(tran_instance.children), 2, "A new point was added when tool was in drag mode")
-
-        # Edit Mode: Delete Line, Delete point
-        select_sidebar_button("Transect Mode")
-        tran_instance.on_touch_down(Click(float(x_arr[3]), float(y_arr[3])))
-        select_sidebar_button("Edit Mode")
-        select_sidebar_button("Delete Last Line")
-        self.assertEqual(len(tran_instance.children), 1, "Transect did not delete properly")
-
-        select_sidebar_button("Delete Last Point")
-        self.assertEqual(len(tran_instance.children), 1, "Transect added or delete unexpectedly")
-        self.assertEqual(len(tran_instance.children[0].line.points), 2, "Point was not deleted from transect")
-
-        select_sidebar_button("Back")
-        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
-                          "Plot Button was not Removed when number of points became odd through deleteion")
 
     def test_netcdf_config(self):
         """
@@ -529,7 +471,7 @@ class Test(unittest.TestCase):
         y = run_app.home.size[1]
         display.update_settings("cir_size", 20)
         self.assertEqual(display.cir_size, 20, "Display circle size was not updated on setting change")
-        select_sidebar_button("Transect")
+        select_sidebar_button("Transect Chain")
         display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)),
                          "Transect graphics did not update on circle size change")
@@ -541,13 +483,13 @@ class Test(unittest.TestCase):
                          "Marker graphics were not updated on circle size change")
 
         # Reset
-        select_sidebar_button("Transect")
+        select_sidebar_button("Transect Chain")
 
         # Line Color
         display.update_settings("l_color", "Orange")
         self.assertEqual(display.l_col, "Orange", "Display line color was not updated on line color setting change")
 
-        select_sidebar_button("Transect")
+        select_sidebar_button("Transect Chain")
         display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13],
                          "Transect graphics were not updated on line color setting change")
@@ -587,14 +529,14 @@ class Test(unittest.TestCase):
         tool = run_app.home.display.tool
         for i in range(len(m1_incs)):
             tool.on_touch_down(Click(float(m1_x_arr[i]), float(m1_y_arr[i])))
-        select_sidebar_button("New Line")
+        select_sidebar_button("New Marker")
         for i in range(len(m2_incs)):
             tool.on_touch_down(Click(float(m2_x_arr[i]), float(m2_y_arr[i])))
         select_sidebar_button("Plot")
         plot_popup = tool.plotting
 
         # Initial Transect Selections
-        plot_popup.download_selected_data("__test__")
+        plot_popup.download_selected_data("__test__.json")
         f = open("__test__.json")
         res1 = json.load(f)
         f.close()
@@ -604,11 +546,11 @@ class Test(unittest.TestCase):
                          "Marker should have 3 transects and Click x, Click y, Width")
 
         # Plot Saving
-        plot_popup.download_png_plot("__test__")
+        plot_popup.download_png_plot("__test__.png")
         self.assertTrue(os.path.isfile("__test__.png"), "PNG Plot not saved")
         os.remove("__test__.png")
 
-        plot_popup.download_pdf_plot("__test__")
+        plot_popup.download_pdf_plot("__test__.pdf")
         self.assertTrue(os.path.isfile("__test__.pdf"), "PDF Plot not saved")
         os.remove("__test__.pdf")
 
@@ -623,7 +565,7 @@ class Test(unittest.TestCase):
 
         # Selecting Specific Transects
         plot_popup.on_transect_checkbox(dummy_check, "Marker 2", "Cut 2")
-        plot_popup.download_selected_data("__test__")
+        plot_popup.download_selected_data("__test__.json")
         f = open("__test__.json")
         res2 = json.load(f)
         f.close()
@@ -643,7 +585,7 @@ class Test(unittest.TestCase):
         plot_popup.on_var_checkbox(dummy_check, "Vorticity")
         self.assertTrue(dummy_check.active, "User should not be able to deselect all variables")
         plot_popup.on_var_checkbox(dummy_check, "Divergence")
-        plot_popup.download_selected_data("__test__")
+        plot_popup.download_selected_data("__test__.json")
         f = open("__test__.json")
         res3 = json.load(f)
         f.close()
@@ -659,17 +601,21 @@ class Test(unittest.TestCase):
         # Loading 3D NetCDF File
         load_3d_nc("15")
 
-        # Draw 2 Single Transects
+        # Draw 2 chains
         x = run_app.home.size[0]
         y = run_app.home.size[1]
-        incs = np.array([0.5, 0.55, 0.6, 0.65])
+        incs = np.array([0.4, 0.45, 0.5, 0.55, 0.6, 0.65])
         x_arr = incs * x
         y_arr = incs * y
-        select_sidebar_button("Transect")
+        select_sidebar_button("Transect Chain")
         tool = run_app.home.display.tool
-        for i in range(len(incs)):
+        for i in range(3):
+            tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
+        select_sidebar_button("New Chain")
+        for i in range(3, 6):
             tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
         select_sidebar_button("Plot")
+        self.assertEqual(len(tool.children), 2, "2 Chains Not Added")
         plot_popup = tool.plotting
 
         # Selecting multiple z values
@@ -678,7 +624,7 @@ class Test(unittest.TestCase):
         self.assertTrue(dummy_check.active, "User should not be able to deselect all z values")
         plot_popup.on_z_checkbox(dummy_check, "30")
         plot_popup.on_z_checkbox(dummy_check, "60")
-        plot_popup.download_selected_data("__test__")
+        plot_popup.download_selected_data("__test__.json")
         f = open("__test__.json")
         res1 = json.load(f)
         f.close()
@@ -687,20 +633,22 @@ class Test(unittest.TestCase):
                          "Three z values were selected so three should have been saved")
 
         # Saving all z data
-        plot_popup.download_all_z_data("__test__")
+        plot_popup.download_all_z_data("__test__.json")
         f = open("__test__.json")
         res2 = json.load(f)
         f.close()
         os.remove("__test__.json")
         self.assertEqual(len(list(res2["Theta"].keys())), 18, "All z values should have been saved")
 
-        # Ensure one transect requirement for the all z plot
+        # Ensure one chain requirement for the all z plot
+        dummy_check = CheckBox(active=False)
+        plot_popup.on_chain_checkbox(dummy_check, "Chain 2")
         og_plot = str(plot_popup.plot)
         plot_popup.get_all_z_plot()
         self.assertEqual(og_plot, str(plot_popup.plot),
-                         "If more than one transect is selected all Z values should not be plotted")
+                         "If more than one chain is selected all Z values should not be plotted")
         dummy_check = CheckBox(active=False)
-        plot_popup.on_transect_checkbox(dummy_check, "Multi", "Cut 2")
+        plot_popup.on_chain_checkbox(dummy_check, "Chain 1")
         plot_popup.get_all_z_plot()
         self.assertNotEqual(og_plot, str(plot_popup.plot),
                             "If only one transect is selected the all z plot should be created")

@@ -5,13 +5,12 @@ Manages having multiple markers on screen at once and the uploading of previous 
 """
 
 import kivy.uix as ui
-from kivy.uix.button import Button
 from kivy.uix.popup import Popup
-from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.core.window import Window
-from os.path import exists
 import json
+import tkinter as tk
+from tkinter import filedialog
 from scipy.interpolate import CubicSpline
 import nccut.functions as func
 from nccut.marker import Marker
@@ -105,7 +104,7 @@ class MultiMarker(ui.widget.Widget):
         m_on (bool): Whether there are any markers active
         upload_fail (bool): If anything has gone wrong in the project uploading process
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
-        dbtn: RoundedButton, Plot button to activate PlotPopup
+        dbtn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
         dragging (bool): Whether viewer is in dragging mode
         width_w: :class:`nccut.markerwidth.MarkerWidth` widget to allow for adjustable marker widths
         clicks (int): Number of clicks made by user. Does not decrease when points are deleted
@@ -139,10 +138,10 @@ class MultiMarker(ui.widget.Widget):
         self.upbtn.bind(on_press=lambda x: self.upload_pop())
         self.home.ids.sidebar.add_widget(self.upbtn, 1)
 
-        # New Line Button
-        self.nbtn = func.RoundedButton(text="New Line", size_hint=(1, 0.1), font_size=self.home.font)
+        # New Marker Button
+        self.nbtn = func.RoundedButton(text="New Marker", size_hint=(1, 0.1), font_size=self.home.font)
 
-        self.nbtn.bind(on_press=lambda x: self.new_line())
+        self.nbtn.bind(on_press=lambda x: self.new_marker())
         self.home.ids.sidebar.add_widget(self.nbtn, 1)
 
     def font_adapt(self, font):
@@ -191,59 +190,43 @@ class MultiMarker(ui.widget.Widget):
         """
         Opens popup to ask for name of project file user wishes to upload.
         """
-        content = ui.boxlayout.BoxLayout(orientation='horizontal')
-        popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
-        txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
-        content.add_widget(txt)
-        go = Button(text="Ok", size_hint=(0.1, 1))
-        go.bind(on_release=lambda x: self.check_file(txt.text, popup))
-        close = Button(text="Close", size_hint=(0.2, 1))
-        close.bind(on_press=popup.dismiss)
-        content.add_widget(go)
-        content.add_widget(close)
-        popup.open()
+        """
+        Opens native operating system file browser to allow user to select their project file
+        """
+        root = tk.Tk()
+        root.withdraw()
+        path = filedialog.askopenfilename(filetypes=[("Project File", "*.json")])
+        self.check_file(path)
 
-    def check_file(self, file, popup):
+    def check_file(self, file):
         """
         Checks is given file name is a properly formatted project file. If it is it uploads
-        file. If not, closes popups and shows error message.
+        file. If not, shows error message.
 
         Args:
             file (str): File path
-            popup: kivy.uix.popup.Popup, File name input popup (so can close if file invalid)
         """
-        if exists(file):
-            if file[-5:] == ".json":
-                data = json.load(open(file))
-                config = self.home.display.config
-                x_name = "X"
-                y_name = "Y"
-                nc_coords = False
-                if list(config.keys())[0] == "netcdf":
-                    try:
-                        config["netcdf"]["file"].coords[config["netcdf"]["x"]].data.astype(float)
-                        config["netcdf"]["file"].coords[config["netcdf"]["y"]].data.astype(float)
-                        x_name = config["netcdf"]["x"]
-                        y_name = config["netcdf"]["y"]
-                        nc_coords = True
-                    except ValueError:
-                        pass
-                found = marker_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"])
-                if len(found) >= 1:
-                    popup.dismiss()
-                    if nc_coords:
-                        found = self.convert_found_coords(found)
-                    self.upload_data(found)
-                else:
-                    content = Label(text="JSON File is not a Project for this File")
-                    popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
-                    popup2.open()
-            else:
-                content = Label(text="Incorrect File Format")
-                popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
-                popup2.open()
+        data = json.load(open(file))
+        config = self.home.display.config
+        x_name = "X"
+        y_name = "Y"
+        nc_coords = False
+        if list(config.keys())[0] == "netcdf":
+            try:
+                config["netcdf"]["file"].coords[config["netcdf"]["x"]].data.astype(float)
+                config["netcdf"]["file"].coords[config["netcdf"]["y"]].data.astype(float)
+                x_name = config["netcdf"]["x"]
+                y_name = config["netcdf"]["y"]
+                nc_coords = True
+            except ValueError:
+                pass
+        found = marker_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"])
+        if len(found) >= 1:
+            if nc_coords:
+                found = self.convert_found_coords(found)
+            self.upload_data(found)
         else:
-            content = Label(text="File Not Found")
+            content = Label(text="JSON File is not a Project for this File")
             popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
             popup2.open()
 
@@ -301,10 +284,14 @@ class MultiMarker(ui.widget.Widget):
                 marker.on_touch_down(touch)
                 self.clicks += 1
             marker.upload_mode(False)
+            if self.clicks >= 1 and self.width_w.parent is None:
+                self.home.ids.sidebar.add_widget(self.width_w, 1)
+            if self.clicks >= 2 and self.dbtn.parent is None:
+                self.home.ids.sidebar.add_widget(self.dbtn, 1)
             if self.upload_fail:  # If upload goes wrong, stop and undo everything
                 self.undo_upload(m)
                 return
-        self.new_line()
+        self.new_marker()
 
     def undo_upload(self, markers):
         """
@@ -325,7 +312,7 @@ class MultiMarker(ui.widget.Widget):
                 self.home.display.current.remove(self.width_w)
             if self.dragging:
                 self.home.display.drag_mode()
-            self.new_line()
+            self.new_marker()
         content = Label(text="Project File Markers out of Bounds")
         popup = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
         popup.open()
@@ -360,7 +347,7 @@ class MultiMarker(ui.widget.Widget):
                 self.home.display.current.remove(self.dbtn)
             if self.width_w in self.home.display.current:
                 self.home.display.current.remove(self.width_w)
-            self.new_line()
+            self.new_marker()
 
     def del_point(self):
         """
@@ -383,7 +370,7 @@ class MultiMarker(ui.widget.Widget):
         # Delete point from current marker
         self.children[0].del_point()
 
-    def new_line(self):
+    def new_marker(self):
         """
         Creates a new marker if not in dragging or editing mode and current marker has at least two clicks.
         """
@@ -427,8 +414,8 @@ class MultiMarker(ui.widget.Widget):
                     cy = y_spline(cy).tolist()
                 data['Click ' + str(x_name)], data['Click ' + str(y_name)], data['Width'] = cx, cy, w
                 count = 1
-                for j in i.base.lines:
-                    data["Cut " + str(count)] = j.line.points
+                for j in i.transects:
+                    data["Cut " + str(count)] = j.points
                     count += 1
                 frames["Marker " + str(c)] = data
                 c += 1
@@ -444,7 +431,7 @@ class MultiMarker(ui.widget.Widget):
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 if touch.is_double_tap:
-                    self.new_line()
+                    self.new_marker()
                 else:
                     self.clicks += 1
                     if self.clicks >= 1 and self.width_w.parent is None:
@@ -453,6 +440,6 @@ class MultiMarker(ui.widget.Widget):
                         self.home.ids.sidebar.add_widget(self.dbtn, 1)
                     # If no current marker, create marker. Otherwise, pass touch to current marker.
                     if not self.m_on:
-                        self.new_line()
+                        self.new_marker()
                         self.m_on = True
                     self.children[0].on_touch_down(touch)
