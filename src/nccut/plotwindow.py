@@ -16,8 +16,8 @@ import numpy as np
 import cv2
 import pathlib
 
-KV_PATH = pathlib.Path(__file__).parent.resolve()
-Builder.load_file(str(KV_PATH) + "\\plotwindow.kv")
+KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotwindow.kv"
+Builder.load_file(str(KV_FILE_PATH))
 
 
 class YAxis(FloatLayout):
