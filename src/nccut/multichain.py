@@ -176,8 +176,8 @@ class MultiChain(ui.widget.Widget):
                     cy = y_spline(cy)
                 data['Click ' + str(x_name)], data['Click ' + str(y_name)] = cx, cy
                 count = 1
-                for j in i.base.lines:
-                    data["Cut " + str(count)] = j.line.points
+                for j in i.transects:
+                    data["Cut " + str(count)] = j.points
                     count += 1
                 frames["Chain " + str(c)] = data
                 c += 1

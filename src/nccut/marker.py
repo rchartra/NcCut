@@ -12,8 +12,6 @@ import math
 import numpy as np
 from kivy.core.window import Window
 import nccut.functions as functions
-from nccut.singletransect import SingleTransect
-from nccut.multitransect import MultiTransect
 
 
 class Marker(ui.widget.Widget):
@@ -22,14 +20,14 @@ class Marker(ui.widget.Widget):
 
     Graphics and functionality of a singular marker created by the transect marker tool.
     Determines endpoints of where transects should be made orthogonally to the user marked
-    out line, and then uses a MultiTransect object to manage the transects.
+    out line, and then stores the transects.
 
     Attributes:
         clicks (int): Number of clicks user has made. Decreases when points are deleted.
         points (list): List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
         t_width (int): Current width in pixels of orthogonal transects
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
-        base: :class:`nccut.multitransect.MultiTransect` object that manages transects
+        transects (list): List of transects made
         curr_line: kivy.graphics.Line, Line between cursor and last clicked
         number: kivy.uix.label.Label, Reference to the number label
         size: 2 element array of ints, Size of widget
@@ -52,7 +50,7 @@ class Marker(ui.widget.Widget):
         self.t_width = width
         self.uploaded = False
         self.home = home
-        self.base = MultiTransect(home=self.home)
+        self.transects = []
         self.curr_line = Line()
         self.number = None
         self.size = self.home.display.size
@@ -200,7 +198,7 @@ class Marker(ui.widget.Widget):
         Graphics are grouped by the number of clicks made when they were created for easier deletion.
         """
         if self.clicks != 1:
-            self.base.lines = self.base.lines[:-1]
+            self.transects = self.transects[:-1]
         else:
             # Remove plot and width buttons from sidebar if last point of the marker
             if self.parent.dbtn in self.home.display.current:
@@ -250,13 +248,11 @@ class Marker(ui.widget.Widget):
                     Color(self.l_color.r, self.l_color.g, self.l_color.b)
                     line = Line(points=[self.points[-2][0:2], self.points[-1][0:2]],
                                 width=self.line_width, group=str(self.clicks))
-                # Stores orthogonal line in a SingleTransect which gets stored in base MultiTransect
+                # Stores orthogonal line
                 coords = self.get_orthogonal(line)
                 if self.in_bounds(coords):
                     # Check if orthogonal points are within image bounds
-                    x = SingleTransect(home=self.home)
-                    x.line = Line(points=coords, width=self.line_width)
-                    self.base.lines.append(x)
+                    self.transects.append(Line(points=coords, width=self.line_width))
                 else:
                     # Undo actions and alert user or parent
                     self.canvas.remove_group(str(self.clicks))

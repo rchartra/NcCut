@@ -9,8 +9,6 @@ from kivy.metrics import dp
 from kivy.graphics import Color, Ellipse, Line
 from kivy.uix.label import Label
 from kivy.core.window import Window
-from nccut.multitransect import MultiTransect
-from nccut.singletransect import SingleTransect
 
 
 class Chain(ui.widget.Widget):
@@ -18,14 +16,13 @@ class Chain(ui.widget.Widget):
     Singular transect chain widget.
 
     Graphics and functionality of a singular chain created by the transect chain tool. Draws point on each user click
-    and connects points with a line creating a chain of transects. Uses a MultiTransect object to store ana manage the
-    individual transects.
+    and connects points with a line creating a chain of transects.
 
     Attributes:
         clicks (int): Number of clicks user has made. Decreases when points are deleted.
         points (list): List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
-        base: :class:`nccut.multitransect.MultiTransect` object that manages transects
+        transects (list): List of transects made
         curr_line: kivy.graphics.Line, Line between cursor and last clicked
         number: kivy.uix.label.Label, Reference to the number label
         size: 2 element array of ints, Size of widget
@@ -45,7 +42,7 @@ class Chain(ui.widget.Widget):
         self.clicks = 0
         self.points = []
         self.home = home
-        self.base = MultiTransect(home=self.home)
+        self.transects = []
         self.curr_line = Line()
         self.number = None
         self.size = self.home.display.size
@@ -117,7 +114,7 @@ class Chain(ui.widget.Widget):
         Graphics are grouped by the number of clicks made when they were created for easier deletion.
         """
         if self.clicks != 1:
-            self.base.lines = self.base.lines[:-1]
+            self.transects = self.transects[:-1]
         else:
             # Remove plot buttons from sidebar if last point of the chain
             if self.parent.dbtn in self.home.display.current:
@@ -159,10 +156,8 @@ class Chain(ui.widget.Widget):
                         Color(self.l_color.r, self.l_color.g, self.l_color.b)
                         line = Line(points=[self.points[-2][0:2], self.points[-1][0:2]],
                                     width=self.line_width, group=str(self.clicks))
-                    # Stores line in a SingleTransect which gets stored in base MultiTransect
-                    x = SingleTransect(home=self.home)
-                    x.line = line
-                    self.base.lines.append(x)
+                    # Store line
+                    self.transects.append(line)
 
                 else:
                     # If first click, adds chain number

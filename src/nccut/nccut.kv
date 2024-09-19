@@ -251,6 +251,7 @@
 <HomeScreen>
 
     BoxLayout:
+        id: main_box
         orientation: "vertical"
         size_hint: (0.8, 1)
         spacing: dp(10)
@@ -371,7 +372,7 @@
 
             TextInput:
                 id: file_in
-                size_hint: (0.9, 1)
+                size_hint: (0.75, 1)
                 hint_text: "Enter Image or NetCDF File Path"
 
             RoundedButton:
@@ -379,6 +380,12 @@
                 text: "Go"
                 font_size: self.size[1] / 2
                 on_press: root.go_btn()
+
+            RoundedButton:
+                size_hint: (0.15, 1)
+                text: "Browse"
+                font_size: self.size[1] / 2
+                on_press: root.browse()
 
     BoxLayout:
         id: sidebar
@@ -397,23 +404,17 @@
             font_size: self.size[0] / 10
 
         RoundedButton:
-            text: "Transect"
+            text: "Transect Chain"
             id: transect
             size_hint: (1, 0.1)
             font_size: self.size[0] / 12
-            on_press: root.transect_btn("transect")
+            on_press: root.transect_btn("transect_chain")
 
         RoundedButton:
             text: "Transect Marker"
             size_hint: (1, 0.1)
             font_size: self.size[0] / 12
             on_press: root.transect_btn("transect_marker")
-
-        RoundedButton:
-            text: "Transect Chain"
-            size_hint: (1, 0.1)
-            font_size: self.size[0] / 12
-            on_press: root.transect_btn("transect_chain")
 
         RoundedButton:
             text: "Quit"

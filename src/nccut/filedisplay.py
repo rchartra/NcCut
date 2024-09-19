@@ -9,7 +9,6 @@ ScatterLayout class. Manages the creation and deletion of tools.
 import kivy
 from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
-from kivy.metrics import dp
 import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
 from PIL import Image as im
@@ -18,12 +17,8 @@ import cv2
 import copy
 import io
 import nccut.functions as func
-from nccut.multitransect import MultiTransect
 from nccut.multimarker import MultiMarker
 from nccut.multichain import MultiChain
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
 
 class FileDisplay(ScatterLayout):
@@ -139,7 +134,7 @@ class FileDisplay(ScatterLayout):
 
         self.load_image()
 
-    # Turn off ScatterLayout functionality that conflicts with ImageView functionality
+    # Turn off ScatterLayout functionality that conflicts with functionality
     ScatterLayout.do_rotation = False
     ScatterLayout.do_scale = False
 
@@ -185,17 +180,10 @@ class FileDisplay(ScatterLayout):
             args: Two element list of object and it's size
         """
         if not self.resized:
-            w_size = self.home.ids.view.size
-            i_size = self.bbox[1]
-            if i_size[0] >= w_size[0] or i_size[1] >= w_size[1]:
-                while self.bbox[1][0] >= w_size[0] or self.bbox[1][1] >= w_size[1]:
-                    mat = Matrix().scale(.9, .9, .9)
-                    self.apply_transform(mat)
-            if i_size[0] <= w_size[0] and i_size[1] <= w_size[1]:
-                while self.bbox[1][0] <= w_size[0] and self.bbox[1][1] <= w_size[1]:
-                    mat = Matrix().scale(1.1, 1.1, 1.1)
-                    self.apply_transform(mat)
-            xco = w_size[0] / 2 - self.bbox[1][0] / 2
+            bounds = self.home.ids.view.size
+            r = min([bounds[i] / self.bbox[1][i] for i in range(len(bounds))])
+            self.apply_transform(Matrix().scale(r, r, r))
+            xco = bounds[0] / 2 - self.bbox[1][0] / 2
             self.pos = (xco, self.pos[1])
             if args[0]:
                 self.resized = True
@@ -216,9 +204,7 @@ class FileDisplay(ScatterLayout):
             for w in self.action_widgets:
                 self.sidebar.add_widget(w, 1)
             kivy.core.window.Window.set_system_cursor("crosshair")
-            if t_type == "transect":
-                self.tool = MultiTransect(home=self.home)
-            elif t_type == "transect_marker":
+            if t_type == "transect_marker":
                 self.tool = MultiMarker(home=self.home)
             elif t_type == "transect_chain":
                 self.tool = MultiChain(home=self.home)
@@ -341,7 +327,6 @@ class FileDisplay(ScatterLayout):
         can make image out of an array.
         """
         self.nc_data = np.flip(func.sel_data(self.config['netcdf']).data, 0)
-
         n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
         nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 3, axis=2)
 
@@ -350,41 +335,12 @@ class FileDisplay(ScatterLayout):
         c_mapped = cv2.applyColorMap(n_data, self.colormap)
         whites = np.ones(c_mapped.shape) * 255
         img = np.where(nans, whites, c_mapped)
-        self.home.load_colorbar(self.get_color_bar())
-
+        self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white"),
+                                         self.config[self.f_type])
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
         is_success, img_b = cv2.imencode(".png", img)
         self.byte = io.BytesIO(img_b)
-
-    def get_color_bar(self):
-        """
-        Create color bar image according to colormap and dataset
-        """
-        c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8).T
-        c_bar = cv2.applyColorMap(c_arr, self.colormap)
-        c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
-        plt.figure(figsize=(1, 30))
-        plt.imshow(c_bar)
-
-        ax = plt.gca()
-        ax.get_xaxis().set_visible(False)
-        lab_arr = np.linspace(np.nanmin(self.nc_data), np.nanmax(self.nc_data), 256)
-        rep = "{:.2e}".format(lab_arr[128])
-        exp_str = rep[rep.find("e"):]
-        exp = int(exp_str[1:])
-        lab_arr = [round(elem / 10 ** exp, 2) for elem in lab_arr]
-        ticks = [0, 50, 100, 150, 200, 250]
-        ax.set_yticks(ticks=ticks, labels=[lab_arr[i] for i in ticks], fontsize=dp(40))
-        ax.yaxis.label.set_color('white')
-        ax.tick_params(axis='y', colors='white')
-        ax.set_title("        " + exp_str, color='white', fontsize=dp(40))
-        temp = io.BytesIO()
-        plt.savefig(temp, facecolor=(0.2, 0.2, 0.2), bbox_inches='tight', format="png")
-        temp.seek(0)
-        plt.close()
-        plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
-        return plot
 
     def apply_contrast(self, data, contrast):
         """
