@@ -306,68 +306,59 @@ class PlotPopup(Popup):
             ext = ".pdf"
             f_types = [("PDF", "*.pdf")]
         fpath = filedialog.asksaveasfilename(defaultextension=ext, filetypes=f_types)
-        if s_type == "s_data":
-            self.download_selected_data(fpath)
-        elif s_type == "a_data":
-            self.download_all_data(fpath)
-        elif s_type == "all_z":
-            self.download_all_z_data(fpath)
-        elif s_type == "png":
-            self.download_png_plot(fpath)
-        elif s_type == "pdf":
-            self.download_pdf_plot(fpath)
+        print(fpath)
+        if fpath != "":
+            if s_type == "s_data":
+                self.download_selected_data(fpath)
+            elif s_type == "a_data":
+                self.download_all_data(fpath)
+            elif s_type == "all_z":
+                self.download_all_z_data(fpath)
+            elif s_type == "png":
+                self.download_png_plot(fpath)
+            elif s_type == "pdf":
+                self.download_pdf_plot(fpath)
 
-    def close_popups(self, fpop):
-        """
-        Close file name popup and plot popup
-
-        Args:
-            fpop: reference to file name popup
-        """
-        fpop.dismiss()
-        self.dismiss()
-
-    def download_png_plot(self, f_name):
+    def download_png_plot(self, f_path):
         """
         Download the current plot as a PNG file if valid file name given
 
         Args:
-            f_name (str): Output file path
+            f_path (str): Output file path
         """
-        path = self.home.rel_path / f_name
         if isinstance(self.plot, PlotWindow):
-            self.plot.export_to_png(str(path.absolute()))
+            self.plot.export_to_png(f_path)
         else:
-            self.plot.texture.save(str(path.absolute()))
-            img = cv2.flip(cv2.imread(str(path.absolute())), 0)
-            cv2.imwrite(str(path.absolute()), img)
+            self.plot.texture.save(f_path)
+            img = cv2.flip(cv2.imread(f_path), 0)
+            cv2.imwrite(f_path, img)
         func.alert("Download Complete", self.home)
 
-    def download_pdf_plot(self, f_name):
+    def download_pdf_plot(self, f_path):
         """
         Download the current plot as a PDF file if valid file name given
 
         Args:
-            f_name (str): Output file path
+            f_path (str): Output file path
         """
-        ipath = self.home.rel_path / (f_name[:-4] + ".png")
-        ppath = self.home.rel_path / f_name
+        ipath = f_path[:-4] + ".png"
+        ppath = f_path
         if isinstance(self.plot, PlotWindow):
-            self.plot.export_to_png(str(ipath.absolute()))
-            img = im.open(str(ipath.absolute()))
+            self.plot.export_to_png(ipath)
+            img = im.open(ipath)
         else:
-            self.plot.texture.save(str(ipath.absolute()))
-            img = imo.flip(im.open(str(ipath.absolute())))
+            self.plot.texture.save(ipath)
+            img = imo.flip(im.open(ipath))
         img.save(ppath, "PDF")
         os.remove(ipath)
         func.alert("Download Complete", self.home)
 
-    def download_selected_data(self, f_name):
+    def download_selected_data(self, f_path):
         """
         Downloads selected transect data into a JSON file if valid file name given.
 
         Args:
-            f_name (str): Output file path
+            f_path (str): Output file path
         """
         dat = copy.copy(self.active_data)
         if len(self.active_vars) == 0:  # If Image
@@ -382,24 +373,24 @@ class PlotPopup(Popup):
                 final[var] = {}
                 for z in list(dat[var].keys()):
                     final[var][z] = self.add_group_info(dat[var][z])
-        with open(self.home.rel_path / f_name, "w") as f:
+        with open(f_path, "w") as f:
             json.dump(final, f)
 
         func.alert("Download Complete", self.home)
 
-    def download_all_data(self, f_name):
+    def download_all_data(self, f_path):
         """
         Downloads selected data for all transects/groups into a JSON file if valid file name given.
 
         Args:
-            f_name (str): Output file path
+            f_path (str): Output file path
         """
         original = copy.copy(self.active_transects)
         for m in list(self.active_transects.keys()):
             for t in list(self.active_transects[m].keys()):
                 self.active_transects[m][t] = True
         self.active_data = self.get_data()
-        self.download_selected_data(f_name)
+        self.download_selected_data(f_path)
         self.active_transects = original
         self.active_data = self.get_data()
 
@@ -423,18 +414,18 @@ class PlotPopup(Popup):
                     dicti[chain][key] = list(self.all_transects[chain][key])
         return dicti
 
-    def download_all_z_data(self, f_name):
+    def download_all_z_data(self, f_path):
         """
         Get and download data for all selected variables for all z dimension values.
 
         Args:
-            f_name (str): Output file path
+            f_path (str): Output file path
         """
         original = copy.copy(self.active_z)
         z_list = self.config[self.f_type]['z']
         self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[z_list].data]
         self.active_data = self.get_data()
-        self.download_selected_data(f_name)
+        self.download_selected_data(f_path)
         self.active_z = original
         self.active_data = self.get_data()
 
