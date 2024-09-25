@@ -11,6 +11,7 @@ from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
 import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
+from kivy.metrics import dp
 from PIL import Image as im
 import numpy as np
 import cv2
@@ -335,8 +336,8 @@ class FileDisplay(ScatterLayout):
         c_mapped = cv2.applyColorMap(n_data, self.colormap)
         whites = np.ones(c_mapped.shape) * 255
         img = np.where(nans, whites, c_mapped)
-        self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white"),
-                                         self.config[self.f_type])
+        self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white",
+                                                            dp(40)), self.config[self.f_type])
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
         is_success, img_b = cv2.imencode(".png", img)

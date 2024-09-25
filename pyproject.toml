@@ -26,7 +26,8 @@ netCDF4 = "^1.7.1"
 opencv-python = "^4.10.0.84"
 Kivy = "^2.3.0"
 progress = "^1.6"
-tk = "^0.1.0"
+plyer = "^2.1.0"
+pyobjus = "^1.2.3"
 
 [tool.poetry.group.test.dependencies]
 flake8 = "^7.1.0"

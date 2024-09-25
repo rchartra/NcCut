@@ -41,7 +41,7 @@ class NcCut(App):
         """
         super(NcCut, self).__init__(**kwargs)
         self.file = file
-        self.btn_img_path = os.path.dirname(os.path.realpath(__file__)) + "\\__btn_images__\\"
+        self.btn_img_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "__btn_images__")
 
     def on_start(self):
         """

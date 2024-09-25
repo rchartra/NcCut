@@ -6,6 +6,7 @@
 #:import NetCDFDropDown nccut.dropdowns.NetCDFDropDown
 #:import LineColorDropDown nccut.dropdowns.LineColorDropDown
 #:import CircleSizeDropDown nccut.dropdowns.CircleSizeDropDown
+#:import join os.path.join
 
 <BackgroundLabel>
     background_color: 0.2, 0.2, 0.2, 1
@@ -107,7 +108,7 @@
             Image:
                 size: blue_btn.size
                 pos: blue_btn.pos
-                source: app.btn_img_path + "blue_line_btn.png"
+                source: join(app.btn_img_path, "blue_line_btn.png")
 
         RoundedButton:
             id: orange_btn
@@ -115,7 +116,7 @@
             Image:
                 size: orange_btn.size
                 pos: orange_btn.pos
-                source: app.btn_img_path + "orange_line_btn.png"
+                source: join(app.btn_img_path, "orange_line_btn.png")
 
         RoundedButton:
             id: green_btn
@@ -123,7 +124,7 @@
             Image:
                 size: green_btn.size
                 pos: green_btn.pos
-                source: app.btn_img_path + "green_line_btn.png"
+                source: join(app.btn_img_path, "green_line_btn.png")
 
 <NetCDFDropDown>
     auto_width: False
@@ -284,7 +285,7 @@
 
                 Image:
                     id: line_color_btn_img
-                    source: app.btn_img_path + "blue_line_btn.png"
+                    source: join(app.btn_img_path, "blue_line_btn.png")
                     size: line_color_btn.size
                     pos: line_color_btn.pos
 
@@ -296,7 +297,7 @@
 
                 Image:
                     id: circle_size_btn_img
-                    source: app.btn_img_path + "cir_size_btn.png"
+                    source: join(app.btn_img_path, "cir_size_btn.png")
                     size: circle_size_btn.size
                     pos: circle_size_btn.pos
 
@@ -308,7 +309,7 @@
 
                 Image:
                     id: rotate_btn_img
-                    source: app.btn_img_path + "rotate_btn.png"
+                    source: join(app.btn_img_path, "rotate_btn.png")
                     size: rotate_btn.size
                     pos: rotate_btn.pos
 
@@ -320,7 +321,7 @@
 
                 Image:
                     id: h_flip_btn_img
-                    source: app.btn_img_path + "h_flip_btn.png"
+                    source: join(app.btn_img_path, "h_flip_btn.png")
                     size: h_flip_btn.size
                     pos: h_flip_btn.pos
 
@@ -332,7 +333,7 @@
 
                 Image:
                     id: v_flip_btn_img
-                    source: app.btn_img_path + "v_flip_btn.png"
+                    source: join(app.btn_img_path, "v_flip_btn.png")
                     size: v_flip_btn.size
                     pos: v_flip_btn.pos
 
