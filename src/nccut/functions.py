@@ -76,8 +76,8 @@ def alert(text, home):
     screen = kivy.core.window.Window.size
     with home.canvas:
         Color(0.2, 0.2, 0.2)
-        box = Rectangle(pos=(10, kivy.core.window.Window.size[1] - 60), size=(300, 50))
-    aler = Label(text=text, size=home.size, pos=(-(screen[0] / 2) + 160, screen[1] / 2 - 35))
+        box = Rectangle(pos=(dp(10), kivy.core.window.Window.size[1] - dp(60)), size=(dp(300), dp(50)))
+    aler = Label(text=text, size=home.size, pos=(-(screen[0] / 2) + dp(160), screen[1] / 2 - dp(35)))
     home.add_widget(aler)
     kivy.clock.Clock.schedule_once(partial(remove_alert, aler, home), 2)
     kivy.clock.Clock.schedule_once(partial(home.canvas_remove, box), 2)
@@ -290,7 +290,7 @@ def label_placer(d_min, d_max, m, q_arr=np.array([1, 5, 2, 4, 3]), w=np.array([0
     return np.arange(best["lmin"], best["lmax"] + best["lstep"], best["lstep"])
 
 
-def get_color_bar(colormap, data, face_color, text_color):
+def get_color_bar(colormap, data, face_color, text_color, font):
     """
     Create color bar image according to colormap and dataset
 
@@ -299,6 +299,7 @@ def get_color_bar(colormap, data, face_color, text_color):
         data: 2D indexable array of numerical data to apply the to
         face_color: Color (R, G, B) to use as the background color for the image
         text_color (str): Color to use as text color
+        font (float): Font to use for tick labels
 
     Returns:
         kivy.uix.image.Image object containing image of colorbar
@@ -333,12 +334,12 @@ def get_color_bar(colormap, data, face_color, text_color):
             formatted_labels = [round(elem, 2) for elem in s_labels]
             exp_str = ""
         ticks = [((c - np.nanmin(data)) / (np.nanmax(data) - np.nanmin(data))) * 256 for c in s_labels]
-        ax.set_yticks(ticks=ticks, labels=formatted_labels, fontsize=dp(40))
+        ax.set_yticks(ticks=ticks, labels=formatted_labels, fontsize=font)
         ax.yaxis.label.set_color(text_color)
         ax.tick_params(axis='y', colors=text_color)
     else:
         exp_str = "NaN"
-    ax.set_title("        " + exp_str, color=text_color, fontsize=dp(40))
+    ax.set_title("        " + exp_str, color=text_color, fontsize=font)
     temp = io.BytesIO()
     plt.savefig(temp, facecolor=face_color, bbox_inches='tight', format="png")
     temp.seek(0)

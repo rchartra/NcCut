@@ -92,7 +92,7 @@ class YAxis(FloatLayout):
         self.canvas.clear()
         self.clear_widgets()
         # Determine goal tick density (not necessarily the actual density)
-        d = self.height / 40
+        d = self.height / 50
         if d < 2:
             d = 2
         elif d > 9:
@@ -187,7 +187,7 @@ class XAxis(FloatLayout):
         self.canvas.clear()
         self.clear_widgets()
         # Determine goal tick density (not necessarily the actual density)
-        d = self.width / 60
+        d = self.width / 70
         if d < 2:
             d = 2
         elif d > 9:
@@ -306,7 +306,8 @@ class PlotWindow(RelativeLayout):
         self.add_widget(self.x_axis)
         self.add_widget(self.y_axis)
         # Create and add colorbar
-        self.ids.color_bar_box.add_widget(func.get_color_bar(cv2.COLORMAP_VIRIDIS, self.z_data, (1, 1, 1), "black"))
+        self.ids.color_bar_box.add_widget(func.get_color_bar(cv2.COLORMAP_VIRIDIS, self.z_data, (1, 1, 1), "black",
+                                                             self.font * 4))
 
         self.resized += 1
 

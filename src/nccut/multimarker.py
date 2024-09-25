@@ -9,8 +9,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.core.window import Window
 import json
-import tkinter as tk
-from tkinter import filedialog
+from plyer import filechooser
 from scipy.interpolate import CubicSpline
 import nccut.functions as func
 from nccut.marker import Marker
@@ -193,10 +192,9 @@ class MultiMarker(ui.widget.Widget):
         """
         Opens native operating system file browser to allow user to select their project file
         """
-        root = tk.Tk()
-        root.withdraw()
-        path = filedialog.askopenfilename(filetypes=[("Project File", "*.json")])
-        self.check_file(path)
+        path = filechooser.open_file(filters=["*.json"])
+        if path is not None and len(path) != 0:
+            self.check_file(path[0])
 
     def check_file(self, file):
         """

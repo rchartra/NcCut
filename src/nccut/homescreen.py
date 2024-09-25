@@ -16,8 +16,7 @@ import re
 import os
 import nccut.functions as func
 from pathlib import Path
-import tkinter as tk
-from tkinter import filedialog
+from plyer import filechooser
 from nccut.filedisplay import FileDisplay
 from nccut.netcdfconfig import NetCDFConfig
 
@@ -151,9 +150,12 @@ class HomeScreen(Screen):
         """
         Opens native operating system file browser to allow user to select their file
         """
-        root = tk.Tk()
-        root.withdraw()
-        self.ids.file_in.text = filedialog.askopenfilename(filetypes=[("Allowed Types", "*.png *.jpg *.jpeg *.nc")])
+        files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
+        if files is None or len(files) == 0:
+            text = ""
+        else:
+            text = files[0]
+        self.ids.file_in.text = text
         self.go_btn()
 
     def load_colorbar_and_info(self, colorbar, config):

@@ -14,14 +14,13 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
+from plyer import filechooser
 import nccut.functions as func
 from nccut.plotwindow import PlotWindow
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im
 from PIL import ImageOps as imo
-import tkinter as tk
-from tkinter import filedialog
 import numpy as np
 import copy
 import os
@@ -294,20 +293,16 @@ class PlotPopup(Popup):
                 'png': Current plot as a PNG file
                 'pdf': Current plot as a PDF file
         """
-        root = tk.Tk()
-        root.withdraw()
+
         if s_type == "s_data" or s_type == "a_data" or s_type == "all_z":
-            ext = ".json"
-            f_types = [("JSON", "*.json")]
+            f_types = ["*.json"]
         elif s_type == "png":
-            ext = ".png"
-            f_types = [("PNG", "*.png")]
+            f_types = ["*.png"]
         elif s_type == "pdf":
-            ext = ".pdf"
-            f_types = [("PDF", "*.pdf")]
-        fpath = filedialog.asksaveasfilename(defaultextension=ext, filetypes=f_types)
-        print(fpath)
-        if fpath != "":
+            f_types = ["*.pdf"]
+        fpath = filechooser.save_file(filters=f_types)
+        if fpath is not None and len(fpath) > 0:
+            fpath = fpath[0]
             if s_type == "s_data":
                 self.download_selected_data(fpath)
             elif s_type == "a_data":
