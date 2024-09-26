@@ -66,7 +66,7 @@ If you are having trouble installing NcCut please refer to the Troubleshooting s
         `support/test_img.png`\
         `support/example_4v.nc `\
         `support/example_3d.nc`\
-    * There is an example project file for upload as well:
+    * There is an example project file for upload with `support/example_4v.nc` as well:
 
         `support/project_example.json`
 
