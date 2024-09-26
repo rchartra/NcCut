@@ -1,7 +1,3 @@
-# SPDX-FileCopyrightText: 2024 University of Washington
-#
-# SPDX-License-Identifier: BSD-3-Clause
-
 """
 UI and functionality for plotting and saving popup.
 
@@ -16,13 +12,15 @@ from kivy.metrics import dp
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
+from plyer import filechooser
 import nccut.functions as func
+from nccut.plotwindow import PlotWindow
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im
+from PIL import ImageOps as imo
 import numpy as np
 import copy
 import os
@@ -69,13 +67,12 @@ class PlotPopup(Popup):
     Attributes:
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
         all_transects (dict): Dictionary of data from all transects marked out by the user.
-        t_type (str): 'Marker' if transects came from transect marker tool or 'Multi' if transects
-            came from transect tool.
+        t_type (str): 'Marker' if transects came from transect marker tool or 'Chain' if transects came from transect
+            chain tool
         active_transects (dict): Dictionary of currently selected transects. 'Click <X Cord>', 'Click <Y Cord>', and
             'Width' fields should be removed (if marker tool) to simplify plotting. Contains average
             of transects if marker tool was used with a constant transect width.
-        f_type (str): If file is NetCDF file: 'NC' if only 2 dimensions, 'NC_Z' if 3 dimensions. If
-            file is a JPG or PNG: 'Img'.
+        f_type (str): If file is NetCDF file: 'netcdf'. If file is a JPG or PNG: 'image'.
         config (dict): Information necessary for accessing the file. For images this is the file path and for NetCDF
             files this is a dictionary of configuration values (see
             :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
@@ -108,8 +105,8 @@ class PlotPopup(Popup):
         self.config = config
         if list(self.all_transects.keys())[0][0:-2] == "Marker":
             self.t_type = "Marker"
-        else:
-            self.t_type = "Multi"
+        elif list(self.all_transects.keys())[0][0:-2] == "Chain":
+            self.t_type = "Chain"
 
         # Create nested dictionary of Booleans indicating which transects are currently selected
         self.active_transects = {}
@@ -117,8 +114,12 @@ class PlotPopup(Popup):
         act = copy.deepcopy(self.all_transects)
         for key in list(act.keys()):
             self.active_transects[key] = {}
-            if self.t_type == "Marker":  # Remove fields that don't get plotted
+            # Remove fields that don't get plotted
+            if self.t_type == "Marker":
                 for k in list(act[key].keys())[:3]:
+                    act[key].pop(k)
+            elif self.t_type == "Chain":
+                for k in list(act[key].keys())[:2]:
                     act[key].pop(k)
             self.active_transects[key] = dict.fromkeys(act[key], False)
 
@@ -130,11 +131,11 @@ class PlotPopup(Popup):
                     new.update(self.active_transects[key])
                     self.active_transects[key] = new
 
-        # If not marker, start will all transects selected
+        # Start with the first group selected
         first = list(self.active_transects.keys())[0]
         self.active_transects[first] = dict.fromkeys(self.active_transects[first], True)
 
-        # If marker start with first marker selected
+        # If marker start with average not selected
         if self.t_type == "Marker":
             w_lis = self.all_transects[first]['Width']
             if all(x == w_lis[0] for x in w_lis):
@@ -166,7 +167,7 @@ class PlotPopup(Popup):
         # Plot
         self.plotting = ui.boxlayout.BoxLayout(spacing=dp(20), size_hint=(1, 0.9))
         self.plotting.add_widget(self.plot)
-        self.title = "Plot Transects"
+        self.title = "Plotting Menu"
         self.content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(15), padding=dp(10))
         self.size_hint = (0.8, 0.8)
         sidebar = ui.boxlayout.BoxLayout(orientation='vertical', size_hint=(0.4, 1), padding=dp(10), spacing=dp(20))
@@ -205,8 +206,8 @@ class PlotPopup(Popup):
         t_box.add_widget(self.t_select)
         if self.t_type == "Marker":
             t_drop = self.get_marker_dropdown()
-        else:
-            t_drop = self.get_cut_dropdown('Multi')
+        elif self.t_type == "Chain":
+            t_drop = self.get_chain_dropdown()
         self.t_select.bind(on_press=lambda x: t_drop.open(self.t_select))
         sidebar.add_widget(t_box)
 
@@ -268,218 +269,250 @@ class PlotPopup(Popup):
         self.content.add_widget(self.buttons)
         self.open()
 
-    def text_size_adapt(self, *args):
-        args[0].text_size[0] = args[1]
-
     def font_adapt(self, font):
+        """
+        Updates font of elements in plotting menu with text.
+
+        Args:
+            font (float): New font size
+        """
         for btn in self.buttons.children:
             btn.font_size = font * self.f_m
         for wid in self.widgets_with_text:
             wid.font_size = font
 
-    def file_input(self, type):
+    def file_input(self, s_type):
         """
         Popup window for user to give name for plot/json file to be saved.
 
         Args:
-            type (str): String corresponding to what is being saved:
-                'data': Transect data for selections
-                'all_z_data': Transect data for selections for all z dimension values
+            s_type (str): String corresponding to what is being saved:
+                's_data': Transect data for selections
+                'a_data': Transect data for all transects taken
+                'all_z': Transect data for selections for all z dimension values
                 'png': Current plot as a PNG file
                 'pdf': Current plot as a PDF file
         """
-        content = ui.boxlayout.BoxLayout(orientation='horizontal')
-        popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
-        txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
-        content.add_widget(txt)
-        go = Button(text="Ok", size_hint=(0.1, 1))
-        if type == "s_data":
-            go.bind(on_press=lambda x: self.download_selected_data(txt.text))
-        elif type == "a_data":
-            go.bind(on_press=lambda x: self.download_all_data(txt.text))
-        elif type == "all_z":
-            go.bind(on_press=lambda x: self.download_all_z_data(txt.text))
-        elif type == "png":
-            go.bind(on_press=lambda x: self.download_png_plot(txt.text))
-        elif type == "pdf":
-            go.bind(on_press=lambda x: self.download_pdf_plot(txt.text))
-        go.bind(on_release=lambda x: self.close_popups(popup))
-        close = Button(text="Close", size_hint=(0.2, 1), font_size=self.home.font)
-        close.bind(on_press=popup.dismiss)
-        content.add_widget(go)
-        content.add_widget(close)
-        popup.open()
 
-    def close_popups(self, fpop):
-        """
-        Close file name popup and plot popup
+        if s_type == "s_data" or s_type == "a_data" or s_type == "all_z":
+            f_types = ["*.json"]
+        elif s_type == "png":
+            f_types = ["*.png"]
+        elif s_type == "pdf":
+            f_types = ["*.pdf"]
+        fpath = filechooser.save_file(filters=f_types)
+        if fpath is not None and len(fpath) > 0:
+            fpath = fpath[0]
+            if s_type == "s_data":
+                self.download_selected_data(fpath)
+            elif s_type == "a_data":
+                self.download_all_data(fpath)
+            elif s_type == "all_z":
+                self.download_all_z_data(fpath)
+            elif s_type == "png":
+                self.download_png_plot(fpath)
+            elif s_type == "pdf":
+                self.download_pdf_plot(fpath)
 
-        Args:
-            fpop: reference to file name popup
-        """
-        fpop.dismiss()
-        self.dismiss()
-
-    def download_png_plot(self, f_name):
+    def download_png_plot(self, f_path):
         """
         Download the current plot as a PNG file if valid file name given
 
         Args:
-            f_name (str): Proposed file name
+            f_path (str): Output file path
         """
-        file = func.check_file(self.home.rel_path, f_name, ".png")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
+        if isinstance(self.plot, PlotWindow):
+            self.plot.export_to_png(f_path)
         else:
-            path = self.home.rel_path / (file + ".png")
-            self.plot.texture.save(str(path.absolute()))
-            img = cv2.flip(cv2.imread(str(path.absolute())), 0)
-            cv2.imwrite(str(path.absolute()), img)
-            func.alert("Download Complete", self.home)
+            self.plot.texture.save(f_path)
+            img = cv2.flip(cv2.imread(f_path), 0)
+            cv2.imwrite(f_path, img)
+        func.alert("Download Complete", self.home)
 
-    def download_pdf_plot(self, f_name):
+    def download_pdf_plot(self, f_path):
         """
         Download the current plot as a PDF file if valid file name given
 
         Args:
-            f_name (str): Proposed file name
+            f_path (str): Output file path
         """
-        file = func.check_file(self.home.rel_path, f_name, ".pdf")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
+        ipath = f_path[:-4] + ".png"
+        ppath = f_path
+        if isinstance(self.plot, PlotWindow):
+            self.plot.export_to_png(ipath)
+            img = im.open(ipath)
         else:
-            ipath = self.home.rel_path / (file + ".png")
-            ppath = self.home.rel_path / (file + ".pdf")
-            self.plot.texture.save(str(ipath.absolute()))
-            img = im.fromarray(cv2.flip(cv2.imread(str(ipath.absolute())), 0))
-            img.save(ppath, "PDF")
-            os.remove(ipath)
-            func.alert("Download Complete", self.home)
+            self.plot.texture.save(ipath)
+            img = imo.flip(im.open(ipath))
+        img.save(ppath, "PDF")
+        os.remove(ipath)
+        func.alert("Download Complete", self.home)
 
-    def download_selected_data(self, f_name):
+    def download_selected_data(self, f_path):
         """
         Downloads selected transect data into a JSON file if valid file name given.
 
         Args:
-            f_name (str): Proposed file name
+            f_path (str): Output file path
         """
-        file = func.check_file(self.home.rel_path, f_name, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
-        else:  # Build correctly formatted JSON file
-            dat = copy.copy(self.active_data)
-            if len(self.active_vars) == 0:  # If Image
-                final = self.add_marker_info(dat)
-            elif len(self.active_z) == 0:  # If 2D NetCDF
-                final = {}
-                for var in list(dat.keys()):
-                    final[var] = self.add_marker_info(dat[var])
-            else:  # If 3D NetCDF
-                final = {}
-                for var in list(dat.keys()):
-                    final[var] = {}
-                    for z in list(dat[var].keys()):
-                        final[var][z] = self.add_marker_info(dat[var][z])
-            with open(self.home.rel_path / (file + ".json"), "w") as f:
-                json.dump(final, f)
+        dat = copy.copy(self.active_data)
+        if len(self.active_vars) == 0:  # If Image
+            final = self.add_group_info(dat)
+        elif len(self.active_z) == 0:  # If 2D NetCDF
+            final = {}
+            for var in list(dat.keys()):
+                final[var] = self.add_group_info(dat[var])
+        else:  # If 3D NetCDF
+            final = {}
+            for var in list(dat.keys()):
+                final[var] = {}
+                for z in list(dat[var].keys()):
+                    final[var][z] = self.add_group_info(dat[var][z])
+        with open(f_path, "w") as f:
+            json.dump(final, f)
 
-            func.alert("Download Complete", self.home)
+        func.alert("Download Complete", self.home)
 
-    def download_all_data(self, f_name):
+    def download_all_data(self, f_path):
         """
-        Downloads selected data for all transects/markers into a JSON file if valid file name given.
+        Downloads selected data for all transects/groups into a JSON file if valid file name given.
 
         Args:
-            f_name (str): Proposed file name
+            f_path (str): Output file path
         """
-        file = func.check_file(self.home.rel_path, f_name, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
-            return
-        else:  # Build JSON file
-            original = copy.copy(self.active_transects)
-            for m in list(self.active_transects.keys()):
-                for t in list(self.active_transects[m].keys()):
-                    self.active_transects[m][t] = True
-            self.active_data = self.get_data()
-            self.download_selected_data(f_name)
-            self.active_transects = original
-            self.active_data = self.get_data()
+        original = copy.copy(self.active_transects)
+        for m in list(self.active_transects.keys()):
+            for t in list(self.active_transects[m].keys()):
+                self.active_transects[m][t] = True
+        self.active_data = self.get_data()
+        self.download_selected_data(f_path)
+        self.active_transects = original
+        self.active_data = self.get_data()
 
-    def add_marker_info(self, dicti):
+    def add_group_info(self, dicti):
         """
-        Adds back fields removed for plotting purposes if marker tool was used
+        Adds back fields removed for plotting purposes if marker or chain tool was used
 
         Args:
-            dicti (dict): Dictionary of transect data from either transect marker regular transect tool
+            dicti (dict): Dictionary of transect data from a single group
 
         Returns:
-            Dictionary of transect data with 'Click <X Cord>', 'Click <Y Cord>', and 'Width' fields added back
-                in if transect marker tool was used.
+            Dictionary of transect data with non-plotted data fields added back in.
         """
-        if list(dicti.keys())[0] != "Multi":
+        if list(dicti.keys())[0][0:6] == "Marker":
             for marker in list(dicti.keys()):
                 for key in list(self.all_transects[marker].keys())[:3]:
                     dicti[marker][key] = list(self.all_transects[marker][key])
+        elif list(dicti.keys())[0][0:5] == "Chain":
+            for chain in list(dicti.keys()):
+                for key in list(self.all_transects[chain].keys())[:2]:
+                    dicti[chain][key] = list(self.all_transects[chain][key])
         return dicti
 
-    def download_all_z_data(self, f_name):
+    def download_all_z_data(self, f_path):
         """
         Get and download data for all selected variables for all z dimension values.
 
         Args:
-            f_name (str): Proposed file name
+            f_path (str): Output file path
         """
-        file = func.check_file(self.home.rel_path, f_name, ".json")
-        if file is False:
-            func.alert("Invalid File Name", self.home)
+        original = copy.copy(self.active_z)
+        z_list = self.config[self.f_type]['z']
+        self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[z_list].data]
+        self.active_data = self.get_data()
+        self.download_selected_data(f_path)
+        self.active_z = original
+        self.active_data = self.get_data()
+
+    def get_chain_dropdown(self):
+        """
+        Build dropdown menu for selecting chains.
+
+        Returns:
+            :class:`nccut.plotpopup.BackgroundDropDown` for transect options
+        """
+        # Get dropdown for transect options
+        drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
+        all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+                                         width=dp(180))
+        drop.add_widget(all_box)
+        all_btn = func.RoundedButton(text="Select All", size_hint=(0.5, 1))
+        for i in list(self.active_transects.keys()):
+            c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(40), width=dp(180))
+            but = Button(text=i, size_hint=(0.5, 1), background_color=[0, 0, 0, 0])
+            check = CheckBox(active=all(self.active_transects[i].values()), size_hint=(0.5, 1))
+            check.bind(active=lambda x, y, t=i: self.on_chain_checkbox(x, t))
+            but.bind(on_press=lambda x, c=check: self.on_check_button(c))
+            c_box.add_widget(but)
+            c_box.add_widget(check)
+            drop.add_widget(c_box)
+        all_btn.bind(on_press=lambda x: self.select_all(drop.children[0].children[:-1]))
+        all_box.add_widget(all_btn)
+        return drop
+
+    def on_chain_checkbox(self, check, chain, *args):
+        """
+        Updates plot when a chain checkbox is clicked. Safeguards so at least one chain
+        is always selected.
+
+        Args:
+            check: Reference to kivy.uix.checkbox.CheckBox in transect list
+            chain (str): Name of chain 'Chain #'
+        """
+        # Select or deselect chain
+        for tran in list(self.active_transects[chain].keys()):
+            self.active_transects[chain][tran] = not self.active_transects[chain][tran]
+
+        # Check this isn't the last chain selected
+        count = 0
+        for key in list(self.active_transects.keys()):
+            if all(self.active_transects[key].values()):
+                count += 1
+        if count == 0:  # If last chain unchecked, recheck and ignore
+            for tran in list(self.active_transects[chain].keys()):
+                self.active_transects[chain][tran] = not self.active_transects[chain][tran]
+            check.active = True
             return
         else:
-            original = copy.copy(self.active_z)
-            self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[self.config[self.f_type]['z']].data]
+            # Update current data and plot
             self.active_data = self.get_data()
-            self.download_selected_data(f_name)
-            self.active_z = original
-            self.active_data = self.get_data()
+            self.update_plot()
 
     def get_marker_dropdown(self):
         """
-        Build dropdown menu for marker options with sub-menus for the individual transects
+        Build dropdown menu for Markers with sub-menus for the individual transects.
 
         Returns:
-            :class:`nccut.plotpopup.BackgroundDropDown` for marker options
+            :class:`nccut.plotpopup.BackgroundDropDown` for Marker options
         """
         # Get dropdown for marker options
         marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for i in list(self.all_transects.keys()):
-            m_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+            g_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
                                            width=dp(180))
             btn = func.RoundedButton(text=i, size_hint=(0.5, 1))
-            btn.bind(on_press=lambda but=btn, txt=i: self.cut_drop(txt, but))
-            m_box.add_widget(btn)
-            marker_list.add_widget(m_box)
+            btn.bind(on_press=lambda but=btn, txt=i: self.transect_drop(txt, but))
+            g_box.add_widget(btn)
+            marker_list.add_widget(g_box)
         return marker_list
 
-    def cut_drop(self, marker, button):
+    def transect_drop(self, marker, button):
         """
         Attaches transect dropdowns to marker buttons in marker dropdown menu
 
         Args:
-            marker (str): Marker label 'Marker #'
-            button: RoundedButton, marker's button in marker dropdown menu
+            marker (str): Marker label. Ex: 'Marker #'
+            button: RoundedButton, Marker's button in marker dropdown menu
         """
-        temp_cut_drop = self.get_cut_dropdown(marker)
-        temp_cut_drop.open(button)
+        temp_transect_drop = self.get_transect_dropdown(marker)
+        temp_transect_drop.open(button)
 
-    def get_cut_dropdown(self, key):
+    def get_transect_dropdown(self, key):
         """
-        Build dropdown menu for selecting transects.
+        Build dropdown menu for selecting transects from a marker.
 
         Args:
-            key (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
+            key (str): Name of marker selecting from. Ex: 'Marker #'
 
         Returns:
             :class:`nccut.plotpopup.BackgroundDropDown` for transect options
@@ -506,7 +539,7 @@ class PlotPopup(Popup):
     def select_all(self, boxes):
         """
         If all checkboxes are checked, uncheck all boxes. Otherwise check all boxes. If a box is the only box checked
-        across all markers it will remain checked no matter what.
+        across all groups it will remain checked no matter what.
 
         Args:
             boxes: List of BoxLayouts containing checkbox widgets
@@ -520,40 +553,31 @@ class PlotPopup(Popup):
             for c_box in boxes:
                 c_box.children[0].active = False
 
-    def on_transect_checkbox(self, check, marker, cut, *args):
+    def on_transect_checkbox(self, check, marker, transect, *args):
         """
         Updates plot when a transect checkbox is clicked. Safeguards so at least one transect
         is always selected.
 
         Args:
             check: Reference to kivy.uix.checkbox.CheckBox in transect list
-            marker (str): Name of marker selecting from 'Marker #' or 'Multi' if marker tool wasn't used
-            cut (str): Name of transect 'Cut #'
+            marker (str): Name of marker selecting from. Ex: 'Marker #'
+            transect (str): Name of transect 'Cut #'
         """
         # Select or deselect transect
-        self.active_transects[marker][cut] = not self.active_transects[marker][cut]
+        self.active_transects[marker][transect] = not self.active_transects[marker][transect]
 
         # Check this isn't the last transect selected
         count = 0
         for key in list(self.active_transects.keys()):  # Count current transects
             count += sum(self.active_transects[key].values())
         if count == 0:  # If last transect unchecked, recheck and ignore
-            self.active_transects[marker][cut] = not self.active_transects[marker][cut]
+            self.active_transects[marker][transect] = not self.active_transects[marker][transect]
             check.active = True
             return
         else:
-            # Update current data
+            # Update current data and plot
             self.active_data = self.get_data()
-            # Update plot
-            self.plotting.remove_widget(self.plot)
-            self.plot_active()
-            temp = io.BytesIO()
-            plt.savefig(temp, format="png")
-            temp.seek(0)
-            plt.close()
-            self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                       size_hint=(0.7, 1), fit_mode="contain")
-            self.plotting.add_widget(self.plot, len(self.plotting.children))
+            self.update_plot()
 
     def get_var_dropdown(self):
         """
@@ -597,17 +621,7 @@ class PlotPopup(Popup):
             check.active = True
             return
         self.active_data = self.get_data()
-
-        # Update plot
-        self.plotting.remove_widget(self.plot)
-        self.plot_active()
-        temp = io.BytesIO()
-        plt.savefig(temp, format="png")
-        temp.seek(0)
-        plt.close()
-        self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                   size_hint=(0.7, 1), fit_mode="contain")
-        self.plotting.add_widget(self.plot, len(self.plotting.children))
+        self.update_plot()
 
     def get_z_dropdown(self):
         """
@@ -660,142 +674,144 @@ class PlotPopup(Popup):
             check.active = True
             return
         self.active_data = self.get_data()
-
-        # Update plot
-        self.plotting.remove_widget(self.plot)
-        self.plot_active()
-        temp = io.BytesIO()
-        plt.savefig(temp, format="png")
-        temp.seek(0)
-        plt.close()
-        self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                   size_hint=(0.7, 1), fit_mode="contain")
-        self.plotting.add_widget(self.plot, len(self.plotting.children))
+        self.update_plot()
 
     def get_all_z_plot(self):
         """
         Determines if settings are okay to do an all z value plot. If so calls for plot, if not creates an error
         popup.
         """
-        count = 0
-        for key in list(self.active_transects.keys()):
-            # Count current transects selected
-            count += sum(self.active_transects[key].values())
-        if count == 1:
+        plot_ok = False
+        if self.t_type == "Marker":
+            t_count = 0
+            for key in list(self.active_transects.keys()):
+                # Count current transects selected
+                no_avg = copy.copy(self.active_transects[key])
+                no_avg.pop("Average")
+                t_count += sum(no_avg.values())
+            if t_count == 1 and len(self.active_vars) == 1:
+                plot_ok = True
+        elif self.t_type == "Chain":
+            c_count = 0
+            for key in list(self.active_transects.keys()):
+                # Count current transects selected
+                c_count += all(self.active_transects[key].values())
+            if c_count == 1 and len(self.active_vars) == 1:
+                plot_ok = True
+        if plot_ok:
             # Go ahead and plot
-            self.plot_all_z()
             self.plotting.remove_widget(self.plot)
-            temp = io.BytesIO()
-            plt.savefig(temp, format="png")
-            temp.seek(0)
-            plt.close()
-            self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
-                                       size_hint=(0.7, 1), fit_mode="contain")
+            if self.t_type == "Marker":
+                z_data = self.get_all_z_marker()
+            elif self.t_type == "Chain":
+                z_data = self.get_all_z_chain()
+            self.plot = PlotWindow(self.config[self.f_type], z_data, size_hint=(0.7, 1))
+            self.plot.bind(size=self.plot.load)
             self.plotting.add_widget(self.plot, len(self.plotting.children))
         else:
-            # Error popup if more than one transect is selected
+            # Error popup if more than one transect and/or variable is selected
             content = ui.boxlayout.BoxLayout()
             error = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
-            lab = Label(text="Please only select one transect", size_hint=(0.8, 1))
+            if self.t_type == "Marker":
+                text = "transect"
+            elif self.t_type == "Chain":
+                text = "chain"
+            lab = Label(text="Please only select one " + text + " and one variable", size_hint=(0.8, 1))
             close = Button(text="Close", size_hint=(0.2, 1))
             close.bind(on_press=error.dismiss)
             content.add_widget(lab)
             content.add_widget(close)
             error.open()
 
-    def plot_all_z(self):
+    def get_all_z_chain(self):
         """
-         Gather all z value plots for all selected variables into one figure
-
-         Returns:
-            Final completed figure
-        """
-        # Determine subplot layout
-        num = len(self.active_vars)
-        if num <= 1:
-            col = 1
-            row = 1
-        else:
-            col = 2
-            if num % 2 == 0:
-                row = int(num / 2)
-            else:
-                row = int((num + 1) / 2)
-        fig, ax = plt.subplots(row, col)
-
-        count = 0
-        for var in self.active_vars:
-            # Plot variable and assign to subplot
-            count += 1
-            if count % 2 == 0:
-                c = 1
-                r = int((count / 2) - 1)
-            else:
-                c = 0
-                r = int(((count + 1) / 2) - 1)
-            if row == 1 and col == 1:
-                pos = self.z_ip(var, ax)
-                fig.colorbar(pos, ax=ax)
-            elif row == 1:
-                pos = self.z_ip(var, ax[c])
-                fig.colorbar(pos, ax=ax[c])
-            else:
-                pos = self.z_ip(var, ax[r, c])
-                fig.colorbar(pos, ax=ax[r, c])
-        if len(self.active_vars) % 2 == 1 and len(self.active_vars) > 1:
-            plt.delaxes(ax[r, 1])
-        return fig
-
-    def z_ip(self, var, ax):
-        """
-        Gather data and plot all z values for given variable
-
-        Args:
-            var (str): Variable name
-            ax: Plot axis on which to make plot
+        Gather data over all z values for current variable when chain tool used. Assumes only one variable and only one
+        chain are selected.
 
         Returns:
-            Axis with completed plot
+            3D Array of concatenated transect data over all z values in the NetCDF file.
         """
-        # Get transect coordinates
-        v = self.active_data[var]
+        v = self.active_data[self.active_vars[0]]
         z = v[next(iter(v))]
-        marker = next(iter(z))
-        tran = next(iter(z[marker]))
-        points = self.all_transects[marker][tran]
-        width = len(z[marker][tran]['Cut'])
-
+        chain = next(iter(z))
+        width = 0
+        for tran in list(z[chain].keys()):
+            width += len(z[chain][tran]['Cut'])
+        chain_points = copy.copy(self.all_transects[chain])
+        # Determine the boundary points to subset around chain
+        bound_points = copy.copy(chain_points["Cut 1"])
+        for seg in list(chain_points.keys())[2:]:
+            arr = copy.copy(chain_points[seg])
+            xs_ys = [[arr[0], arr[2]], [arr[1], arr[3]]]
+            for n, c in enumerate(xs_ys):
+                for i in c:
+                    if i < bound_points[0 + n]:
+                        bound_points[0 + n] = i
+                    elif i > bound_points[2 + n]:
+                        bound_points[2 + n] = i
+        # Subset around chain
         ds = self.config[self.f_type]['file']
         z_len = len(ds.coords[self.config[self.f_type]['z']].data)
         f_config = copy.copy(self.config)
         config = f_config[self.f_type]
-        config['var'] = var
-        ds = ds[config['var']]
-
-        # Load entire dataset (if big file this will take a while but decreases total plot time)
-        ds.load()
-        ds = ds.rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-        ds = ds.transpose('y', 'x', 'z')
-        ds['z'] = ds['z'].astype(str)
-        ds = np.flip(ds.data, 0)
+        config['var'] = self.active_vars[0]
+        ds = ds[config['var']].rename({config['y']: "y", config['x']: "x", config['z']: "z"})
+        data, scaled_bound_points, scales = func.subset_around_transect(ds, bound_points)
+        point_scales = np.array(bound_points) - np.array(scaled_bound_points)
+        data = data.transpose('y', 'x', 'z')
+        data['z'] = data['z'].astype(str)
+        data = np.flip(data.data, 0)
 
         # Array of data values at x, y pairs for each z
         all_z = np.empty(shape=(z_len, width))
-        c = 0
-
         for d in range(0, z_len):
             # Get transect data for each z level and add to array
-            curr = ds[:, :, d]
-            dat = func.ip_get_points(points, curr, f_config)
-            all_z[c, :] = dat['Cut']
-            c += 1
+            curr = data[:, :, d]
+            s_points = np.array(chain_points["Cut 1"]) - point_scales
+            dat = func.ip_get_points(s_points, curr, f_config)["Cut"]
+            for tran in list(chain_points.keys())[3:]:
+                s_points = np.array(chain_points[tran]) - point_scales
+                res = func.ip_get_points(s_points, curr, f_config)["Cut"]
+                dat = np.concatenate((dat, res))
+            all_z[d, :] = dat
+        return all_z
 
-        # Plot array
-        pos = ax.imshow(all_z)
-        ax.set_ylabel(self.config[self.f_type]['z'])
-        ax.set_xlabel("Along Transect Point")
-        ax.set_title(var)
-        return pos
+    def get_all_z_marker(self):
+        """
+        Gather transect data over all z values for current variable. Assumes only one variable and only one transect are
+        selected.
+
+        Returns:
+            3D Array of transect data over all z values in the NetCDF file
+        """
+        # Get transect coordinates
+        v = self.active_data[self.active_vars[0]]
+        z = v[next(iter(v))]
+        group = next(iter(z))
+        tran = next(iter(z[group]))
+        points = self.all_transects[group][tran]
+        width = len(z[group][tran]['Cut'])
+        ds = self.config[self.f_type]['file']
+
+        # Subset dataset around transect
+        z_len = len(ds.coords[self.config[self.f_type]['z']].data)
+        f_config = copy.copy(self.config)
+        config = f_config[self.f_type]
+        config['var'] = self.active_vars[0]
+        ds = ds[config['var']].rename({config['y']: "y", config['x']: "x", config['z']: "z"})
+        data, scale_points, scales = func.subset_around_transect(ds, points)
+        data = data.transpose('y', 'x', 'z')
+        data['z'] = data['z'].astype(str)
+        data = np.flip(data.data, 0)
+
+        # Array of data values at x, y pairs for each z
+        all_z = np.empty(shape=(z_len, width))
+        for d in range(0, z_len):
+            # Get transect data for each z level and add to array
+            curr = data[:, :, d]
+            dat = func.ip_get_points(scale_points, curr, f_config)
+            all_z[d, :] = dat['Cut']
+        return all_z
 
     def plot_active(self):
         """
@@ -844,10 +860,10 @@ class PlotPopup(Popup):
 
     def plot_single(self, data, ax, label):
         """
-        Creates a single plot of selected transect data for a single variable (if NetCDF)
+        Creates a single plot of selected chain/transect data for a single variable (if NetCDF)
 
         Args:
-            data: Currently selected transect data. Either self.active_data itself or a sub-dictionary
+            data: Currently selected chain/transect data. Either self.active_data itself or a sub-dictionary
             ax: Plot axis on which to make plot
             label: Label for the y axis of plot. If NetCDF use variable if Image use 'Mean RGB Value'
 
@@ -858,35 +874,17 @@ class PlotPopup(Popup):
         dat = copy.copy(data)
         plot_dat = {}
 
-        if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0] != "Multi":
-            # Gather data for all transects selected across all markers for all Z levels selected
+        if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0][0:5] != "Chain":
+            # Gather data for all transects selected across all groups for all Z levels selected
             for z in list(dat.keys()):
                 if len(z) >= 12:
                     z_name = z[:12] + "..."
                 else:
                     z_name = z
-                for obj in list(dat[z].keys()):
-                    if obj == "Multi":
-                        title = "Z: " + z_name + " "
-                    else:
-                        title = "Z: " + z_name + " M" + obj[-1] + " "
-                    for cut in list(dat[z][obj].keys()):
-                        if cut == "Average":
-                            plot_dat[title + cut] = dat[z][obj][cut]
-                        else:
-                            plot_dat[title + cut] = dat[z][obj][cut]["Cut"]
+                plot_dat = self.plot_gather_data(dat[z], "Z: " + z_name + " ", plot_dat)
         else:
-            for obj in list(dat.keys()):
-                # Gather data for all transects selected across all markers
-                if obj == "Multi":
-                    title = ""
-                else:
-                    title = "M" + obj[-1] + " "
-                for cut in list(dat[obj].keys()):
-                    if cut == "Average":
-                        plot_dat[title + cut] = dat[obj][cut]
-                    else:
-                        plot_dat[title + cut] = dat[obj][cut]["Cut"]
+            # Gather data for all transects selected across all groups
+            plot_dat = self.plot_gather_data(dat, "", plot_dat)
 
         # Plot data by turning dictionary into a data frame
         df = pd.DataFrame.from_dict(dict([(k, pd.Series(v)) for k, v in plot_dat.items()]))
@@ -897,10 +895,59 @@ class PlotPopup(Popup):
         ax.set_ylabel(label.capitalize())
         if not self.f_type == "netcdf":
             ax.set_ylim(ymin=0)
-        ax.set_xlabel("Normalized Long Transect Distance")
+        if self.t_type == "Marker":
+            x_text = "Normalized Long Transect Distance"
+        elif self.t_type == "Chain":
+            x_text = "Normalized Long Chain Distance"
+        ax.set_xlabel(x_text)
         plt.tight_layout()
         # Return dataframe column names for legend
         return df.columns
+
+    def plot_gather_data(self, dat, name_start, plot_dat):
+        """
+        Iterates group transect data and gathers it into a dictionary for plotting. If tool used is chain, ensures that
+        transect data is in direction user clicked the points (left to right or right to left).
+
+        Args:
+            dat (dict): Dictionary of all chains or all markers transect data that are selected for plotting
+            name_start (str): Start of string to use as key name for plotting dictionary. Key names are ultimately used
+                for labels in plot legend. 'Z: <z_value>' if 3D NetCDF data, otherwise just ''.
+            plot_dat: Plotting dictionary to add data to
+
+        Returns:
+            Plotting dictionary with chain/marker data added in the correct plotting format
+        """
+        for obj in list(dat.keys()):
+            if obj[0:5] == "Chain":
+                title = name_start + "C" + obj[-1]
+                all_trans = np.array(dat[obj]["Cut 1"]["Cut"])
+                for tran in list(dat[obj].keys())[1:]:
+                    n_dat = np.array(dat[obj][tran]["Cut"])
+                    all_trans = np.concatenate((all_trans, n_dat))
+                plot_dat[title] = all_trans
+            else:
+                title = name_start + "M" + obj[-1] + " "
+                for tran in list(dat[obj].keys()):
+                    if tran == "Average":
+                        plot_dat[title + tran] = dat[obj][tran]
+                    else:
+                        plot_dat[title + tran] = dat[obj][tran]["Cut"]
+        return plot_dat
+
+    def update_plot(self):
+        """
+        Remakes and replaces plot based on current selections.
+        """
+        self.plotting.remove_widget(self.plot)
+        self.plot_active()
+        temp = io.BytesIO()
+        plt.savefig(temp, format="png")
+        temp.seek(0)
+        plt.close()
+        self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
+                                   size_hint=(0.7, 1), fit_mode="contain")
+        self.plotting.add_widget(self.plot, len(self.plotting.children))
 
     def get_data(self):
         """
@@ -908,7 +955,7 @@ class PlotPopup(Popup):
 
         Returns:
             Nested dictionary of transect data with hierarchy:
-                Variables -> Z values -> Markers/Multi -> Transects -> X,Y, Cut
+                Variables -> Z values -> Groups -> Transects -> X,Y, Cut
             If only 2D NetCDF file there is no Z values level. If an image there is no Variables or Z Values level.
         """
         # Get transect data for list of active transect points
@@ -922,56 +969,56 @@ class PlotPopup(Popup):
                 if len(self.active_z) >= 1:
                     # If data has multiple Z levels
                     for z in self.active_z:
-                        # Multi Z selection
+                        # Multiple Z selection
                         values[var][z] = {}
                         config["z_val"] = z
                         curr = func.sel_data(config)
-                        for key in list(self.active_transects.keys()):
-                            # All markers selected
-                            values[var][z][key] = {}
-                            for cut in list(self.active_transects[key].keys()):
-                                # All selected transects
-                                if self.active_transects[key][cut]:
-                                    if cut == "Average":
-                                        values[var][z][key][cut] = self.get_average(key, curr)
-                                    else:
-                                        values[var][z][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                                      curr, {self.f_type: config})
-                            if len(values[var][z][key]) == 0:
-                                values[var][z].pop(key)
+                        values[var][z] = self.get_transect_data(curr)
                 else:
                     curr = func.sel_data(config)
-                    # Single Z Selection
-                    for key in list(self.active_transects.keys()):
-                        # All markers selected
-                        values[var][key] = {}
-                        for cut in list(self.active_transects[key].keys()):
-                            if self.active_transects[key][cut]:
-                                # All transects selected
-                                if cut == "Average":
-                                    values[var][key][cut] = self.get_average(key, curr)
-                                else:
-                                    values[var][key][cut] = func.ip_get_points(self.all_transects[key][cut],
-                                                                               curr, {self.f_type: config})
-                        if len(values[var][key]) == 0:
-                            values[var].pop(key)
+                    values[var] = self.get_transect_data(curr)
+
         else:
-            curr = im.open(config)
-            # Image data (no variables, no Z levels)
-            for key in list(self.active_transects.keys()):
-                # All markers selected
-                values[key] = {}
-                for cut in list(self.active_transects[key].keys()):
-                    # All transects selected
-                    if self.active_transects[key][cut]:
-                        if cut == "Average":
-                            values[key][cut] = self.get_average(key, curr)
-                        else:
-                            values[key][cut] = func.ip_get_points(self.all_transects[key][cut], curr,
-                                                                  {self.f_type: config})
-                if len(values[key]) == 0:
-                    values.pop(key)
+            curr = np.asarray(im.open(config))
+            values = self.get_transect_data(curr)
         return values
+
+    def get_transect_data(self, curr):
+        """
+        Iterates through the active transect points and returns the transect data.
+
+        Args:
+            curr: Either a Dataset (NetCDF) or a 2D array (Image) to take transect data from
+
+        Return:
+            Returns dictionary of nested tool group dictionaries of transect data
+        """
+        val_dict = {}
+        for key in list(self.active_transects.keys()):
+            # All groups selected
+            val_dict[key] = {}
+            for tran in list(self.active_transects[key].keys()):
+                if self.active_transects[key][tran]:
+                    # All transects selected
+                    if tran == "Average":
+                        val_dict[key][tran] = self.get_average(key, curr)
+                    else:
+                        sub_d, sub_p, scales = func.subset_around_transect(curr, self.all_transects[key][tran])
+                        if self.f_type == "image":
+                            x_lab = "x"
+                            y_lab = "y"
+                            dat = sub_d
+                        else:
+                            x_lab = self.config[self.f_type]["x"]
+                            y_lab = self.config[self.f_type]["y"]
+                            dat = np.flip(sub_d.data, 0)
+                        val_dict[key][tran] = func.ip_get_points(sub_p, dat, self.config)
+                        val_dict[key][tran][x_lab] = [x + scales[1] for x in val_dict[key][tran][x_lab]]
+                        val_dict[key][tran][y_lab] = [x + scales[0] for x in val_dict[key][tran][y_lab]]
+
+            if len(val_dict[key]) == 0:
+                val_dict.pop(key)
+        return val_dict
 
     def get_average(self, key, curr):
         """
@@ -985,7 +1032,12 @@ class PlotPopup(Popup):
             1D array of length of transect width containing average transect values for the marker.
         """
         dat = np.zeros(self.all_transects[key]['Width'][0])
-        for cut in list(self.all_transects[key].keys())[3:]:
-            dat += func.ip_get_points(self.all_transects[key][cut], curr, self.config)['Cut']
+        for tran in list(self.all_transects[key].keys())[3:]:
+            sub_d, sub_p, scales = func.subset_around_transect(curr, self.all_transects[key][tran])
+            if self.f_type == "image":
+                data = sub_d
+            else:
+                data = np.flip(sub_d.data, 0)
+            dat += func.ip_get_points(sub_p, data, self.config)['Cut']
         dat = dat / len(list(self.all_transects[key].keys())[3:])
         return list(dat)

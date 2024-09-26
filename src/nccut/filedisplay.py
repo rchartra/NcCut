@@ -15,17 +15,15 @@ from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
 import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
+from kivy.metrics import dp
 from PIL import Image as im
 import numpy as np
 import cv2
 import copy
 import io
 import nccut.functions as func
-from nccut.multitransect import MultiTransect
 from nccut.multimarker import MultiMarker
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+from nccut.multichain import MultiChain
 
 
 class FileDisplay(ScatterLayout):
@@ -54,6 +52,7 @@ class FileDisplay(ScatterLayout):
         dragging (bool): Whether in dragging mode or not
         editing (bool): Whether in editing mode or not
         t_mode (bool): Whether a tool is currently loaded
+        resized (bool): Whether the image has been resized to fit in the viewer window
         contrast (int): Int from -127 to 127, contrast value to use when making image from NetCDF file
         l_col (str): Line color for transect tools: 'Blue', 'Green' or 'Orange'
         cir_size (float): Circle size for transect tools
@@ -85,7 +84,6 @@ class FileDisplay(ScatterLayout):
         self.config = f_config
         self.f_type = list(f_config.keys())[0]
         self.home = home
-        self.pos = self.home.ids.view.pos
         self.sidebar = self.home.ids.sidebar
         self.og_sidebar = copy.copy(self.home.ids.sidebar.children)
 
@@ -98,6 +96,7 @@ class FileDisplay(ScatterLayout):
         self.dragging = False
         self.editing = False
         self.t_mode = False
+        self.resized = False
 
         self.contrast = 1.0
         self.l_col = "Blue"
@@ -140,7 +139,7 @@ class FileDisplay(ScatterLayout):
 
         self.load_image()
 
-    # Turn off ScatterLayout functionality that conflicts with ImageView functionality
+    # Turn off ScatterLayout functionality that conflicts with functionality
     ScatterLayout.do_rotation = False
     ScatterLayout.do_scale = False
 
@@ -164,7 +163,6 @@ class FileDisplay(ScatterLayout):
         """
         Creates UI Image element, loads it in viewer, and scales it to window size.
         """
-
         if self.f_type == "netcdf":
             self.netcdf_to_image()
             self.im = CoreImage(self.byte, ext='png')
@@ -172,24 +170,28 @@ class FileDisplay(ScatterLayout):
         elif self.f_type == "image":
             self.im = CoreImage(self.config[self.f_type])
             self.size = im.open(self.config[self.f_type]).size
-
-        self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.home.ids.view.pos)
+        self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.pos)
+        self.home.ids.view.bind(size=self.resize_to_fit)
         self.add_widget(self.img)
+        # Necessary for when viewer doesn't change size on file load (image -> image)
+        self.resize_to_fit(False)
 
-        # Begin at max size where you can see entire image
-        w_size = self.home.ids.view.size
-        i_size = self.bbox[1]
-        if i_size[0] >= w_size[0] or i_size[1] >= w_size[1]:
-            while self.bbox[1][0] >= w_size[0] or self.bbox[1][1] >= w_size[1]:
-                mat = Matrix().scale(.9, .9, .9)
-                self.apply_transform(mat)
-        if i_size[0] <= w_size[0] and i_size[1] <= w_size[1]:
-            while self.bbox[1][0] <= w_size[0] and self.bbox[1][1] <= w_size[1]:
-                mat = Matrix().scale(1.1, 1.1, 1.1)
-                self.apply_transform(mat)
+    def resize_to_fit(self, *args):
+        """
+        Resizes image to be just large enough to fill viewer screen. Method is bound to size property but only resizes
+        on initial size change
 
-        xco = w_size[0] / 2 - self.bbox[1][0] / 2
-        self.pos = (xco, self.pos[1])
+        Args:
+            args: Two element list of object and it's size
+        """
+        if not self.resized:
+            bounds = self.home.ids.view.size
+            r = min([bounds[i] / self.bbox[1][i] for i in range(len(bounds))])
+            self.apply_transform(Matrix().scale(r, r, r))
+            xco = bounds[0] / 2 - self.bbox[1][0] / 2
+            self.pos = (xco, self.pos[1])
+            if args[0]:
+                self.resized = True
 
     def manage_tool(self, t_type):
         """
@@ -207,10 +209,10 @@ class FileDisplay(ScatterLayout):
             for w in self.action_widgets:
                 self.sidebar.add_widget(w, 1)
             kivy.core.window.Window.set_system_cursor("crosshair")
-            if t_type == "transect":
-                self.tool = MultiTransect(home=self.home)
-            elif t_type == "transect_marker":
+            if t_type == "transect_marker":
                 self.tool = MultiMarker(home=self.home)
+            elif t_type == "transect_chain":
+                self.tool = MultiChain(home=self.home)
             self.add_widget(self.tool)
             self.t_mode = True
         else:
@@ -329,53 +331,21 @@ class FileDisplay(ScatterLayout):
         and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
         can make image out of an array.
         """
-        self.nc_data = func.sel_data(self.config['netcdf'])
+        self.nc_data = np.flip(func.sel_data(self.config['netcdf']).data, 0)
         n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
+        nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 3, axis=2)
+
         n_data = np.nan_to_num(n_data, nan=1)
         n_data = (n_data * 255).astype(np.uint8)
-        img = cv2.applyColorMap(n_data, self.colormap)
-        self.update_color_bar(self.get_color_bar())
-
+        c_mapped = cv2.applyColorMap(n_data, self.colormap)
+        whites = np.ones(c_mapped.shape) * 255
+        img = np.where(nans, whites, c_mapped)
+        self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white",
+                                                            dp(40)), self.config[self.f_type])
         # Applies contrast settings
         img = self.apply_contrast(img, self.contrast)
         is_success, img_b = cv2.imencode(".png", img)
         self.byte = io.BytesIO(img_b)
-
-    def update_color_bar(self, colorbar):
-        """
-        Adds colorbar image to settings bar.
-
-        Args:
-            colorbar: kivy.uix.image.Image, colorbar graphic
-        """
-        if len(self.home.ids.colorbar.children) != 0:
-            self.home.ids.colorbar.remove_widget(self.home.ids.colorbar.children[0])
-        self.home.ids.colorbar.add_widget(colorbar)
-
-    def get_color_bar(self):
-        """
-        Create color bar image according to colormap and dataset
-        """
-        c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8)
-        c_bar = cv2.applyColorMap(c_arr, self.colormap)
-        c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
-        plt.figure(figsize=(10, 1))
-        plt.imshow(c_bar)
-
-        ax = plt.gca()
-        ax.get_yaxis().set_visible(False)
-        lab_arr = np.linspace(np.nanmin(self.nc_data), np.nanmax(self.nc_data), 256)
-        lab_arr = ["{:.2e}".format(elem) for elem in lab_arr]
-        ticks = [0, 50, 100, 150, 200, 250]
-        ax.set_xticks(ticks=ticks, labels=[lab_arr[i] for i in ticks], fontsize=20)
-        ax.xaxis.label.set_color('white')
-        ax.tick_params(axis='x', colors='white')
-        temp = io.BytesIO()
-        plt.savefig(temp, facecolor=(0.2, 0.2, 0.2), bbox_inches='tight', format="png")
-        temp.seek(0)
-        plt.close()
-        plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
-        return plot
 
     def apply_contrast(self, data, contrast):
         """

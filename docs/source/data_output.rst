@@ -21,16 +21,16 @@ File Structure
 
 The output JSON file has a hierarchical data structure that depends on the tool you used and the file you loaded.
 
-When taken from an image, the data will be simply organized into one or multiple **Marker** sub-dictionaries which contain one or multiple **Cut** sub-dictionaries which each contain arrays of the x coordinates, y coordinates, and the transect values of each transect.
+When taken from an image, the data will be simply organized into one or multiple tool group sub-dictionaries which contain one or multiple **Cut #** sub-dictionaries which each contain arrays of the x coordinates, y coordinates, and the transect values of each transect within the tool.
 
-    * When the data is taken with the transect tool, the dictionary is labeled as **Multi** instead of **Marker #**
+    * When the data is taken with the :ref:`Transect Marker <transect_marker>` tool, the tool group sub-dictionaries are labeled as **Marker #**.
+    * When the data is taken with the :ref:`Transect Chain <transect_chain>` tool the tool group sub-dictionaries are labeled as **Chain #**. Each **Cut #** is a line segment within the chain.
     * The transect values are the mean of the RGB values of the pixel at each point. The data is interpolated for smoothness.
 
     .. image:: _media/marker_diagram.png
 
-When taken from a NetCDF file the markers are further nested into dictionaries first according to the selected variables and then the selected z dimension values chosen (if the variables has 3 dimensions).
+When taken from a NetCDF file the tool group sub-dictionaries are further nested into dictionaries first according to the selected variables and then the selected z dimension values chosen (if the variables has 3 dimensions).
 
-    * When the data is taken with the transect tool, the dictionary is labeled as **Multi** instead of **Marker #**
     * The transect values are the value of the corresponding dataset of the file at that x, y coordinate. The data is interpolated for smoothness.
     * If the NetCDF file has valid coordinate data the x, y coordinates of the transect points are interpolated from the dataset's coordinate values.
 
