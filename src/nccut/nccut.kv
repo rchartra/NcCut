@@ -102,12 +102,12 @@
                 max: 70
                 value: 5
                 step: 1
-                size_hint: (0.5, 1)
+                size_hint: (0.4, 1)
 
             RoundedButton:
-                text: "Go"
-                size_hint: (0.1, 0.6)
-                font_size: self.size[0] / 2.6
+                text: "Set"
+                size_hint: (0.2, 0.6)
+                font_size: self.size[0] / 4
                 on_press: root.pass_setting(cir_size_slider.value)
                 pos_hint: {'top': 0.8}
 
@@ -200,12 +200,12 @@
                 max: 127
                 value: 0
                 step: 1
-                size_hint: (0.5, 1)
+                size_hint: (0.4, 1)
 
             RoundedButton:
-                text: "Go"
-                size_hint: (0.1, 0.6)
-                font_size: self.size[0] / 2
+                text: "Set"
+                size_hint: (0.2, 0.6)
+                font_size: self.size[0] / 4
                 on_press: root.pass_setting("contrast", contrast.value)
                 pos_hint: {'top': 0.8}
 
