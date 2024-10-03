@@ -110,7 +110,7 @@ class HomeScreen(Screen):
                 self.ids.file_in.text = str(self.file)
                 self.open_btn()
                 if str(self.file)[-3:] == ".nc":
-                    self.nc_popup.go.dispatch("on_press")
+                    self.nc_popup.load.dispatch("on_press")
             self.loaded = True
 
     def font_adapt(self):
