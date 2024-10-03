@@ -10,11 +10,15 @@ import unittest
 from PIL import Image as Im
 import numpy as np
 import json
+import pooch
 import xarray as xr
 import nccut.functions as func
 from nccut.multimarker import marker_find
 
-SUPPORT_FILE_PATH = "support/"
+EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg", known_hash=None)
+EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc", known_hash=None)
+EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc", known_hash=None)
+PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json", known_hash=None)
 
 
 class Test(unittest.TestCase):
@@ -23,11 +27,11 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken horizontally on an image
         """
         # Setup
-        img = Im.open(SUPPORT_FILE_PATH + "example.jpg").convert('RGB')
+        img = Im.open(EXAMPLE_JPG_PATH).convert('RGB')
         points = [1000, 200, 1200, 200]
 
         # App result
-        app = func.ip_get_points(points, img, {"image": SUPPORT_FILE_PATH + "example.jpg"})["Cut"]
+        app = func.ip_get_points(points, img, {"image": EXAMPLE_JPG_PATH})["Cut"]
 
         # Manual result
         arr = np.asarray(img)
@@ -41,11 +45,11 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken at 45 on an image
         """
         # Setup
-        img = Im.open(SUPPORT_FILE_PATH + "example.jpg").convert('RGB')
+        img = Im.open(EXAMPLE_JPG_PATH).convert('RGB')
         points = [1000, 200, 1200, 400]
 
         # App result
-        app = func.ip_get_points(points, img, {"image": SUPPORT_FILE_PATH + "example.jpg"})["Cut"]
+        app = func.ip_get_points(points, img, {"image": EXAMPLE_JPG_PATH})["Cut"]
 
         # Manual result
         arr = np.asarray(img)
@@ -62,11 +66,11 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken vertically on an image
         """
         # Setup
-        img = Im.open(SUPPORT_FILE_PATH + "example.jpg").convert('RGB')
+        img = Im.open(EXAMPLE_JPG_PATH).convert('RGB')
         points = [1000, 100, 1000, 400]
 
         # App result
-        app = func.ip_get_points(points, img, {"image": SUPPORT_FILE_PATH + "example.jpg"})["Cut"]
+        app = func.ip_get_points(points, img, {"image": EXAMPLE_JPG_PATH})["Cut"]
 
         # Manual result
         arr = np.asarray(img)
@@ -81,7 +85,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken horizontally on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
+        dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
         config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
         points = [100, 50, 200, 50]
 
@@ -105,7 +109,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken at 45 degrees on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
+        dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
         config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
         points = [100, 50, 200, 150]
 
@@ -131,7 +135,7 @@ class Test(unittest.TestCase):
         Test an accurate transect is made when taken vertically on a NetCDF file
         """
         # Setup
-        dat = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")['Theta'].sel(k=0)
+        dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
         config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
         points = [100, 50, 100, 150]
 
@@ -155,7 +159,7 @@ class Test(unittest.TestCase):
         Test whether valid project files can be accurately identified
         """
         # Data from a valid file is correctly extracted
-        proper_json = open(SUPPORT_FILE_PATH + "project_example.json")
+        proper_json = open(PROJECT_EXAMPLE_PATH)
         proper_data = json.load(proper_json)
         marker_result = marker_find(proper_data, [], ["Click x", "Click y", "Width"])
 
@@ -200,7 +204,7 @@ class Test(unittest.TestCase):
         """
         Test whether correct netcdf data is collected from user configurations for a 2D netcdf dataset
         """
-        data = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")
+        data = xr.open_dataset(EXAMPLE_4V_PATH)
         config1 = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": data}
         res1 = func.sel_data(config1).data
         exp1 = data["Vorticity"].transpose("y", "x").data
@@ -216,7 +220,7 @@ class Test(unittest.TestCase):
         """
         Test whether correct netcdf data is collected from user configurations for a 3D netcdf dataset
         """
-        data = xr.open_dataset(SUPPORT_FILE_PATH + "example_3d.nc")
+        data = xr.open_dataset(EXAMPLE_3D_PATH)
         config1 = {"x": "i", "y": "j", "z": "k", "z_val": "15", "var": "Theta", "file": data}
         res1 = func.sel_data(config1).data
         exp1 = data["Theta"].sel(k=15).transpose("j", "i").data
@@ -233,8 +237,8 @@ class Test(unittest.TestCase):
         Test subset properly includes a margin only when it is possible and click points are properly rescaled
         """
         # NetCDF
-        nc = xr.open_dataset(SUPPORT_FILE_PATH + "example_4v.nc")
-        img = np.asarray(Im.open(SUPPORT_FILE_PATH + "example.jpg"))
+        nc = xr.open_dataset(EXAMPLE_4V_PATH)
+        img = np.asarray(Im.open(EXAMPLE_JPG_PATH))
         config = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": nc}
         data_arr = [("NC", func.sel_data(config)), ("image", img)]
 
