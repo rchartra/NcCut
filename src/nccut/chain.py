@@ -117,8 +117,8 @@ class Chain(ui.widget.Widget):
             self.transects = self.transects[:-1]
         else:
             # Remove plot buttons from sidebar if last point of the chain
-            if self.parent.dbtn in self.home.display.current:
-                self.home.display.current.remove(self.parent.dbtn)
+            if self.parent.dbtn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.parent.dbtn)
             self.remove_widget(self.children[0])
             # Stop drawing line between last point and cursor
             Window.unbind(mouse_pos=self.draw_line)

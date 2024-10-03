@@ -49,7 +49,7 @@ class MultiChain(ui.widget.Widget):
         self.nbtn = func.RoundedButton(text="New Chain", size_hint=(1, 0.1), font_size=self.home.font)
 
         self.nbtn.bind(on_press=lambda x: self.new_chain())
-        self.home.ids.sidebar.add_widget(self.nbtn, 1)
+        self.home.display.add_to_sidebar([self.nbtn])
 
     def font_adapt(self, font):
         """
@@ -107,8 +107,8 @@ class MultiChain(ui.widget.Widget):
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted chain was the only chain
             self.clicks = 0
-            if self.dbtn in self.home.display.current:
-                self.home.display.current.remove(self.dbtn)
+            if self.dbtn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.dbtn)
             self.new_chain()
 
     def del_point(self):
@@ -124,6 +124,8 @@ class MultiChain(ui.widget.Widget):
             # If no chains on screen do nothing
             return
         elif self.children[0].clicks == 0:
+            if self.dbtn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.dbtn)
             if len(self.children) > 1:
                 # If no clicks on current chain and not the only chain delete current chain
                 self.remove_widget(self.children[0])
@@ -197,7 +199,7 @@ class MultiChain(ui.widget.Widget):
                 else:
                     self.clicks += 1
                     if self.clicks >= 2 and self.dbtn.parent is None:
-                        self.home.ids.sidebar.add_widget(self.dbtn, 1)
+                        self.home.display.add_to_sidebar([self.dbtn])
                     # If no current chain, create chain. Otherwise, pass touch to current chain.
                     if not self.c_on:
                         self.new_chain()
