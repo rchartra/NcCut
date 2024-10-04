@@ -62,7 +62,7 @@ def get_app():
 
 def load_2d_nc(variable):
     run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
-    run_app.home.open_btn()
+    run_app.home.load_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = variable
     popup.x_select.text = "x"
@@ -73,7 +73,7 @@ def load_2d_nc(variable):
 
 def load_3d_nc(z_val):
     run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_3d.nc"
-    run_app.home.open_btn()
+    run_app.home.load_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = "Theta"
     popup.x_select.text = "i"
@@ -102,18 +102,18 @@ class Test(unittest.TestCase):
         Test input file name rules
         """
         run_app.home.ids.file_in.text = " *$%&@! "
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name",
                          "File names with irregular characters are invalid")
         self.assertEqual(run_app.home.ids.file_in.text, "*$%&@!", "Whitespace not removed from file entry")
         run_app.home.ids.file_in.text = ""
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Empty file names are invalid")
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "project_example.json"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "File Not Found", "File must exist")
 
     def test_tool_cleanup(self):
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
         Check that viewer window is clean after removing tools
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
         # Run for all tools in sidebar
@@ -149,13 +149,15 @@ class Test(unittest.TestCase):
         """
         # Open a file and use a tool
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         load_2d_nc("Vorticity")
         og_side = ["Transect Marker", "Transect Chain"]
 
         self.assertEqual(len(run_app.home.color_bar_box.children), 1, "Colorbar was not Added")
         self.assertIsNotNone(run_app.home.color_bar_box.parent, "Colorbar box was not displayed")
         self.assertIsNotNone(run_app.home.netcdf_info.parent, "NetCDF Info bar was not displayed")
+        self.assertIsNotNone(run_app.home.settings_bar.parent, "Settings bar was not displayed")
+        self.assertIsNotNone(run_app.home.settings_bar.netcdf_btn.parent, "NetCDF settings button was not displayed")
         select_sidebar_button("Transect Marker")
         x = run_app.home.size[0]
         y = run_app.home.size[1]
@@ -168,7 +170,7 @@ class Test(unittest.TestCase):
             tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
 
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         sidebar = run_app.home.ids.dynamic_sidebar.children
         self.assertListEqual(og_side,
                              [b.text for b in sidebar if isinstance(b, type(functions.RoundedButton()))],
@@ -176,6 +178,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(run_app.home.color_bar_box.children), 0, "Colorbar was not removed")
         self.assertIsNone(run_app.home.color_bar_box.parent, "Colorbar box was not removed")
         self.assertIsNone(run_app.home.netcdf_info.parent, "NetCDF info bar was not removed")
+        self.assertIsNone(run_app.home.netcdf_info.parent, "NetCDF info bar was not removed")
+        self.assertIsNone(run_app.home.settings_bar.netcdf_btn.parent, "NetCDF settings menu was not removed")
         self.assertEqual(len(run_app.home.display.children), 1, "Not all tools were removed from display")
 
     def test_project_upload(self):
@@ -211,7 +215,7 @@ class Test(unittest.TestCase):
         Test transect marker tool exhibits expected behavior.
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
 
         load_2d_nc("Vorticity")
 
@@ -301,7 +305,7 @@ class Test(unittest.TestCase):
         Test transect chain tool exhibits expected behavior
         """
         run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
         # Open Transect Chain tool
@@ -376,7 +380,7 @@ class Test(unittest.TestCase):
         Test netcdf configuration popup ensures valid netcdf configuration settings
         """
         run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         popup = run_app.home.nc_popup
 
         # Check Default Values and rejection of a 1D Variable
@@ -412,7 +416,7 @@ class Test(unittest.TestCase):
 
         # Check 3D Variable behavior
         run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         popup = run_app.home.nc_popup
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
@@ -435,7 +439,7 @@ class Test(unittest.TestCase):
 
         # Check Rejection of a 4D Variable
         run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.open_btn()
+        run_app.home.load_btn()
         popup = run_app.home.nc_popup
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
