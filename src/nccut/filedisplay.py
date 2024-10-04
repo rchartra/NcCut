@@ -353,6 +353,7 @@ class FileDisplay(ScatterLayout):
         can make image out of an array.
         """
         self.nc_data = np.flip(func.sel_data(self.config['netcdf']).data, 0)
+        print(self.nc_data)
         n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
         nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 3, axis=2)
 

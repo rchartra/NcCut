@@ -278,6 +278,75 @@
                 pos_hint: {'top': 0.9}
                 on_press: root.depth_dropdown.open(self)
 
+<SettingsBar>
+    size_hint: (1, 1)
+    spacing: dp(10)
+    padding: [dp(5), dp(5), dp(5), dp(5)]
+
+    RoundedButton:
+        id: line_color_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: Factory.LineColorDropDown().open(self)
+
+        Image:
+            id: line_color_btn_img
+            source: join(app.btn_img_path, "blue_line_btn.png")
+            size: line_color_btn.size
+            pos: line_color_btn.pos
+
+    RoundedButton:
+        id: circle_size_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: Factory.CircleSizeDropDown().open(self)
+
+        Image:
+            id: circle_size_btn_img
+            source: join(app.btn_img_path, "cir_size_btn.png")
+            size: circle_size_btn.size
+            pos: circle_size_btn.pos
+
+    RoundedButton:
+        id: rotate_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: root.rotate()
+
+        Image:
+            id: rotate_btn_img
+            source: join(app.btn_img_path, "rotate_btn.png")
+            size: rotate_btn.size
+            pos: rotate_btn.pos
+
+    RoundedButton:
+        id: h_flip_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: root.h_flip()
+
+        Image:
+            id: h_flip_btn_img
+            source: join(app.btn_img_path, "h_flip_btn.png")
+            size: h_flip_btn.size
+            pos: h_flip_btn.pos
+
+    RoundedButton:
+        id: v_flip_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: root.v_flip()
+
+        Image:
+            id: v_flip_btn_img
+            source: join(app.btn_img_path, "v_flip_btn.png")
+            size: v_flip_btn.size
+            pos: v_flip_btn.pos
+
+    BoxLayout:
+        size_hint: (0.4, 1)
+
+
 <HomeScreen>
 
     BoxLayout:
@@ -290,8 +359,6 @@
         BoxLayout:
             id: settings_bar
             size_hint: (1, 0.08)
-            spacing: dp(10)
-            padding: [dp(5), dp(5), dp(5), dp(5)]
             canvas:
                 Color:
                     rgb: [.2, .2, .2]
@@ -299,73 +366,6 @@
                     size: self.size
                     pos: self.pos
                     radius: [dp(8),]
-
-            RoundedButton:
-                text: "NetCDF"
-                id: netcdf_btn
-                font_size: min(self.size[0] / 5, self.size[1] / 2)
-                size_hint: (0.1, 1)
-                on_press: Factory.NetCDFDropDown().open(self)
-
-            RoundedButton:
-                id: line_color_btn
-                size_hint: (0.1, 1)
-                on_press: Factory.LineColorDropDown().open(self)
-
-                Image:
-                    id: line_color_btn_img
-                    source: join(app.btn_img_path, "blue_line_btn.png")
-                    size: line_color_btn.size
-                    pos: line_color_btn.pos
-
-            RoundedButton:
-                id: circle_size_btn
-                size_hint: (0.1, 1)
-                on_press: Factory.CircleSizeDropDown().open(self)
-
-                Image:
-                    id: circle_size_btn_img
-                    source: join(app.btn_img_path, "cir_size_btn.png")
-                    size: circle_size_btn.size
-                    pos: circle_size_btn.pos
-
-            RoundedButton:
-                id: rotate_btn
-                size_hint: (0.1, 1)
-                on_press: root.rotate()
-
-                Image:
-                    id: rotate_btn_img
-                    source: join(app.btn_img_path, "rotate_btn.png")
-                    size: rotate_btn.size
-                    pos: rotate_btn.pos
-
-            RoundedButton:
-                id: h_flip_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: root.h_flip()
-
-                Image:
-                    id: h_flip_btn_img
-                    source: join(app.btn_img_path, "h_flip_btn.png")
-                    size: h_flip_btn.size
-                    pos: h_flip_btn.pos
-
-            RoundedButton:
-                id: v_flip_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: root.v_flip()
-
-                Image:
-                    id: v_flip_btn_img
-                    source: join(app.btn_img_path, "v_flip_btn.png")
-                    size: v_flip_btn.size
-                    pos: v_flip_btn.pos
-
-            BoxLayout:
-                size_hint: (0.4, 1)
 
         BoxLayout:
             id: view_box
@@ -407,9 +407,9 @@
 
             RoundedButton:
                 size_hint: (0.1, 1)
-                text: "Open"
+                text: "Load"
                 font_size: min(self.size[0] / 5, self.size[1] / 2)
-                on_press: root.open_btn()
+                on_press: root.load_btn()
 
             RoundedButton:
                 size_hint: (0.15, 1)
