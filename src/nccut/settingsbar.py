@@ -69,4 +69,3 @@ class SettingsBar(BoxLayout):
             btn_img_path (String): Path to button image
         """
         self.ids.line_color_btn_img.source = btn_img_path
-
