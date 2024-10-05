@@ -15,6 +15,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.app import App
 from kivy.metrics import dp
 import nccut.functions as func
+import os
 
 
 class LineColorDropDown(DropDown):
@@ -40,7 +41,8 @@ class LineColorDropDown(DropDown):
             line_color (str): New line color. Either Blue, Orange, or Green.
         """
         if self.home.file_on:
-            self.home.ids.line_color_btn_img.source = self.home.btn_img_path + line_color.lower() + "_line_btn.png"
+            new_path = os.path.join(self.home.btn_img_path, line_color.lower() + "_line_btn.png")
+            self.home.settings_bar.set_line_color_btn(new_path)
             self.home.display.update_settings("l_color", line_color)
 
 

@@ -15,18 +15,21 @@ class SettingsBar(BoxLayout):
     The UI code is in nccut.kv and code for the individual dropdowns is in nccut.dropdowns.
 
     Args:
+        home: Reference to root HomeScreen instance
         font (float): Current font_size for all text containing elements
         f_m (float): Multiplier to use across all elements for font_size adjustment
         netcdf_btn: Reference to the button that opens the NetCDF settings menu.
     """
-    def __init__(self, font, **kwargs):
+    def __init__(self, font, home, **kwargs):
         super(SettingsBar, self).__init__(**kwargs)
         """
         Creates button to open NetCDF menu
 
         Args:
             font: Initial font size to use
+            home: Reference to root HomeScreen instance
         """
+        self.home = home
         self.font = font
         self.f_m = 0.7
         self.netcdf_btn = func.RoundedButton(text="NetCDF", size_hint=(0.1, 1), font_size=self.font * self.f_m)
@@ -61,7 +64,7 @@ class SettingsBar(BoxLayout):
         if self.netcdf_btn.parent is not None:
             self.remove_widget(self.netcdf_btn)
 
-    def reset_line_color_btn(self, btn_img_path):
+    def set_line_color_btn(self, btn_img_path):
         """
         Sets line color setting button image to image at specified path
 
@@ -69,3 +72,24 @@ class SettingsBar(BoxLayout):
             btn_img_path (String): Path to button image
         """
         self.ids.line_color_btn_img.source = btn_img_path
+
+    def rotate(self):
+        """
+        Call for a 45 degree rotation of current display by 45 degrees
+        """
+        if self.home.file_on:
+            self.home.display.rotate()
+
+    def v_flip(self):
+        """
+        Call for a vertical flip of view of current display
+        """
+        if self.home.file_on:
+            self.home.display.flip_vertically()
+
+    def h_flip(self):
+        """
+        Call for a horizontal flip of view of current display
+        """
+        if self.home.file_on:
+            self.home.display.flip_horizontally()
