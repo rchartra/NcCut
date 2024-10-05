@@ -20,7 +20,6 @@ pandas = "^2.2.2"
 numpy = "^2.0.0"
 scipy = "^1.13.1"
 matplotlib = "^3.9.0"
-Cython = "^3.0.10"
 xarray = "^2024.6.0"
 netCDF4 = "^1.7.1" # Necessary for xarray
 opencv-python = "^4.10.0.84"

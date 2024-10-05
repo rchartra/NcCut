@@ -77,7 +77,7 @@ class HomeScreen(Screen):
         self.sidebar_label = self.ids.sidebar_label
         self.sidebar_spacer = self.ids.dynamic_spacer
         # Settings bar
-        self.settings_bar = SettingsBar(self.font)
+        self.settings_bar = SettingsBar(self.font, self)
 
     def populate_dynamic_sidebar(self, elements, sidebar_label):
         """
@@ -181,12 +181,9 @@ class HomeScreen(Screen):
         Opens native operating system file browser to allow user to select their file
         """
         files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
-        if files is None or len(files) == 0:
-            text = ""
-        else:
-            text = files[0]
-        self.ids.file_in.text = text
-        self.load_btn()
+        if files is not None and len(files) > 0:
+            self.ids.file_in.text = files[0]
+            self.load_btn()
 
     def load_colorbar_and_info(self, colorbar, config):
         """
@@ -254,7 +251,7 @@ class HomeScreen(Screen):
             self.ids.main_box.remove_widget(self.netcdf_info)
         if self.file_on:
             self.ids.view.unbind(size=self.display.resize_to_fit)
-            self.settings_bar.reset_line_color_btn(os.path.join(self.btn_img_path, "blue_line_btn.png"))
+            self.settings_bar.set_line_color_btn(os.path.join(self.btn_img_path, "blue_line_btn.png"))
             self.display.parent.remove_widget(self.display)
         if self.settings_bar.parent is not None:
             self.ids.settings_bar.remove_widget(self.settings_bar)
@@ -271,27 +268,6 @@ class HomeScreen(Screen):
 
         """
         self.canvas.remove(item)
-
-    def rotate(self):
-        """
-        Call for a 45 degree rotation of current display by 45 degrees
-        """
-        if self.file_on:
-            self.display.rotate()
-
-    def v_flip(self):
-        """
-        Call for a vertical flip of view of current display
-        """
-        if self.file_on:
-            self.display.flip_vertically()
-
-    def h_flip(self):
-        """
-        Call for a horizontal flip of view of current display
-        """
-        if self.file_on:
-            self.display.flip_horizontally()
 
     def quit_btn(self):
         """

@@ -1,0 +1,106 @@
+<PlotPopup>
+    title: "Plotting Menu"
+    size_hint: (0.9, 0.9)
+    background_color: [0.8, 0.8, 0.8, 1]
+
+    BoxLayout:
+        orientation: "vertical"
+        spacing: dp(15)
+        padding: dp(15)
+
+        BoxLayout:
+            id: plotting
+            spacing: dp(20)
+            size_hint: (1, 0.85)
+
+            BoxLayout:
+                id: sidebar
+                orientation: "vertical"
+                size_hint: (0.4, 1)
+                padding: dp(10)
+                spacing: dp(20)
+                canvas:
+                    Color:
+                        rgb: [.2, .2, .2]
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+                        radius: [dp(10),]
+
+                BoxLayout:
+                    size_hint: (1, 0.2)
+                    spacing: dp(5)
+
+                    Label:
+                        id: sel_transects_label
+                        text: "Select Transects: "
+                        size_hint: (0.5, 1)
+                        halign: "center"
+                        valign: "middle"
+                        text_size: self.size
+
+                    RoundedButton:
+                        id: sel_transects_btn
+                        text: "Select..."
+                        size_hint: (0.5, 1)
+
+        BoxLayout:
+            size_hint: (1, 0.15)
+
+            BoxLayout:
+                id: buttons
+                size_hint: (0.8, 1)
+                spacing: dp(10)
+                padding: dp(10)
+                canvas:
+                    Color:
+                        rgb: [.2, .2, .2]
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+                        radius: [dp(10),]
+
+                RoundedButton:
+                    id: export_all_data_btn
+                    text: "Export All Data"
+                    size_hint: (0.2, 1)
+                    on_press: root.file_input("a_data")
+
+                RoundedButton:
+                    id: export_sel_data_btn
+                    text: "Export Selected Data"
+                    size_hint: (0.2, 1)
+                    on_press: root.file_input("s_data")
+
+                RoundedButton:
+                    id: export_plot_png_btn
+                    text: "Export Plot to PNG"
+                    size_hint: (0.2, 1)
+                    on_press: root.file_input("png")
+
+                RoundedButton:
+                    id: export_plot_pdf_btn
+                    text: "Export Plot to PDF"
+                    size_hint: (0.2, 1)
+                    on_press: root.file_input("pdf")
+
+            Widget:
+                id: spacer
+                size_hint: (0.1, 1)
+
+            BoxLayout:
+                size_hint: (0.1, 1)
+                padding: dp(10)
+                canvas:
+                    Color:
+                        rgb: [.2, .2, .2]
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+                        radius: [dp(10),]
+
+                RoundedButton:
+                    id: close_btn
+                    text: "Close"
+                    size_hint: (1, 1)
+                    on_press: root.dismiss()
