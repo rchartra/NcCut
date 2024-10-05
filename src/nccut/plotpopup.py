@@ -351,9 +351,12 @@ class PlotPopup(Popup):
             f_path = f_path[:f_path.find(".")] + ".pdf"
         try:
             if isinstance(self.plot, PlotWindow):
-                with tempfile.NamedTemporaryFile(suffix='.png') as ipath:
-                    self.plot.export_to_png(ipath.name)
-                    im.open(ipath).save(f_path)
+                core_img = self.plot.export_as_image()
+                image_data = core_img.texture.pixels
+                width, height = core_img.size
+                image_array = np.frombuffer(image_data, np.uint8).reshape((height, width, 4))
+                pil_image = im.fromarray(image_array, 'RGBA')
+                pil_image.save(f_path)
             else:
                 pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
                 pil_image.save(f_path)
