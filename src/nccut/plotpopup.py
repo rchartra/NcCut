@@ -324,12 +324,16 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
+        if f_path.find(".") == -1:
+            f_path = f_path + ".png"
+        else:
+            f_path = f_path[:f_path.find(".")] + ".png"
         try:
             if isinstance(self.plot, PlotWindow):
-                self.plot.export_to_png(f_path + '.png')
+                self.plot.export_to_png(f_path)
             else:
                 pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
-                pil_image.save(f_path + '.png')
+                pil_image.save(f_path)
             func.alert("Download Complete", self.home)
         except Exception as error:
             func.alert_popup(str(error))
@@ -341,14 +345,18 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
+        if f_path.find(".") == -1:
+            f_path = f_path + ".pdf"
+        else:
+            f_path = f_path[:f_path.find(".")] + ".pdf"
         try:
             if isinstance(self.plot, PlotWindow):
                 with tempfile.NamedTemporaryFile(suffix='.png') as ipath:
                     self.plot.export_to_png(ipath.name)
-                    im.open(ipath.name).save(f_path + '.pdf')
+                    im.open(ipath).save(f_path)
             else:
                 pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
-                pil_image.save(f_path + '.pdf')
+                pil_image.save(f_path)
             func.alert("Download Complete", self.home)
         except Exception as error:
             func.alert_popup(str(error))
@@ -360,8 +368,12 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
+        if f_path.find(".") == -1:
+            f_path = f_path + ".json"
+        else:
+            f_path = f_path[:f_path.find(".")] + ".json"
         try:
-            dat = copy.copy(self.active_data)
+            dat = copy.deepcopy(self.active_data)
             if len(self.active_vars) == 0:  # If Image
                 final = self.add_group_info(dat)
             elif len(self.active_z) == 0:  # If 2D NetCDF
