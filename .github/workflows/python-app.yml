@@ -70,7 +70,7 @@ jobs:
         python -m poetry run python -m pytest
 
   mac_deps_test:
-    runs_on: macos-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.x

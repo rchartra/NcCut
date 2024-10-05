@@ -25,7 +25,6 @@ import numpy as np
 import copy
 import pandas as pd
 import json
-import tempfile
 
 
 class BackgroundDropDown(DropDown):
@@ -334,7 +333,7 @@ class PlotPopup(Popup):
             else:
                 pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
                 pil_image.save(f_path)
-            func.alert("Download Complete", self.home)
+            func.alert_popup("Download Complete")
         except Exception as error:
             func.alert_popup(str(error))
 
@@ -360,7 +359,7 @@ class PlotPopup(Popup):
             else:
                 pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
                 pil_image.save(f_path)
-            func.alert("Download Complete", self.home)
+            func.alert_popup("Download Complete")
         except Exception as error:
             func.alert_popup(str(error))
 
@@ -392,7 +391,7 @@ class PlotPopup(Popup):
             with open(f_path, "w") as f:
                 json.dump(final, f)
 
-            func.alert("Download Complete", self.home)
+            func.alert_popup("Download Complete")
         except Exception as error:
             func.alert_popup(str(error))
 
