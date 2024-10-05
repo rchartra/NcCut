@@ -86,7 +86,7 @@ jobs:
           python -m poetry install --with test
       - name: Test pyobjus install
         run: |
-          python -c "import pyobjus"
+          python -m poetry run python -c "import pyobjus"
 
   licenses:
     runs-on: ubuntu-latest
