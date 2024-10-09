@@ -14,6 +14,7 @@ import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.widget import Widget
 from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
 import re
@@ -72,10 +73,10 @@ class HomeScreen(Screen):
         self.color_bar_box.bind(size=self.update_cb_bg, pos=self.update_cb_bg)
         self.netcdf_info = func.BackgroundLabel(text="", font_size=self.font, size_hint=(1, 0.08),
                                                 background_color=[0.1, 0.1, 0.1, 1], markup=True)
-
         # Dynamic sidebar
         self.sidebar_label = self.ids.sidebar_label
-        self.sidebar_spacer = self.ids.dynamic_spacer
+        self.sidebar_spacer = Widget(size_hint=(1, 0.9))
+        self.ids.dynamic_sidebar.add_widget(self.sidebar_spacer)
         # Settings bar
         self.settings_bar = SettingsBar(self.font, self)
 
