@@ -690,7 +690,7 @@ class PlotPopup(Popup):
                 z_data = self.get_all_z_marker()
             elif self.t_type == "Chain":
                 z_data = self.get_all_z_chain()
-            self.plot = PlotWindow(self.config[self.f_type], z_data, size_hint=(0.7, 1))
+            self.plot = PlotWindow(self.config[self.f_type], z_data, self.home.display.colormap, size_hint=(0.7, 1))
             self.plot.bind(size=self.plot.load)
             self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
         else:
