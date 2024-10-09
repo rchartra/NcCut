@@ -17,9 +17,11 @@ import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
 from kivy.metrics import dp
 from PIL import Image as im
+from PIL import ImageEnhance
 import numpy as np
-import cv2
+import matplotlib.pyplot as plt
 import io
+import warnings
 import nccut.functions as func
 from nccut.multimarker import MultiMarker
 from nccut.multichain import MultiChain
@@ -105,15 +107,8 @@ class FileDisplay(ScatterLayout):
         self.l_col = "Blue"
         self.cir_size = 5
 
-        self.cmaps = {"Autumn": cv2.COLORMAP_AUTUMN, "Bone": cv2.COLORMAP_BONE, "Jet": cv2.COLORMAP_JET,
-                      "Winter": cv2.COLORMAP_WINTER, "Rainbow": cv2.COLORMAP_RAINBOW, "Ocean": cv2.COLORMAP_OCEAN,
-                      "Summer": cv2.COLORMAP_SUMMER, "Spring": cv2.COLORMAP_SPRING, "Cool": cv2.COLORMAP_COOL,
-                      "HSV": cv2.COLORMAP_HSV, "Pink": cv2.COLORMAP_PINK, "Hot": cv2.COLORMAP_HOT,
-                      "Parula": cv2.COLORMAP_PARULA, "Magma": cv2.COLORMAP_MAGMA, "Inferno": cv2.COLORMAP_INFERNO,
-                      "Plasma": cv2.COLORMAP_PLASMA, "Viridis": cv2.COLORMAP_VIRIDIS, "Cividis": cv2.COLORMAP_CIVIDIS,
-                      "Twilight": cv2.COLORMAP_TWILIGHT, "Twilight Shifted": cv2.COLORMAP_TWILIGHT_SHIFTED,
-                      "Turbo": cv2.COLORMAP_TURBO, "Deep Green": cv2.COLORMAP_DEEPGREEN}
-        self.colormap = self.cmaps['Viridis']
+        self.cmaps = plt.colormaps()[:87]
+        self.colormap = 'viridis'
 
         # Initial Sidebar Widgets
         self.transect_chain_btn = func.RoundedButton(text="Transect Chain", size_hint=(1, 0.1),
@@ -180,6 +175,7 @@ class FileDisplay(ScatterLayout):
         """
         if self.f_type == "netcdf":
             self.netcdf_to_image()
+            self.byte.seek(0)
             self.im = CoreImage(self.byte, ext='png')
             self.size = self.im.size
         elif self.f_type == "image":
@@ -319,11 +315,15 @@ class FileDisplay(ScatterLayout):
                 self.tool.update_c_size(float(value))
         elif setting == "contrast":
             if self.f_type == "netcdf":
-                self.contrast = float(value)
+                v = float(value) / 20
+                if v < 0:
+                    self.contrast = 1 + v
+                else:
+                    self.contrast = 1 + v * 2
                 self.update_netcdf()
         elif setting == "colormap":
             if self.f_type == "netcdf":
-                self.colormap = self.cmaps[value]
+                self.colormap = value
                 self.update_netcdf()
         elif setting == "variable":
             if self.f_type == "netcdf":
@@ -339,6 +339,7 @@ class FileDisplay(ScatterLayout):
         Reload netcdf image when netcdf data is changed.
         """
         self.netcdf_to_image()
+        self.byte.seek(0)
         self.im = CoreImage(self.byte, ext='png')
         self.size = self.im.size
         self.img.texture = self.im.texture
@@ -348,42 +349,26 @@ class FileDisplay(ScatterLayout):
         """
         Creates image from NetCDF dataset defined in :attr:`nccut.filedisplay.FileDisplay.f_config`
 
-        Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
-        and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
-        can make image out of an array.
+        Normalizes data and then applies colormap and contrast settings and then calls for the creation of colorbar.
+        Loads image into memory as io.BytesIO object so kivy can make image out of an array.
         """
         self.nc_data = np.flip(func.sel_data(self.config['netcdf']).data, 0)
-        n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
-        nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 3, axis=2)
+        with warnings.catch_warnings(record=True) as w:
+            n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
+            if len(w) > 0 and issubclass(w[-1].category, RuntimeWarning):
+                func.alert_popup("Selected data is all NaN")
+        nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 4, axis=2)
+        c_mapped = plt.get_cmap(self.colormap)(n_data)
+        whites = np.ones(c_mapped.shape)
 
-        n_data = np.nan_to_num(n_data, nan=1)
-        n_data = (n_data * 255).astype(np.uint8)
-        c_mapped = cv2.applyColorMap(n_data, self.colormap)
-        whites = np.ones(c_mapped.shape) * 255
-        img = np.where(nans, whites, c_mapped)
         self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white",
                                                             dp(40)), self.config[self.f_type])
+        img = np.where(nans, whites, c_mapped)
         # Applies contrast settings
-        img = self.apply_contrast(img, self.contrast)
-        is_success, img_b = cv2.imencode(".png", img)
-        self.byte = io.BytesIO(img_b)
-
-    def apply_contrast(self, data, contrast):
-        """
-        Perform contrast level adjustment to data
-
-        Args:
-            data: 2D array to which to apply contrast change
-            contrast (int): Desired contrast value
-
-        Return:
-            Data with contrast adjusted
-        """
-        f = 131 * (contrast + 127) / (127 * (131 - contrast))
-        alpha_c = f
-        gamma_c = 127 * (1 - f)
-        out = cv2.addWeighted(data, alpha_c, data, 0, gamma_c)
-        return out
+        pil_image = im.fromarray(np.uint8(img * 255))
+        img = ImageEnhance.Contrast(pil_image).enhance(self.contrast)
+        self.byte = io.BytesIO()
+        img.save(self.byte, format="PNG")
 
     def flip_vertically(self):
         """

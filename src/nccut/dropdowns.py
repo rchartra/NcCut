@@ -102,7 +102,7 @@ class NetCDFDropDown(DropDown):
 
         self.cmap_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf":
-            for i in list(self.home.display.cmaps.keys()):
+            for i in self.home.display.cmaps:
                 btn = Button(text=i, size_hint_y=None, height=dp(30))
                 btn.bind(on_release=lambda btn: self.pass_setting("colormap", btn.text),  # Setting name: 'colormap'
                          on_press=self.cmap_dropdown.dismiss)

@@ -22,8 +22,8 @@ from functools import partial
 from scipy.interpolate import RegularGridInterpolator, CubicSpline
 import numpy as np
 import math
-import cv2
 import io
+import warnings
 import xarray as xr
 import matplotlib
 matplotlib.use('Agg')
@@ -355,15 +355,16 @@ def get_color_bar(colormap, data, face_color, text_color, font):
         kivy.uix.image.Image object containing image of colorbar
     """
     c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8).T
-    c_bar = cv2.applyColorMap(c_arr, colormap)
-    c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
+    c_bar = plt.get_cmap(colormap)(c_arr)
     plt.figure(figsize=(1, 30))
     plt.imshow(c_bar, origin="lower")
 
     ax = plt.gca()
     ax.get_xaxis().set_visible(False)
-    d_min = np.nanmin(data)
-    d_max = np.nanmax(data)
+    with warnings.catch_warnings(record=True):
+        d_min = np.nanmin(data)
+        d_max = np.nanmax(data)
+
     if d_min == d_max:
         s_labels = [d_min]
     elif np.isnan(d_min) or np.isnan(d_max):

@@ -12,7 +12,6 @@ import time
 import copy
 import pooch
 import json
-import cv2
 import tempfile
 import numpy as np
 from functools import partial
@@ -457,14 +456,16 @@ class Test(unittest.TestCase):
 
         # Contrast updates
         og_img = copy.copy(display.img.texture)
-        display.update_settings("contrast", 30)
-        self.assertEqual(display.contrast, 30, "Contrast was not updated on contrast change")
+        display.update_settings("contrast", 10)
+        self.assertEqual(display.contrast, 2.0, "Contrast increase was not updated properly on contrast change")
+        display.update_settings("contrast", -10)
+        self.assertEqual(display.contrast, 0.5, "Contrast increase was not updated properly on contrast change")
         self.assertNotEqual(og_img, display.img.texture, "Image was not updated on contrast change")
 
         # Colormap updates
         og_img = copy.copy(display.img.texture)
-        display.update_settings("colormap", "Inferno")
-        self.assertEqual(display.colormap, cv2.COLORMAP_INFERNO, "Colormap was not updated on colormap change")
+        display.update_settings("colormap", "inferno")
+        self.assertEqual(display.colormap, "inferno", "Colormap was not updated on colormap change")
         self.assertNotEqual(og_img, display.img.texture, "Image was not updated on colormap change")
 
         # Variable
