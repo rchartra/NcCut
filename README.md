@@ -59,18 +59,7 @@ If you are having trouble installing NcCut please refer to the Troubleshooting s
 
 # <ins>Using the App</ins>
 
-* If you would like to try out the app there are example image and NetCDF files in the [support](https://github.com/rchartra/NcCut/tree/master/support) folder of this repository
-    * Relative file paths:
-
-        `support/example.jpg`\
-        `support/test_img.png`\
-        `support/example_4v.nc `\
-        `support/example_3d.nc`\
-    * There is an example project file for upload with `support/example_4v.nc` as well:
-
-        `support/project_example.json`
-
-
+* If you would like to try out the app there are example image and NetCDF files here: [https://zenodo.org/records/13883476](https://zenodo.org/records/13883476)
 
 ## Running the App
 

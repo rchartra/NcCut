@@ -24,8 +24,11 @@ import nccut.functions as functions
 from nccut.nccut import NcCut
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-SUPPORT_FILE_PATH = "support/"
 TEST_NC_PATH = pooch.retrieve(url="doi:10.5281/zenodo.12734574/test_nc.nc", known_hash=None)
+EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg", known_hash=None)
+EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc", known_hash=None)
+EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc", known_hash=None)
+PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json", known_hash=None)
 
 
 class AppInfo:
@@ -60,7 +63,7 @@ def get_app():
 
 
 def load_2d_nc(variable):
-    run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
+    run_app.home.ids.file_in.text = EXAMPLE_4V_PATH
     run_app.home.load_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = variable
@@ -71,7 +74,7 @@ def load_2d_nc(variable):
 
 
 def load_3d_nc(z_val):
-    run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_3d.nc"
+    run_app.home.ids.file_in.text = EXAMPLE_3D_PATH
     run_app.home.load_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = "Theta"
@@ -108,7 +111,7 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = ""
         run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Empty file names are invalid")
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "project_example.json"
+        run_app.home.ids.file_in.text = PROJECT_EXAMPLE_PATH
         run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
@@ -119,7 +122,7 @@ class Test(unittest.TestCase):
         """
         Check that viewer window is clean after removing tools
         """
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
         run_app.home.load_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
@@ -147,7 +150,7 @@ class Test(unittest.TestCase):
         Tests all tools, file elements, and sidebar additions are reset when a new file is opened.
         """
         # Open a file and use a tool
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
+        run_app.home.ids.file_in.text = EXAMPLE_4V_PATH
         run_app.home.load_btn()
         load_2d_nc("Vorticity")
         og_side = ["Transect Marker", "Transect Chain"]
@@ -168,7 +171,7 @@ class Test(unittest.TestCase):
         for i in range(len(incs)):
             tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
 
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
         run_app.home.load_btn()
         sidebar = run_app.home.ids.dynamic_sidebar.children
         self.assertListEqual(og_side,
@@ -194,7 +197,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f1 = open(SUPPORT_FILE_PATH + "project_example.json")
+        f1 = open(PROJECT_EXAMPLE_PATH)
         project1 = json.load(f1)
         # Upload Project File
         multi_mark_instance = run_app.home.display.tool
@@ -213,7 +216,7 @@ class Test(unittest.TestCase):
         """
         Test transect marker tool exhibits expected behavior.
         """
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
         run_app.home.load_btn()
 
         load_2d_nc("Vorticity")
@@ -223,7 +226,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f = open(SUPPORT_FILE_PATH + "project_example.json")
+        f = open(PROJECT_EXAMPLE_PATH)
         project = json.load(f)
 
         # Upload Project File
@@ -270,7 +273,8 @@ class Test(unittest.TestCase):
         select_sidebar_button("Edit Mode")
         select_sidebar_button("Delete Last Point")
         select_sidebar_button("Back")
-        self.assertNotIn(multi_mark_instance.dbtn, sidebar, "Plot button not removed from sidebar when no more markers left")
+        self.assertNotIn(multi_mark_instance.dbtn, sidebar,
+                         "Plot button not removed from sidebar when no more markers left")
 
         # Test width adjustments
 
@@ -303,7 +307,7 @@ class Test(unittest.TestCase):
         """
         Test transect chain tool exhibits expected behavior
         """
-        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
         run_app.home.load_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
