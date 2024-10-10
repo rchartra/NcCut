@@ -11,7 +11,7 @@ Submission
 
 Testing
 -------
-* If you are adding new features to the GUI please write unit tests for your feature. You may refer to the existing test `suite <https://github.com/rchartra/NcCut/tree/master/tests>`_ for examples on how to write them.
+* If you are adding new features to the GUI please write unit tests for your feature. You may refer to the existing test `suite <https://github.com/rchartra/NcCut/tree/main/tests>`_ for examples on how to write them.
 * Unit tests ensure that any future changes to the GUI won't break your code making them crucial to maintaining this project long term.
 * When writing unit tests, check only that the expected user input results in the correct final behavior. Tests that look too deep into how the code itself works are vulnerable to failing over small changes even if the code overall is working correctly.
 * Please test your feature from a user's perspective as you are developing it. There should be no way for the app to crash while it's in use. If there is a way for a user to do something incorrectly, (for example entering an invalid file name), handle that case and alert the user via :py:func:`nccut.functions.alert`.
@@ -19,7 +19,7 @@ Testing
 Documentation
 -------------
 * If you are adding a new feature please add instructions as to how to use your tool to the the documentation.
-* To update the documentation edit the reStructuredText files in the docs `source <https://github.com/rchartra/NcCut/tree/master/docs/source>`_ folder.
+* To update the documentation edit the reStructuredText files in the docs `source <https://github.com/rchartra/NcCut/tree/main/docs/source>`_ folder.
 * Your code should be well documented with docstrings according to the Google python style `guide <https://google.github.io/styleguide/pyguide.html>`_. The docstrings are used to create the :doc:`nccut` section of the docs, so please ensure they are properly formatted.
 
 Code Style
@@ -31,11 +31,11 @@ Tips for Adding a New Tool
 --------------------------
 
 * Refer to the `Kivy documentation <https://kivy.org/doc/stable/guide/widgets.html>`_. The Kivy python library is the backbone for all UI related aspects of this app, therefore knowing how it works and how to use it is essential for making any additions or changes.
-* Read through the :doc:`nccut`. This will give you an understanding of the widget tree structure and then you can use the code for the **Transect** and **Transect Marker** tools as examples for how to structure your tool to work with the GUI.
+* Read through the :doc:`nccut`. This will give you an understanding of the widget tree structure and then you can use the code for the **Transec Chaint** and **Transect Marker** tools as examples for how to structure your tool to work with the GUI.
 
     * In summary, the Homescreen object serves as the root. The root creates the FileDisplay object with the correct image to display. The FileDisplay object then manages setting changes and the tools. The tools are added as children of the FileDisplay object. The tools add a **Plot** button to the sidebar which calls for a PlotPopup object which allows the user to view and save their data.
 
-* To add a button for your tool in the sidebar edit the `nccut.kv <https://github.com/rchartra/NcCut/blob/master/src/NcCut/nccut.kv>`_ file and follow the example of the current tools.
+* To add a button for your tool in the sidebar edit the `nccut.kv <https://github.com/rchartra/NcCut/blob/main/src/NcCut/nccut.kv>`_ file and follow the example of the current tools.
 * You should pass a reference to the home screen to your tool class upon creation. The home screen is the root of the widget tree, so doing this will allow you to access the rest of the widget tree.
 * The home screen has a reference to the active :py:func:`nccut.filedisplay.FileDisplay` object. This is what holds the loaded image and tools when they are created. You should add your tools as children to this object via the :py:func:`nccut.filedisplay.FileDisplay.manage_tool()` method.
 * You can access the loaded data as well as the user selected configurations in the :py:func:`nccut.filedisplay.FileDisplay.config` attribute.
