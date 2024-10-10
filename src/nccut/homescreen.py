@@ -14,6 +14,7 @@ import kivy
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.widget import Widget
 from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
 import re
@@ -23,6 +24,7 @@ from pathlib import Path
 from plyer import filechooser
 from nccut.filedisplay import FileDisplay
 from nccut.netcdfconfig import NetCDFConfig
+from nccut.settingsbar import SettingsBar
 
 
 class HomeScreen(Screen):
@@ -39,6 +41,12 @@ class HomeScreen(Screen):
         display: FileDisplay object (draggable image) created when a file is loaded
         nc_popup: Reference to NetCDF configuration popup
         file: File if one was given on start up from command line, otherwise None
+        color_bar_box: BoxLayout containing colorbar and related graphics
+        cb_bg: Background for colorbar box
+        netcdf_info: Label object containing information about NetCDF file if it has necessary attributes
+        sidebar_label: Label object for title of dynamic sidebar
+        sidebar_spacer: Spacer to fill any remaining area in dynamic sidebar not filled by widgets
+        settings_bar: SettingsBar object holding view manipulation buttons and NetCDF menu
     """
     def __init__(self, btn_img_path, file=None, **kwargs):
         """
@@ -54,7 +62,7 @@ class HomeScreen(Screen):
         self.file_on = False
         self.loaded = False
         self.rel_path = Path(os.getcwd())
-        self.font = self.ids.transect.font_size
+        self.font = self.ids.quit.font_size
         self.display = None
         self.nc_popup = None
         self.file = file
@@ -65,6 +73,33 @@ class HomeScreen(Screen):
         self.color_bar_box.bind(size=self.update_cb_bg, pos=self.update_cb_bg)
         self.netcdf_info = func.BackgroundLabel(text="", font_size=self.font, size_hint=(1, 0.08),
                                                 background_color=[0.1, 0.1, 0.1, 1], markup=True)
+        # Dynamic sidebar
+        self.sidebar_label = self.ids.sidebar_label
+        self.sidebar_spacer = Widget(size_hint=(1, 0.9))
+        self.ids.dynamic_sidebar.add_widget(self.sidebar_spacer)
+        # Settings bar
+        self.settings_bar = SettingsBar(self.font, self)
+
+    def populate_dynamic_sidebar(self, elements, sidebar_label):
+        """
+        Removes current sidebar elements and replaces them with the widgets provided.
+
+        Args:
+            elements (list): List of widgets to add
+            sidebar_label (str): Title for dynamic sidebar
+        """
+        dsl = self.ids.dynamic_sidebar
+        for i in range(len(dsl.children) - 1):
+            dsl.remove_widget(dsl.children[0])
+        self.sidebar_label.text = sidebar_label
+        y_space = 1 - ((len(elements) + 1) * 0.1)
+        if y_space < 0:
+            y_space = 0
+        self.sidebar_spacer.size_hint = (1, y_space)
+        for el in elements:
+            dsl.add_widget(el)
+        dsl.add_widget(self.sidebar_spacer)
+        self.font_adapt()
 
     def update_cb_bg(self, *args):
         """
@@ -83,9 +118,9 @@ class HomeScreen(Screen):
         if not self.loaded and self.ids.view_box.size[0] / kivy.core.window.Window.size[0] >= 0.75:
             if self.file:
                 self.ids.file_in.text = str(self.file)
-                self.go_btn()
+                self.load_btn()
                 if str(self.file)[-3:] == ".nc":
-                    self.nc_popup.go.dispatch("on_press")
+                    self.nc_popup.load.dispatch("on_press")
             self.loaded = True
 
     def font_adapt(self):
@@ -96,71 +131,60 @@ class HomeScreen(Screen):
         but not those defined in scripts. Thus this method updates font size for such elements to be the same as
         the static elements.
         """
-        font = self.ids.transect.font_size
-
+        font = self.ids.quit.font_size
+        dsl = self.ids.dynamic_sidebar
+        for i in range(len(dsl.children)):
+            dsl.children[i].font_size = font
         self.font = font
-        self.ids.netcdf_btn.font_size = font
         self.netcdf_info.font_size = font
+        self.settings_bar.font_adapt(font)
         if self.file_on:
             self.display.font_adapt(font)
 
-    def transect_btn(self, t_type):
-        """
-        Calls for the creation and deletion of tools.
-        Args:
-            t_type (str): Tool type: 'transect' or 'transect_marker'
-        """
-        if self.file_on:
-            self.font_adapt()
-            self.display.manage_tool(t_type)
-
-    def go_btn(self):
+    def load_btn(self):
         """
         If file name is valid and exists, load image or NetCDF File.
 
         If a file and any transect tools are already loaded, first clears viewer.
         """
         if self.file_on:
-            self.display.reset_sidebar()
             self.clean_file()
+        self.ids.file_in.text = self.ids.file_in.text.strip()
         file = self.ids.file_in.text
-
         # Limit file names to alphanumeric characters and _-./
         if file == "" or len(re.findall(r'[^A-Za-z0-9_:\\.\-/]', file)) > 0:
             func.alert("Invalid File Name", self)
             self.clean_file()
         else:
-            if len(file) >= 1:
-                try:
-                    open(file)
-                    if file[-3:] == ".nc":
-                        # Creates selection popup for nc file data sets
-                        self.nc_popup = NetCDFConfig(file, self)
+            try:
+                open(file)
+                if file[-3:] == ".nc":
+                    # Creates selection popup for nc file data sets
+                    self.nc_popup = NetCDFConfig(file, self)
 
-                    elif file[-5:] == ".jpeg" or file[-4:] == ".png" or file[-4:] == ".jpg":
-                        # Creates interactive image from .jpg/.png/.jpeg files
-                        self.display = FileDisplay(home=self, f_config={"image": str(file)})
-                        self.ids.view.add_widget(self.display)
-                        self.file_on = True
-                    else:
-                        func.alert("Unsupported File Type", self)
-                        self.clean_file()
-
-                except FileNotFoundError:
-                    func.alert("File Not Found", self)
+                elif file[-5:] == ".jpeg" or file[-4:] == ".png" or file[-4:] == ".jpg":
+                    # Creates interactive image from .jpg/.png/.jpeg files
+                    self.display = FileDisplay(home=self, f_config={"image": str(file)})
+                    self.ids.view.add_widget(self.display)
+                    if self.settings_bar.parent is None:
+                        self.ids.settings_bar.add_widget(self.settings_bar)
+                    self.file_on = True
+                else:
+                    func.alert("Unsupported File Type", self)
                     self.clean_file()
+
+            except FileNotFoundError:
+                func.alert("File Not Found", self)
+                self.clean_file()
 
     def browse(self):
         """
         Opens native operating system file browser to allow user to select their file
         """
         files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
-        if files is None or len(files) == 0:
-            text = ""
-        else:
-            text = files[0]
-        self.ids.file_in.text = text
-        self.go_btn()
+        if files is not None and len(files) > 0:
+            self.ids.file_in.text = files[0]
+            self.load_btn()
 
     def load_colorbar_and_info(self, colorbar, config):
         """
@@ -210,6 +234,10 @@ class HomeScreen(Screen):
         """
         self.display = FileDisplay(home=self, f_config={"netcdf": config})
         self.ids.view.add_widget(self.display)
+        if self.settings_bar.parent is None:
+            self.ids.settings_bar.add_widget(self.settings_bar)
+        self.settings_bar.add_netcdf_button()
+        self.settings_bar.font_adapt(self.font)
         self.file_on = True
 
     def clean_file(self):
@@ -224,8 +252,11 @@ class HomeScreen(Screen):
             self.ids.main_box.remove_widget(self.netcdf_info)
         if self.file_on:
             self.ids.view.unbind(size=self.display.resize_to_fit)
-            self.ids.line_color_btn_img.source = self.btn_img_path + "blue_line_btn.png"
+            self.settings_bar.set_line_color_btn(os.path.join(self.btn_img_path, "blue_line_btn.png"))
             self.display.parent.remove_widget(self.display)
+        if self.settings_bar.parent is not None:
+            self.ids.settings_bar.remove_widget(self.settings_bar)
+        self.settings_bar.remove_netcdf_button()
         self.file_on = False
 
     def canvas_remove(self, item, *largs):
@@ -238,27 +269,6 @@ class HomeScreen(Screen):
 
         """
         self.canvas.remove(item)
-
-    def rotate(self):
-        """
-        Call for a 45 degree rotation of current display by 45 degrees
-        """
-        if self.file_on:
-            self.display.rotate()
-
-    def v_flip(self):
-        """
-        Call for a vertical flip of view of current display
-        """
-        if self.file_on:
-            self.display.flip_vertically()
-
-    def h_flip(self):
-        """
-        Call for a horizontal flip of view of current display
-        """
-        if self.file_on:
-            self.display.flip_horizontally()
 
     def quit_btn(self):
         """

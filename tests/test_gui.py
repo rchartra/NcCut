@@ -12,7 +12,7 @@ import time
 import copy
 import pooch
 import json
-import cv2
+import tempfile
 import numpy as np
 from functools import partial
 from kivy.metrics import dp
@@ -20,16 +20,12 @@ from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from nccut.multimarker import Click, marker_find
-from nccut.markerwidth import MarkerWidth
 import nccut.functions as functions
 from nccut.nccut import NcCut
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+SUPPORT_FILE_PATH = "support/"
 TEST_NC_PATH = pooch.retrieve(url="doi:10.5281/zenodo.12734574/test_nc.nc", known_hash=None)
-EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg", known_hash=None)
-EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc", known_hash=None)
-EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc", known_hash=None)
-PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json", known_hash=None)
 
 
 class AppInfo:
@@ -64,31 +60,31 @@ def get_app():
 
 
 def load_2d_nc(variable):
-    run_app.home.ids.file_in.text = EXAMPLE_4V_PATH
-    run_app.home.go_btn()
+    run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
+    run_app.home.load_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = variable
     popup.x_select.text = "x"
     popup.y_select.text = "y"
-    popup.go.dispatch("on_press")
-    popup.go.dispatch("on_release")
+    popup.load.dispatch("on_press")
+    popup.load.dispatch("on_release")
 
 
 def load_3d_nc(z_val):
-    run_app.home.ids.file_in.text = EXAMPLE_3D_PATH
-    run_app.home.go_btn()
+    run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_3d.nc"
+    run_app.home.load_btn()
     popup = run_app.home.nc_popup
     popup.var_select.text = "Theta"
     popup.x_select.text = "i"
     popup.y_select.text = "j"
     popup.z_select.text = "k"
     popup.depth_select.text = z_val
-    popup.go.dispatch("on_press")
-    popup.go.dispatch("on_release")
+    popup.load.dispatch("on_press")
+    popup.load.dispatch("on_release")
 
 
 def select_sidebar_button(text):
-    sidebar = run_app.home.ids.sidebar
+    sidebar = run_app.home.ids.dynamic_sidebar
     but = next((but for but in sidebar.children if isinstance(but, Button) and but.text == text), None)
     but.dispatch('on_press')
     but.dispatch('on_release')
@@ -104,57 +100,63 @@ class Test(unittest.TestCase):
         """
         Test input file name rules
         """
-        run_app.home.ids.file_in.text = "*$%&@! "
-        run_app.home.go_btn()
+        run_app.home.ids.file_in.text = " *$%&@! "
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name",
                          "File names with irregular characters are invalid")
+        self.assertEqual(run_app.home.ids.file_in.text, "*$%&@!", "Whitespace not removed from file entry")
         run_app.home.ids.file_in.text = ""
-        run_app.home.go_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Empty file names are invalid")
-        run_app.home.ids.file_in.text = PROJECT_EXAMPLE_PATH
-        run_app.home.go_btn()
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "project_example.json"
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
-        run_app.home.go_btn()
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "File Not Found", "File must exist")
 
     def test_tool_cleanup(self):
         """
         Check that viewer window is clean after removing tools
         """
-        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
-        run_app.home.go_btn()
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
         # Run for all tools in sidebar
-        og_side = copy.copy(run_app.home.ids.sidebar.children)
+        og_side = ["Transect Marker", "Transect Chain"]
         og_img = copy.copy(run_app.home.display.children[0].children)
-        for item in run_app.home.ids.sidebar.children:
-            if isinstance(item, type(functions.RoundedButton())) and item.text != "Quit":
+        sidebar = run_app.home.ids.dynamic_sidebar.children
+        for item in sidebar:
+            if isinstance(item, type(functions.RoundedButton())):
                 # Start tool
                 item.dispatch('on_press')
                 item.dispatch('on_release')
 
-                # Press again to clear
-                item.dispatch('on_press')
-                item.dispatch('on_release')
+                # Close Tool
+                run_app.home.display.close_tool_btn.dispatch('on_press')
+                run_app.home.display.close_tool_btn.dispatch('on_release')
 
-                self.assertListEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar did not revert to original")
+                self.assertListEqual(og_side,
+                                     [b.text for b in sidebar if isinstance(b, type(functions.RoundedButton()))],
+                                     "Sidebar did not revert to original")
                 self.assertListEqual(og_img, run_app.home.display.children[0].children, "All Tools were not removed")
 
     def test_file_cleanup(self):
         """
         Tests all tools, file elements, and sidebar additions are reset when a new file is opened.
         """
-        og_side = copy.copy(run_app.home.ids.sidebar.children)
-
         # Open a file and use a tool
-        run_app.home.ids.file_in.text = EXAMPLE_4V_PATH
-        run_app.home.go_btn()
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example_4v.nc"
+        run_app.home.load_btn()
         load_2d_nc("Vorticity")
+        og_side = ["Transect Marker", "Transect Chain"]
+
         self.assertEqual(len(run_app.home.color_bar_box.children), 1, "Colorbar was not Added")
         self.assertIsNotNone(run_app.home.color_bar_box.parent, "Colorbar box was not displayed")
         self.assertIsNotNone(run_app.home.netcdf_info.parent, "NetCDF Info bar was not displayed")
+        self.assertIsNotNone(run_app.home.settings_bar.parent, "Settings bar was not displayed")
+        self.assertIsNotNone(run_app.home.settings_bar.netcdf_btn.parent, "NetCDF settings button was not displayed")
         select_sidebar_button("Transect Marker")
         x = run_app.home.size[0]
         y = run_app.home.size[1]
@@ -166,13 +168,17 @@ class Test(unittest.TestCase):
         for i in range(len(incs)):
             tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
 
-        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
-        run_app.home.go_btn()
-
-        self.assertEqual(og_side, run_app.home.ids.sidebar.children, "Sidebar was not restored")
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.load_btn()
+        sidebar = run_app.home.ids.dynamic_sidebar.children
+        self.assertListEqual(og_side,
+                             [b.text for b in sidebar if isinstance(b, type(functions.RoundedButton()))],
+                             "Sidebar did not revert to original")
         self.assertEqual(len(run_app.home.color_bar_box.children), 0, "Colorbar was not removed")
         self.assertIsNone(run_app.home.color_bar_box.parent, "Colorbar box was not removed")
         self.assertIsNone(run_app.home.netcdf_info.parent, "NetCDF info bar was not removed")
+        self.assertIsNone(run_app.home.netcdf_info.parent, "NetCDF info bar was not removed")
+        self.assertIsNone(run_app.home.settings_bar.netcdf_btn.parent, "NetCDF settings menu was not removed")
         self.assertEqual(len(run_app.home.display.children), 1, "Not all tools were removed from display")
 
     def test_project_upload(self):
@@ -188,7 +194,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f1 = open(PROJECT_EXAMPLE_PATH)
+        f1 = open(SUPPORT_FILE_PATH + "project_example.json")
         project1 = json.load(f1)
         # Upload Project File
         multi_mark_instance = run_app.home.display.tool
@@ -207,17 +213,17 @@ class Test(unittest.TestCase):
         """
         Test transect marker tool exhibits expected behavior.
         """
-        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
-        run_app.home.go_btn()
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.load_btn()
 
         load_2d_nc("Vorticity")
 
         # Open Transect Marker tool
-        sidebar = run_app.home.ids.sidebar
+        sidebar = run_app.home.ids.dynamic_sidebar.children
         select_sidebar_button("Transect Marker")
 
         # Project File
-        f = open(PROJECT_EXAMPLE_PATH)
+        f = open(SUPPORT_FILE_PATH + "project_example.json")
         project = json.load(f)
 
         # Upload Project File
@@ -255,9 +261,18 @@ class Test(unittest.TestCase):
         m2_expected_points = list(zip(m2["Click x"][:-1], m2["Click y"][:-1], m2["Width"][:-1]))
         self.assertEqual(multi_mark_instance.children[0].points, m2_expected_points, "Last point of m2 was not deleted")
 
-        # Test width adjustments
+        # Delete until only one point
+        while len(multi_mark_instance.children) != 1 and multi_mark_instance.children[0].points != 1:
+            select_sidebar_button("Delete Last Point")
+
         select_sidebar_button("Back")
-        select_sidebar_button("New Marker")
+        self.assertNotIn(multi_mark_instance.width_w, sidebar, "Width adjuster in sidebar when only one point clicked")
+        select_sidebar_button("Edit Mode")
+        select_sidebar_button("Delete Last Point")
+        select_sidebar_button("Back")
+        self.assertNotIn(multi_mark_instance.dbtn, sidebar, "Plot button not removed from sidebar when no more markers left")
+
+        # Test width adjustments
 
         # Simulate marker press with width changes
         x = run_app.home.size[0]
@@ -269,7 +284,7 @@ class Test(unittest.TestCase):
         w_arr = [int(n * 100) for n in incs]
         w_arr[0] = 44
         multi_mark_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
-        w_wid = next((but for but in sidebar.children if isinstance(but, MarkerWidth)), None)
+        w_wid = multi_mark_instance.width_w
         for i in range(1, len(incs)):
             w_wid.txt.text = str(w_arr[i])
             w_wid.btn.dispatch('on_press')
@@ -288,8 +303,8 @@ class Test(unittest.TestCase):
         """
         Test transect chain tool exhibits expected behavior
         """
-        run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
-        run_app.home.go_btn()
+        run_app.home.ids.file_in.text = SUPPORT_FILE_PATH + "example.jpg"
+        run_app.home.load_btn()
         self.assertEqual(run_app.home.file_on, True, "File was not loaded")
 
         # Open Transect Chain tool
@@ -303,22 +318,19 @@ class Test(unittest.TestCase):
 
         tran_instance = run_app.home.display.tool
         # First Click
-        sidebar = run_app.home.ids.sidebar
+        sidebar = run_app.home.ids.dynamic_sidebar.children
         tran_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
-        self.assertIsNone(next((but for but in sidebar.children if but.text == "Plot"), None),
-                          "There cannot be a Plot Button on First Click")
+        self.assertNotIn(tran_instance.dbtn, sidebar, "There cannot be a Plot Button on First Click")
         self.assertEqual(len(tran_instance.children), 1, "Transect Chain Not Added")
 
         # Second Click
         tran_instance.on_touch_down(Click(float(x_arr[1]), float(y_arr[1])))
-        self.assertIsInstance(next((but for but in sidebar.children if but.text == "Plot")), Button,
-                              "Plot Button should be added on second click")
+        self.assertIn(tran_instance.dbtn, sidebar, "Plot Button should be added on second click")
         self.assertEqual(len(tran_instance.children), 1, "A transect chain was improperly deleted or added")
 
         # Third Click
         tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
-        self.assertIsInstance(next((but for but in sidebar.children if but.text == "Plot")), Button,
-                              "Plot Button should still exist on third click")
+        self.assertIn(tran_instance.dbtn, sidebar, "Plot Button should be there on third click")
         self.assertEqual(len(tran_instance.children), 1, "A transect chain was improperly deleted or added")
 
         self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
@@ -359,6 +371,7 @@ class Test(unittest.TestCase):
                          "Transect chain point was not deleted from previous marker after current marker was removed")
         select_sidebar_button("Delete Last Line")
         self.assertEqual(len(tran_instance.children), 1, "When last chain is deleted, a new chain is added")
+        self.assertNotIn(tran_instance.dbtn, sidebar)
         self.assertEqual(tran_instance.children[0].points, [], "Transect Chain was not properly deleted")
 
     def test_netcdf_config(self):
@@ -366,7 +379,7 @@ class Test(unittest.TestCase):
         Test netcdf configuration popup ensures valid netcdf configuration settings
         """
         run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.go_btn()
+        run_app.home.load_btn()
         popup = run_app.home.nc_popup
 
         # Check Default Values and rejection of a 1D Variable
@@ -376,8 +389,8 @@ class Test(unittest.TestCase):
         self.assertEqual(popup.z_select.text, "N/A", "Z dimension detected for 1D variable")
         self.assertEqual(popup.z_select.text, "N/A", "Z dimension value chosen for 1D variable")
 
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
+        popup.load.dispatch('on_press')
+        popup.load.dispatch('on_release')
         self.assertEqual(popup.error.text, "This variable has less than 2 dimensions", "Can't support less than 2 dims")
 
         # Check 2D Variable behavior
@@ -391,18 +404,18 @@ class Test(unittest.TestCase):
         self.assertEqual(popup.z_select.text, "N/A", "Z dimension value chosen for 2D variable")
 
         popup.y_select.text = "i"
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
+        popup.load.dispatch('on_press')
+        popup.load.dispatch('on_release')
         self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
 
         popup.y_select.text = "j"
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
+        popup.load.dispatch('on_press')
+        popup.load.dispatch('on_release')
         self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
 
         # Check 3D Variable behavior
         run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.go_btn()
+        run_app.home.load_btn()
         popup = run_app.home.nc_popup
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
@@ -414,24 +427,24 @@ class Test(unittest.TestCase):
         self.assertEqual(popup.depth_select.text, "0", "First Z dimension value not chosen for 3D variable")
 
         popup.z_select.text = "j"
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
+        popup.load.dispatch('on_press')
+        popup.load.dispatch('on_release')
         self.assertEqual(popup.error.text, "All X, Y, Z variables must be unique", "Dimensions must be unique")
 
         popup.z_select.text = "k"
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
+        popup.load.dispatch('on_press')
+        popup.load.dispatch('on_release')
         self.assertTrue(run_app.home.file_on, "File did not load when there was a proper configuration")
 
         # Check Rejection of a 4D Variable
         run_app.home.ids.file_in.text = TEST_NC_PATH
-        run_app.home.go_btn()
+        run_app.home.load_btn()
         popup = run_app.home.nc_popup
         popup.var_select.dispatch('on_press')
         popup.var_select.dispatch('on_release')
         popup.var_drop.select("v4")
-        popup.go.dispatch('on_press')
-        popup.go.dispatch('on_release')
+        popup.load.dispatch('on_press')
+        popup.load.dispatch('on_release')
         self.assertEqual(popup.error.text, "This variable has more than 3 dimensions", "Can't support more than 3 dims")
 
     def test_netcdf_settings(self):
@@ -443,14 +456,16 @@ class Test(unittest.TestCase):
 
         # Contrast updates
         og_img = copy.copy(display.img.texture)
-        display.update_settings("contrast", 30)
-        self.assertEqual(display.contrast, 30, "Contrast was not updated on contrast change")
+        display.update_settings("contrast", 10)
+        self.assertEqual(display.contrast, 2.0, "Contrast increase was not updated properly on contrast change")
+        display.update_settings("contrast", -10)
+        self.assertEqual(display.contrast, 0.5, "Contrast increase was not updated properly on contrast change")
         self.assertNotEqual(og_img, display.img.texture, "Image was not updated on contrast change")
 
         # Colormap updates
         og_img = copy.copy(display.img.texture)
-        display.update_settings("colormap", "Inferno")
-        self.assertEqual(display.colormap, cv2.COLORMAP_INFERNO, "Colormap was not updated on colormap change")
+        display.update_settings("colormap", "inferno")
+        self.assertEqual(display.colormap, "inferno", "Colormap was not updated on colormap change")
         self.assertNotEqual(og_img, display.img.texture, "Image was not updated on colormap change")
 
         # Variable
@@ -483,14 +498,14 @@ class Test(unittest.TestCase):
         self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)),
                          "Transect graphics did not update on circle size change")
 
-        select_sidebar_button("Transect Marker")
+        select_sidebar_button("Close Tool")
         select_sidebar_button("Transect Marker")
         display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)),
                          "Marker graphics were not updated on circle size change")
 
         # Reset
-        select_sidebar_button("Transect Chain")
+        select_sidebar_button("Close Tool")
 
         # Line Color
         display.update_settings("l_color", "Orange")
@@ -501,7 +516,7 @@ class Test(unittest.TestCase):
         self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13],
                          "Transect graphics were not updated on line color setting change")
 
-        select_sidebar_button("Transect Marker")
+        select_sidebar_button("Close Tool")
         select_sidebar_button("Transect Marker")
         display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13],
@@ -543,23 +558,22 @@ class Test(unittest.TestCase):
         plot_popup = tool.plotting
 
         # Initial Transect Selections
-        plot_popup.download_selected_data("__test__.json")
-        f = open("__test__.json")
-        res1 = json.load(f)
-        f.close()
-        os.remove("__test__.json")
-        self.assertEqual(len(list(res1["Vorticity"].keys())), 1, "Only selected marker should be saved")
-        self.assertEqual(len(list(res1["Vorticity"]["Marker 1"].keys())), 6,
-                         "Marker should have 3 transects and Click x, Click y, Width")
-
+        with tempfile.TemporaryDirectory() as jpath:
+            plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res1 = json.load(f)
+            f.close()
+            self.assertEqual(len(list(res1["Vorticity"].keys())), 1, "Only selected marker should be saved")
+            self.assertEqual(len(list(res1["Vorticity"]["Marker 1"].keys())), 6,
+                             "Marker should have 3 transects and Click x, Click y, Width")
         # Plot Saving
-        plot_popup.download_png_plot("__test__.png")
-        self.assertTrue(os.path.isfile("__test__.png"), "PNG Plot not saved")
-        os.remove("__test__.png")
+        with tempfile.TemporaryDirectory() as ipath:
+            plot_popup.download_png_plot(os.path.join(ipath, "test"))
+            self.assertTrue(os.path.isfile(os.path.join(ipath, "test.png")), "PNG Plot not saved")
 
-        plot_popup.download_pdf_plot("__test__.pdf")
-        self.assertTrue(os.path.isfile("__test__.pdf"), "PDF Plot not saved")
-        os.remove("__test__.pdf")
+        with tempfile.TemporaryDirectory() as ppath:
+            plot_popup.download_pdf_plot(os.path.join(ppath, "test"))
+            self.assertTrue(os.path.isfile(os.path.join(ppath, "test.pdf")), "PDF Plot not saved")
 
         # Can't deselect all transects
         dummy_check = CheckBox(active=False)
@@ -572,32 +586,31 @@ class Test(unittest.TestCase):
 
         # Selecting Specific Transects
         plot_popup.on_transect_checkbox(dummy_check, "Marker 2", "Cut 2")
-        plot_popup.download_selected_data("__test__.json")
-        f = open("__test__.json")
-        res2 = json.load(f)
-        f.close()
-        os.remove("__test__.json")
-        self.assertEqual(len(list(res2["Vorticity"].keys())), 2, "Two markers were selected so two should be saved")
-        self.assertEqual(len(list(res2["Vorticity"]["Marker 1"].keys())), 4,
-                         "Marker 1 should have 1 transect and Click x, Click y, Width")
-        self.assertEqual(list(res2["Vorticity"]["Marker 1"].keys())[0], "Cut 1",
-                         "Marker 1 should only have Cut 1 transect")
-        self.assertEqual(len(list(res2["Vorticity"]["Marker 2"].keys())), 4,
-                         "Marker 2 should have 1 transect and Click x, Click y, Width")
-        self.assertEqual(list(res2["Vorticity"]["Marker 2"].keys())[0], "Cut 2",
-                         "Marker 2 should only have Cut 2 transect")
-
+        with tempfile.TemporaryDirectory() as jpath:
+            plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res2 = json.load(f)
+            f.close()
+            self.assertEqual(len(list(res2["Vorticity"].keys())), 2, "Two markers were selected so two should be saved")
+            self.assertEqual(len(list(res2["Vorticity"]["Marker 1"].keys())), 4,
+                             "Marker 1 should have 1 transect and Click x, Click y, Width")
+            self.assertEqual(list(res2["Vorticity"]["Marker 1"].keys())[0], "Cut 1",
+                             "Marker 1 should only have Cut 1 transect")
+            self.assertEqual(len(list(res2["Vorticity"]["Marker 2"].keys())), 4,
+                             "Marker 2 should have 1 transect and Click x, Click y, Width")
+            self.assertEqual(list(res2["Vorticity"]["Marker 2"].keys())[0], "Cut 2",
+                             "Marker 2 should only have Cut 2 transect")
         # Selecting multiple variables
         dummy_check = CheckBox(active=False)
         plot_popup.on_var_checkbox(dummy_check, "Vorticity")
         self.assertTrue(dummy_check.active, "User should not be able to deselect all variables")
         plot_popup.on_var_checkbox(dummy_check, "Divergence")
-        plot_popup.download_selected_data("__test__.json")
-        f = open("__test__.json")
-        res3 = json.load(f)
-        f.close()
-        os.remove("__test__.json")
-        self.assertEqual(len(list(res3.keys())), 2, "Two variables were selected but two weren't saved")
+        with tempfile.TemporaryDirectory() as jpath:
+            plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res3 = json.load(f)
+            f.close()
+            self.assertEqual(len(list(res3.keys())), 2, "Two variables were selected but two weren't saved")
         plot_popup.dismiss()
 
     def test_plot_popup_3d_nc(self):
@@ -631,21 +644,21 @@ class Test(unittest.TestCase):
         self.assertTrue(dummy_check.active, "User should not be able to deselect all z values")
         plot_popup.on_z_checkbox(dummy_check, "30")
         plot_popup.on_z_checkbox(dummy_check, "60")
-        plot_popup.download_selected_data("__test__.json")
-        f = open("__test__.json")
-        res1 = json.load(f)
-        f.close()
-        os.remove("__test__.json")
-        self.assertEqual(list(res1["Theta"].keys()), ["15", "30", "60"],
-                         "Three z values were selected so three should have been saved")
+        with tempfile.TemporaryDirectory() as jpath:
+            plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res1 = json.load(f)
+            f.close()
+            self.assertEqual(list(res1["Theta"].keys()), ["15", "30", "60"],
+                             "Three z values were selected so three should have been saved")
 
         # Saving all z data
-        plot_popup.download_all_z_data("__test__.json")
-        f = open("__test__.json")
-        res2 = json.load(f)
-        f.close()
-        os.remove("__test__.json")
-        self.assertEqual(len(list(res2["Theta"].keys())), 18, "All z values should have been saved")
+        with tempfile.TemporaryDirectory() as jpath:
+            plot_popup.download_all_z_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res2 = json.load(f)
+            f.close()
+            self.assertEqual(len(list(res2["Theta"].keys())), 18, "All z values should have been saved")
 
         # Ensure one chain requirement for the all z plot
         dummy_check = CheckBox(active=False)

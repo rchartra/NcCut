@@ -13,14 +13,15 @@
 #:import join os.path.join
 
 <BackgroundLabel>
-    background_color: 0.2, 0.2, 0.2, 1
+    background_color: 0, 0, 0, 1
     canvas.before:
         Color:
             rgba: root.background_color
         RoundedRectangle:
             size: self.size
             pos: self.pos
-            radius: [5,]
+            radius: [dp(5),]
+
 
 <RoundedButton>:
     background_color: 0,0,0,0
@@ -30,7 +31,31 @@
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: [15,]
+            radius: [dp(10),]
+
+<AlertPopup>:
+    title: "Alert"
+    size_hint: (0.6, None)
+
+    BoxLayout:
+        id: box
+        padding: [dp(4), dp(4), dp(4), dp(4)]
+        spacing: dp(8)
+
+        Label:
+            id: message
+            text: ""
+            size_hint: (0.8, None)
+            text_size: self.width, None
+            pos_hint: {"top": 1}
+            height: self.texture_size[1]
+            on_height: root.update_height(self.height)
+
+        RoundedButton:
+            text: "Back"
+            size_hint: (0.2, None)
+            height: dp(32)
+            on_press: root.quit()
 
 <CircleSizeDropDown>
     auto_width: False
@@ -77,12 +102,12 @@
                 max: 70
                 value: 5
                 step: 1
-                size_hint: (0.5, 1)
+                size_hint: (0.4, 1)
 
             RoundedButton:
-                text: "Go"
-                size_hint: (0.1, 0.6)
-                font_size: self.size[0] / 2.6
+                text: "Set"
+                size_hint: (0.2, 0.6)
+                font_size: self.size[0] / 4
                 on_press: root.pass_setting(cir_size_slider.value)
                 pos_hint: {'top': 0.8}
 
@@ -171,16 +196,16 @@
 
             Slider:
                 id: contrast
-                min: -127
-                max: 127
+                min: -20
+                max: 20
                 value: 0
                 step: 1
-                size_hint: (0.5, 1)
+                size_hint: (0.4, 1)
 
             RoundedButton:
-                text: "Go"
-                size_hint: (0.1, 0.6)
-                font_size: self.size[0] / 2
+                text: "Set"
+                size_hint: (0.2, 0.6)
+                font_size: self.size[0] / 4
                 on_press: root.pass_setting("contrast", contrast.value)
                 pos_hint: {'top': 0.8}
 
@@ -253,6 +278,75 @@
                 pos_hint: {'top': 0.9}
                 on_press: root.depth_dropdown.open(self)
 
+<SettingsBar>
+    size_hint: (1, 1)
+    spacing: dp(10)
+    padding: [dp(5), dp(5), dp(5), dp(5)]
+
+    RoundedButton:
+        id: line_color_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: Factory.LineColorDropDown().open(self)
+
+        Image:
+            id: line_color_btn_img
+            source: join(app.btn_img_path, "blue_line_btn.png")
+            size: line_color_btn.size
+            pos: line_color_btn.pos
+
+    RoundedButton:
+        id: circle_size_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: Factory.CircleSizeDropDown().open(self)
+
+        Image:
+            id: circle_size_btn_img
+            source: join(app.btn_img_path, "cir_size_btn.png")
+            size: circle_size_btn.size
+            pos: circle_size_btn.pos
+
+    RoundedButton:
+        id: rotate_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: root.rotate()
+
+        Image:
+            id: rotate_btn_img
+            source: join(app.btn_img_path, "rotate_btn.png")
+            size: rotate_btn.size
+            pos: rotate_btn.pos
+
+    RoundedButton:
+        id: h_flip_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: root.h_flip()
+
+        Image:
+            id: h_flip_btn_img
+            source: join(app.btn_img_path, "h_flip_btn.png")
+            size: h_flip_btn.size
+            pos: h_flip_btn.pos
+
+    RoundedButton:
+        id: v_flip_btn
+        size_hint: (0.1, 1)
+        font_size: self.size[1] / 2.5
+        on_press: root.v_flip()
+
+        Image:
+            id: v_flip_btn_img
+            source: join(app.btn_img_path, "v_flip_btn.png")
+            size: v_flip_btn.size
+            pos: v_flip_btn.pos
+
+    BoxLayout:
+        size_hint: (0.4, 1)
+
+
 <HomeScreen>
 
     BoxLayout:
@@ -260,89 +354,18 @@
         orientation: "vertical"
         size_hint: (0.8, 1)
         spacing: dp(10)
-        padding: [dp(20), dp(10), dp(10), dp(20)]
+        padding: [dp(20), dp(15), dp(10), dp(20)]
 
         BoxLayout:
+            id: settings_bar
             size_hint: (1, 0.08)
-            spacing: dp(10)
-            padding: [dp(5), dp(5), dp(5), dp(5)]
             canvas:
                 Color:
                     rgb: [.2, .2, .2]
                 RoundedRectangle:
                     size: self.size
                     pos: self.pos
-                    radius: [5,]
-
-            RoundedButton:
-                text: "NetCDF"
-                id: netcdf_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: Factory.NetCDFDropDown().open(self)
-
-            RoundedButton:
-                id: line_color_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: Factory.LineColorDropDown().open(self)
-
-                Image:
-                    id: line_color_btn_img
-                    source: join(app.btn_img_path, "blue_line_btn.png")
-                    size: line_color_btn.size
-                    pos: line_color_btn.pos
-
-            RoundedButton:
-                id: circle_size_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: Factory.CircleSizeDropDown().open(self)
-
-                Image:
-                    id: circle_size_btn_img
-                    source: join(app.btn_img_path, "cir_size_btn.png")
-                    size: circle_size_btn.size
-                    pos: circle_size_btn.pos
-
-            RoundedButton:
-                id: rotate_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: root.rotate()
-
-                Image:
-                    id: rotate_btn_img
-                    source: join(app.btn_img_path, "rotate_btn.png")
-                    size: rotate_btn.size
-                    pos: rotate_btn.pos
-
-            RoundedButton:
-                id: h_flip_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: root.h_flip()
-
-                Image:
-                    id: h_flip_btn_img
-                    source: join(app.btn_img_path, "h_flip_btn.png")
-                    size: h_flip_btn.size
-                    pos: h_flip_btn.pos
-
-            RoundedButton:
-                id: v_flip_btn
-                size_hint: (0.1, 1)
-                font_size: self.size[1] / 2.5
-                on_press: root.v_flip()
-
-                Image:
-                    id: v_flip_btn_img
-                    source: join(app.btn_img_path, "v_flip_btn.png")
-                    size: v_flip_btn.size
-                    pos: v_flip_btn.pos
-
-            BoxLayout:
-                size_hint: (0.4, 1)
+                    radius: [dp(8),]
 
         BoxLayout:
             id: view_box
@@ -373,23 +396,25 @@
                 RoundedRectangle:
                     size: self.size
                     pos: self.pos
-                    radius: [15,]
+                    radius: [dp(10),]
 
             TextInput:
                 id: file_in
+                multiline: False
                 size_hint: (0.75, 1)
                 hint_text: "Enter Image or NetCDF File Path"
+                on_text_validate: root.load_btn()
 
             RoundedButton:
                 size_hint: (0.1, 1)
-                text: "Go"
-                font_size: self.size[1] / 2
-                on_press: root.go_btn()
+                text: "Load"
+                font_size: min(self.size[0] / 5, self.size[1] / 2)
+                on_press: root.load_btn()
 
             RoundedButton:
                 size_hint: (0.15, 1)
                 text: "Browse"
-                font_size: self.size[1] / 2
+                font_size: min(self.size[0] / 8, self.size[1] / 2)
                 on_press: root.browse()
 
     BoxLayout:
@@ -397,32 +422,56 @@
         orientation: "vertical"
         size_hint: (0.2, 1)
         pos_hint: {"x": 0.8}
-        padding: [dp(10), dp(20), dp(20), dp(20)]
-        spacing: dp(20)
+        padding: [dp(10), dp(15), dp(20), dp(20)]
+        spacing: dp(10)
 
-        BackgroundLabel:
-            text: "Tools"
-            size_hint: (1, 0.1)
-            text_size: self.size
-            halign: 'center'
-            valign: 'center'
-            font_size: self.size[0] / 10
+        BoxLayout:
+            id: dynamic_sidebar
+            orientation: "vertical"
+            size_hint: (1, 0.9)
+            spacing: dp(20)
+            padding: [dp(10), dp(10), dp(10), dp(10)]
 
-        RoundedButton:
-            text: "Transect Chain"
-            id: transect
-            size_hint: (1, 0.1)
-            font_size: self.size[0] / 12
-            on_press: root.transect_btn("transect_chain")
+            canvas:
+                Color:
+                    rgb: [.2, .2, .2]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [dp(10),]
 
-        RoundedButton:
-            text: "Transect Marker"
-            size_hint: (1, 0.1)
-            font_size: self.size[0] / 12
-            on_press: root.transect_btn("transect_marker")
+            BackgroundLabel:
+                id: sidebar_label
+                text: ""
+                background_color: 0.2, 0.2, 0.2, 1
+                size_hint: (1, 0.1)
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+                font_size: self.size[0] / 10
+                canvas:
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Line:
+                        points: [self.x, self.y, self.x + self.width, self.y]
+                        width: dp(1)
+                        cap: "square"
 
-        RoundedButton:
-            text: "Quit"
+        BoxLayout:
             size_hint: (1, 0.1)
-            font_size: self.size[0] / 10
-            on_press: root.quit_btn()
+            spacing: dp(10)
+            padding: [dp(10), dp(10), dp(10), dp(10)]
+            canvas:
+                Color:
+                    rgb: [.2, .2, .2]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [dp(10),]
+
+            RoundedButton:
+                id: quit
+                text: "Quit"
+                size_hint: (1, 1)
+                font_size: min(self.size[0] / 10, self.size[1] / 2)
+                on_press: root.quit_btn()

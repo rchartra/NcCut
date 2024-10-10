@@ -17,10 +17,11 @@ import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
 from kivy.metrics import dp
 from PIL import Image as im
+from PIL import ImageEnhance
 import numpy as np
-import cv2
-import copy
+import matplotlib.pyplot as plt
 import io
+import warnings
 import nccut.functions as func
 from nccut.multimarker import MultiMarker
 from nccut.multichain import MultiChain
@@ -58,14 +59,19 @@ class FileDisplay(ScatterLayout):
         cir_size (float): Circle size for transect tools
         cmaps (dict): Dictionary of colormap names mapping to colormap values from cv2
         colormap: current colormap data
-        action_lbl: Actions label to be loaded when in transect mode
+        transect_chain_btn: Transect Chain button which opens Transect Chain tool
+        transect_marker_btn: Transect Marker button which opens Transect Marker tool
+        initial_side_bar (list): List of sidebar buttons in 'Tools' sidebar menu
         drag_btn: Drag button to be loaded when in transect mode
         edit_btn: Edit button to be loaded when in transect mode
+        close_tool_btn: Button to close currently loaded tool
+        action_widgets: Initial list of widgets in Actions menu, not including any widgets added by the tool
+        tool_action_widgets: List of widgets in Actions menu at any given moment
+        tran_mode_btn: Button to close Drag Mode
         back_btn: Back button for editing mode
         delete_line_btn: Delete line button
         delete_point_btn: Delete point button
         edit_widgets (list): List of widgets that must be added to screen when entering editing mode
-        current (list): List to hold other widgets when they are replaced by editing mode widgets
     """
     def __init__(self, home, f_config, **kwargs):
         """
@@ -85,7 +91,6 @@ class FileDisplay(ScatterLayout):
         self.f_type = list(f_config.keys())[0]
         self.home = home
         self.sidebar = self.home.ids.sidebar
-        self.og_sidebar = copy.copy(self.home.ids.sidebar.children)
 
         self.im = None
         self.byte = None
@@ -102,26 +107,35 @@ class FileDisplay(ScatterLayout):
         self.l_col = "Blue"
         self.cir_size = 5
 
-        self.cmaps = {"Autumn": cv2.COLORMAP_AUTUMN, "Bone": cv2.COLORMAP_BONE, "Jet": cv2.COLORMAP_JET,
-                      "Winter": cv2.COLORMAP_WINTER, "Rainbow": cv2.COLORMAP_RAINBOW, "Ocean": cv2.COLORMAP_OCEAN,
-                      "Summer": cv2.COLORMAP_SUMMER, "Spring": cv2.COLORMAP_SPRING, "Cool": cv2.COLORMAP_COOL,
-                      "HSV": cv2.COLORMAP_HSV, "Pink": cv2.COLORMAP_PINK, "Hot": cv2.COLORMAP_HOT,
-                      "Parula": cv2.COLORMAP_PARULA, "Magma": cv2.COLORMAP_MAGMA, "Inferno": cv2.COLORMAP_INFERNO,
-                      "Plasma": cv2.COLORMAP_PLASMA, "Viridis": cv2.COLORMAP_VIRIDIS, "Cividis": cv2.COLORMAP_CIVIDIS,
-                      "Twilight": cv2.COLORMAP_TWILIGHT, "Twilight Shifted": cv2.COLORMAP_TWILIGHT_SHIFTED,
-                      "Turbo": cv2.COLORMAP_TURBO, "Deep Green": cv2.COLORMAP_DEEPGREEN}
-        self.colormap = self.cmaps['Viridis']
+        self.cmaps = plt.colormaps()[:87]
+        self.colormap = 'viridis'
+
+        # Initial Sidebar Widgets
+        self.transect_chain_btn = func.RoundedButton(text="Transect Chain", size_hint=(1, 0.1),
+                                                     font_size=self.home.font)
+        self.transect_chain_btn.bind(on_press=lambda x: self.transect_btn("transect_chain"))
+
+        self.transect_marker_btn = func.RoundedButton(text="Transect Marker", size_hint=(1, 0.1),
+                                                      font_size=self.home.font)
+        self.transect_marker_btn.bind(on_press=lambda x: self.transect_btn("transect_marker"))
+        self.initial_side_bar = [self.transect_chain_btn, self.transect_marker_btn]
 
         # Action Widgets
-        self.action_lbl = func.BackgroundLabel(text="Actions", size_hint=(1, 0.1),
-                                               halign='center', valign='center', font_size=self.home.font)
         self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint=(1, 0.1),
                                            halign='center', valign='center', font_size=self.home.font)
         self.drag_btn.bind(on_press=self.drag_mode)
         self.edit_btn = func.RoundedButton(text="Edit Mode", size_hint=(1, 0.1),
                                            halign='center', valign='center', font_size=self.home.font)
         self.edit_btn.bind(on_press=self.edit_mode)
-        self.action_widgets = [self.action_lbl, self.drag_btn, self.edit_btn]
+        self.close_tool_btn = func.RoundedButton(text="Close Tool", size_hint=(1, 0.1),
+                                                 halign='center', valign='center', font_size=self.home.font)
+        self.close_tool_btn.bind(on_press=self.close_tool)
+        self.action_widgets = [self.close_tool_btn, self.drag_btn, self.edit_btn]
+        self.tool_action_widgets = self.action_widgets
+        # Drag Mode Widgets
+        self.tran_mode_btn = func.RoundedButton(text="Transect Mode", size_hint=(1, 0.1),
+                                                halign='center', valign='center', font_size=self.home.font)
+        self.tran_mode_btn.bind(on_press=self.drag_mode)
 
         # Editing Mode widgets
         self.back_btn = func.RoundedButton(text="Back", size_hint=(1, 0.1),
@@ -135,7 +149,6 @@ class FileDisplay(ScatterLayout):
         self.delete_point_btn.bind(on_press=lambda x: self.tool.del_point())
 
         self.edit_widgets = [self.back_btn, self.delete_line_btn, self.delete_point_btn]
-        self.current = []
 
         self.load_image()
 
@@ -150,9 +163,6 @@ class FileDisplay(ScatterLayout):
         Args:
             font (float): New font size
         """
-        self.action_lbl.font_size = font
-        self.drag_btn.font_size = font
-        self.edit_btn.font_size = font
         self.back_btn.font_size = font
         self.delete_line_btn.font_size = font
         self.delete_point_btn.font_size = font
@@ -165,6 +175,7 @@ class FileDisplay(ScatterLayout):
         """
         if self.f_type == "netcdf":
             self.netcdf_to_image()
+            self.byte.seek(0)
             self.im = CoreImage(self.byte, ext='png')
             self.size = self.im.size
         elif self.f_type == "image":
@@ -173,6 +184,7 @@ class FileDisplay(ScatterLayout):
         self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.pos)
         self.home.ids.view.bind(size=self.resize_to_fit)
         self.add_widget(self.img)
+        self.home.populate_dynamic_sidebar(self.initial_side_bar, "Tools")
         # Necessary for when viewer doesn't change size on file load (image -> image)
         self.resize_to_fit(False)
 
@@ -193,7 +205,7 @@ class FileDisplay(ScatterLayout):
             if args[0]:
                 self.resized = True
 
-    def manage_tool(self, t_type):
+    def transect_btn(self, t_type):
         """
         Manages the creation and deletion of each tool.
 
@@ -201,34 +213,52 @@ class FileDisplay(ScatterLayout):
         and clean up. If not, load indicated tool and switches cursor to a cross.
 
         Args:
-            t_type (str): Tool type: 'transect' or 'transect_marker'
+            t_type (str): Tool type: 'transect_chain' or 'transect_marker'
         """
 
         if not self.t_mode:
             # Opens a new tool
-            for w in self.action_widgets:
-                self.sidebar.add_widget(w, 1)
             kivy.core.window.Window.set_system_cursor("crosshair")
             if t_type == "transect_marker":
                 self.tool = MultiMarker(home=self.home)
             elif t_type == "transect_chain":
                 self.tool = MultiChain(home=self.home)
             self.add_widget(self.tool)
+            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
             self.t_mode = True
-        else:
+
+    def add_to_sidebar(self, elements):
+        """
+        Adds elements to the dynamic sidebar.
+
+        Args:
+            elements (list): List of kivy.uix.Widgets to add to sidebar
+        """
+        self.tool_action_widgets = self.tool_action_widgets + elements
+        self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
+
+    def remove_from_tool_action_widgets(self, element):
+        """
+        Removes element from widgets in 'Actions' sidebar menu.
+
+        Args:
+            element: kivy.uix.Widget to remove
+        """
+        self.tool_action_widgets.remove(element)
+
+    def close_tool(self, *args):
+        """
+        Closes tool and resets sidebar elements to non tool state.
+
+        Args:
+            args: Unused arguments passed to the method
+        """
+        if self.t_mode:
             kivy.core.window.Window.set_system_cursor("arrow")
             self.remove_widget(self.tool)
-            self.drag_btn.text = "Drag Mode"
-            self.editing = False
-            self.reset_sidebar()
+            self.tool_action_widgets = self.action_widgets
+            self.home.populate_dynamic_sidebar(self.initial_side_bar, "Tools")
             self.t_mode = False
-
-    def reset_sidebar(self):
-        """
-        Revert sidebar to pre-tool state
-        """
-        while self.sidebar.children != self.og_sidebar:
-            self.sidebar.remove_widget(self.sidebar.children[1])
 
     def edit_mode(self, *args):
         """
@@ -242,23 +272,10 @@ class FileDisplay(ScatterLayout):
             *args: Unused arguments passed to method when called.
         """
         if self.editing:
-            for i in self.edit_widgets:
-                if i in self.sidebar.children:
-                    self.sidebar.remove_widget(i)
-            for i in reversed(self.current):
-                if i not in self.sidebar.children:
-                    self.sidebar.add_widget(i, 1)
+            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
             self.editing = False
         else:
-            if self.dragging:  # Can't be in both dragging and editing mode
-                self.drag_mode()
-            self.current = self.sidebar.children[1:self.sidebar.children.index(self.action_lbl)]
-            for i in self.current:
-                if i in self.sidebar.children:
-                    self.sidebar.remove_widget(i)
-            for i in self.edit_widgets:
-                if i not in self.sidebar.children:
-                    self.sidebar.add_widget(i, 1)
+            self.home.populate_dynamic_sidebar(self.edit_widgets, "Edit Mode")
             self.editing = True
         self.tool.change_dragging(self.editing)
 
@@ -270,12 +287,12 @@ class FileDisplay(ScatterLayout):
             *args: Unused arguments passed to method when called.
         """
         if not self.dragging:
-            self.drag_btn.text = "Transect Mode"
+            self.home.populate_dynamic_sidebar([self.tran_mode_btn], "Drag Mode")
             kivy.core.window.Window.set_system_cursor("arrow")
             self.tool.change_dragging(True)
             self.dragging = True
         else:
-            self.drag_btn.text = "Drag Mode"
+            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
             kivy.core.window.Window.set_system_cursor("crosshair")
             self.tool.change_dragging(False)
             self.dragging = False
@@ -298,11 +315,15 @@ class FileDisplay(ScatterLayout):
                 self.tool.update_c_size(float(value))
         elif setting == "contrast":
             if self.f_type == "netcdf":
-                self.contrast = float(value)
+                v = float(value) / 20
+                if v < 0:
+                    self.contrast = 1 + v
+                else:
+                    self.contrast = 1 + v * 2
                 self.update_netcdf()
         elif setting == "colormap":
             if self.f_type == "netcdf":
-                self.colormap = self.cmaps[value]
+                self.colormap = value
                 self.update_netcdf()
         elif setting == "variable":
             if self.f_type == "netcdf":
@@ -318,6 +339,7 @@ class FileDisplay(ScatterLayout):
         Reload netcdf image when netcdf data is changed.
         """
         self.netcdf_to_image()
+        self.byte.seek(0)
         self.im = CoreImage(self.byte, ext='png')
         self.size = self.im.size
         self.img.texture = self.im.texture
@@ -327,42 +349,26 @@ class FileDisplay(ScatterLayout):
         """
         Creates image from NetCDF dataset defined in :attr:`nccut.filedisplay.FileDisplay.f_config`
 
-        Normalizes data and then rescales it to between 0 and 255. Applies colormap and contrast settings
-        and then calls for the creation of colorbar. Loads image into memory as io.BytesIO object so kivy
-        can make image out of an array.
+        Normalizes data and then applies colormap and contrast settings and then calls for the creation of colorbar.
+        Loads image into memory as io.BytesIO object so kivy can make image out of an array.
         """
         self.nc_data = np.flip(func.sel_data(self.config['netcdf']).data, 0)
-        n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
-        nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 3, axis=2)
+        with warnings.catch_warnings(record=True) as w:
+            n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
+            if len(w) > 0 and issubclass(w[-1].category, RuntimeWarning):
+                func.alert_popup("Selected data is all NaN")
+        nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 4, axis=2)
+        c_mapped = plt.get_cmap(self.colormap)(n_data)
+        whites = np.ones(c_mapped.shape)
 
-        n_data = np.nan_to_num(n_data, nan=1)
-        n_data = (n_data * 255).astype(np.uint8)
-        c_mapped = cv2.applyColorMap(n_data, self.colormap)
-        whites = np.ones(c_mapped.shape) * 255
-        img = np.where(nans, whites, c_mapped)
         self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white",
                                                             dp(40)), self.config[self.f_type])
+        img = np.where(nans, whites, c_mapped)
         # Applies contrast settings
-        img = self.apply_contrast(img, self.contrast)
-        is_success, img_b = cv2.imencode(".png", img)
-        self.byte = io.BytesIO(img_b)
-
-    def apply_contrast(self, data, contrast):
-        """
-        Perform contrast level adjustment to data
-
-        Args:
-            data: 2D array to which to apply contrast change
-            contrast (int): Desired contrast value
-
-        Return:
-            Data with contrast adjusted
-        """
-        f = 131 * (contrast + 127) / (127 * (131 - contrast))
-        alpha_c = f
-        gamma_c = 127 * (1 - f)
-        out = cv2.addWeighted(data, alpha_c, data, 0, gamma_c)
-        return out
+        pil_image = im.fromarray(np.uint8(img * 255))
+        img = ImageEnhance.Contrast(pil_image).enhance(self.contrast)
+        self.byte = io.BytesIO()
+        img.save(self.byte, format="PNG")
 
     def flip_vertically(self):
         """

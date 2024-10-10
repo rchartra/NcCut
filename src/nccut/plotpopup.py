@@ -7,6 +7,7 @@ Manages the saving of the plots and user selected data.
 
 import io
 import kivy.uix as ui
+from kivy.lang import Builder
 from kivy.graphics import Color, Rectangle
 from kivy.metrics import dp
 from kivy.uix.button import Button
@@ -20,13 +21,15 @@ from nccut.plotwindow import PlotWindow
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im
-from PIL import ImageOps as imo
 import numpy as np
 import copy
-import os
 import pandas as pd
 import json
-import cv2
+import pathlib
+
+
+KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotpopup.kv"
+Builder.load_file(str(KV_FILE_PATH))
 
 
 class BackgroundDropDown(DropDown):
@@ -164,54 +167,16 @@ class PlotPopup(Popup):
 
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
                                    size_hint=(0.6, 1), fit_mode="contain")
-        # Plot
-        self.plotting = ui.boxlayout.BoxLayout(spacing=dp(20), size_hint=(1, 0.9))
-        self.plotting.add_widget(self.plot)
-        self.title = "Plotting Menu"
-        self.content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(15), padding=dp(10))
-        self.size_hint = (0.8, 0.8)
-        sidebar = ui.boxlayout.BoxLayout(orientation='vertical', size_hint=(0.4, 1), padding=dp(10), spacing=dp(20))
-
-        # Saving Data/Plotting buttons
-
-        self.buttons = ui.boxlayout.BoxLayout(orientation='horizontal', size_hint=(1, .1), spacing=dp(10))
-
+        self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
         self.f_m = 0.8
-        a_data_btn = func.RoundedButton(text="Save All Data", size_hint=(.15, 1),
-                                             font_size=self.home.font * self.f_m)
-        a_data_btn.bind(on_press=lambda x: self.file_input('a_data'))
-
-        s_data_btn = func.RoundedButton(text="Save Selected Data", size_hint=(.15, 1),
-                                        font_size=self.home.font * self.f_m)
-        s_data_btn.bind(on_press=lambda x: self.file_input('s_data'))
-
-        png_btn = func.RoundedButton(text='Save Plot to PNG', size_hint=(.15, 1), font_size=self.home.font * self.f_m)
-        png_btn.bind(on_press=lambda x: self.file_input('png'))
-
-        pdf_btn = func.RoundedButton(text='Save Plot to PDF', size_hint=(.15, 1), font_size=self.home.font * self.f_m)
-        pdf_btn.bind(on_press=lambda x: self.file_input('pdf'))
-
-        self.buttons.add_widget(a_data_btn)
-        self.buttons.add_widget(s_data_btn)
-        self.buttons.add_widget(png_btn)
-        self.buttons.add_widget(pdf_btn)
+        self.widgets_with_text = [self.ids.sel_transects_label, self.ids.sel_transects_btn]
 
         # Transect selection
-        t_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
-        t_lab = Label(text="Select Transects: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
-                      valign='middle')
-        t_lab.bind(size=func.text_wrap)
-        t_box.add_widget(t_lab)
-        self.t_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1), font_size=self.home.font)
-        t_box.add_widget(self.t_select)
         if self.t_type == "Marker":
             t_drop = self.get_marker_dropdown()
         elif self.t_type == "Chain":
             t_drop = self.get_chain_dropdown()
-        self.t_select.bind(on_press=lambda x: t_drop.open(self.t_select))
-        sidebar.add_widget(t_box)
-
-        self.widgets_with_text = [t_lab, self.t_select]
+        self.ids.sel_transects_btn.bind(on_press=lambda x: t_drop.open(self.ids.sel_transects_btn))
 
         if self.f_type == "netcdf":
             # Variable Selection
@@ -225,7 +190,7 @@ class PlotPopup(Popup):
             v_box.add_widget(self.v_select)
             v_drop = self.get_var_dropdown()
             self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
-            sidebar.add_widget(v_box)
+            self.ids.sidebar.add_widget(v_box)
             self.widgets_with_text.extend([v_lab, self.v_select])
             if self.config[self.f_type]['z'] != "N/A":
                 # Z Selection
@@ -239,35 +204,28 @@ class PlotPopup(Popup):
                 z_box.add_widget(self.z_select)
                 z_drop = self.get_z_dropdown()
                 self.z_select.bind(on_press=lambda x: z_drop.open(self.z_select))
-                sidebar.add_widget(z_box)
+                self.ids.sidebar.add_widget(z_box)
 
                 # All Z option
                 zp_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), padding=dp(10))
                 zp_btn = func.RoundedButton(text="Plot all Z as Img", font_size=self.home.font)
                 zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
                 zp_box.add_widget(zp_btn)
-                sidebar.add_widget(zp_box)
+                self.ids.sidebar.add_widget(zp_box)
 
-                allz_btn = func.RoundedButton(text="Save All Z Data", size_hint=(.2, 1),
-                                              font_size=self.home.font * self.f_m)
+                allz_btn = func.RoundedButton(text="Export All Z Data", size_hint=(.2, 1),
+                                              font_size=self.home.font)
                 allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
-                self.buttons.add_widget(allz_btn)
-                self.widgets_with_text.extend([z_lab, self.z_select, zp_btn, allz_btn])
+                self.ids.buttons.add_widget(allz_btn)
+                self.widgets_with_text.extend([z_lab, self.z_select, zp_btn])
             else:
                 # Spacer if 2D NetCDF
-                sidebar.add_widget(Label(text="", size_hint=(1, 0.6)))
+                self.ids.sidebar.add_widget(Label(text="", size_hint=(1, 0.6)))
         else:
             # Spacer if Image
-            sidebar.add_widget(Label(text="", size_hint=(1, 0.8)))
-
-        self.plotting.add_widget(sidebar)
-        self.content.add_widget(self.plotting)
-
-        close = func.RoundedButton(text="Close", size_hint=(.2, 1), font_size=self.home.font * self.f_m)
-        close.bind(on_press=self.dismiss)
-        self.buttons.add_widget(close)
-        self.content.add_widget(self.buttons)
+            self.ids.sidebar.add_widget(Label(text="", size_hint=(1, 0.8)))
         self.open()
+        self.font_adapt(self.home.font)
 
     def font_adapt(self, font):
         """
@@ -276,8 +234,9 @@ class PlotPopup(Popup):
         Args:
             font (float): New font size
         """
-        for btn in self.buttons.children:
+        for btn in self.ids.buttons.children:
             btn.font_size = font * self.f_m
+        self.ids.close_btn.font_size = font * self.f_m
         for wid in self.widgets_with_text:
             wid.font_size = font
 
@@ -321,13 +280,19 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
-        if isinstance(self.plot, PlotWindow):
-            self.plot.export_to_png(f_path)
+        if f_path.find(".") == -1:
+            f_path = f_path + ".png"
         else:
-            self.plot.texture.save(f_path)
-            img = cv2.flip(cv2.imread(f_path), 0)
-            cv2.imwrite(f_path, img)
-        func.alert("Download Complete", self.home)
+            f_path = f_path[:f_path.find(".")] + ".png"
+        try:
+            if isinstance(self.plot, PlotWindow):
+                self.plot.export_to_png(f_path)
+            else:
+                pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
+                pil_image.save(f_path)
+            func.alert_popup("Download Complete")
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def download_pdf_plot(self, f_path):
         """
@@ -336,17 +301,24 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
-        ipath = f_path[:-4] + ".png"
-        ppath = f_path
-        if isinstance(self.plot, PlotWindow):
-            self.plot.export_to_png(ipath)
-            img = im.open(ipath)
+        if f_path.find(".") == -1:
+            f_path = f_path + ".pdf"
         else:
-            self.plot.texture.save(ipath)
-            img = imo.flip(im.open(ipath))
-        img.save(ppath, "PDF")
-        os.remove(ipath)
-        func.alert("Download Complete", self.home)
+            f_path = f_path[:f_path.find(".")] + ".pdf"
+        try:
+            if isinstance(self.plot, PlotWindow):
+                core_img = self.plot.export_as_image()
+                image_data = core_img.texture.pixels
+                width, height = core_img.size
+                image_array = np.frombuffer(image_data, np.uint8).reshape((height, width, 4))
+                pil_image = im.fromarray(image_array, 'RGBA')
+                pil_image.save(f_path)
+            else:
+                pil_image = im.frombytes('RGBA', self.plot.texture.size, self.plot.texture.pixels)
+                pil_image.save(f_path)
+            func.alert_popup("Download Complete")
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def download_selected_data(self, f_path):
         """
@@ -355,23 +327,30 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
-        dat = copy.copy(self.active_data)
-        if len(self.active_vars) == 0:  # If Image
-            final = self.add_group_info(dat)
-        elif len(self.active_z) == 0:  # If 2D NetCDF
-            final = {}
-            for var in list(dat.keys()):
-                final[var] = self.add_group_info(dat[var])
-        else:  # If 3D NetCDF
-            final = {}
-            for var in list(dat.keys()):
-                final[var] = {}
-                for z in list(dat[var].keys()):
-                    final[var][z] = self.add_group_info(dat[var][z])
-        with open(f_path, "w") as f:
-            json.dump(final, f)
+        if f_path.find(".") == -1:
+            f_path = f_path + ".json"
+        else:
+            f_path = f_path[:f_path.find(".")] + ".json"
+        try:
+            dat = copy.deepcopy(self.active_data)
+            if len(self.active_vars) == 0:  # If Image
+                final = self.add_group_info(dat)
+            elif len(self.active_z) == 0:  # If 2D NetCDF
+                final = {}
+                for var in list(dat.keys()):
+                    final[var] = self.add_group_info(dat[var])
+            else:  # If 3D NetCDF
+                final = {}
+                for var in list(dat.keys()):
+                    final[var] = {}
+                    for z in list(dat[var].keys()):
+                        final[var][z] = self.add_group_info(dat[var][z])
+            with open(f_path, "w") as f:
+                json.dump(final, f)
 
-        func.alert("Download Complete", self.home)
+            func.alert_popup("Download Complete")
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def download_all_data(self, f_path):
         """
@@ -380,14 +359,17 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
-        original = copy.copy(self.active_transects)
-        for m in list(self.active_transects.keys()):
-            for t in list(self.active_transects[m].keys()):
-                self.active_transects[m][t] = True
-        self.active_data = self.get_data()
-        self.download_selected_data(f_path)
-        self.active_transects = original
-        self.active_data = self.get_data()
+        try:
+            original = copy.copy(self.active_transects)
+            for m in list(self.active_transects.keys()):
+                for t in list(self.active_transects[m].keys()):
+                    self.active_transects[m][t] = True
+            self.active_data = self.get_data()
+            self.download_selected_data(f_path)
+            self.active_transects = original
+            self.active_data = self.get_data()
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def add_group_info(self, dicti):
         """
@@ -416,13 +398,16 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
-        original = copy.copy(self.active_z)
-        z_list = self.config[self.f_type]['z']
-        self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[z_list].data]
-        self.active_data = self.get_data()
-        self.download_selected_data(f_path)
-        self.active_z = original
-        self.active_data = self.get_data()
+        try:
+            original = copy.copy(self.active_z)
+            z_list = self.config[self.f_type]['z']
+            self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[z_list].data]
+            self.active_data = self.get_data()
+            self.download_selected_data(f_path)
+            self.active_z = original
+            self.active_data = self.get_data()
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def get_chain_dropdown(self):
         """
@@ -700,14 +685,14 @@ class PlotPopup(Popup):
                 plot_ok = True
         if plot_ok:
             # Go ahead and plot
-            self.plotting.remove_widget(self.plot)
+            self.ids.plotting.remove_widget(self.plot)
             if self.t_type == "Marker":
                 z_data = self.get_all_z_marker()
             elif self.t_type == "Chain":
                 z_data = self.get_all_z_chain()
-            self.plot = PlotWindow(self.config[self.f_type], z_data, size_hint=(0.7, 1))
+            self.plot = PlotWindow(self.config[self.f_type], z_data, self.home.display.colormap, size_hint=(0.7, 1))
             self.plot.bind(size=self.plot.load)
-            self.plotting.add_widget(self.plot, len(self.plotting.children))
+            self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
         else:
             # Error popup if more than one transect and/or variable is selected
             content = ui.boxlayout.BoxLayout()
@@ -939,7 +924,7 @@ class PlotPopup(Popup):
         """
         Remakes and replaces plot based on current selections.
         """
-        self.plotting.remove_widget(self.plot)
+        self.ids.plotting.remove_widget(self.plot)
         self.plot_active()
         temp = io.BytesIO()
         plt.savefig(temp, format="png")
@@ -947,7 +932,7 @@ class PlotPopup(Popup):
         plt.close()
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
                                    size_hint=(0.7, 1), fit_mode="contain")
-        self.plotting.add_widget(self.plot, len(self.plotting.children))
+        self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
 
     def get_data(self):
         """

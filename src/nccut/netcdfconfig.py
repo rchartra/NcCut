@@ -118,9 +118,9 @@ class NetCDFConfig(Popup):
         back = func.RoundedButton(text="Back", size_hint=(0.15, 1))
         back.bind(on_press=self.dismiss)
         c_box.add_widget(back)
-        self.go = func.RoundedButton(text="Go", size_hint=(0.15, 1))
-        self.go.bind(on_press=self.check_inputs)
-        c_box.add_widget(self.go)
+        self.load = func.RoundedButton(text="Load", size_hint=(0.15, 1))
+        self.load.bind(on_press=self.check_inputs)
+        c_box.add_widget(self.load)
         content.add_widget(c_box)
 
         # Final settings

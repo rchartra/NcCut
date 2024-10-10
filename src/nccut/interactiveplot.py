@@ -76,7 +76,7 @@ class InteractivePlot(ScatterLayout):
 
         x_grid, y_grid = np.meshgrid(self.z_coords, np.arange(0, n_data.shape[1]))
         plt.figure(frameon=False)
-        plt.pcolormesh(y_grid, x_grid, n_data.T, shading="nearest")
+        plt.pcolormesh(y_grid, x_grid, n_data.T, cmap=self.window.colormap, shading="nearest")
         plt.gca().invert_yaxis()
         plt.axis('off')
         self.byte = io.BytesIO()

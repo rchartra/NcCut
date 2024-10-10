@@ -110,8 +110,7 @@ class MultiMarker(ui.widget.Widget):
         dbtn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
         dragging (bool): Whether viewer is in dragging mode
         width_w: :class:`nccut.markerwidth.MarkerWidth` widget to allow for adjustable marker widths
-        clicks (int): Number of clicks made by user. Does not decrease when points are deleted
-            unless all points are deleted in which case it goes back to zero.
+        clicks (int): Number of clicks made by user. Decreases when points are deleted
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New marker button
         plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
@@ -139,13 +138,12 @@ class MultiMarker(ui.widget.Widget):
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
         self.upbtn.bind(on_press=lambda x: self.upload_pop())
-        self.home.ids.sidebar.add_widget(self.upbtn, 1)
 
         # New Marker Button
         self.nbtn = func.RoundedButton(text="New Marker", size_hint=(1, 0.1), font_size=self.home.font)
-
         self.nbtn.bind(on_press=lambda x: self.new_marker())
-        self.home.ids.sidebar.add_widget(self.nbtn, 1)
+
+        self.home.display.add_to_sidebar([self.upbtn, self.nbtn])
 
     def font_adapt(self, font):
         """
@@ -268,32 +266,35 @@ class MultiMarker(ui.widget.Widget):
         Args:
             points: Properly formatted nested list from :class:`nccut.multimarker.marker_find()` function.
         """
-        self.upload_fail = False
-        if len(self.children) != 0:  # If markers already exist in viewer
-            self.children[0].stop_drawing()
-            if self.children[0].clicks < 2:  # If any existing markers are incomplete, remove them
-                if self.children[0].clicks == 1:
-                    self.children[0].del_point()
-                self.remove_widget(self.children[0])
-        for m in range(0, len(points)):
-            marker = Marker(home=self.home, width=self.curr_width)
-            clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
-            marker.upload_mode(True)
-            self.add_widget(marker)
-            for i in clicks:
-                touch = Click(i[0], i[1])
-                marker.t_width = i[2]
-                marker.on_touch_down(touch)
-                self.clicks += 1
-            marker.upload_mode(False)
-            if self.clicks >= 1 and self.width_w.parent is None:
-                self.home.ids.sidebar.add_widget(self.width_w, 1)
-            if self.clicks >= 2 and self.dbtn.parent is None:
-                self.home.ids.sidebar.add_widget(self.dbtn, 1)
-            if self.upload_fail:  # If upload goes wrong, stop and undo everything
-                self.undo_upload(m)
-                return
-        self.new_marker()
+        try:
+            self.upload_fail = False
+            if len(self.children) != 0:  # If markers already exist in viewer
+                self.children[0].stop_drawing()
+                if self.children[0].clicks < 2:  # If any existing markers are incomplete, remove them
+                    if self.children[0].clicks == 1:
+                        self.children[0].del_point()
+                    self.remove_widget(self.children[0])
+            for m in range(0, len(points)):
+                marker = Marker(home=self.home, width=self.curr_width)
+                clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
+                marker.upload_mode(True)
+                self.add_widget(marker)
+                for i in clicks:
+                    touch = Click(i[0], i[1])
+                    marker.t_width = i[2]
+                    marker.on_touch_down(touch)
+                    self.clicks += 1
+                marker.upload_mode(False)
+                if self.clicks >= 1 and self.width_w.parent is None:
+                    self.home.display.add_to_sidebar([self.width_w])
+                if self.clicks >= 2 and self.dbtn.parent is None:
+                    self.home.display.add_to_sidebar([self.dbtn])
+                if self.upload_fail:  # If upload goes wrong, stop and undo everything
+                    self.undo_upload(m)
+                    return
+            self.new_marker()
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def undo_upload(self, markers):
         """
@@ -303,15 +304,14 @@ class MultiMarker(ui.widget.Widget):
             markers (int): Number of markers added so far
         """
         for m in range(0, markers + 1):
-            Window.unbind(mouse_pos=self.children[0].draw_line)
-            self.remove_widget(self.children[0])
+            self.del_line()
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted marker was the only marker
             self.clicks = 0
-            if self.dbtn in self.home.display.current:
-                self.home.display.current.remove(self.dbtn)
-            if self.width_w in self.home.display.current:
-                self.home.display.current.remove(self.width_w)
+            if self.dbtn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.dbtn)
+            if self.width_w in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.width_w)
             if self.dragging:
                 self.home.display.drag_mode()
             self.new_marker()
@@ -341,14 +341,14 @@ class MultiMarker(ui.widget.Widget):
             # If no markers on screen do nothing
             return
         Window.unbind(mouse_pos=self.children[0].draw_line)
+        self.clicks -= self.children[0].clicks
         self.remove_widget(self.children[0])
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted marker was the only marker
-            self.clicks = 0
-            if self.dbtn in self.home.display.current:
-                self.home.display.current.remove(self.dbtn)
-            if self.width_w in self.home.display.current:
-                self.home.display.current.remove(self.width_w)
+            if self.dbtn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.dbtn)
+            if self.width_w in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.width_w)
             self.new_marker()
 
     def del_point(self):
@@ -371,6 +371,12 @@ class MultiMarker(ui.widget.Widget):
                 return
         # Delete point from current marker
         self.children[0].del_point()
+        self.clicks -= 1
+        # Determine which buttons should be in sidebar
+        if self.clicks == 1:
+            self.home.display.remove_from_tool_action_widgets(self.dbtn)
+        elif self.clicks == 0:
+            self.home.display.remove_from_tool_action_widgets(self.width_w)
 
     def new_marker(self):
         """
@@ -437,9 +443,9 @@ class MultiMarker(ui.widget.Widget):
                 else:
                     self.clicks += 1
                     if self.clicks >= 1 and self.width_w.parent is None:
-                        self.home.ids.sidebar.add_widget(self.width_w, 1)
+                        self.home.display.add_to_sidebar([self.width_w])
                     if self.clicks >= 2 and self.dbtn.parent is None:
-                        self.home.ids.sidebar.add_widget(self.dbtn, 1)
+                        self.home.display.add_to_sidebar([self.dbtn])
                     # If no current marker, create marker. Otherwise, pass touch to current marker.
                     if not self.m_on:
                         self.new_marker()

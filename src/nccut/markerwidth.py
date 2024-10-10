@@ -11,6 +11,7 @@ transect marker tool.
 
 import kivy.uix as ui
 from kivy.uix.textinput import TextInput
+from kivy.metrics import dp
 import nccut.functions as func
 
 
@@ -22,8 +23,9 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
     transect marker tool.
 
     Attributes:
+        spacing: The spacing between widgets in the layout
         txt: kivy.uix.textinput.TextInput widget where user enters their desired width
-        btn: 'Go' Button
+        btn: 'Set' Button
         marker: Current :class:`nccut.multimarker.MultiMarker` instance
         min (int): Minimum width allowed
         max (int): Maximum width allowed
@@ -36,8 +38,10 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
             marker: Active :class:`nccut.multimarker.MultiMarker` instance
         """
         super(MarkerWidth, self).__init__(**kwargs)
+        self.spacing = dp(8)
         self.txt = TextInput(hint_text="Width", size_hint=(.7, 1))
-        self.btn = func.RoundedButton(text="Go", size_hint=(.3, 1), font_size=marker.home.font)
+        self.font_size = marker.home.font
+        self.btn = func.RoundedButton(text="Set", size_hint=(.3, 1), font_size=self.font_size)
         self.btn.bind(on_press=lambda x: self.update())
         self.add_widget(self.txt)
         self.add_widget(self.btn)

@@ -13,7 +13,6 @@ from kivy.lang import Builder
 from nccut.interactiveplot import InteractivePlot
 import nccut.functions as func
 import numpy as np
-import cv2
 import pathlib
 
 KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotwindow.kv"
@@ -236,8 +235,9 @@ class PlotWindow(RelativeLayout):
         x_axis: Reference to current :class: `nccut.plotwindow.XAxis` object
         y_axis: Reference to current :class: `nccut.plotwindow.YAxis` object
         font (float): Font size to use for all text elements in the plotting window
+        colormap(str): Matplotlib colormap to use for plot
     """
-    def __init__(self, config, z_data, **kwargs):
+    def __init__(self, config, z_data, colormap, **kwargs):
         """
         Initialized object according to all z data to be plotted
 
@@ -245,6 +245,7 @@ class PlotWindow(RelativeLayout):
             config (dict): Dictionary of configuration information about the laoded NetCDF file (see
                 :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary).
             z_data (arr): 2D Numpy Array of transect data for all z values to be plotted.
+            colormap (str): Matplotlib colormap to use for plot
         """
         super(PlotWindow, self).__init__(**kwargs)
         self.config = config
@@ -254,6 +255,7 @@ class PlotWindow(RelativeLayout):
         self.x_axis = None
         self.y_axis = None
         self.font = None
+        self.colormap = colormap
 
     def load(self, *args):
         """
@@ -306,7 +308,7 @@ class PlotWindow(RelativeLayout):
         self.add_widget(self.x_axis)
         self.add_widget(self.y_axis)
         # Create and add colorbar
-        self.ids.color_bar_box.add_widget(func.get_color_bar(cv2.COLORMAP_VIRIDIS, self.z_data, (1, 1, 1), "black",
+        self.ids.color_bar_box.add_widget(func.get_color_bar(self.colormap, self.z_data, (1, 1, 1), "black",
                                                              self.font * 4))
 
         self.resized += 1

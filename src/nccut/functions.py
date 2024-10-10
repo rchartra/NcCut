@@ -12,6 +12,7 @@ Contains error banner functionality, file management function, and transect taki
 
 import kivy
 from kivy.graphics import Color, Rectangle
+from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.metrics import dp
@@ -21,8 +22,8 @@ from functools import partial
 from scipy.interpolate import RegularGridInterpolator, CubicSpline
 import numpy as np
 import math
-import cv2
 import io
+import warnings
 import xarray as xr
 import matplotlib
 matplotlib.use('Agg')
@@ -41,6 +42,39 @@ class BackgroundLabel(Label):
     Code for this is in nccut.kv. Referenced here so it can be used in scripts.
     """
     pass
+
+
+class AlertPopup(Popup):
+    """
+    Displays a popup with the given message as well as a back button. Adapts to the height of the text.
+
+    UI Code for this is in nccut.kv. This code outlines the functionality for the popup.
+    """
+
+    def update_height(self, height):
+        """
+        Updates popup height to match text height
+
+        Args:
+            height: Text height
+        """
+        new_height = max(height, dp(40))
+        self.height = new_height + dp(60)
+
+    def quit(self):
+        """
+        Closes popup
+        """
+        self.dismiss()
+
+    def set_message(self, message):
+        """
+        Sets popup message
+
+        Args:
+            message (str): Text to display
+        """
+        self.ids.message.text = message
 
 
 def text_wrap(*args):
@@ -73,7 +107,7 @@ def alert(text, home):
     Schedules it to be removed after 2 seconds.
 
     Args:
-        text: String of alert banner message
+        text (str): Alert banner message
         home: Active :class:`nccut.homescreen.HomeScreen` reference
     """
 
@@ -85,6 +119,18 @@ def alert(text, home):
     home.add_widget(aler)
     kivy.clock.Clock.schedule_once(partial(remove_alert, aler, home), 2)
     kivy.clock.Clock.schedule_once(partial(home.canvas_remove, box), 2)
+
+
+def alert_popup(text):
+    """
+    Creates popup with an alert with given text.
+
+    Args:
+        text (str): Alert message
+    """
+    popup = AlertPopup()
+    popup.set_message(text)
+    popup.open()
 
 
 def simplicity(q, q_arr, j, l_min, l_max, l_step):
@@ -309,15 +355,16 @@ def get_color_bar(colormap, data, face_color, text_color, font):
         kivy.uix.image.Image object containing image of colorbar
     """
     c_arr = (np.arange(0, 256) * np.ones((10, 256))).astype(np.uint8).T
-    c_bar = cv2.applyColorMap(c_arr, colormap)
-    c_bar = cv2.cvtColor(c_bar, cv2.COLOR_BGR2RGB)
+    c_bar = plt.get_cmap(colormap)(c_arr)
     plt.figure(figsize=(1, 30))
     plt.imshow(c_bar, origin="lower")
 
     ax = plt.gca()
     ax.get_xaxis().set_visible(False)
-    d_min = np.nanmin(data)
-    d_max = np.nanmax(data)
+    with warnings.catch_warnings(record=True):
+        d_min = np.nanmin(data)
+        d_max = np.nanmax(data)
+
     if d_min == d_max:
         s_labels = [d_min]
     elif np.isnan(d_min) or np.isnan(d_max):
