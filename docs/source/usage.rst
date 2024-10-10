@@ -31,7 +31,7 @@ Loading a File
 
 **NcCut** supports .jpg, .jpeg, and .png image files and NetCDF .nc files.
 
-#. To load the file you can either enter the absolute or relative path to your file in to the text box and select **Go*** or you can select **Browse** to find the file on your system.
+#. To load the file you can either enter the absolute or relative path to your file in to the text box and select **Load*** or you can select **Browse** to find the file on your system.
 
     * If you are loading a NetCDF file a popup window will appear with additional selections:
 
@@ -87,13 +87,13 @@ Using this tool multiple *Markers* can be drawn onto a loaded file. These *Marke
 
     * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
     * Select **Edit Mode** to delete either the last point clicked or the last marker drawn.
-    * To change the width of the transects being made you may enter the number of pixels into the **Width** text box. Select **Go** to change the width for all future transects.
+    * To change the width of the transects being made you may enter the number of pixels into the **Width** text box. Select **Set** to change the width for all future transects.
 
         * This will not change the width of transects already drawn
         * The default width is 40 pixels, you can enter any width within 0 and 400
         * If you change the width of a marker any new markers will continue to use that same width unless you change it again.
 
-#. Double click the final point or select **New Line** to begin a new marker and repeat for as many markers as you'd like.
+#. Double click the final point or select **New Marker** to begin a new marker and repeat for as many markers as you'd like.
 #. When done select the **Plot** button and a popup will appear with a plot of all transects from the first marker and downloading options.
 
 #. Click anywhere around the popup or the close button to dismiss
