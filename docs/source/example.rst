@@ -1,4 +1,4 @@
-Tutorials
+Examples
 =========
 
 To test out NcCut you can download some example files from here: `https://zenodo.org/records/13883476 <https://zenodo.org/records/13883476>`_:

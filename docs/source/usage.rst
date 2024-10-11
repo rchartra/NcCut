@@ -24,7 +24,7 @@ Usage
             from nccut.nccut import NcCut
             NcCut().run()
 
-For video walkthroughs of NcCut's basic usage, refer to the :doc:`example` section.
+For some example files to try out NcCut, refer to the :doc:`example` section.
 
 Loading a File
 --------------
