@@ -100,7 +100,8 @@ Using this tool multiple *Markers* can be drawn onto a loaded file. These *Marke
 
 To upload a previously worked on project:
 
-#. Load the same dataset/image you worked on previously.
+#. Load the same dataset/image you worked on previously. Project files are specific to the file, variable, and coordinate
+selections originally used.
 #. Hit the **Transect Marker** button to enter transect mode.
 #. Instead of clicking new points, select the **Upload Project** button.
 #. Enter the file name of the transect data you saved previously and select **Ok**.
