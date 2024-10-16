@@ -213,8 +213,8 @@ class MultiMarker(ui.widget.Widget):
         nc_coords = False
         if list(config.keys())[0] == "netcdf":
             try:
-                config["netcdf"]["file"].coords[config["netcdf"]["x"]].data.astype(float)
-                config["netcdf"]["file"].coords[config["netcdf"]["y"]].data.astype(float)
+                config["netcdf"]["data"].coords[config["netcdf"]["x"]].data.astype(float)
+                config["netcdf"]["data"].coords[config["netcdf"]["y"]].data.astype(float)
                 x_name = config["netcdf"]["x"]
                 y_name = config["netcdf"]["y"]
                 nc_coords = True
@@ -246,7 +246,7 @@ class MultiMarker(ui.widget.Widget):
         config = self.home.display.config
         for marker in found:
             for i, c in enumerate(["x", "y"]):
-                coords = config["netcdf"]["file"].coords[config["netcdf"][c]].data.astype(float)
+                coords = config["netcdf"]["data"].coords[config["netcdf"][c]].data.astype(float)
                 c_spline = CubicSpline(coords, range(len(coords)))
                 marker[i] = c_spline(marker[i]).tolist()
         return found
@@ -400,8 +400,8 @@ class MultiMarker(ui.widget.Widget):
         y_name = "Y"
         if self.home.display.f_type == "netcdf":
             config = self.home.display.config
-            x = config["netcdf"]["file"].coords[config["netcdf"]["x"]].data
-            y = config["netcdf"]["file"].coords[config["netcdf"]["y"]].data
+            x = config["netcdf"]["data"].coords[config["netcdf"]["x"]].data
+            y = config["netcdf"]["data"].coords[config["netcdf"]["y"]].data
             try:
                 x = x.astype(float)
                 x_spline = CubicSpline(range(len(x)), x)

@@ -413,11 +413,11 @@ def sel_data(config):
     # IMPORTANT: Numpy indexes (row, column) with (0, 0) at top left corner
     if config['z'] == 'N/A':
         # 2D NetCDF data
-        ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
+        ds = config['data'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
         data = ds.sel(y=ds['y'], x=ds['x'])
     else:
         # 3D NetCDF data
-        ds = config['file'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
+        ds = config['data'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
         ds['z'] = ds['z'].astype(str)
         data = ds.sel(y=ds['y'], x=ds['x'], z=config['z_val'])
     return data.transpose('y', 'x')
@@ -547,8 +547,8 @@ def ip_get_points(line, curr, config):
     # If NetCDF and valid coordinate data is available, return that
 
     if list(config.keys())[0] == "netcdf":
-        x = config["netcdf"]["file"].coords[config["netcdf"][x_lab]].data
-        y = config["netcdf"]["file"].coords[config["netcdf"][y_lab]].data
+        x = config["netcdf"]["data"].coords[config["netcdf"][x_lab]].data
+        y = config["netcdf"]["data"].coords[config["netcdf"][y_lab]].data
         try:
             x = x.astype(float)
             xcs = CubicSpline(range(len(x)), x)

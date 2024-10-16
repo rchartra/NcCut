@@ -204,7 +204,7 @@ class HomeScreen(Screen):
         else:
             self.color_bar_box.remove_widget(self.color_bar_box.children[0])
         self.color_bar_box.add_widget(colorbar)
-        var_attrs = config["file"][config["var"]].attrs
+        var_attrs = config["data"][config["var"]].attrs
         if "long_name" in list(var_attrs.keys()):
             v_text = var_attrs["long_name"].title()
         else:
@@ -212,7 +212,7 @@ class HomeScreen(Screen):
         if "units" in list(var_attrs.keys()):
             v_text += " (" + var_attrs["units"] + ")"
         if config["z"] != "N/A":
-            z_attrs = config["file"][config["z"]].attrs
+            z_attrs = config["data"][config["z"]].attrs
             if "long_name" in list(z_attrs.keys()):
                 z_text = ", " + z_attrs["long_name"].title()
             else:

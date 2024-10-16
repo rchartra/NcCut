@@ -49,7 +49,7 @@ class YAxis(FloatLayout):
         """
         super(YAxis, self).__init__(**kwargs)
         self.font = font
-        z_attrs = config["file"][config["z"]].attrs
+        z_attrs = config["data"][config["z"]].attrs
         if "long_name" in list(z_attrs.keys()):
             self.y_label_text = z_attrs["long_name"].title()
         else:
@@ -58,9 +58,9 @@ class YAxis(FloatLayout):
             self.y_label_text = self.y_label_text + " (" + z_attrs["units"] + ")"
         # Determine whether z coordinate values can be used for the y axis
         try:
-            self.z_coords = config["file"][config["z"]].data.astype(float)
+            self.z_coords = config["data"][config["z"]].data.astype(float)
         except ValueError:
-            self.z_coords = np.arange(0, len(config["file"][config["z"]].data))
+            self.z_coords = np.arange(0, len(config["data"][config["z"]].data))
         # Assumption made in order to be able to plot an image despite their being same number of coords as data points
         self.z_coords = np.append(self.z_coords, self.z_coords[-1] + ((self.z_coords[-1] - self.z_coords[-2]) / 2))
         self.window = window_box
@@ -272,7 +272,7 @@ class PlotWindow(RelativeLayout):
             self.ids.window.remove_widget(self.plot)
             self.ids.color_bar_box.remove_widget(self.ids.color_bar_box.children[0])
 
-        self.plot = InteractivePlot(self.z_data, self.config["file"][self.config["z"]], [0.7, 0.75], self)
+        self.plot = InteractivePlot(self.z_data, self.config["data"][self.config["z"]], [0.7, 0.75], self)
         # Size and position of StencilView are set to that of the plot at it's minimum size that fills the widget
         self.ids.window_box.size = self.plot.bbox[1]
         self.ids.window.add_widget(self.plot)
@@ -290,7 +290,7 @@ class PlotWindow(RelativeLayout):
         self.font = min(0.035 * self.height, 0.025 * self.width)
         # Place plot title
 
-        var_attrs = self.config["file"][self.config["var"]].attrs
+        var_attrs = self.config["data"][self.config["var"]].attrs
         if "long_name" in list(var_attrs.keys()):
             title = var_attrs["long_name"].title()
         else:

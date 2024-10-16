@@ -567,7 +567,12 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res1 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res1["Vorticity"].keys())), 1, "Only selected marker should be saved")
+            self.assertListEqual(list(res1["Vorticity"].keys()), ["Marker 1", "Vorticity_attrs"],
+                                 "Only selected marker and metadata should be saved")
+            self.assertIn("global_metadata", list(res1.keys()), "Global metadata not added")
+            self.assertListEqual(list(res1["global_metadata"].keys()),
+                                 ["time_stamp", "user", "license", "file", "netcdf_attrs", "dim_attrs"],
+                                 "Not all metadata fields present")
             self.assertEqual(len(list(res1["Vorticity"]["Marker 1"].keys())), 6,
                              "Marker should have 3 transects and Click x, Click y, Width")
         # Plot Saving
@@ -595,7 +600,12 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res2 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res2["Vorticity"].keys())), 2, "Two markers were selected so two should be saved")
+            self.assertListEqual(list(res2["Vorticity"].keys()), ["Marker 1", "Marker 2", "Vorticity_attrs"],
+                                 "Two markers were selected so two should be saved")
+            self.assertIn("global_metadata", list(res2.keys()), "Global metadata not added")
+            self.assertListEqual(list(res2["global_metadata"].keys()),
+                                 ["time_stamp", "user", "license", "file", "netcdf_attrs", "dim_attrs"],
+                                 "Not all metadata fields present")
             self.assertEqual(len(list(res2["Vorticity"]["Marker 1"].keys())), 4,
                              "Marker 1 should have 1 transect and Click x, Click y, Width")
             self.assertEqual(list(res2["Vorticity"]["Marker 1"].keys())[0], "Cut 1",
@@ -614,7 +624,10 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res3 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res3.keys())), 2, "Two variables were selected but two weren't saved")
+            self.assertListEqual(list(res3.keys()), ["Vorticity", "Divergence", "global_metadata"],
+                                 "Two variables were selected but two weren't saved")
+            self.assertIn("Vorticity_attrs", list(res3["Vorticity"].keys()), "Vorticity metadata was not saved")
+            self.assertIn("Divergence_attrs", list(res3["Divergence"].keys()), "Divergence metadata was not saved")
         plot_popup.dismiss()
 
     def test_plot_popup_3d_nc(self):
@@ -653,16 +666,15 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res1 = json.load(f)
             f.close()
-            self.assertEqual(list(res1["Theta"].keys()), ["15", "30", "60"],
+            self.assertEqual(list(res1["Theta"].keys()), ["15", "30", "60", "Theta_attrs"],
                              "Three z values were selected so three should have been saved")
-
         # Saving all z data
         with tempfile.TemporaryDirectory() as jpath:
             plot_popup.download_all_z_data(os.path.join(jpath, "test.json"))
             f = open(os.path.join(jpath, "test.json"))
             res2 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res2["Theta"].keys())), 18, "All z values should have been saved")
+            self.assertEqual(len(list(res2["Theta"].keys())), 19, "All z values should have been saved")
 
         # Ensure one chain requirement for the all z plot
         dummy_check = CheckBox(active=False)

@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
-        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "data": dat}}
         points = [100, 50, 200, 50]
 
         # App result
@@ -110,7 +110,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
-        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "data": dat}}
         points = [100, 50, 200, 150]
 
         # App result
@@ -136,7 +136,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
-        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "data": dat}}
         points = [100, 50, 100, 150]
 
         # App result
@@ -205,12 +205,12 @@ class Test(unittest.TestCase):
         Test whether correct netcdf data is collected from user configurations for a 2D netcdf dataset
         """
         data = xr.open_dataset(EXAMPLE_4V_PATH)
-        config1 = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": data}
+        config1 = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "data": data}
         res1 = func.sel_data(config1).data
         exp1 = data["Vorticity"].transpose("y", "x").data
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
-        config2 = {"x": "y", "y": "x", "z": "N/A", "z_val": "N/A", "var": "Divergence", "file": data}
+        config2 = {"x": "y", "y": "x", "z": "N/A", "z_val": "N/A", "var": "Divergence", "data": data}
         res2 = func.sel_data(config2).data
         exp2 = np.swapaxes(data["Divergence"].transpose("y", "x").data, 0, 1)
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
@@ -221,12 +221,12 @@ class Test(unittest.TestCase):
         Test whether correct netcdf data is collected from user configurations for a 3D netcdf dataset
         """
         data = xr.open_dataset(EXAMPLE_3D_PATH)
-        config1 = {"x": "i", "y": "j", "z": "k", "z_val": "15", "var": "Theta", "file": data}
+        config1 = {"x": "i", "y": "j", "z": "k", "z_val": "15", "var": "Theta", "data": data}
         res1 = func.sel_data(config1).data
         exp1 = data["Theta"].sel(k=15).transpose("j", "i").data
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
-        config2 = {"x": "j", "y": "k", "z": "i", "z_val": "3000", "var": "Theta", "file": data}
+        config2 = {"x": "j", "y": "k", "z": "i", "z_val": "3000", "var": "Theta", "data": data}
         res2 = func.sel_data(config2)
         exp2 = data.transpose("k", "j", "i")["Theta"].sel(i=3000).data
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
@@ -239,7 +239,7 @@ class Test(unittest.TestCase):
         # NetCDF
         nc = xr.open_dataset(EXAMPLE_4V_PATH)
         img = np.asarray(Im.open(EXAMPLE_JPG_PATH))
-        config = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": nc}
+        config = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "data": nc}
         data_arr = [("NC", func.sel_data(config)), ("image", img)]
 
         for d in data_arr:

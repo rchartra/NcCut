@@ -28,6 +28,7 @@ class NetCDFConfig(Popup):
 
     Attributes:
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+        file (str): File path to the NetCDF file
         data: xarray.Dataset, Opened NetCDF file
         running (bool): Whether the 'Go' button has been pressed. Used to prevent user from spamming the button.
         var_select: RoundedButton, Variable select button
@@ -52,6 +53,7 @@ class NetCDFConfig(Popup):
         """
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
+        self.file = file
         self.data = xr.open_dataset(file)
         self.running = False
         content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(20), padding=dp(20))
@@ -161,7 +163,7 @@ class NetCDFConfig(Popup):
             self.running = True
             vals = {'x': self.x_select.text, 'y': self.y_select.text,
                     'z': self.z_select.text, 'z_val': self.depth_select.text,
-                    'var': self.var_select.text, 'file': self.data}
+                    'var': self.var_select.text, 'data': self.data, 'file': self.file}
             selects = [(self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
             if len(self.data[self.var_select.text].dims) > 3:
                 self.error.text = "This variable has more than 3 dimensions"
@@ -176,7 +178,7 @@ class NetCDFConfig(Popup):
                     self.error.text = "Please Select a " + sel[1]
                     self.running = False
                     return
-            if len(set(list(vals.values())[:-3])) != len(list(vals.values())[:-3]):
+            if len(set(list(vals.values())[:-4])) != len(list(vals.values())[:-4]):
                 self.error.text = "All X, Y, Z variables must be unique"
                 self.running = False
                 return
