@@ -91,10 +91,9 @@ jobs:
         python -m poetry run python -c "from nccut.functions import find_config; assert find_config('') == {'graphics_defaults': {'contrast': 0}}, 'Config load failed via default path'"    - name: Test with command line argument
     - name: Test with command line argument
       run: |
-        mkdir command_dir
-        copy nccut_config.toml command_dir\nccut_config.toml
-        dir command_dir
-        python -m poetry run nccut -config custom_dir\nccut_config.toml > output.log
+        mkdir ${GITHUB_WORKSPACE}\command_dir
+        copy nccut_config.toml ${GITHUB_WORKSPACE}\command_dir\nccut_config.toml
+        python -m poetry run nccut -config command_dir\nccut_config.toml > output.log
         type output.log
         findstr /c:"Valid configuration file found at command_dir\\nccut_config.toml" output.log
 
