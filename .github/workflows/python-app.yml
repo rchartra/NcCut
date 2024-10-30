@@ -84,6 +84,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m poetry install --with test
+          python -m pip install cython
       - name: Test pyobjus install
         run: |
           python -m poetry run python -c "import pyobjus"
