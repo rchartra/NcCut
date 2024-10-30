@@ -126,6 +126,7 @@ def run():
             print("ERROR: File not an Image or NetCDF File")
             return
     if config:
+        print(config)
         if not os.path.isfile(config):
             print("ERROR: Config File Not Found")
             return
