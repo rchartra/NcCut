@@ -390,8 +390,13 @@ class PlotPopup(Popup):
             return {k: str(v) for k, v in d.items()}
 
         config = self.config[self.f_type]
+        # On GitHub Linux Runner a user is not defined resulting in an error
+        try:
+            user = os.getlogin()
+        except OSError:
+            user = "_user_id_not_found_"
         global_metadata = {"time_stamp": datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-                           "user": os.getlogin(), "license": "CC0-1.0"}
+                           "user": user, "license": "CC0-1.0"}
         global_metadata.update(self.home.general_config["metadata"])
         if self.f_type == "netcdf":
             global_metadata["file"] = config["file"]
