@@ -68,6 +68,24 @@ jobs:
     - name: Test with unittest
       run: |
         python -m poetry run python -m pytest -s
+
+  windows_cmd_test:
+    runs-on: windows-latest
+    env:
+      KIVY_GL_BACKEND: 'angle_sdl2'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install Poetry
+      run: |
+         python -m pip install --upgrade pip
+         python -m pip install poetry
+    - name: Install dependencies
+      run: |
+         python -m poetry install --with test
     - name: Prepare Configuration File
       run: |
         echo '[graphics_defaults]' > nccut_config.toml
@@ -93,7 +111,9 @@ jobs:
       run: |
         mkdir "${{ github.workspace }}\command_dir"
         copy nccut_config.toml "${{ github.workspace }}\command_dir\nccut_config.toml"
-        python -m poetry run nccut -config "${{ github.workspace }}\command_dir\nccut_config.toml" > output.log
+        start /B python -m poetry run nccut -config "${{ github.workspace }}\command_dir\nccut_config.toml" > output.log
+        timeout 15
+        taskkill /IM python.exe /F
         type output.log
         findstr /c:"Valid configuration file found at ${{ github.workspace }}\\nccut_config.toml" output.log
 
