@@ -150,6 +150,7 @@ def find_config(config_file):
             # Look for file in default location
             if os.name == 'nt':  # Windows
                 config_path = Path(os.getenv('APPDATA')) / 'nccut' / 'nccut_config.toml'
+                print("Config path: " + str(config_path))
                 print("Config found in default location: windows")
             else:  # Unix-based systems (Linux/macOS)
                 config_path = Path.home() / ".config" / "nccut" / "nccut_config.toml"
@@ -166,6 +167,7 @@ def find_config(config_file):
                 print(f"Invalid configuration file ignored. File found at {config_path}")
                 return {}
     except FileNotFoundError:
+        print("File not found")
         return {}
 
 
