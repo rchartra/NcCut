@@ -111,11 +111,7 @@ jobs:
       run: |
         mkdir "${{ github.workspace }}\command_dir"
         copy nccut_config.toml "${{ github.workspace }}\command_dir\nccut_config.toml"
-        start /B python -m poetry run nccut -config "${{ github.workspace }}\command_dir\nccut_config.toml" > output.log
-        timeout 15
-        taskkill /IM python.exe /F
-        type output.log
-        findstr /c:"Valid configuration file found at ${{ github.workspace }}\\nccut_config.toml" output.log
+        python -m poetry run python -c "from nccut.functions import find_config; assert find_config("${{ github.workspace }}\command_dir\nccut_config.toml") == {'graphics_defaults': {'contrast': 0}}, 'Config load failed via default path'"    - name: Test with command line argument
 
   mac_deps_test:
     runs-on: macos-latest
