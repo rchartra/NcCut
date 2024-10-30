@@ -348,7 +348,7 @@ class PlotPopup(Popup):
                     for z in list(dat[var].keys()):
                         final[var][z] = self.add_group_info(dat[var][z])
             final = self.add_metadata(final)
-            print(f_path)
+            print("_FILE_PATH_SAVED_: " + f_path)
             with open(f_path, "w") as f:
                 json.dump(final, f)
 
