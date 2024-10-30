@@ -72,12 +72,24 @@ jobs:
       run: |
         echo '[graphics_defaults]' > nccut_config.toml
         echo 'contrast = 0' >> nccut_config.toml
-        echo "Configuration file prepared at $(pwd)/nccut_config.toml"
+        echo "Configuration file prepared at %cd%\nccut_config.toml"
     - name: Test Config with Environment variable
       env:
-        NCCUT_CONFIG: ${{ github.workspace }}/nccut_config.toml
+        NCCUT_CONFIG: ${{ github.workspace }}\nccut_config.toml
       run: |
         python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via environment variable"'
+    - name: Test Config in Working Directory
+      run: |
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via working directory"'
+    - name: Test with Default Path
+      run: |
+        mkdir %APPDATA%\nccut
+        move nccut_config.toml %APPDATA%\nccut\nccut_config.toml
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via working directory"'
+    - name: Test with command line argument
+      run: |
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via working directory"'
+
   mac_deps_test:
     runs-on: macos-latest
     steps:
