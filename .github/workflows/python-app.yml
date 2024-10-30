@@ -77,7 +77,7 @@ jobs:
       env:
         NCCUT_CONFIG: ${{ github.workspace }}/config.toml
       run: |
-        python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via environment variable"'
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via environment variable"'
   mac_deps_test:
     runs-on: macos-latest
     steps:
