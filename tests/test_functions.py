@@ -15,10 +15,14 @@ import xarray as xr
 import nccut.functions as func
 from nccut.multimarker import marker_find
 
-EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg", known_hash=None)
-EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc", known_hash=None)
-EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc", known_hash=None)
-PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json", known_hash=None)
+EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg",
+                                  known_hash="f039e8cb72d6821f4909707767863373230159e384a26ba7edd8a01a3e359e53")
+EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc",
+                                 known_hash="a3c946398b1bb5fddf4fbbae36e3fc7e6934cd7b0365d4d9d52b156dadc059d3")
+EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc",
+                                 known_hash="afd261063f4b58c382c46db0d81e69dfb8f5234ef0037b261087177e6d3f7e1b")
+PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json",
+                                      known_hash="33c739a4c5515ece45f44eb3de266da46afd6eab47c10cb1f53ac1821226c595")
 
 
 class Test(unittest.TestCase):
