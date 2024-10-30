@@ -136,6 +136,7 @@ def find_config(config_file):
         dictionary.
     """
     # Check if an environment variable is set for the config file
+    print(config_file)
     config_path = os.getenv('NCCUT_CONFIG')
     if config_file:
         config_path = config_file
