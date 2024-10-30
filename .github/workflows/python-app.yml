@@ -86,13 +86,14 @@ jobs:
     - name: Test with Default Path
       run: |
         mkdir "${{ env.APPDATA_DIR }}\nccut"
-        move nccut_config.toml "${{ env.APPDATA_DIR }}\nccut\nccut_config.toml"
+        copy nccut_config.toml "${{ env.APPDATA_DIR }}\nccut\nccut_config.toml"
         dir "${{ env.APPDATA_DIR }}\nccut"  # Verify that the file moved to the correct location
         python -m poetry run python -c "from nccut.functions import find_config; assert find_config('') == {'graphics_defaults': {'contrast': 0}}, 'Config load failed via default path'"    - name: Test with command line argument
     - name: Test with command line argument
       run: |
         mkdir command_dir
-        move "${{ env.APPDATA_DIR }}\nccut\nccut_config.toml" command_dir\nccut_config.toml
+        copy nccut_config.toml command_dir\nccut_config.toml
+        dir command_dir
         python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("command_dir\nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via command line"'
 
   mac_deps_test:
