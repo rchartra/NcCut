@@ -329,6 +329,7 @@ class PlotPopup(Popup):
         Args:
             f_path (str): Output file path
         """
+        print("method called")
         if f_path.find(".") == -1:
             f_path = f_path + ".json"
         else:

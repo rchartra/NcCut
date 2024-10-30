@@ -67,7 +67,7 @@ jobs:
         python -m poetry run python -m flake8 --ignore=E402,E501
     - name: Test with unittest
       run: |
-        python -m poetry run python -m pytest
+        python -m poetry run python -m pytest -s
 
   mac_deps_test:
     runs-on: macos-latest
