@@ -140,6 +140,7 @@ def find_config(config_file):
     if config_file:
         config_path = config_file
     elif config_path:
+        print("Env found")
         config_path = Path(config_path)
     else:
         # Look for file in working directory
