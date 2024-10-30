@@ -85,9 +85,9 @@ jobs:
       run: echo ("APPDATA_DIR=" + $env:APPDATA) >> $env:GITHUB_ENV
     - name: Test with Default Path
       run: |
-        mkdir "{{ env.APPDATA_DIR }}\nccut"
-        move nccut_config.toml "{{ env.APPDATA_DIR }}\nccut\nccut_config.toml"
-        dir "{{ env.APPDATA_DIR }}\nccut"  # Verify that the file moved to the correct location
+        mkdir "${{ env.APPDATA_DIR }}\nccut"
+        move nccut_config.toml "${{ env.APPDATA_DIR }}\nccut\nccut_config.toml"
+        dir "${{ env.APPDATA_DIR }}\nccut"  # Verify that the file moved to the correct location
         python -m poetry run python -c "from nccut.functions import find_config; assert find_config('') == {'graphics_defaults': {'contrast': 0}}, 'Config load failed via default path'"    - name: Test with command line argument
     - name: Test with command line argument
       run: |
