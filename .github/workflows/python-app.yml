@@ -91,7 +91,9 @@ jobs:
         python -m poetry run python -c "from nccut.functions import find_config; assert find_config('') == {'graphics_defaults': {'contrast': 0}}, 'Config load failed via default path'"    - name: Test with command line argument
     - name: Test with command line argument
       run: |
-        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via command line"'
+        mkdir command_dir
+        move "${{ env.APPDATA_DIR }}\nccut\nccut_config.toml" command_dir\nccut_config.toml
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("command_dir\nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via command line"'
 
   mac_deps_test:
     runs-on: macos-latest
