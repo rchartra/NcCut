@@ -334,7 +334,7 @@ class PlotPopup(Popup):
             f_path = f_path + ".json"
         else:
             f_path = f_path[:f_path.find(".")] + ".json"
-        #try:
+        # try:
         dat = copy.deepcopy(self.active_data)
         if len(self.active_vars) == 0:  # If Image
             final = self.add_group_info(dat)
@@ -354,8 +354,8 @@ class PlotPopup(Popup):
             json.dump(final, f)
 
         func.alert_popup("Download Complete")
-        #except Exception as error:
-            #func.alert_popup(str(error))
+        # except Exception as error:
+        # func.alert_popup(str(error))
 
     def download_all_data(self, f_path):
         """
