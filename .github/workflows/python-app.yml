@@ -70,12 +70,12 @@ jobs:
         python -m poetry run python -m pytest -s
     - name: Prepare Configuration File
       run: |
-        echo '[graphics_defaults]' > config.toml
+        echo '[graphics_defaults]' > nccut_config.toml
         echo 'contrast = 0' >> nccut_config.toml
-        echo "Configuration file prepared at $(pwd)/config.toml"
+        echo "Configuration file prepared at $(pwd)/nccut_config.toml"
     - name: Test Config with Environment variable
       env:
-        NCCUT_CONFIG: ${{ github.workspace }}/config.toml
+        NCCUT_CONFIG: ${{ github.workspace }}/nccut_config.toml
       run: |
         python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via environment variable"'
   mac_deps_test:
