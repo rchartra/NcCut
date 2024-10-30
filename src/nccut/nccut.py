@@ -8,7 +8,6 @@ Builds app and sets initial window.
 Creates the widget tree and sets the initial window size. To load app, run ``NcCut().run()``
 
 """
-import matplotlib.pyplot as plt
 from progress.bar import ChargingBar
 bar = ChargingBar("Loading App", max=3)
 import os
