@@ -68,7 +68,16 @@ jobs:
     - name: Test with unittest
       run: |
         python -m poetry run python -m pytest -s
-
+    - name: Prepare Configuration File
+      run: |
+        echo '[graphics_defaults]' > config.toml
+        echo 'contrast = 0' >> nccut_config.toml
+        echo "Configuration file prepared at $(pwd)/config.toml"
+    - name: Test Config with Environment variable
+      env:
+        NCCUT_CONFIG: ${{ github.workspace }}/config.toml
+      run: |
+        python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via environment variable"'
   mac_deps_test:
     runs-on: macos-latest
     steps:
@@ -83,7 +92,6 @@ jobs:
           python -m pip install poetry
       - name: Install dependencies
         run: |
-          python -m pip install cython
           python -m poetry install --with test
       - name: Test pyobjus install
         run: |
