@@ -50,7 +50,7 @@ class BackgroundDropDown(DropDown):
         """
         super(BackgroundDropDown, self).open(widget)
         with self.canvas.before:
-            Color(rgb=[0.2, 0.2, 0.2])
+            Color(rgb=[0.25, 0.25, 0.25])
             self.rect = Rectangle(size=self.size, pos=self.pos, radius=[dp(10), ])
         self.bind(pos=self.update_canvas, size=self.update_canvas)
 
@@ -390,6 +390,7 @@ class PlotPopup(Popup):
         config = self.config[self.f_type]
         global_metadata = {"time_stamp": datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
                            "user": os.getlogin(), "license": "CC0-1.0"}
+        global_metadata.update(self.home.general_config["metadata"])
         if self.f_type == "netcdf":
             global_metadata["file"] = config["file"]
             global_metadata["netcdf_attrs"] = attrs_to_str(config["data"].attrs)

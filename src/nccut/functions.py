@@ -24,8 +24,12 @@ import numpy as np
 import math
 import io
 import warnings
+import itertools
 import xarray as xr
 import matplotlib
+from pathlib import Path
+import tomli
+import os
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -75,6 +79,108 @@ class AlertPopup(Popup):
             message (str): Text to display
         """
         self.ids.message.text = message
+
+
+def validate_config(config):
+    """
+    Given a dictionary parsed from a configuration file, ensures that no invalid elements or values are present.
+
+    Args:
+        config: Dictionary parsed from a configuration file of configuration sections, keys, and values
+
+    Returns:
+        True if configuration is valid, False if any invalid elements or values we're found
+    """
+    keys = list(config.keys())
+
+    xyz = [list(i) for i in list(itertools.permutations(["x", "y", "z"], 3))]
+    allowed_options = {"graphics_defaults": {"contrast": np.arange(-20, 21).astype(int),
+                                             "line_color": ["Blue", "Orange", "Green"],
+                                             "colormap": plt.colormaps()[:87],
+                                             "circle_size": np.arange(2, 71).astype(int)},
+                       "tool_defaults": {"marker_width": np.arange(0, 401).astype(int)},
+                       "netcdf": {"dimension_order": xyz},
+                       "metadata": {}}
+
+    if not all([key in list(allowed_options.keys()) for key in keys]):
+        return False
+    for key in keys:
+        sub_keys = list(config[key].keys())
+        if key == "metadata":
+            vals = list(config[key].values())
+            if len(vals) > 0 and not all(isinstance(item, str) for item in vals):
+                return False
+        else:
+            if not all([k in list(allowed_options[key].keys()) for k in sub_keys]):
+                return False
+            for subkey in list(config[key].keys()):
+                if not config[key][subkey] in allowed_options[key][subkey]:
+                    return False
+    return True
+
+
+def find_config(config_file):
+    """
+    Looks for nccut_config.toml file. If found, validates and applied configuration changes.
+
+    Looks for an environment variable 'NCCUT_CONFIG' holding the config file. If not found, looks in the current
+    working directory and then in either '%APPDATA%\nccut\nccut_config.toml' on Windows or
+    '~/.config/your_app/config.toml' on Linux and macOS
+
+    Args:
+        config_file (str): Path to configuration file given by user on command line start. Empty string if none was
+            given.
+
+    Returns:
+        If valid configuration file, returns dictionary of config values. If none was found or invalid, returns empty
+        dictionary.
+    """
+    # Check if an environment variable is set for the config file
+    config_path = os.getenv('NCCUT_CONFIG')
+    if config_file:
+        config_path = config_file
+    elif config_path:
+        config_path = Path(config_path)
+    else:
+        # Look for file in working directory
+        config_path = Path.cwd() / "nccut_config.toml"
+        if not config_path.is_file():
+            # Look for file in default location
+            if os.name == 'nt':  # Windows
+                config_path = Path(os.getenv('APPDATA')) / 'nccut' / 'nccut_config.toml'
+            else:  # Unix-based systems (Linux/macOS)
+                config_path = Path.home() / ".config" / "nccut" / "nccut_config.toml"
+    try:
+        with open(config_path, 'rb') as config_file:
+            config = tomli.load(config_file)
+            if validate_config(config):
+                print(f"Valid configuration file found at {config_path}")
+                return config
+            else:
+                print(f"Invalid configuration file ignored. File found at {config_path}")
+                return {}
+    except FileNotFoundError:
+        return {}
+
+
+def contrast_function(value):
+    """
+    Function to transform a setting value to the actual contrast value to apply with PIL.
+
+    Transforms domain [-20, 20] to [0, 2]
+
+    Args:
+        value (int): The user selected contrast setting value
+
+    Returns:
+        Float, contrast value to actually apply to the image.
+    """
+    v = float(value) / 20
+    if v < 0:
+        contrast = 1 + v
+    else:
+        contrast = 1 + v * 2
+    return contrast
 
 
 def text_wrap(*args):

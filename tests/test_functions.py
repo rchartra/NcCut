@@ -301,6 +301,58 @@ class Test(unittest.TestCase):
             self.assertTrue(np.array_equal(two_edge_res_scales, two_edge_expected_scales, equal_nan=True),
                             "Point scale factors were incorrect for the subset of the " + d[0] + " data on two edges")
 
+    def test_validate_config(self):
+        """
+        When given a dictionary of configuration values, tests whether the program can identify illegal elements.
+        """
+        illegal_header = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                "circle_size": 5},
+                          "netcdf": {"dimension_order": ["z", "y", "x"]},
+                          "metadta": {}}
+        self.assertFalse(func.validate_config(illegal_header), "Illegal config file headers we're allowed.")
+        illegal_sub_header = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                    "circle_size": 5},
+                              "netcdf": {"dimenson_order": ["z", "y", "x"]},
+                              "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_sub_header), "Illegal config file sub headers we're allowed.")
+        illegal_metadata = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                  "circle_size": 5},
+                            "netcdf": {"dimension_order": ["z", "y", "x"]},
+                            "metadata": {"float_field": 40.2}}
+        self.assertFalse(func.validate_config(illegal_metadata), "Illegal config file metadata was allowed.")
+        illegal_netcdf = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                "circle_size": 5},
+                          "netcdf": {"dimension_order": ["z", "a", "x"]},
+                          "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_netcdf), "Illegal config file dimensions order was allowed.")
+        illegal_contrast = {"graphics_defaults": {"contrast": 40, "line_color": "Blue", "colormap": "viridis",
+                                                  "circle_size": 5},
+                            "netcdf": {"dimension_order": ["z", "y", "x"]},
+                            "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_contrast), "Illegal config file contrast value was allowed.")
+        illegal_line_color = {"graphics_defaults": {"contrast": 0, "line_color": "Purple", "colormap": "viridis",
+                                                    "circle_size": 5},
+                              "netcdf": {"dimension_order": ["z", "y", "x"]},
+                              "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_line_color), "Illegal config file line color was allowed.")
+        illegal_colormap = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "apple",
+                                                  "circle_size": 5},
+                            "netcdf": {"dimension_order": ["z", "y", "x"]},
+                            "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_colormap), "Illegal config file colormap was allowed.")
+        illegal_circle_size = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                     "circle_size": "7"},
+                               "netcdf": {"dimension_order": ["z", "y", "x"]},
+                               "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_circle_size), "Illegal config file circle size was allowed.")
+        illegal_marker_width = {"tool_defaults": {"marker_width": 5000}}
+        self.assertFalse(func.validate_config(illegal_marker_width), "Illegal config file marker width was allowed.")
+        legal_config = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                              "circle_size": 5},
+                        "netcdf": {"dimension_order": ["z", "y", "x"]},
+                        "metadata": {}}
+        self.assertTrue(func.validate_config(legal_config), "Valid config file was deemed invalid.")
+
 
 if __name__ == '__main__':
     unittest.main()

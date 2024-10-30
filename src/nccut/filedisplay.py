@@ -73,7 +73,7 @@ class FileDisplay(ScatterLayout):
         delete_point_btn: Delete point button
         edit_widgets (list): List of widgets that must be added to screen when entering editing mode
     """
-    def __init__(self, home, f_config, **kwargs):
+    def __init__(self, home, f_config, g_config, t_config, **kwargs):
         """
         Initializes settings and defines editing mode buttons.
 
@@ -84,10 +84,13 @@ class FileDisplay(ScatterLayout):
                 "netcdf") whose value is the necessary configuration settings. For images, the config dictionary has
                 form {"image": str(file)}. For a netcdf file the value is a dictionary of configuration values (see
                 :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+            g_config (dict): Dictionary holding initial contrast value, line color, colormap, and circle size
+            t_config (dict): Dictionary holding tool configurations: default marker width
         """
         super(FileDisplay, self).__init__(**kwargs)
 
         self.config = f_config
+        self.default_marker_width = t_config["marker_width"]
         self.f_type = list(f_config.keys())[0]
         self.home = home
         self.sidebar = self.home.ids.sidebar
@@ -103,12 +106,12 @@ class FileDisplay(ScatterLayout):
         self.t_mode = False
         self.resized = False
 
-        self.contrast = 1.0
-        self.l_col = "Blue"
-        self.cir_size = 5
+        self.contrast = func.contrast_function(g_config["contrast"])
+        self.l_col = g_config["line_color"]
+        self.cir_size = g_config["circle_size"]
 
         self.cmaps = plt.colormaps()[:87]
-        self.colormap = 'viridis'
+        self.colormap = g_config["colormap"]
 
         # Initial Sidebar Widgets
         self.transect_chain_btn = func.RoundedButton(text="Transect Chain", size_hint=(1, 0.1),
@@ -220,7 +223,7 @@ class FileDisplay(ScatterLayout):
             # Opens a new tool
             kivy.core.window.Window.set_system_cursor("crosshair")
             if t_type == "transect_marker":
-                self.tool = MultiMarker(home=self.home)
+                self.tool = MultiMarker(home=self.home, m_width=self.default_marker_width)
             elif t_type == "transect_chain":
                 self.tool = MultiChain(home=self.home)
             self.add_widget(self.tool)
@@ -315,11 +318,7 @@ class FileDisplay(ScatterLayout):
                 self.tool.update_c_size(float(value))
         elif setting == "contrast":
             if self.f_type == "netcdf":
-                v = float(value) / 20
-                if v < 0:
-                    self.contrast = 1 + v
-                else:
-                    self.contrast = 1 + v * 2
+                self.contrast = func.contrast_function(value)
                 self.update_netcdf()
         elif setting == "colormap":
             if self.f_type == "netcdf":

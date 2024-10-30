@@ -1,0 +1,22 @@
+# An example config file. This file details all possible configuration options, however
+# you do not have to set all of them. In order to be read the settings must have the below
+# names, formats, and headers.
+
+# Each section is optional
+[graphics_defaults]
+contrast = 0 # The intitial contrast value to apply to displayed image, int between [-20, 20]
+line_color = "Blue" # Default color for tool graphics, one of "Blue", "Orange", or "Green"
+colormap = "viridis" # Default colormap for NetCDF data. Must be one of plt.colormaps()[:87]
+circle_size = 5 # Default tool graphics size, int between [2, 70]
+
+[tool_defaults]
+marker_width = 40 # The default width for the marker tool, int between [1, 400]
+
+[netcdf]
+# Default assumed order of NetCDF file dimensions.
+#   - Must be three element list of some ordering of "x", "y", and "z"
+dimension_order = ["z", "y", "x"]
+
+[metadata] # Specify additional global metadata key pairs here. Value must be a str
+# Example:
+batch_num = '1'

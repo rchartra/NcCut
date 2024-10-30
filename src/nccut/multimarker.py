@@ -116,7 +116,7 @@ class MultiMarker(ui.widget.Widget):
         plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
         curr_width (int): Current marker width being used. Used to initialize width of new markers.
     """
-    def __init__(self, home, **kwargs):
+    def __init__(self, home, m_width, **kwargs):
         """
         Defines sidebar elements and initializes widget
 
@@ -133,7 +133,7 @@ class MultiMarker(ui.widget.Widget):
         self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
         self.plotting = None
-        self.curr_width = 40
+        self.curr_width = m_width
 
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
