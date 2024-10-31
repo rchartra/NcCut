@@ -31,7 +31,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install poetry
-    - name: Install dependencies
+    - name: Install NcCut
       run: |
         python -m poetry install --with test
     - name: Lint with flake8
@@ -59,7 +59,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install poetry
-    - name: Install dependencies
+    - name: Install NcCut
       run: |
         python -m poetry install --with test
     - name: Lint with flake8
@@ -83,7 +83,7 @@ jobs:
       run: |
          python -m pip install --upgrade pip
          python -m pip install poetry
-    - name: Install dependencies
+    - name: Install NcCut
       run: |
          python -m poetry install --with test
     - name: Prepare Configuration File
@@ -112,6 +112,55 @@ jobs:
         mkdir "${{ github.workspace }}\command_dir"
         copy nccut_config.toml "${{ github.workspace }}\command_dir\nccut_config.toml"
         python -m poetry run python -c 'from nccut.functions import find_config; assert find_config(r"${{ github.workspace }}\command_dir\nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via command line argument path"'
+
+  linux_cmd_test:
+    runs-on: ubuntu-latest
+    env:
+      KIVY_GL_BACKEND: 'angle_sdl2'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.version }}
+    - name: Install X11
+      run: |
+        sudo apt-get update 
+        sudo apt-get install xorg
+        sudo apt-get install xorg openbox
+    - name: Install Poetry
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install poetry
+    - name: Install dependencies
+      run: |
+        python -m poetry install --with test
+    - name: Prepare Configuration File
+      run: |
+        echo '[graphics_defaults]' > nccut_config.toml
+        echo 'contrast = 0' >> nccut_config.toml
+        echo "Configuration file prepared at $(pwd)\nccut_config.toml"
+    - name: Test Config with Environment variable
+      env:
+        NCCUT_CONFIG: ${{ github.workspace }}/nccut_config.toml
+      run: |
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via environment variable"'
+    - name: Test Config in Working Directory
+      run: |
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config("") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via working directory"'
+    - name: Get Config Directory
+      run: echo "CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}" >> $GITHUB_ENV
+    - name: Test with Default Path
+      run: |
+        mkdir -p "${{ env.CONFIG_DIR }}/nccut"
+        cp nccut_config.toml "${{ env.APPDATA_DIR }}/nccut/nccut_config.toml"
+        ls "${{ env.CONFIG_DIR }}/nccut"  # Verify that the file moved to the correct location
+        python -m poetry run python -c "from nccut.functions import find_config; assert find_config('') == {'graphics_defaults': {'contrast': 0}}, 'Config load failed via default path'"
+    - name: Test with command line argument
+      run: |
+        mkdir -p "${{ github.workspace }}/command_dir"
+        copy nccut_config.toml "${{ github.workspace }}/command_dir/nccut_config.toml"
+        python -m poetry run python -c 'from nccut.functions import find_config; assert find_config(r"${{ github.workspace }}/command_dir/nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via command line argument path"'
 
   mac_deps_test:
     runs-on: macos-latest
