@@ -8,25 +8,19 @@ Builds app and sets initial window.
 Creates the widget tree and sets the initial window size. To load app, run ``NcCut().run()``
 
 """
-from progress.bar import ChargingBar
-bar = ChargingBar("Loading App", max=3)
 import os
-import re
 import logging
 import copy
 from nccut.logger import get_logging_level
 _LOG_LEVEL_ = copy.copy(get_logging_level())
 os.environ["KIVY_NO_ARGS"] = "true"
 os.environ["KCFG_KIVY_LOG_LEVEL"] = _LOG_LEVEL_.lower()
-bar.next()
 from kivy.metrics import dp
 import kivy
 import kivy.uix as ui
 from kivy.app import App
 import platform
-import argparse
 logging.getLogger().setLevel(getattr(logging, _LOG_LEVEL_, None))
-bar.next()
 from nccut.homescreen import HomeScreen
 import nccut.functions as func
 
@@ -102,40 +96,3 @@ class NcCut(App):
         home = HomeScreen(name="HomeScreen", btn_img_path=self.btn_img_path, file=self.file, conf=self.general_config)
         root.add_widget(home)
         return root
-
-
-def run():
-    """
-    Runs app with command line. Can also specify file to load and configuration file
-    """
-    bar.next()
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-file', nargs='?', default=None, help="File path for image or NetCDF file")
-    parser.add_argument('-config', nargs='?', default=None, help="File path for config file: 'nccut_config.toml'")
-    args = parser.parse_args()
-    file = args.file
-    config = args.config
-    if file:
-        if not os.path.isfile(file):
-            print("ERROR: File Not Found")
-            return
-        elif len(re.findall(r'[^A-Za-z0-9_:\\.\-/]', str(file))) > 0:
-            print("ERROR: Invalid File Name")
-            return
-        elif not os.path.splitext(file)[1] in [".jpg", ".jpeg", ".png", ".nc"]:
-            print("ERROR: File not an Image or NetCDF File")
-            return
-    if config:
-        print(config)
-        if not os.path.isfile(config):
-            print("ERROR: Config File Not Found")
-            return
-        elif len(re.findall(r'[^A-Za-z0-9_:\\.\-/]', str(file))) > 0:
-            print("ERROR: Invalid Config File Path")
-            return
-        elif not os.path.basename(config) == "nccut_config.toml":
-            print("ERROR: File Passed is not NcCut Config File (file must be named 'nccut_config.toml)")
-            return
-    bar.next()
-    bar.finish()
-    NcCut(file=file, config=config).run()

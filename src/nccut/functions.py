@@ -135,15 +135,13 @@ def find_config(config_file):
         If valid configuration file, returns dictionary of config values. If none was found or invalid, returns empty
         dictionary.
     """
-    # Check if an environment variable is set for the config file
-    print(config_file)
     config_path = os.getenv('NCCUT_CONFIG')
     if config_file:
+        # Check if config file passed in as a command line argument
         config_path = config_file
-        print("Config found via argument")
     elif config_path:
+        # Check if an environment variable is set for the config file
         config_path = Path(config_path)
-        print("Config found via environment variable")
     else:
         # Look for file in working directory
         config_path = Path.cwd() / "nccut_config.toml"
@@ -151,13 +149,8 @@ def find_config(config_file):
             # Look for file in default location
             if os.name == 'nt':  # Windows
                 config_path = Path(os.getenv('APPDATA')) / 'nccut' / 'nccut_config.toml'
-                print("Config path: " + str(config_path))
-                print("Config found in default location: windows")
             else:  # Unix-based systems (Linux/macOS)
                 config_path = Path.home() / ".config" / "nccut" / "nccut_config.toml"
-                print("Config found in default location: linux")
-        else:
-            print("Config found in working directory")
     try:
         with open(config_path, 'rb') as config_file:
             config = tomli.load(config_file)
@@ -168,7 +161,6 @@ def find_config(config_file):
                 print(f"Invalid configuration file ignored. File found at {config_path}")
                 return {}
     except FileNotFoundError:
-        print("File not found")
         return {}
 
 

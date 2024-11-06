@@ -39,7 +39,7 @@ sphinx-rtd-theme = "^2.0.0"
 sphinxcontrib-video = "^0.2.1"
 
 [tool.poetry.scripts]
-nccut = "nccut.nccut:run"
+nccut = "nccut.__main__:run"
 
 [[tool.poetry_bumpversion.replacements]]
 files = ["docs/source/conf.py"]

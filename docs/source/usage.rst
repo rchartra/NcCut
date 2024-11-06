@@ -15,7 +15,7 @@ Usage
 
         .. code-block:: console
 
-            nccut file_name
+            nccut -file file_name
 
     * From Python:
 
@@ -128,6 +128,24 @@ Plotting
     * **Save All Z Values** will save all z values for the selected transects and variables. This option only appears if using a NetCDF file with three dimensions.
 #. See the :ref:`Data Output <data_output>` section for how the saved data is formatted.
 #. Click anywhere around the popup or the close button to dismiss plotting window.
+
+.. _config_file:
+
+Configuration File
+------------------
+
+NcCut's default graphic settings, netcdf configuration settings, and metadata can be configured using a configuration file. An example file with information on the possible configurations can be found `here <https://github.com/rchartra/NcCut/tree/main>`_.
+
+For NcCut to locate the file it must be named ``nccut_config.toml`` and be in one of the following locations which are by ordered by decreasing search priority:
+
+#. Command line argument:
+
+    .. code-block:: console
+        nccut -config path_to_config_file
+
+#. Environment variable called 'NCCUT_CONFIG' holding the path to the config file.
+#. Current working directory and then in
+#. Either '%APPDATA%\nccut\nccut_config.toml' on Windows or '~/.config/your_app/config.toml' on Linux and macOS
 
 Changing Logger Settings
 ------------------------
