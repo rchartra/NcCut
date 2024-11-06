@@ -100,7 +100,7 @@
                 id: cir_size_slider
                 min: 2
                 max: 70
-                value: 5
+                value: app.general_config["graphics_defaults"]["circle_size"]
                 step: 1
                 size_hint: (0.4, 1)
 
@@ -198,7 +198,7 @@
                 id: contrast
                 min: -20
                 max: 20
-                value: 0
+                value: app.general_config["graphics_defaults"]["contrast"]
                 step: 1
                 size_hint: (0.4, 1)
 
@@ -291,7 +291,7 @@
 
         Image:
             id: line_color_btn_img
-            source: join(app.btn_img_path, "blue_line_btn.png")
+            source: join(app.btn_img_path, app.default_line_btn_img)
             size: line_color_btn.size
             pos: line_color_btn.pos
 

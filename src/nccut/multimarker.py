@@ -116,7 +116,7 @@ class MultiMarker(ui.widget.Widget):
         plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
         curr_width (int): Current marker width being used. Used to initialize width of new markers.
     """
-    def __init__(self, home, **kwargs):
+    def __init__(self, home, m_width, **kwargs):
         """
         Defines sidebar elements and initializes widget
 
@@ -133,7 +133,7 @@ class MultiMarker(ui.widget.Widget):
         self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
         self.clicks = 0
         self.plotting = None
-        self.curr_width = 40
+        self.curr_width = m_width
 
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
@@ -213,8 +213,8 @@ class MultiMarker(ui.widget.Widget):
         nc_coords = False
         if list(config.keys())[0] == "netcdf":
             try:
-                config["netcdf"]["file"].coords[config["netcdf"]["x"]].data.astype(float)
-                config["netcdf"]["file"].coords[config["netcdf"]["y"]].data.astype(float)
+                config["netcdf"]["data"].coords[config["netcdf"]["x"]].data.astype(float)
+                config["netcdf"]["data"].coords[config["netcdf"]["y"]].data.astype(float)
                 x_name = config["netcdf"]["x"]
                 y_name = config["netcdf"]["y"]
                 nc_coords = True
@@ -246,7 +246,7 @@ class MultiMarker(ui.widget.Widget):
         config = self.home.display.config
         for marker in found:
             for i, c in enumerate(["x", "y"]):
-                coords = config["netcdf"]["file"].coords[config["netcdf"][c]].data.astype(float)
+                coords = config["netcdf"]["data"].coords[config["netcdf"][c]].data.astype(float)
                 c_spline = CubicSpline(coords, range(len(coords)))
                 marker[i] = c_spline(marker[i]).tolist()
         return found
@@ -400,8 +400,8 @@ class MultiMarker(ui.widget.Widget):
         y_name = "Y"
         if self.home.display.f_type == "netcdf":
             config = self.home.display.config
-            x = config["netcdf"]["file"].coords[config["netcdf"]["x"]].data
-            y = config["netcdf"]["file"].coords[config["netcdf"]["y"]].data
+            x = config["netcdf"]["data"].coords[config["netcdf"]["x"]].data
+            y = config["netcdf"]["data"].coords[config["netcdf"]["y"]].data
             try:
                 x = x.astype(float)
                 x_spline = CubicSpline(range(len(x)), x)

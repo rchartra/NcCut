@@ -25,6 +25,7 @@ netCDF4 = "^1.7.1" # Necessary for xarray
 Kivy = "^2.3.0"
 progress = "^1.6"
 plyer = "^2.1.0"
+tomli = "^2.0.2"
 pyobjus = {version = "^1.2.3", platform = "darwin"} # Necessary for native file browser on MacOS
 
 [tool.poetry.group.test.dependencies]
@@ -38,7 +39,7 @@ sphinx-rtd-theme = "^2.0.0"
 sphinxcontrib-video = "^0.2.1"
 
 [tool.poetry.scripts]
-nccut = "nccut.nccut:run"
+nccut = "nccut.__main__:run"
 
 [[tool.poetry_bumpversion.replacements]]
 files = ["docs/source/conf.py"]

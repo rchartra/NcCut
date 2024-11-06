@@ -48,7 +48,7 @@ class HomeScreen(Screen):
         sidebar_spacer: Spacer to fill any remaining area in dynamic sidebar not filled by widgets
         settings_bar: SettingsBar object holding view manipulation buttons and NetCDF menu
     """
-    def __init__(self, btn_img_path, file=None, **kwargs):
+    def __init__(self, btn_img_path, file=None, conf=None, **kwargs):
         """
         Initialize main screen with default settings.
 
@@ -58,6 +58,7 @@ class HomeScreen(Screen):
             file: (Optional) File if one was given on start up from command line, otherwise None
         """
         super(HomeScreen, self).__init__(**kwargs)
+        self.general_config = conf
         self.btn_img_path = btn_img_path
         self.file_on = False
         self.loaded = False
@@ -160,11 +161,13 @@ class HomeScreen(Screen):
                 open(file)
                 if file[-3:] == ".nc":
                     # Creates selection popup for nc file data sets
-                    self.nc_popup = NetCDFConfig(file, self)
+                    self.nc_popup = NetCDFConfig(file, self, self.general_config["netcdf"]["dimension_order"])
 
                 elif file[-5:] == ".jpeg" or file[-4:] == ".png" or file[-4:] == ".jpg":
                     # Creates interactive image from .jpg/.png/.jpeg files
-                    self.display = FileDisplay(home=self, f_config={"image": str(file)})
+                    self.display = FileDisplay(home=self, f_config={"image": str(file)},
+                                               g_config=self.general_config["graphics_defaults"],
+                                               t_config=self.general_config["tool_defaults"])
                     self.ids.view.add_widget(self.display)
                     if self.settings_bar.parent is None:
                         self.ids.settings_bar.add_widget(self.settings_bar)
@@ -204,7 +207,7 @@ class HomeScreen(Screen):
         else:
             self.color_bar_box.remove_widget(self.color_bar_box.children[0])
         self.color_bar_box.add_widget(colorbar)
-        var_attrs = config["file"][config["var"]].attrs
+        var_attrs = config["data"][config["var"]].attrs
         if "long_name" in list(var_attrs.keys()):
             v_text = var_attrs["long_name"].title()
         else:
@@ -212,7 +215,7 @@ class HomeScreen(Screen):
         if "units" in list(var_attrs.keys()):
             v_text += " (" + var_attrs["units"] + ")"
         if config["z"] != "N/A":
-            z_attrs = config["file"][config["z"]].attrs
+            z_attrs = config["data"][config["z"]].attrs
             if "long_name" in list(z_attrs.keys()):
                 z_text = ", " + z_attrs["long_name"].title()
             else:
@@ -232,7 +235,9 @@ class HomeScreen(Screen):
         Args:
             config (dict): Dictionary of verified NetCDF file configuration settings. Check FileDisplay for more details
         """
-        self.display = FileDisplay(home=self, f_config={"netcdf": config})
+        self.display = FileDisplay(home=self, f_config={"netcdf": config},
+                                   g_config=self.general_config["graphics_defaults"],
+                                   t_config=self.general_config["tool_defaults"])
         self.ids.view.add_widget(self.display)
         if self.settings_bar.parent is None:
             self.ids.settings_bar.add_widget(self.settings_bar)
@@ -252,7 +257,8 @@ class HomeScreen(Screen):
             self.ids.main_box.remove_widget(self.netcdf_info)
         if self.file_on:
             self.ids.view.unbind(size=self.display.resize_to_fit)
-            self.settings_bar.set_line_color_btn(os.path.join(self.btn_img_path, "blue_line_btn.png"))
+            def_img_name = self.general_config["graphics_defaults"]["line_color"].lower() + "_line_btn.png"
+            self.settings_bar.set_line_color_btn(os.path.join(self.btn_img_path, def_img_name))
             self.display.parent.remove_widget(self.display)
         if self.settings_bar.parent is not None:
             self.ids.settings_bar.remove_widget(self.settings_bar)

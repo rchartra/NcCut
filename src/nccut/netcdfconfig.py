@@ -28,6 +28,7 @@ class NetCDFConfig(Popup):
 
     Attributes:
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+        file (str): File path to the NetCDF file
         data: xarray.Dataset, Opened NetCDF file
         running (bool): Whether the 'Go' button has been pressed. Used to prevent user from spamming the button.
         var_select: RoundedButton, Variable select button
@@ -41,7 +42,7 @@ class NetCDFConfig(Popup):
         content: BoxLayout containing all widgets of the popup
         size_hint (tuple): Tuple (width, height) of relative size of popup to window
     """
-    def __init__(self, file, home, **kwargs):
+    def __init__(self, file, home, dim_order, **kwargs):
         """
         Defines UI elements and opens popup. By default it selects the first variable of the NetCDF file and if it has
         3 dimensions it selects the first value in the third dimension as the Z value.
@@ -52,6 +53,7 @@ class NetCDFConfig(Popup):
         """
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
+        self.file = file
         self.data = xr.open_dataset(file)
         self.running = False
         content = ui.boxlayout.BoxLayout(orientation='vertical', spacing=dp(20), padding=dp(20))
@@ -77,18 +79,18 @@ class NetCDFConfig(Popup):
         dims = list(self.data[self.var_select.text].dims)
         if len(dims) < 3:
             while len(dims) < 3:
-                dims.insert(0, "N/A")
+                dims.insert(dim_order.index("z"), "N/A")
         elif len(dims) > 3:
             dims = dims[:3]
 
         xy_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         xy_box.add_widget(Label(text="X: ", size_hint=(0.2, 1)))
-        self.x_select = func.RoundedButton(text=dims[-1], size_hint=(0.3, 1), halign='center', valign='middle')
+        self.x_select = func.RoundedButton(text=dims[dim_order.index("x")], size_hint=(0.3, 1), halign='center', valign='middle')
         self.x_select.bind(on_release=lambda x: self.dim_options(self.x_select), size=func.text_wrap)
         xy_box.add_widget(self.x_select)
 
         xy_box.add_widget(Label(text="Y: ", size_hint=(0.2, 1)))
-        self.y_select = func.RoundedButton(text=dims[-2], size_hint=(0.3, 1), halign='center', valign='middle')
+        self.y_select = func.RoundedButton(text=dims[dim_order.index("y")], size_hint=(0.3, 1), halign='center', valign='middle')
         self.y_select.bind(on_release=lambda x: self.dim_options(self.y_select), size=func.text_wrap)
         xy_box.add_widget(self.y_select)
         content.add_widget(xy_box)
@@ -96,7 +98,7 @@ class NetCDFConfig(Popup):
         # Z selection (not always required)
         z_box = ui.boxlayout.BoxLayout(spacing=dp(20))
         z_box.add_widget(Label(text="Z Variable: ", size_hint=(0.2, 1)))
-        self.z_select = func.RoundedButton(text=dims[-3], size_hint=(0.3, 1), halign='center', valign='middle')
+        self.z_select = func.RoundedButton(text=dims[dim_order.index("z")], size_hint=(0.3, 1), halign='center', valign='middle')
         self.z_select.bind(on_release=lambda x: self.dim_options(self.z_select),
                            text=self.update_depth_btn, size=func.text_wrap)
         z_box.add_widget(self.z_select)
@@ -161,7 +163,7 @@ class NetCDFConfig(Popup):
             self.running = True
             vals = {'x': self.x_select.text, 'y': self.y_select.text,
                     'z': self.z_select.text, 'z_val': self.depth_select.text,
-                    'var': self.var_select.text, 'file': self.data}
+                    'var': self.var_select.text, 'data': self.data, 'file': self.file}
             selects = [(self.x_select, "X Dimension"), (self.y_select, "Y Dimension")]
             if len(self.data[self.var_select.text].dims) > 3:
                 self.error.text = "This variable has more than 3 dimensions"
@@ -176,7 +178,7 @@ class NetCDFConfig(Popup):
                     self.error.text = "Please Select a " + sel[1]
                     self.running = False
                     return
-            if len(set(list(vals.values())[:-3])) != len(list(vals.values())[:-3]):
+            if len(set(list(vals.values())[:-4])) != len(list(vals.values())[:-4]):
                 self.error.text = "All X, Y, Z variables must be unique"
                 self.running = False
                 return

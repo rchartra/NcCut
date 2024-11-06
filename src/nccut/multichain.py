@@ -156,8 +156,8 @@ class MultiChain(ui.widget.Widget):
         y_name = "Y"
         if self.home.display.f_type == "netcdf":
             config = self.home.display.config
-            x = config["netcdf"]["file"].coords[config["netcdf"]["x"]].data
-            y = config["netcdf"]["file"].coords[config["netcdf"]["y"]].data
+            x = config["netcdf"]["data"].coords[config["netcdf"]["x"]].data
+            y = config["netcdf"]["data"].coords[config["netcdf"]["y"]].data
             try:
                 x = x.astype(float)
                 x_spline = CubicSpline(range(len(x)), x)

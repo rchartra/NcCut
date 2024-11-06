@@ -6,7 +6,7 @@ Data Output
 .. note::
    For an example of how to work with the output data look :ref:`here <output>`.
 
-No matter which tool you use the GUI will download the transect data into a JSON file. If you're unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages, however an easy way to access it is using the python ``json`` library:
+No matter which tool you use the GUI will download the transect data into a JSON file. If you're unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages. One easy way to access it is using the python ``json`` library:
 
     .. code-block:: python
 
@@ -36,6 +36,7 @@ When taken from a NetCDF file the tool group sub-dictionaries are further nested
 
     .. image:: _media/nc_diagram.png
 
+The output will also have additional metadata from the loaded file. You can add additional metadata fields via a :ref:`configuration <config_file>` file.
 **NcCut** has a helper module for viewing the output data in a readable fashion.
 
 nccut.project\_file\_printer module

@@ -110,7 +110,7 @@ class NetCDFDropDown(DropDown):
 
         self.var_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf":
-            for i in list(self.home.display.config["netcdf"]["file"].keys()):
+            for i in list(self.home.display.config["netcdf"]["data"].keys()):
                 btn = Button(text=i, size_hint_y=None, height=dp(30), halign='center', valign='middle', shorten=True)
                 btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text), size=func.text_wrap,
                          on_release=self.var_dropdown.dismiss)  # Setting name: 'variable'
@@ -118,7 +118,7 @@ class NetCDFDropDown(DropDown):
 
         self.depth_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf" and self.home.display.config['netcdf']['z'] != "N/A":
-            for i in list(self.home.display.config["netcdf"]['file'][self.home.display.config["netcdf"]['z']].data):
+            for i in list(self.home.display.config["netcdf"]['data'][self.home.display.config["netcdf"]['z']].data):
                 btn = Button(text=str(i), size_hint_y=None, height=dp(30), halign='center', valign='middle',
                              shorten=True)
                 btn.bind(on_press=lambda btn: self.pass_setting("depth", btn.text), size=func.text_wrap,

@@ -24,8 +24,10 @@ from PIL import Image as im
 import numpy as np
 import copy
 import pandas as pd
+import datetime
 import json
 import pathlib
+import os
 
 
 KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotpopup.kv"
@@ -48,7 +50,7 @@ class BackgroundDropDown(DropDown):
         """
         super(BackgroundDropDown, self).open(widget)
         with self.canvas.before:
-            Color(rgb=[0.2, 0.2, 0.2])
+            Color(rgb=[0.25, 0.25, 0.25])
             self.rect = Rectangle(size=self.size, pos=self.pos, radius=[dp(10), ])
         self.bind(pos=self.update_canvas, size=self.update_canvas)
 
@@ -345,6 +347,7 @@ class PlotPopup(Popup):
                     final[var] = {}
                     for z in list(dat[var].keys()):
                         final[var][z] = self.add_group_info(dat[var][z])
+            final = self.add_metadata(final)
             with open(f_path, "w") as f:
                 json.dump(final, f)
 
@@ -370,6 +373,43 @@ class PlotPopup(Popup):
             self.active_data = self.get_data()
         except Exception as error:
             func.alert_popup(str(error))
+
+    def add_metadata(self, dicti):
+        """
+        Adds global and variable specific data to an output dictionary.
+
+        Args:
+            dicti: Dictionary of data about to be exported
+
+        Returns:
+            dicti: Dictionary of data with metadata fields added
+        """
+        def attrs_to_str(d):
+            return {k: str(v) for k, v in d.items()}
+
+        config = self.config[self.f_type]
+        # On GitHub Linux Runner a user is not defined resulting in an error
+        try:
+            user = os.getlogin()
+        except OSError:
+            user = "_user_id_not_found_"
+        global_metadata = {"time_stamp": datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                           "user": user, "license": "CC0-1.0"}
+        global_metadata.update(self.home.general_config["metadata"])
+        if self.f_type == "netcdf":
+            global_metadata["file"] = config["file"]
+            global_metadata["netcdf_attrs"] = attrs_to_str(config["data"].attrs)
+            dims = {config["x"]: attrs_to_str(config["data"][config["x"]].attrs),
+                    config["y"]: attrs_to_str(config["data"][config["y"]].attrs)}
+            if config["z"] != "N/A":
+                dims[config["z"]] = attrs_to_str(config["data"][config["z"]].attrs)
+            global_metadata["dim_attrs"] = dims
+            for key in list(dicti.keys()):
+                dicti[key][key + "_attrs"] = attrs_to_str(config["data"][key].attrs)
+        else:
+            global_metadata["file"] = config
+        dicti["global_metadata"] = global_metadata
+        return dicti
 
     def add_group_info(self, dicti):
         """
@@ -401,7 +441,7 @@ class PlotPopup(Popup):
         try:
             original = copy.copy(self.active_z)
             z_list = self.config[self.f_type]['z']
-            self.active_z = [str(z) for z in self.config[self.f_type]['file'].coords[z_list].data]
+            self.active_z = [str(z) for z in self.config[self.f_type]['data'].coords[z_list].data]
             self.active_data = self.get_data()
             self.download_selected_data(f_path)
             self.active_z = original
@@ -571,7 +611,7 @@ class PlotPopup(Popup):
         Returns:
             :class:`nccut.plotpopup.BackgroundDropdown` menu of variable options
         """
-        file = self.config[self.f_type]['file']
+        file = self.config[self.f_type]['data']
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for var in list(file.keys()):
             if file[self.config[self.f_type]['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
@@ -616,7 +656,7 @@ class PlotPopup(Popup):
             :class:`nccut.plotpopup.BackgroundDropDown` menu of z value options
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
-        for z in list(self.config[self.f_type]['file'].coords[self.config[self.f_type]['z']].data):
+        for z in list(self.config[self.f_type]['data'].coords[self.config[self.f_type]['z']].data):
             z_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
                                            width=dp(180))
             but = Button(text=str(z), size_hint=(0.7, 1), halign='center', valign='middle', shorten=True,
@@ -735,7 +775,7 @@ class PlotPopup(Popup):
                     elif i > bound_points[2 + n]:
                         bound_points[2 + n] = i
         # Subset around chain
-        ds = self.config[self.f_type]['file']
+        ds = self.config[self.f_type]['data']
         z_len = len(ds.coords[self.config[self.f_type]['z']].data)
         f_config = copy.copy(self.config)
         config = f_config[self.f_type]
@@ -776,7 +816,7 @@ class PlotPopup(Popup):
         tran = next(iter(z[group]))
         points = self.all_transects[group][tran]
         width = len(z[group][tran]['Cut'])
-        ds = self.config[self.f_type]['file']
+        ds = self.config[self.f_type]['data']
 
         # Subset dataset around transect
         z_len = len(ds.coords[self.config[self.f_type]['z']].data)

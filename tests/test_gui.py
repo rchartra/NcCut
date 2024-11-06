@@ -382,6 +382,11 @@ class Test(unittest.TestCase):
         """
         Test netcdf configuration popup ensures valid netcdf configuration settings
         """
+        run_app.home.general_config = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                             "circle_size": 5},
+                                       "netcdf": {"dimension_order": ["z", "y", "x"]},
+                                       "tool_defaults": {"marker_width": 40},
+                                       "metadata": {}}
         run_app.home.ids.file_in.text = TEST_NC_PATH
         run_app.home.load_btn()
         popup = run_app.home.nc_popup
@@ -567,7 +572,9 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res1 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res1["Vorticity"].keys())), 1, "Only selected marker should be saved")
+            self.assertListEqual(list(res1["Vorticity"].keys()), ["Marker 1", "Vorticity_attrs"],
+                                 "Only selected marker and metadata should be saved")
+            self.assertIn("global_metadata", list(res1.keys()), "Global metadata not added")
             self.assertEqual(len(list(res1["Vorticity"]["Marker 1"].keys())), 6,
                              "Marker should have 3 transects and Click x, Click y, Width")
         # Plot Saving
@@ -595,7 +602,9 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res2 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res2["Vorticity"].keys())), 2, "Two markers were selected so two should be saved")
+            self.assertListEqual(list(res2["Vorticity"].keys()), ["Marker 1", "Marker 2", "Vorticity_attrs"],
+                                 "Two markers were selected so two should be saved")
+            self.assertIn("global_metadata", list(res2.keys()), "Global metadata not added")
             self.assertEqual(len(list(res2["Vorticity"]["Marker 1"].keys())), 4,
                              "Marker 1 should have 1 transect and Click x, Click y, Width")
             self.assertEqual(list(res2["Vorticity"]["Marker 1"].keys())[0], "Cut 1",
@@ -614,7 +623,10 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res3 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res3.keys())), 2, "Two variables were selected but two weren't saved")
+            self.assertListEqual(list(res3.keys()), ["Vorticity", "Divergence", "global_metadata"],
+                                 "Two variables were selected but two weren't saved")
+            self.assertIn("Vorticity_attrs", list(res3["Vorticity"].keys()), "Vorticity metadata was not saved")
+            self.assertIn("Divergence_attrs", list(res3["Divergence"].keys()), "Divergence metadata was not saved")
         plot_popup.dismiss()
 
     def test_plot_popup_3d_nc(self):
@@ -653,16 +665,15 @@ class Test(unittest.TestCase):
             f = open(os.path.join(jpath, "test.json"))
             res1 = json.load(f)
             f.close()
-            self.assertEqual(list(res1["Theta"].keys()), ["15", "30", "60"],
+            self.assertEqual(list(res1["Theta"].keys()), ["15", "30", "60", "Theta_attrs"],
                              "Three z values were selected so three should have been saved")
-
         # Saving all z data
         with tempfile.TemporaryDirectory() as jpath:
             plot_popup.download_all_z_data(os.path.join(jpath, "test.json"))
             f = open(os.path.join(jpath, "test.json"))
             res2 = json.load(f)
             f.close()
-            self.assertEqual(len(list(res2["Theta"].keys())), 18, "All z values should have been saved")
+            self.assertEqual(len(list(res2["Theta"].keys())), 19, "All z values should have been saved")
 
         # Ensure one chain requirement for the all z plot
         dummy_check = CheckBox(active=False)
@@ -676,3 +687,65 @@ class Test(unittest.TestCase):
         plot_popup.get_all_z_plot()
         self.assertNotEqual(og_plot, str(plot_popup.plot),
                             "If only one transect is selected the all z plot should be created")
+
+    def test_metadata_and_config_file(self):
+        """
+        Tests whether a passed valid configuration dictionary is properly used to change settings in the app.
+        """
+        non_default_config = {"graphics_defaults": {"contrast": 6, "line_color": "Green", "colormap": "plasma",
+                                                    "circle_size": 50},
+                              "netcdf": {"dimension_order": ["z", "x", "y"]},
+                              "tool_defaults": {"marker_width": 20},
+                              "metadata": {"new_field": "new_val"}}
+        run_app.home.general_config = non_default_config
+        run_app.home.ids.file_in.text = EXAMPLE_3D_PATH
+        run_app.home.load_btn()
+        popup = run_app.home.nc_popup
+        self.assertEqual(popup.x_select.text, "j", "Dimension order was not updated from config file.")
+        self.assertEqual(popup.y_select.text, "i", "Dimension order was not updated from config file.")
+        self.assertEqual(popup.z_select.text, "k", "Dimension order was not updated from config file.")
+        self.assertEqual(popup.depth_select.text, "0", "Dimension order was not updated from config file.")
+        popup.load.dispatch("on_press")
+        popup.load.dispatch("on_release")
+
+        self.assertEqual(run_app.home.display.colormap, non_default_config["graphics_defaults"]["colormap"],
+                         "Colormap was not updated from config file.")
+        self.assertEqual(run_app.home.display.contrast,
+                         functions.contrast_function(non_default_config["graphics_defaults"]["contrast"]),
+                         "Contrast was not updated from config file.")
+
+        x = run_app.home.size[0]
+        y = run_app.home.size[1]
+        m1_incs = np.array([0.5, 0.55, 0.6, 0.65])
+        m1_x_arr = m1_incs * x
+        m1_y_arr = m1_incs * y
+        select_sidebar_button("Transect Marker")
+        tool = run_app.home.display.tool
+        for i in range(len(m1_incs)):
+            tool.on_touch_down(Click(float(m1_x_arr[i]), float(m1_y_arr[i])))
+        self.assertEqual(run_app.home.display.l_col, non_default_config["graphics_defaults"]["line_color"],
+                         "Tool line color was not updated from config file.")
+        c = non_default_config["graphics_defaults"]["circle_size"]
+        self.assertEqual(tool.children[0].c_size, (dp(c), dp(c)),
+                         "Tool graphics size was not updated from config file.")
+        self.assertEqual(tool.curr_width, 20, "Default marker width was not updated from config file.")
+        select_sidebar_button("Plot")
+        plot_popup = tool.plotting
+        with tempfile.TemporaryDirectory() as jpath:
+            plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res = json.load(f)
+            f.close()
+            self.assertIn("global_metadata", list(res.keys()))
+            self.assertListEqual(list(res["global_metadata"].keys()),
+                                 ["time_stamp", "user", "license", "new_field", "file", "netcdf_attrs", "dim_attrs"],
+                                 "Some or all global attributes including ones from config weren't included in output")
+            self.assertListEqual(list(res["global_metadata"]["dim_attrs"].keys()), ["j", "i", "k"],
+                                 "Dimension attributes for each dimension weren't collected.")
+            self.assertListEqual(list(res["global_metadata"]["dim_attrs"]["j"].keys()),
+                                 ["standard_name", "axis", "long_name", "swap_dim"],
+                                 "Dimension attributes for each dimension weren't collected.")
+            self.assertIn("Theta_attrs", list(res["Theta"].keys()),
+                          "Variable specific attributes weren't included in output")
+            self.assertListEqual(list(res["Theta"]["Theta_attrs"].keys()), ["standard_name", "long_name", "units"],
+                                 "Some or all variable specific attributes missing from output.")

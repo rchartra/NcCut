@@ -233,7 +233,6 @@ class Marker(ui.widget.Widget):
                 self.parent.upload_fail_alert()  # Upload failed
         elif self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
             proceed = True  # If being clicked, must also be within viewing window
-
         if proceed:
             par = self.home.display.children[0].children[-2]
             self.clicks += 1

@@ -15,10 +15,14 @@ import xarray as xr
 import nccut.functions as func
 from nccut.multimarker import marker_find
 
-EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg", known_hash=None)
-EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc", known_hash=None)
-EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc", known_hash=None)
-PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json", known_hash=None)
+EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example.jpg",
+                                  known_hash="f039e8cb72d6821f4909707767863373230159e384a26ba7edd8a01a3e359e53")
+EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_3d.nc",
+                                 known_hash="a3c946398b1bb5fddf4fbbae36e3fc7e6934cd7b0365d4d9d52b156dadc059d3")
+EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/example_4v.nc",
+                                 known_hash="afd261063f4b58c382c46db0d81e69dfb8f5234ef0037b261087177e6d3f7e1b")
+PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.13883476/project_example.json",
+                                      known_hash="33c739a4c5515ece45f44eb3de266da46afd6eab47c10cb1f53ac1821226c595")
 
 
 class Test(unittest.TestCase):
@@ -86,7 +90,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
-        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "data": dat}}
         points = [100, 50, 200, 50]
 
         # App result
@@ -110,7 +114,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
-        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "data": dat}}
         points = [100, 50, 200, 150]
 
         # App result
@@ -136,7 +140,7 @@ class Test(unittest.TestCase):
         """
         # Setup
         dat = xr.open_dataset(EXAMPLE_3D_PATH)['Theta'].sel(k=0)
-        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "file": dat}}
+        config = {"netcdf": {"x": "i", "y": "j", "z": "k", "z_val": "0", "var": "Theta", "data": dat}}
         points = [100, 50, 100, 150]
 
         # App result
@@ -205,12 +209,12 @@ class Test(unittest.TestCase):
         Test whether correct netcdf data is collected from user configurations for a 2D netcdf dataset
         """
         data = xr.open_dataset(EXAMPLE_4V_PATH)
-        config1 = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": data}
+        config1 = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "data": data}
         res1 = func.sel_data(config1).data
         exp1 = data["Vorticity"].transpose("y", "x").data
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
-        config2 = {"x": "y", "y": "x", "z": "N/A", "z_val": "N/A", "var": "Divergence", "file": data}
+        config2 = {"x": "y", "y": "x", "z": "N/A", "z_val": "N/A", "var": "Divergence", "data": data}
         res2 = func.sel_data(config2).data
         exp2 = np.swapaxes(data["Divergence"].transpose("y", "x").data, 0, 1)
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
@@ -221,12 +225,12 @@ class Test(unittest.TestCase):
         Test whether correct netcdf data is collected from user configurations for a 3D netcdf dataset
         """
         data = xr.open_dataset(EXAMPLE_3D_PATH)
-        config1 = {"x": "i", "y": "j", "z": "k", "z_val": "15", "var": "Theta", "file": data}
+        config1 = {"x": "i", "y": "j", "z": "k", "z_val": "15", "var": "Theta", "data": data}
         res1 = func.sel_data(config1).data
         exp1 = data["Theta"].sel(k=15).transpose("j", "i").data
         self.assertTrue(np.array_equal(res1, exp1, equal_nan=True), "Basic settings do not match original dataset")
 
-        config2 = {"x": "j", "y": "k", "z": "i", "z_val": "3000", "var": "Theta", "file": data}
+        config2 = {"x": "j", "y": "k", "z": "i", "z_val": "3000", "var": "Theta", "data": data}
         res2 = func.sel_data(config2)
         exp2 = data.transpose("k", "j", "i")["Theta"].sel(i=3000).data
         self.assertTrue(np.array_equal(res2, exp2, equal_nan=True),
@@ -239,7 +243,7 @@ class Test(unittest.TestCase):
         # NetCDF
         nc = xr.open_dataset(EXAMPLE_4V_PATH)
         img = np.asarray(Im.open(EXAMPLE_JPG_PATH))
-        config = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "file": nc}
+        config = {"x": "x", "y": "y", "z": "N/A", "z_val": "N/A", "var": "Vorticity", "data": nc}
         data_arr = [("NC", func.sel_data(config)), ("image", img)]
 
         for d in data_arr:
@@ -300,6 +304,58 @@ class Test(unittest.TestCase):
                             "Points were not properly rescaled to the subset of the " + d[0] + " data on two edges")
             self.assertTrue(np.array_equal(two_edge_res_scales, two_edge_expected_scales, equal_nan=True),
                             "Point scale factors were incorrect for the subset of the " + d[0] + " data on two edges")
+
+    def test_validate_config(self):
+        """
+        When given a dictionary of configuration values, tests whether the program can identify illegal elements.
+        """
+        illegal_header = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                "circle_size": 5},
+                          "netcdf": {"dimension_order": ["z", "y", "x"]},
+                          "metadta": {}}
+        self.assertFalse(func.validate_config(illegal_header), "Illegal config file headers we're allowed.")
+        illegal_sub_header = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                    "circle_size": 5},
+                              "netcdf": {"dimenson_order": ["z", "y", "x"]},
+                              "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_sub_header), "Illegal config file sub headers we're allowed.")
+        illegal_metadata = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                  "circle_size": 5},
+                            "netcdf": {"dimension_order": ["z", "y", "x"]},
+                            "metadata": {"float_field": 40.2}}
+        self.assertFalse(func.validate_config(illegal_metadata), "Illegal config file metadata was allowed.")
+        illegal_netcdf = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                "circle_size": 5},
+                          "netcdf": {"dimension_order": ["z", "a", "x"]},
+                          "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_netcdf), "Illegal config file dimensions order was allowed.")
+        illegal_contrast = {"graphics_defaults": {"contrast": 40, "line_color": "Blue", "colormap": "viridis",
+                                                  "circle_size": 5},
+                            "netcdf": {"dimension_order": ["z", "y", "x"]},
+                            "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_contrast), "Illegal config file contrast value was allowed.")
+        illegal_line_color = {"graphics_defaults": {"contrast": 0, "line_color": "Purple", "colormap": "viridis",
+                                                    "circle_size": 5},
+                              "netcdf": {"dimension_order": ["z", "y", "x"]},
+                              "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_line_color), "Illegal config file line color was allowed.")
+        illegal_colormap = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "apple",
+                                                  "circle_size": 5},
+                            "netcdf": {"dimension_order": ["z", "y", "x"]},
+                            "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_colormap), "Illegal config file colormap was allowed.")
+        illegal_circle_size = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                                     "circle_size": "7"},
+                               "netcdf": {"dimension_order": ["z", "y", "x"]},
+                               "metadata": {}}
+        self.assertFalse(func.validate_config(illegal_circle_size), "Illegal config file circle size was allowed.")
+        illegal_marker_width = {"tool_defaults": {"marker_width": 5000}}
+        self.assertFalse(func.validate_config(illegal_marker_width), "Illegal config file marker width was allowed.")
+        legal_config = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
+                                              "circle_size": 5},
+                        "netcdf": {"dimension_order": ["z", "y", "x"]},
+                        "metadata": {}}
+        self.assertTrue(func.validate_config(legal_config), "Valid config file was deemed invalid.")
 
 
 if __name__ == '__main__':

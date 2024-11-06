@@ -16,7 +16,7 @@ Installation
 
         .. code-block:: console
 
-            python3 -m venv nccut-venv
+            python -m venv nccut-venv
             nccut-venv\Scripts\activate
 
 #. Then install NcCut using PIP:
@@ -37,7 +37,7 @@ Installation
 
         .. code-block:: console
 
-            nccut file_name
+            nccut -file file_name
 
     * From Python:
 
