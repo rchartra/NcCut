@@ -103,9 +103,9 @@ NcCut().run()
 
 1. Hit "Transect Chain" to enter transect mode
 2. Click points along the feature you'd like to make transects along. Transects will be made between the points you click.
-    * Select "Drag Mode" from the actions sidebar to drag the image without selecting points, and select "Transect Mode" to go back.
-    * Select "Edit Mode" to delete either the last point clicked or the last chain drawn.
-3. Double click the final point or select "New Chain" to begin a new chain and repeat for as many chains as you'd like.
+    * Select "Drag Mode" from the actions sidebar to drag the image without selecting points, and select "Transect Mode" to go back. 
+    * Select "Edit Mode" to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain drawn.
+3. Right click to select the final point or select "New Chain" to begin a new chain and repeat for as many chains as you'd like.
 4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first chain and downloading options.
 
 
@@ -116,9 +116,9 @@ NcCut().run()
 1. Hit the "Transect Marker" button to enter transect mode
 2. Click points along the feature you'd like transects of. Dots will appear on either side of the line drawn indicating the start and end of the transects that will be made
    * Select "Drag Mode" from the actions sidebar to drag the image without selecting points, and select "Transect Mode" to go back.
-   * Select "Edit Mode" to delete either the last point clicked or the last marker drawn.
+   * Select "Edit Mode" to delete either the last point clicked or the last marker drawn. You can also press the esc key to delete the last marker drawn.
    * To change the width of the transects being made you may enter the number of pixels into the "Width" text box. Select "Set" to change the width for all future transects.
-3. Select "New Marker" to begin a new marker and repeat for as many markers as you'd like
+3. Right click to select the final point or select "New Marker" to begin a new marker and repeat for as many markers as you'd like
 4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first marker and downloading options.
    * If you want to continue working on your project at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
 

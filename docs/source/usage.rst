@@ -71,7 +71,7 @@ Using this tool chains of transects can be drawn. Transects will be taken along 
 #. Hit the **Transect Chain** button to enter transect mode.
 #. Click points along the feature you'd like to make transects along. Transects will be made between the points you click.
     * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
-    * Select **Edit Mode** to delete either the last point clicked or the last chain drawn. You can also press esc to delete the last chain draw.
+    * Select **Edit Mode** to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain draw.
 #. Right click to select the final point or select **New Chain** to begin a new chain and repeat for as many chains as you'd like.
 #. When done select the **Plot** button and a popup will appear with a plot of all transects from the first chain and downloading options.
 
@@ -86,7 +86,7 @@ Using this tool multiple *Markers* can be drawn onto a loaded file. These *Marke
 #. Click points along the feature you'd like to make transects across. Dots will appear on either side of the line drawn indicating the start and end points of the transects that will be made.
 
     * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
-    * Select **Edit Mode** to delete either the last point clicked or the last marker drawn. You can also press esc to delete the last marker drawn.
+    * Select **Edit Mode** to delete either the last point clicked or the last marker drawn. You can also press the esc key to delete the last marker drawn.
     * To change the width of the transects being made you may enter the number of pixels into the **Width** text box. Select **Set** to change the width for all future transects.
 
         * This will not change the width of transects already drawn
