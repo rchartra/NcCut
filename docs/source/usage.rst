@@ -71,8 +71,8 @@ Using this tool chains of transects can be drawn. Transects will be taken along 
 #. Hit the **Transect Chain** button to enter transect mode.
 #. Click points along the feature you'd like to make transects along. Transects will be made between the points you click.
     * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
-    * Select **Edit Mode** to delete either the last point clicked or the last chain drawn.
-#. Double click the final point or select **New Chain** to begin a new chain and repeat for as many chains as you'd like.
+    * Select **Edit Mode** to delete either the last point clicked or the last chain drawn. You can also press esc to delete the last chain draw.
+#. Right click to select the final point or select **New Chain** to begin a new chain and repeat for as many chains as you'd like.
 #. When done select the **Plot** button and a popup will appear with a plot of all transects from the first chain and downloading options.
 
 .. _transect_marker:
@@ -86,14 +86,14 @@ Using this tool multiple *Markers* can be drawn onto a loaded file. These *Marke
 #. Click points along the feature you'd like to make transects across. Dots will appear on either side of the line drawn indicating the start and end points of the transects that will be made.
 
     * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
-    * Select **Edit Mode** to delete either the last point clicked or the last marker drawn.
+    * Select **Edit Mode** to delete either the last point clicked or the last marker drawn. You can also press esc to delete the last marker drawn.
     * To change the width of the transects being made you may enter the number of pixels into the **Width** text box. Select **Set** to change the width for all future transects.
 
         * This will not change the width of transects already drawn
         * The default width is 40 pixels, you can enter any width within 0 and 400
         * If you change the width of a marker any new markers will continue to use that same width unless you change it again.
 
-#. Double click the final point or select **New Marker** to begin a new marker and repeat for as many markers as you'd like.
+#. Right click to select the final point or select **New Marker** to begin a new marker and repeat for as many markers as you'd like.
 #. When done select the **Plot** button and a popup will appear with a plot of all transects from the first marker and downloading options.
 
 #. Click anywhere around the popup or the close button to dismiss
