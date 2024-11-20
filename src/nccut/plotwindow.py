@@ -255,6 +255,7 @@ class PlotWindow(RelativeLayout):
         self.x_axis = None
         self.y_axis = None
         self.font = None
+        self.max_c_bar_font = dp(45)
         self.colormap = colormap
 
     def load(self, *args):
@@ -287,7 +288,7 @@ class PlotWindow(RelativeLayout):
             Line(points=[wb.x, wb.y, wb.x, wb.top], width=dp(1), cap="square", group=str(self.resized))
             Line(points=[wb.right, wb.y, wb.right, wb.top], width=dp(1), cap="square", group=str(self.resized))
         # Choose font
-        self.font = min(0.035 * self.height, 0.025 * self.width)
+        self.font = min(0.03 * self.height, 0.02 * self.width)
         # Place plot title
 
         var_attrs = self.config["data"][self.config["var"]].attrs
@@ -308,8 +309,14 @@ class PlotWindow(RelativeLayout):
         self.add_widget(self.x_axis)
         self.add_widget(self.y_axis)
         # Create and add colorbar
+        if min(0.02 * self.height, 0.02 * self.width) == 0.02 * self.width:
+            c_bar_font = self.font * 2
+        else:
+            c_bar_font = self.font * 4
+        if c_bar_font > self.max_c_bar_font:
+            c_bar_font = self.max_c_bar_font
         self.ids.color_bar_box.add_widget(func.get_color_bar(self.colormap, self.z_data, (1, 1, 1), "black",
-                                                             self.font * 4))
+                                                             c_bar_font))
 
         self.resized += 1
 

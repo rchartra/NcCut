@@ -564,7 +564,7 @@ class Test(unittest.TestCase):
         for i in range(len(m2_incs)):
             tool.on_touch_down(Click(float(m2_x_arr[i]), float(m2_y_arr[i])))
         select_sidebar_button("Plot")
-        plot_popup = tool.plotting
+        plot_popup = run_app.home.plot_popup
 
         # Initial Transect Selections
         with tempfile.TemporaryDirectory() as jpath:
@@ -652,7 +652,7 @@ class Test(unittest.TestCase):
             tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
         select_sidebar_button("Plot")
         self.assertEqual(len(tool.children), 2, "2 Chains Not Added")
-        plot_popup = tool.plotting
+        plot_popup = run_app.home.plot_popup
 
         # Selecting multiple z values
         dummy_check = CheckBox(active=False)
@@ -730,7 +730,7 @@ class Test(unittest.TestCase):
                          "Tool graphics size was not updated from config file.")
         self.assertEqual(tool.curr_width, 20, "Default marker width was not updated from config file.")
         select_sidebar_button("Plot")
-        plot_popup = tool.plotting
+        plot_popup = run_app.home.plot_popup
         with tempfile.TemporaryDirectory() as jpath:
             plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
             f = open(os.path.join(jpath, "test.json"))

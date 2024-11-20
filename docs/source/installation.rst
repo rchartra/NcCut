@@ -45,7 +45,8 @@ Installation
 
             from nccut.nccut import NcCut
             NcCut().run()
-
+    .. note::
+       The first run after installation may be slow as underlying packages must unpack and compile. Future runs should open much quicker.
 #. To exit the virtual environment when finished:
 
     .. code-block:: console

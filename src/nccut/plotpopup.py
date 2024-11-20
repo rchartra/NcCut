@@ -9,6 +9,7 @@ import io
 import kivy.uix as ui
 from kivy.lang import Builder
 from kivy.graphics import Color, Rectangle
+from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -41,6 +42,16 @@ class BackgroundDropDown(DropDown):
     Attributes:
         rect: Rectangle object that serves as background to the dropdown.
     """
+    def open_obj(self, obj, widget):
+        """
+        Calls for open even when passed object by Kivy
+
+        Args:
+            obj: Instance of object that called it... redundant in this case
+            widget: RoundedButton to which dropdown is bound
+        """
+        self.open(widget)
+
     def open(self, widget):
         """
         Overwrites DropDown open method to also draw a background rectangle.
@@ -70,6 +81,7 @@ class PlotPopup(Popup):
     plots and/or selected data.
 
     Attributes:
+        is_open (bool): Whether popup is currently open
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
         all_transects (dict): Dictionary of data from all transects marked out by the user.
         t_type (str): 'Marker' if transects came from transect marker tool or 'Chain' if transects came from transect
@@ -83,6 +95,8 @@ class PlotPopup(Popup):
             :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         active_z (list): List of selected Z values. Empty list if 2D NetCDF or Image file.
         active_vars (list): List of selected variables. Empty list if image file.
+        active_data: Currently plotted data
+        b_height (int): Button height, adapts to font size
         plot: Image containing plot.
         plotting: BoxLayout that holds plot and selection sidebar.
         title (str): Popup title
@@ -94,18 +108,62 @@ class PlotPopup(Popup):
         widgets_with_text: List of widgets with text whose font size must be updated when the window is resized
         v_select: RoundedButton which opens variable selection dropdown menu (Only if NetCDF file)
         z_select: RoundedButton which opens z value selection dropdown menu (Only if 3D NetCDF file)
+        t_drop: Transect dropdown
+        v_drop: Variable dropdown
+        z_drop: Z Value dropdown
     """
-    def __init__(self, transects, home, config, **kwargs):
+
+    def __init__(self, **kwargs):
+        super(PlotPopup, self).__init__(**kwargs)
+        """
+        Initializes attributes. They are loaded later when popup is actually opened.
+        """
+        self.is_open = False
+        self.bind(on_dismiss=self.close)
+        self.all_transects = None
+        self.home = None
+        self.font = None
+        self.f_type = None
+        self.config = None
+        self.t_type = None
+        self.active_transects = None
+        self.active_vars = None
+        self.active_z = None
+        self.active_data = None
+        self.b_height = None
+        self.plot = None
+        self.f_m = None
+        self.t_select = None
+        self.widgets_with_text = None
+        self.allz_btn = None
+        self.t_drop = None
+        self.v_drop = None
+        self.z_drop = None
+        self.v_select = None
+        self.z_select = None
+
+    def close(self, *args):
+        """
+        Cleans up popup and marks it as closed
+        :param args:
+        :return:
+        """
+        if self.is_open:
+            self.clean()
+            self.is_open = False
+
+    def run(self, transects, home, config):
         """
         Defines popup UI elements and opens popup.
 
         Args:
             transects (dict): Dictionary of transect data from tool which opened popup
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
+            config: Dictionary of configuration data for currently loaded file
         """
-        super(PlotPopup, self).__init__(**kwargs)
         self.all_transects = transects
         self.home = home
+        self.font = self.home.font
         self.f_type = list(config.keys())[0]
         self.config = config
         if list(self.all_transects.keys())[0][0:-2] == "Marker":
@@ -166,7 +224,7 @@ class PlotPopup(Popup):
         plt.close()
 
         # Popup Graphics Code
-
+        self.b_height = dp(40) + self.font
         self.plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture,
                                    size_hint=(0.6, 1), fit_mode="contain")
         self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
@@ -175,50 +233,51 @@ class PlotPopup(Popup):
 
         # Transect selection
         if self.t_type == "Marker":
-            t_drop = self.get_marker_dropdown()
+            self.t_drop = self.get_marker_dropdown()
         elif self.t_type == "Chain":
-            t_drop = self.get_chain_dropdown()
-        self.ids.sel_transects_btn.bind(on_press=lambda x: t_drop.open(self.ids.sel_transects_btn))
+            self.t_drop = self.get_chain_dropdown()
+        self.ids.sel_transects_btn.fbind("on_press", self.t_drop.open_obj, self.ids.sel_transects_btn)
 
         if self.f_type == "netcdf":
             # Variable Selection
-            v_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
-            v_lab = Label(text="Select Variables: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
+            v_box = ui.boxlayout.BoxLayout(size_hint=(1, None), spacing=dp(5), height=self.b_height)
+            v_lab = Label(text="Select Variables: ", size_hint=(0.5, 1), font_size=self.font, halign='center',
                           valign='middle')
             v_lab.bind(size=func.text_wrap)
             v_box.add_widget(v_lab)
             self.v_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1),
-                                               font_size=self.home.font)
+                                               pos_hint={"center_y": 0.5}, font_size=self.font)
             v_box.add_widget(self.v_select)
-            v_drop = self.get_var_dropdown()
-            self.v_select.bind(on_press=lambda x: v_drop.open(self.v_select))
-            self.ids.sidebar.add_widget(v_box)
+            self.v_drop = self.get_var_dropdown()
+            self.v_select.bind(on_press=lambda x: self.v_drop.open(self.v_select))
+            self.ids.sidebar.add_widget(v_box, 1)
             self.widgets_with_text.extend([v_lab, self.v_select])
             if self.config[self.f_type]['z'] != "N/A":
                 # Z Selection
-                z_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), spacing=dp(5))
-                z_lab = Label(text="Select Z Values: ", size_hint=(0.5, 1), font_size=self.home.font, halign='center',
+                z_box = ui.boxlayout.BoxLayout(size_hint=(1, None), spacing=dp(5), height=self.b_height)
+                z_lab = Label(text="Select Z Values: ", size_hint=(0.5, 1), font_size=self.font, halign='center',
                               valign='middle')
                 z_lab.bind(size=func.text_wrap)
                 z_box.add_widget(z_lab)
                 self.z_select = func.RoundedButton(text="Select...", size_hint=(0.5, 1),
-                                                   font_size=self.home.font)
+                                                   pos_hint={"center_y": 0.5}, font_size=self.font)
                 z_box.add_widget(self.z_select)
-                z_drop = self.get_z_dropdown()
-                self.z_select.bind(on_press=lambda x: z_drop.open(self.z_select))
-                self.ids.sidebar.add_widget(z_box)
+                self.z_drop = self.get_z_dropdown()
+                self.z_select.bind(on_press=lambda x: self.z_drop.open(self.z_select))
+                self.ids.sidebar.add_widget(z_box, 1)
 
-                # All Z option
-                zp_box = ui.boxlayout.BoxLayout(size_hint=(1, 0.2), padding=dp(10))
-                zp_btn = func.RoundedButton(text="Plot all Z as Img", font_size=self.home.font)
+                # Plot All Z option
+                zp_box = ui.boxlayout.BoxLayout(size_hint=(1, None), height=self.b_height, padding=dp(10))
+                zp_btn = func.RoundedButton(text="Plot all Z as Img", size_hint=(1, 1), font_size=self.font)
                 zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
                 zp_box.add_widget(zp_btn)
-                self.ids.sidebar.add_widget(zp_box)
+                self.ids.sidebar.add_widget(zp_box, 1)
 
-                allz_btn = func.RoundedButton(text="Export All Z Data", size_hint=(.2, 1),
-                                              font_size=self.home.font)
-                allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
-                self.ids.buttons.add_widget(allz_btn)
+                # Export All Z Option
+                self.allz_btn = func.RoundedButton(text="All Z Data", size_hint_x=None, width=dp(50) + self.font * 3,
+                                                   font_size=self.font)
+                self.allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
+                self.ids.buttons.add_widget(self.allz_btn)
                 self.widgets_with_text.extend([z_lab, self.z_select, zp_btn])
             else:
                 # Spacer if 2D NetCDF
@@ -227,20 +286,38 @@ class PlotPopup(Popup):
             # Spacer if Image
             self.ids.sidebar.add_widget(Label(text="", size_hint=(1, 0.8)))
         self.open()
-        self.font_adapt(self.home.font)
+        self.is_open = True
+        self.title_size = self.font
+        self.font_adapt(self.font)
+
+    def clean(self):
+        self.ids.plotting.remove_widget(self.plot)
+        while len(self.ids.sidebar.children) > 2:
+            self.ids.sidebar.remove_widget(self.ids.sidebar.children[1])
+        if self.allz_btn:
+            self.ids.buttons.remove_widget(self.allz_btn)
+            self.allz_btn = None
+        self.ids.sel_transects_btn.funbind('on_press', self.t_drop.open_obj, self.ids.sel_transects_btn)
 
     def font_adapt(self, font):
         """
-        Updates font of elements in plotting menu with text.
+        Updates font of elements in plotting menu with text and size of dropdown menus.
 
         Args:
             font (float): New font size
         """
-        for btn in self.ids.buttons.children:
-            btn.font_size = font * self.f_m
-        self.ids.close_btn.font_size = font * self.f_m
-        for wid in self.widgets_with_text:
-            wid.font_size = font
+        if self.is_open:
+            drop_width = max(Window.size[0] * 0.22, dp(160) + self.font * 4)
+            self.t_drop.width = drop_width
+            if self.f_type == "netcdf":
+                self.v_drop.width = drop_width
+                if self.config[self.f_type]['z'] != "N/A":
+                    self.z_drop.width = drop_width
+            for btn in self.ids.buttons.children:
+                btn.font_size = font * self.f_m
+            self.ids.close_btn.font_size = font * self.f_m
+            for wid in self.widgets_with_text:
+                wid.font_size = font
 
     def file_input(self, s_type):
         """
@@ -458,13 +535,12 @@ class PlotPopup(Popup):
         """
         # Get dropdown for transect options
         drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
-        all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
-                                         width=dp(180))
+        all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(30) + self.font)
         drop.add_widget(all_box)
-        all_btn = func.RoundedButton(text="Select All", size_hint=(0.5, 1))
+        all_btn = func.RoundedButton(text="Select All", font_size=self.font)
         for i in list(self.active_transects.keys()):
-            c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(40), width=dp(180))
-            but = Button(text=i, size_hint=(0.5, 1), background_color=[0, 0, 0, 0])
+            c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(30) + self.font)
+            but = Button(text=i, size_hint=(0.5, 1), background_color=[0, 0, 0, 0], font_size=self.font)
             check = CheckBox(active=all(self.active_transects[i].values()), size_hint=(0.5, 1))
             check.bind(active=lambda x, y, t=i: self.on_chain_checkbox(x, t))
             but.bind(on_press=lambda x, c=check: self.on_check_button(c))
@@ -513,9 +589,9 @@ class PlotPopup(Popup):
         # Get dropdown for marker options
         marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for i in list(self.all_transects.keys()):
-            g_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
+            g_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(30) + self.font,
                                            width=dp(180))
-            btn = func.RoundedButton(text=i, size_hint=(0.5, 1))
+            btn = func.RoundedButton(text=i, font_size=self.font)
             btn.bind(on_press=lambda but=btn, txt=i: self.transect_drop(txt, but))
             g_box.add_widget(btn)
             marker_list.add_widget(g_box)
@@ -544,14 +620,13 @@ class PlotPopup(Popup):
         """
         # Get dropdown for transect options
         drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
-        all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(40),
-                                         width=dp(180))
+        all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(30) + self.font)
         drop.add_widget(all_box)
-        all_btn = func.RoundedButton(text="Select All", size_hint=(0.5, 1))
+        all_btn = func.RoundedButton(text="Select All", font_size=self.font)
         for i in list(self.active_transects[key].keys()):
-            c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(40), width=dp(180))
-            but = Button(text=i, size_hint=(0.5, 1), background_color=[0, 0, 0, 0])
-            check = CheckBox(active=self.active_transects[key][i], size_hint=(0.5, 1))
+            c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(30) + self.font, width=dp(180))
+            but = Button(text=i, background_color=[0, 0, 0, 0], font_size=self.font)
+            check = CheckBox(active=self.active_transects[key][i], size_hint_x=None, width=dp(40))
             check.bind(active=lambda x, y, m=key, t=i: self.on_transect_checkbox(x, m, t))
             but.bind(on_press=lambda x, c=check: self.on_check_button(c))
             c_box.add_widget(but)
@@ -615,12 +690,12 @@ class PlotPopup(Popup):
         var_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for var in list(file.keys()):
             if file[self.config[self.f_type]['var']].dims == file[var].dims:  # Dimensions must match variable in viewer
-                v_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
-                                               width=dp(180))
-                but = Button(text=var, size_hint=(0.7, 1), halign='center', valign='middle', shorten=True,
+                v_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(5), size_hint_y=None,
+                                               height=dp(30) + self.font)
+                but = Button(text=var, halign='center', valign='middle', shorten=True, font_size=self.font,
                              background_color=[0, 0, 0, 0])
                 v_box.add_widget(but)
-                check = CheckBox(active=var in self.active_vars, size_hint=(0.5, 1))
+                check = CheckBox(active=var in self.active_vars, size_hint_x=None, width=dp(40))
                 check.bind(active=lambda x, y, var=var: self.on_var_checkbox(x, var))
                 but.bind(size=func.text_wrap, on_press=lambda x, c=check: self.on_check_button(c))
                 v_box.add_widget(check)
@@ -657,11 +732,10 @@ class PlotPopup(Popup):
         """
         z_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for z in list(self.config[self.f_type]['data'].coords[self.config[self.f_type]['z']].data):
-            z_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(3), size_hint_y=None, height=dp(40),
-                                           width=dp(180))
-            but = Button(text=str(z), size_hint=(0.7, 1), halign='center', valign='middle', shorten=True,
+            z_box = ui.boxlayout.BoxLayout(spacing=dp(3), padding=dp(5), size_hint_y=None, height=dp(30) + self.font)
+            but = Button(text=str(z), halign='center', valign='middle', shorten=True, font_size=self.font,
                          background_color=[0, 0, 0, 0])
-            check = CheckBox(active=str(z) in self.active_z, size_hint=(0.3, 1))
+            check = CheckBox(active=str(z) in self.active_z, size_hint_x=None, width=dp(40))
             check.bind(active=lambda x, y, z=str(z): self.on_z_checkbox(x, z))
             but.bind(size=func.text_wrap, on_press=lambda x, c=check: self.on_check_button(c))
             z_box.add_widget(but)

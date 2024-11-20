@@ -42,7 +42,7 @@ class NcCut(App):
         self.config_file = config
         self.btn_img_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "__btn_images__")
         default_config = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
-                                                "circle_size": 5},
+                                                "circle_size": 5, "font_size": 14},
                           "netcdf": {"dimension_order": ["z", "y", "x"]},
                           "tool_defaults": {"marker_width": 40},
                           "metadata": {}}
@@ -52,8 +52,11 @@ class NcCut(App):
                 for s in config_dict[k].keys():
                     default_config[k][s] = config_dict[k][s]
         self.general_config = default_config
+        # Make font size universal to all screens
+        self.general_config["graphics_defaults"]["font_size"] = dp(self.general_config["graphics_defaults"]["font_size"])
         img_names = {"Blue": "blue_line_btn.png", "Green": "green_line_btn.png", "Orange": "orange_line_btn.png"}
         self.default_line_btn_img = img_names[self.general_config["graphics_defaults"]["line_color"]]
+        self.font_size = self.general_config["graphics_defaults"]["font_size"]
 
     def on_start(self):
         """
@@ -68,10 +71,11 @@ class NcCut(App):
         logging.getLogger("kivy").setLevel(logging.ERROR)
         if platform.system() == "Darwin":  # macOS
             win.size = (dp(500), dp(300))
-            win.minimum_width, win.minimum_height = (dp(400), dp(225))
+            win.minimum_width, win.minimum_height = (dp(500), dp(300))
         else:
-            win.size = (dp(750), dp(450))
-            win.minimum_width, win.minimum_height = (dp(600), dp(350))
+            size = (dp(700) + self.font_size * 4, dp(430) + self.font_size * 4)
+            win.size = size
+            win.minimum_width, win.minimum_height = size
         logging.getLogger("kivy").setLevel(_LOG_LEVEL_)
 
         win.bind(on_resize=self.on_resize, on_maximize=self.on_resize, on_restore=self.on_resize)

@@ -23,7 +23,7 @@ This is an open source project. For contribution guidelines please refer to the 
 
    * For Windows:
     ```
-    python3 -m venv nccut-venv
+    python -m venv nccut-venv
     nccut-venv\Scripts\activate
     ```
 
@@ -37,13 +37,23 @@ pip install nccut
 from nccut.nccut import NcCut
 NcCut().run()
 ```
-4. To exit virtual environment when finished:
+4. Or to execute from the command line:
+```
+nccut
+```
+
+  * You can optionally pass in a file to be loaded as well:
+   ```
+   nccut -file file_name
+   ```
+
+5. To exit virtual environment when finished:
  
 ```
 deactivate
 ```
 
-5. To open the same virtual environment again in the future simply execute:
+6. To open the same virtual environment again in the future simply execute:
 
    * For Linux and Mac:
     ```

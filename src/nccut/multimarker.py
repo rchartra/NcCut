@@ -18,7 +18,6 @@ from scipy.interpolate import CubicSpline
 import nccut.functions as func
 from nccut.marker import Marker
 from nccut.markerwidth import MarkerWidth
-from nccut.plotpopup import PlotPopup
 
 
 class Click:
@@ -35,6 +34,7 @@ class Click:
         self.y = y
         self.pos = (x, y)
         self.is_double_tap = False
+        self.button = "left"
 
 
 def correct_test(data, need):
@@ -113,41 +113,43 @@ class MultiMarker(ui.widget.Widget):
         clicks (int): Number of clicks made by user. Decreases when points are deleted
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New marker button
-        plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
         curr_width (int): Current marker width being used. Used to initialize width of new markers.
     """
-    def __init__(self, home, m_width, **kwargs):
+    def __init__(self, home, m_width, b_height, **kwargs):
         """
         Defines sidebar elements and initializes widget
 
         Args:
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+            m_width: Default marker width in pixels
+            b_height: Height for sidebar buttons based on font size
         """
         super(MultiMarker, self).__init__(**kwargs)
         self.m_on = False
         self.upload_fail = False
         self.home = home
-        self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
+        self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
-        self.width_w = MarkerWidth(self, size_hint=(1, 0.1))
+        self.width_w = MarkerWidth(self, size_hint_y=None, height=b_height)
         self.clicks = 0
-        self.plotting = None
         self.curr_width = m_width
 
         # Upload Button
-        self.upbtn = func.RoundedButton(text="Upload Project", size_hint=(1, 0.1), font_size=self.home.font)
+        self.upbtn = func.RoundedButton(text="Upload Project", size_hint_y=None, height=b_height,
+                                        font_size=self.home.font)
         self.upbtn.bind(on_press=lambda x: self.upload_pop())
 
         # New Marker Button
-        self.nbtn = func.RoundedButton(text="New Marker", size_hint=(1, 0.1), font_size=self.home.font)
+        self.nbtn = func.RoundedButton(text="New Marker", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.nbtn.bind(on_press=lambda x: self.new_marker())
 
         self.home.display.add_to_sidebar([self.upbtn, self.nbtn])
 
     def font_adapt(self, font):
         """
-        Updates font of sidebar elements and plotting menu if loaded.
+        Updates font of sidebar elements.
+
         Args:
             font (float): New font size
         """
@@ -155,8 +157,6 @@ class MultiMarker(ui.widget.Widget):
         self.upbtn.font_size = font
         self.nbtn.font_size = font
         self.width_w.font_adapt(font)
-        if self.plotting:
-            self.plotting.font_adapt(font)
 
     def update_l_col(self, color):
         """
@@ -427,20 +427,19 @@ class MultiMarker(ui.widget.Widget):
                     count += 1
                 frames["Marker " + str(c)] = data
                 c += 1
-        self.plotting = PlotPopup(frames, self.home, self.home.display.config)
+        self.home.plot_popup.run(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """
-        Manages when sidebar elements are added to sidebar and clears them as needed.
+        Manages when sidebar elements are added to sidebar and clears them as needed. If click is a right click and not
+        the first click creates new marker.
 
         Args:
             touch: MouseMotionEvent, see kivy docs for details
         """
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
-                if touch.is_double_tap:
-                    self.new_marker()
-                else:
+                if self.clicks > 0 or touch.button == "left":
                     self.clicks += 1
                     if self.clicks >= 1 and self.width_w.parent is None:
                         self.home.display.add_to_sidebar([self.width_w])
@@ -451,3 +450,5 @@ class MultiMarker(ui.widget.Widget):
                         self.new_marker()
                         self.m_on = True
                     self.children[0].on_touch_down(touch)
+                    if touch.button == "right":
+                        self.new_marker()

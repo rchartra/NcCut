@@ -82,6 +82,7 @@ class NetCDFDropDown(DropDown):
 
     Attributes:
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+        font: Font size for app
         cmap_dropdown: Color map selection kivy.uix.dropdown.Dropdown object
         var_dropdown: Variable selection kivy.uix.dropdown.Dropdown object
         depth_dropdown: Z dimension value selection kivy.uix.dropdown.Dropdown object
@@ -95,6 +96,7 @@ class NetCDFDropDown(DropDown):
         """
         super(NetCDFDropDown, self).__init__(**kwargs)
         self.home = App.get_running_app().root.get_screen("HomeScreen")
+        self.font = self.home.font
         if self.home.file_on:
             f_type = self.home.display.f_type
         else:
@@ -103,7 +105,7 @@ class NetCDFDropDown(DropDown):
         self.cmap_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf":
             for i in self.home.display.cmaps:
-                btn = Button(text=i, size_hint_y=None, height=dp(30))
+                btn = Button(text=i, size_hint_y=None, height=dp(20) + self.font, font_size=self.font)
                 btn.bind(on_release=lambda btn: self.pass_setting("colormap", btn.text),  # Setting name: 'colormap'
                          on_press=self.cmap_dropdown.dismiss)
                 self.cmap_dropdown.add_widget(btn)
@@ -111,7 +113,8 @@ class NetCDFDropDown(DropDown):
         self.var_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf":
             for i in list(self.home.display.config["netcdf"]["data"].keys()):
-                btn = Button(text=i, size_hint_y=None, height=dp(30), halign='center', valign='middle', shorten=True)
+                btn = Button(text=i, size_hint_y=None, height=dp(20) + self.font,
+                             halign='center', valign='middle', shorten=True, font_size=self.font)
                 btn.bind(on_press=lambda btn: self.pass_setting("variable", btn.text), size=func.text_wrap,
                          on_release=self.var_dropdown.dismiss)  # Setting name: 'variable'
                 self.var_dropdown.add_widget(btn)
@@ -119,8 +122,8 @@ class NetCDFDropDown(DropDown):
         self.depth_dropdown = DropDown()
         if self.home.file_on and f_type == "netcdf" and self.home.display.config['netcdf']['z'] != "N/A":
             for i in list(self.home.display.config["netcdf"]['data'][self.home.display.config["netcdf"]['z']].data):
-                btn = Button(text=str(i), size_hint_y=None, height=dp(30), halign='center', valign='middle',
-                             shorten=True)
+                btn = Button(text=str(i), size_hint_y=None, height=dp(20) + self.font, halign='center', valign='middle',
+                             shorten=True, font_size=self.font)
                 btn.bind(on_press=lambda btn: self.pass_setting("depth", btn.text), size=func.text_wrap,
                          on_release=self.depth_dropdown.dismiss)  # Setting name: 'depth'
                 self.depth_dropdown.add_widget(btn)

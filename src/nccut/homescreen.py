@@ -11,7 +11,6 @@ further down the tree.
 
 """
 import kivy
-from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget
@@ -20,6 +19,7 @@ from kivy.metrics import dp
 import re
 import os
 import nccut.functions as func
+from nccut.plotpopup import PlotPopup
 from pathlib import Path
 from plyer import filechooser
 from nccut.filedisplay import FileDisplay
@@ -40,6 +40,7 @@ class HomeScreen(Screen):
         font (float): Current font size for all buttons
         display: FileDisplay object (draggable image) created when a file is loaded
         nc_popup: Reference to NetCDF configuration popup
+        plot_popup: Plotting popup, held here so can be loaded in testing framework
         file: File if one was given on start up from command line, otherwise None
         color_bar_box: BoxLayout containing colorbar and related graphics
         cb_bg: Background for colorbar box
@@ -55,7 +56,9 @@ class HomeScreen(Screen):
         Creates editing buttons, most UI elements defined in nccut.kv
 
         Args:
+            btn_img_path: Path to location of settings bar button icons
             file: (Optional) File if one was given on start up from command line, otherwise None
+            conf: Dictionary of default configuration values
         """
         super(HomeScreen, self).__init__(**kwargs)
         self.general_config = conf
@@ -63,17 +66,18 @@ class HomeScreen(Screen):
         self.file_on = False
         self.loaded = False
         self.rel_path = Path(os.getcwd())
-        self.font = self.ids.quit.font_size
+        self.font = self.ids.sidebar_label.font_size
         self.display = None
         self.nc_popup = None
+        self.plot_popup = PlotPopup()
         self.file = file
         self.color_bar_box = BoxLayout(size_hint=(0.1, 1), padding=dp(3))
         with self.color_bar_box.canvas:
             Color(0.1, 0.1, 0.1)
             self.cb_bg = RoundedRectangle(size=self.color_bar_box.size, pos=self.color_bar_box.pos, radius=[dp(10),])
         self.color_bar_box.bind(size=self.update_cb_bg, pos=self.update_cb_bg)
-        self.netcdf_info = func.BackgroundLabel(text="", font_size=self.font, size_hint=(1, 0.08),
-                                                background_color=[0.1, 0.1, 0.1, 1], markup=True)
+        self.netcdf_info = func.BackgroundLabel(text="", font_size=self.font, size_hint_y=None, markup=True,
+                                                height=dp(30) + self.font, background_color=[0.1, 0.1, 0.1, 1])
         # Dynamic sidebar
         self.sidebar_label = self.ids.sidebar_label
         self.sidebar_spacer = Widget(size_hint=(1, 0.9))
@@ -132,13 +136,14 @@ class HomeScreen(Screen):
         but not those defined in scripts. Thus this method updates font size for such elements to be the same as
         the static elements.
         """
-        font = self.ids.quit.font_size
+        font = self.ids.load_btn.font_size
         dsl = self.ids.dynamic_sidebar
         for i in range(len(dsl.children)):
             dsl.children[i].font_size = font
         self.font = font
         self.netcdf_info.font_size = font
         self.settings_bar.font_adapt(font)
+        self.plot_popup.font_adapt(font)
         if self.file_on:
             self.display.font_adapt(font)
 
@@ -201,12 +206,7 @@ class HomeScreen(Screen):
                 {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
                 :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         """
-        if len(self.ids.view_box.children) == 1:
-            self.ids.view_box.add_widget(self.color_bar_box, 1)
-            self.ids.main_box.add_widget(self.netcdf_info, 2)
-        else:
-            self.color_bar_box.remove_widget(self.color_bar_box.children[0])
-        self.color_bar_box.add_widget(colorbar)
+        self.update_colorbar(colorbar)
         var_attrs = config["data"][config["var"]].attrs
         if "long_name" in list(var_attrs.keys()):
             v_text = var_attrs["long_name"].title()
@@ -227,6 +227,20 @@ class HomeScreen(Screen):
             z_text = ""
         self.netcdf_info.text = "[b]" + v_text + z_text + "[/b]"
         self.font_adapt()
+
+    def update_colorbar(self, colorbar):
+        """
+        Changes colorbar to new colorbar
+
+        Args:
+            colorbar: kivy.uix.image.Image, colorbar graphic
+        """
+        if len(self.ids.view_box.children) == 1:
+            self.ids.view_box.add_widget(self.color_bar_box, 1)
+            self.ids.main_box.add_widget(self.netcdf_info, 2)
+        else:
+            self.color_bar_box.remove_widget(self.color_bar_box.children[0])
+        self.color_bar_box.add_widget(colorbar)
 
     def load_netcdf(self, config):
         """
@@ -275,9 +289,3 @@ class HomeScreen(Screen):
 
         """
         self.canvas.remove(item)
-
-    def quit_btn(self):
-        """
-        Quit application
-        """
-        App.get_running_app().stop()

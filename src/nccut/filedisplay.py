@@ -13,6 +13,7 @@ ScatterLayout class. Manages the creation and deletion of tools.
 import kivy
 from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
+from kivy.core.window import Window
 import kivy.uix as ui
 from kivy.core.image import Image as CoreImage
 from kivy.metrics import dp
@@ -59,6 +60,7 @@ class FileDisplay(ScatterLayout):
         cir_size (float): Circle size for transect tools
         cmaps (dict): Dictionary of colormap names mapping to colormap values from cv2
         colormap: current colormap data
+        btn_height: Height for buttons in sidebar which adapts to font size
         transect_chain_btn: Transect Chain button which opens Transect Chain tool
         transect_marker_btn: Transect Marker button which opens Transect Marker tool
         initial_side_bar (list): List of sidebar buttons in 'Tools' sidebar menu
@@ -112,56 +114,62 @@ class FileDisplay(ScatterLayout):
 
         self.cmaps = plt.colormaps()[:87]
         self.colormap = g_config["colormap"]
-
+        self.btn_height = dp(20) + self.home.font
         # Initial Sidebar Widgets
-        self.transect_chain_btn = func.RoundedButton(text="Transect Chain", size_hint=(1, 0.1),
+        self.transect_chain_btn = func.RoundedButton(text="Transect Chain", size_hint_y=None, height=self.btn_height,
                                                      font_size=self.home.font)
         self.transect_chain_btn.bind(on_press=lambda x: self.transect_btn("transect_chain"))
 
-        self.transect_marker_btn = func.RoundedButton(text="Transect Marker", size_hint=(1, 0.1),
+        self.transect_marker_btn = func.RoundedButton(text="Transect Marker", size_hint_y=None, height=self.btn_height,
                                                       font_size=self.home.font)
         self.transect_marker_btn.bind(on_press=lambda x: self.transect_btn("transect_marker"))
         self.initial_side_bar = [self.transect_chain_btn, self.transect_marker_btn]
 
         # Action Widgets
-        self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint=(1, 0.1),
+        self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint_y=None, height=self.btn_height,
                                            halign='center', valign='center', font_size=self.home.font)
         self.drag_btn.bind(on_press=self.drag_mode)
-        self.edit_btn = func.RoundedButton(text="Edit Mode", size_hint=(1, 0.1),
+        self.edit_btn = func.RoundedButton(text="Edit Mode", size_hint_y=None, height=self.btn_height,
                                            halign='center', valign='center', font_size=self.home.font)
         self.edit_btn.bind(on_press=self.edit_mode)
-        self.close_tool_btn = func.RoundedButton(text="Close Tool", size_hint=(1, 0.1),
+        self.close_tool_btn = func.RoundedButton(text="Close Tool", size_hint_y=None, height=self.btn_height,
                                                  halign='center', valign='center', font_size=self.home.font)
         self.close_tool_btn.bind(on_press=self.close_tool)
         self.action_widgets = [self.close_tool_btn, self.drag_btn, self.edit_btn]
         self.tool_action_widgets = self.action_widgets
         # Drag Mode Widgets
-        self.tran_mode_btn = func.RoundedButton(text="Transect Mode", size_hint=(1, 0.1),
+        self.tran_mode_btn = func.RoundedButton(text="Transect Mode", size_hint_y=None, height=self.btn_height,
                                                 halign='center', valign='center', font_size=self.home.font)
         self.tran_mode_btn.bind(on_press=self.drag_mode)
 
         # Editing Mode widgets
-        self.back_btn = func.RoundedButton(text="Back", size_hint=(1, 0.1),
+        self.back_btn = func.RoundedButton(text="Back", size_hint_y=None, height=self.btn_height,
                                            halign='center', valign='center', font_size=self.home.font)
         self.back_btn.bind(on_press=self.edit_mode)
-        self.delete_line_btn = func.RoundedButton(text="Delete Last Line", size_hint=(1, 0.1),
+        self.delete_line_btn = func.RoundedButton(text="Delete Last Line", size_hint_y=None, height=self.btn_height,
                                                   font_size=self.home.font)
         self.delete_line_btn.bind(on_press=lambda x: self.tool.del_line())
-        self.delete_point_btn = func.RoundedButton(text="Delete Last Point", size_hint=(1, 0.1),
+        self.delete_point_btn = func.RoundedButton(text="Delete Last Point", size_hint_y=None, height=self.btn_height,
                                                    font_size=self.home.font)
         self.delete_point_btn.bind(on_press=lambda x: self.tool.del_point())
 
         self.edit_widgets = [self.back_btn, self.delete_line_btn, self.delete_point_btn]
 
         self.load_image()
+        Window.bind(on_key_down=self.on_key)
 
     # Turn off ScatterLayout functionality that conflicts with functionality
     ScatterLayout.do_rotation = False
     ScatterLayout.do_scale = False
 
+    def on_key(self, *args):
+        key_ascii = args[1]
+        if key_ascii == 27 and self.tool and not self.home.plot_popup.is_open:
+            self.tool.del_line()
+
     def font_adapt(self, font):
         """
-        Update editing mode button font sizes.
+        Update editing mode button and color bar font sizes.
 
         Args:
             font (float): New font size
@@ -169,6 +177,8 @@ class FileDisplay(ScatterLayout):
         self.back_btn.font_size = font
         self.delete_line_btn.font_size = font
         self.delete_point_btn.font_size = font
+        if self.f_type == "netcdf":
+            self.home.update_colorbar(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white", font * 2.5))
         if self.t_mode:
             self.tool.font_adapt(font)
 
@@ -190,6 +200,7 @@ class FileDisplay(ScatterLayout):
         self.home.populate_dynamic_sidebar(self.initial_side_bar, "Tools")
         # Necessary for when viewer doesn't change size on file load (image -> image)
         self.resize_to_fit(False)
+        self.home.font_adapt()
 
     def resize_to_fit(self, *args):
         """
@@ -223,9 +234,9 @@ class FileDisplay(ScatterLayout):
             # Opens a new tool
             kivy.core.window.Window.set_system_cursor("crosshair")
             if t_type == "transect_marker":
-                self.tool = MultiMarker(home=self.home, m_width=self.default_marker_width)
+                self.tool = MultiMarker(home=self.home, m_width=self.default_marker_width, b_height=self.btn_height)
             elif t_type == "transect_chain":
-                self.tool = MultiChain(home=self.home)
+                self.tool = MultiChain(home=self.home, b_height=self.btn_height)
             self.add_widget(self.tool)
             self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
             self.t_mode = True
@@ -248,6 +259,8 @@ class FileDisplay(ScatterLayout):
             element: kivy.uix.Widget to remove
         """
         self.tool_action_widgets.remove(element)
+        if not self.editing and not self.dragging:
+            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
 
     def close_tool(self, *args):
         """
@@ -359,9 +372,8 @@ class FileDisplay(ScatterLayout):
         nans = np.repeat(np.isnan(n_data)[:, :, np.newaxis], 4, axis=2)
         c_mapped = plt.get_cmap(self.colormap)(n_data)
         whites = np.ones(c_mapped.shape)
-
         self.home.load_colorbar_and_info(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white",
-                                                            dp(40)), self.config[self.f_type])
+                                                            self.home.font * 2.5), self.config[self.f_type])
         img = np.where(nans, whites, c_mapped)
         # Applies contrast settings
         pil_image = im.fromarray(np.uint8(img * 255))

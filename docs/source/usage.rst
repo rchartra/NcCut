@@ -134,7 +134,7 @@ Plotting
 Configuration File
 ------------------
 
-NcCut's default graphic settings, netcdf configuration settings, and metadata can be configured using a configuration file. An example file with information on the possible configurations can be found `here <https://github.com/rchartra/NcCut/tree/main>`_.
+NcCut's default graphic settings, netcdf configuration settings, and metadata can be configured using a configuration file. An example file with information on the possible configurations can be found `here <https://github.com/rchartra/NcCut/blob/main/nccut_config.toml>`_.
 
 For NcCut to locate the file it must be named ``nccut_config.toml`` and be in one of the following locations which are by ordered by decreasing search priority:
 

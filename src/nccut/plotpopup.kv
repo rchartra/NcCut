@@ -16,7 +16,8 @@
             BoxLayout:
                 id: sidebar
                 orientation: "vertical"
-                size_hint: (0.4, 1)
+                size_hint_x: None
+                width: dp(150) + app.font_size * 5
                 padding: dp(10)
                 spacing: dp(20)
                 canvas:
@@ -28,8 +29,9 @@
                         radius: [dp(10),]
 
                 BoxLayout:
-                    size_hint: (1, 0.2)
+                    size_hint: (1, None)
                     spacing: dp(5)
+                    height: dp(40) + app.font_size
 
                     Label:
                         id: sel_transects_label
@@ -43,45 +45,72 @@
                         id: sel_transects_btn
                         text: "Select..."
                         size_hint: (0.5, 1)
+                        pos_hint: {"center_y": 0.5}
+
+                Widget:
+                    id: spacer
+                    size_hint_y: 1
 
         BoxLayout:
-            size_hint: (1, 0.15)
+            size_hint_y: None
+            height: dp(40) + app.font_size
+            canvas:
+                Color:
+                    rgb: [.2, .2, .2]
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [dp(10),]
 
             BoxLayout:
                 id: buttons
                 size_hint: (0.8, 1)
                 spacing: dp(10)
                 padding: dp(10)
-                canvas:
-                    Color:
-                        rgb: [.2, .2, .2]
-                    RoundedRectangle:
-                        size: self.size
-                        pos: self.pos
-                        radius: [dp(10),]
+
+                Label:
+                    text: "Export: "
+                    size_hint_x: None
+                    width: dp(50) + app.font_size
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'center'
+                    font_size: app.font_size
+                    bold: True
+                    canvas:
+                        Color:
+                            rgba: 1, 1, 1, 1
+                        Line:
+                            points: [self.right, self.y, self.right, self.top]
+                            width: dp(1)
+                            cap: "square"
 
                 RoundedButton:
                     id: export_all_data_btn
-                    text: "Export All Data"
-                    size_hint: (0.2, 1)
+                    text: "All Data"
+                    size_hint_x: None
+                    width: dp(50) + app.font_size * 3
                     on_press: root.file_input("a_data")
 
                 RoundedButton:
                     id: export_sel_data_btn
-                    text: "Export Selected Data"
-                    size_hint: (0.2, 1)
+                    text: "Selected Data"
+                    size_hint_x: None
+                    width: dp(50) + app.font_size * 3
                     on_press: root.file_input("s_data")
 
                 RoundedButton:
                     id: export_plot_png_btn
-                    text: "Export Plot to PNG"
-                    size_hint: (0.2, 1)
+                    text: "Plot to PNG"
+                    size_hint_x: None
+                    width: dp(50) + app.font_size * 3
                     on_press: root.file_input("png")
 
                 RoundedButton:
                     id: export_plot_pdf_btn
-                    text: "Export Plot to PDF"
-                    size_hint: (0.2, 1)
+                    text: "Plot to PDF"
+                    size_hint_x: None
+                    width: dp(50) + app.font_size * 3
                     on_press: root.file_input("pdf")
 
             Widget:
@@ -89,15 +118,9 @@
                 size_hint: (0.1, 1)
 
             BoxLayout:
-                size_hint: (0.1, 1)
+                size_hint_x: None
+                width: dp(60) + app.font_size
                 padding: dp(10)
-                canvas:
-                    Color:
-                        rgb: [.2, .2, .2]
-                    RoundedRectangle:
-                        size: self.size
-                        pos: self.pos
-                        radius: [dp(10),]
 
                 RoundedButton:
                     id: close_btn

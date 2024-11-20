@@ -32,7 +32,7 @@ class SettingsBar(BoxLayout):
         self.home = home
         self.font = font
         self.f_m = 0.7
-        self.netcdf_btn = func.RoundedButton(text="NetCDF", size_hint=(0.1, 1), font_size=self.font * self.f_m)
+        self.netcdf_btn = func.RoundedButton(text="NetCDF", size_hint=(0.15, 1), font_size=self.font * self.f_m)
         self.netcdf_btn.bind(on_press=self.open_netcdf)
 
     def font_adapt(self, font):

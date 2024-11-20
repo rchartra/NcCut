@@ -8,7 +8,6 @@ import kivy.uix as ui
 from kivy.core.window import Window
 from scipy.interpolate import CubicSpline
 import nccut.functions as func
-from nccut.plotpopup import PlotPopup
 from nccut.chain import Chain
 
 
@@ -27,40 +26,37 @@ class MultiChain(ui.widget.Widget):
         clicks (int): Number of clicks made by user. Does not decrease when points are deleted
             unless all points are deleted in which case it goes back to zero.
         nbtn: RoundedButton, New chain button
-        plotting: :class:`nccut.plotpopup.PlotPopup`, reference to plotting menu when opened
     """
-    def __init__(self, home, **kwargs):
+    def __init__(self, home, b_height, **kwargs):
         """
         Defines sidebar elements and initializes widget
 
         Args:
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+            b_height: Height for buttons in sidebar according to font size
         """
         super(MultiChain, self).__init__(**kwargs)
         self.c_on = False
         self.home = home
-        self.dbtn = func.RoundedButton(text="Plot", size_hint=(1, 0.1), font_size=self.home.font)
+        self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
         self.clicks = 0
-        self.plotting = None
 
         # New Chain Button
-        self.nbtn = func.RoundedButton(text="New Chain", size_hint=(1, 0.1), font_size=self.home.font)
+        self.nbtn = func.RoundedButton(text="New Chain", size_hint_y=None, height=b_height, font_size=self.home.font)
 
         self.nbtn.bind(on_press=lambda x: self.new_chain())
         self.home.display.add_to_sidebar([self.nbtn])
 
     def font_adapt(self, font):
         """
-        Updates font of sidebar elements and plotting menu if loaded.
+        Updates font of sidebar elements.
         Args:
             font (float): New font size
         """
         self.dbtn.font_size = font
         self.nbtn.font_size = font
-        if self.plotting:
-            self.plotting.font_adapt(font)
 
     def update_l_col(self, color):
         """
@@ -183,20 +179,19 @@ class MultiChain(ui.widget.Widget):
                     count += 1
                 frames["Chain " + str(c)] = data
                 c += 1
-        self.plotting = PlotPopup(frames, self.home, self.home.display.config)
+        self.home.plot_popup.run(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """
-        Manages when sidebar elements are added to sidebar and clears them as needed.
+        Manages when sidebar elements are added to sidebar and clears them as needed. If click is a right click and not
+        the first click creates new marker.
 
         Args:
             touch: MouseMotionEvent, see kivy docs for details
         """
         if not self.dragging:
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
-                if touch.is_double_tap:
-                    self.new_chain()
-                else:
+                if self.clicks > 0 or touch.button == "left":
                     self.clicks += 1
                     if self.clicks >= 2 and self.dbtn.parent is None:
                         self.home.display.add_to_sidebar([self.dbtn])
@@ -205,3 +200,5 @@ class MultiChain(ui.widget.Widget):
                         self.new_chain()
                         self.c_on = True
                     self.children[0].on_touch_down(touch)
+                    if touch.button == "right":
+                        self.new_chain()

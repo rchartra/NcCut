@@ -39,8 +39,8 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
         """
         super(MarkerWidth, self).__init__(**kwargs)
         self.spacing = dp(8)
-        self.txt = TextInput(hint_text="Width", size_hint=(.7, 1))
         self.font_size = marker.home.font
+        self.txt = TextInput(hint_text="Width", size_hint=(.7, 1), font_size=self.font_size)
         self.btn = func.RoundedButton(text="Set", size_hint=(.3, 1), font_size=self.font_size)
         self.btn.bind(on_press=lambda x: self.update())
         self.add_widget(self.txt)

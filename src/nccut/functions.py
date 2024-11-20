@@ -97,7 +97,8 @@ def validate_config(config):
     allowed_options = {"graphics_defaults": {"contrast": np.arange(-20, 21).astype(int),
                                              "line_color": ["Blue", "Orange", "Green"],
                                              "colormap": plt.colormaps()[:87],
-                                             "circle_size": np.arange(2, 71).astype(int)},
+                                             "circle_size": np.arange(2, 71).astype(int),
+                                             "font_size": np.arange(8, 25)},
                        "tool_defaults": {"marker_width": np.arange(0, 401).astype(int)},
                        "netcdf": {"dimension_order": xyz},
                        "metadata": {}}
@@ -481,7 +482,7 @@ def get_color_bar(colormap, data, face_color, text_color, font):
         s_labels = s_labels[np.where((s_labels >= d_min) & (s_labels <= d_max))]
         if len(s_labels) < 2:
             s_labels = [d_min, d_max]
-    if len(s_labels) > 0:
+    if len(s_labels) > 0 and s_labels[0] is not None:
         rep = "{:.2e}".format(s_labels[0])
         exp_str = rep[rep.find("e"):]
         exp = int(exp_str[1:])

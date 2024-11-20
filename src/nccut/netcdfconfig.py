@@ -53,6 +53,7 @@ class NetCDFConfig(Popup):
         """
         super(NetCDFConfig, self).__init__(**kwargs)
         self.home = home
+        self.font = self.home.font
         self.file = file
         self.data = xr.open_dataset(file)
         self.running = False
@@ -60,13 +61,13 @@ class NetCDFConfig(Popup):
 
         # Variable Selection
         var_box = ui.boxlayout.BoxLayout(spacing=dp(20))
-        var_box.add_widget(Label(text="Variable: ", size_hint=(0.3, 1)))
+        var_box.add_widget(Label(text="Variable: ", size_hint=(0.3, 1), font_size=self.font))
         self.var_select = func.RoundedButton(text=list(self.data.keys())[0], size_hint=(0.7, 1),
-                                             halign='center', valign='middle')
+                                             halign='center', valign='middle', font_size=self.font)
         self.var_drop = DropDown()
         for item in list(self.data.keys()):
-            btn = Button(text=str(item), size_hint_y=None, height=dp(30), halign='center',
-                         valign='middle')
+            btn = Button(text=str(item), size_hint_y=None, height=dp(20) + self.font, halign='center',
+                         valign='middle', font_size=self.font)
             btn.bind(on_release=lambda btn: self.var_drop.select(btn.text),
                      on_press=self.var_drop.dismiss, size=func.text_wrap)
             self.var_drop.add_widget(btn)
@@ -84,43 +85,47 @@ class NetCDFConfig(Popup):
             dims = dims[:3]
 
         xy_box = ui.boxlayout.BoxLayout(spacing=dp(20))
-        xy_box.add_widget(Label(text="X: ", size_hint=(0.2, 1)))
-        self.x_select = func.RoundedButton(text=dims[dim_order.index("x")], size_hint=(0.3, 1), halign='center', valign='middle')
+        xy_box.add_widget(Label(text="X: ", size_hint=(0.2, 1), font_size=self.font))
+        self.x_select = func.RoundedButton(text=dims[dim_order.index("x")], size_hint=(0.3, 1), halign='center',
+                                           valign='middle', font_size=self.font)
         self.x_select.bind(on_release=lambda x: self.dim_options(self.x_select), size=func.text_wrap)
         xy_box.add_widget(self.x_select)
 
-        xy_box.add_widget(Label(text="Y: ", size_hint=(0.2, 1)))
-        self.y_select = func.RoundedButton(text=dims[dim_order.index("y")], size_hint=(0.3, 1), halign='center', valign='middle')
+        xy_box.add_widget(Label(text="Y: ", size_hint=(0.2, 1), font_size=self.font))
+        self.y_select = func.RoundedButton(text=dims[dim_order.index("y")], size_hint=(0.3, 1), halign='center',
+                                           valign='middle', font_size=self.font)
         self.y_select.bind(on_release=lambda x: self.dim_options(self.y_select), size=func.text_wrap)
         xy_box.add_widget(self.y_select)
         content.add_widget(xy_box)
 
         # Z selection (not always required)
         z_box = ui.boxlayout.BoxLayout(spacing=dp(20))
-        z_box.add_widget(Label(text="Z Variable: ", size_hint=(0.2, 1)))
-        self.z_select = func.RoundedButton(text=dims[dim_order.index("z")], size_hint=(0.3, 1), halign='center', valign='middle')
+        z_box.add_widget(Label(text="Z Variable: ", size_hint=(0.2, 1), font_size=self.font))
+        self.z_select = func.RoundedButton(text=dims[dim_order.index("z")], size_hint=(0.3, 1), halign='center',
+                                           valign='middle', font_size=self.font)
         self.z_select.bind(on_release=lambda x: self.dim_options(self.z_select),
                            text=self.update_depth_btn, size=func.text_wrap)
         z_box.add_widget(self.z_select)
 
-        z_box.add_widget(Label(text="Z Value: ", size_hint=(0.2, 1)))
+        z_box.add_widget(Label(text="Z Value: ", size_hint=(0.2, 1), font_size=self.font))
         if self.z_select.text == "N/A":
             d_text = "N/A"
         else:
             d_text = str(list(self.data.coords[self.z_select.text].data)[0])
-        self.depth_select = func.RoundedButton(text=d_text, size_hint=(0.3, 1), halign='center', valign='middle')
+        self.depth_select = func.RoundedButton(text=d_text, size_hint=(0.3, 1), halign='center', valign='middle',
+                                               font_size=self.font)
         self.depth_select.bind(size=func.text_wrap, on_release=self.depth_options)
         z_box.add_widget(self.depth_select)
         content.add_widget(z_box)
 
         # Popup Controls
         c_box = ui.boxlayout.BoxLayout(spacing=dp(20))
-        self.error = Label(text="", size_hint=(0.7, 1))
+        self.error = Label(text="", size_hint=(0.7, 1), font_size=self.font)
         c_box.add_widget(self.error)
-        back = func.RoundedButton(text="Back", size_hint=(0.15, 1))
+        back = func.RoundedButton(text="Back", size_hint=(0.15, 1), font_size=self.font)
         back.bind(on_press=self.dismiss)
         c_box.add_widget(back)
-        self.load = func.RoundedButton(text="Load", size_hint=(0.15, 1))
+        self.load = func.RoundedButton(text="Load", size_hint=(0.15, 1), font_size=self.font)
         self.load.bind(on_press=self.check_inputs)
         c_box.add_widget(self.load)
         content.add_widget(c_box)
@@ -128,8 +133,10 @@ class NetCDFConfig(Popup):
         # Final settings
         self.title = "NetCDF Configuration"
         self.content = content
-        self.size_hint = (0.8, 0.8)
+        self.size_hint = (None, None)
+        self.size = (dp(700), dp(450))
         self.bind(on_dismiss=lambda x: self.clean())
+        self.title_size = self.font
         self.open()
 
     def update_depth_btn(self, *args):
@@ -221,7 +228,7 @@ class NetCDFConfig(Popup):
             *args: Unused arguments passed to method
         """
         if not dim.text == "N/A":
-            dim_drop = ListDropDown(list(self.data[self.var_select.text].dims), dim)
+            dim_drop = ListDropDown(list(self.data[self.var_select.text].dims), dim, self.font)
             dim_drop.open(dim)
 
     def depth_options(self, *args):
@@ -232,7 +239,7 @@ class NetCDFConfig(Popup):
             *args: Unused arguments passed to method
         """
         if not self.z_select.text == "N/A":
-            depth_drop = ListDropDown(list(self.data.coords[self.z_select.text].data), self.depth_select)
+            depth_drop = ListDropDown(list(self.data.coords[self.z_select.text].data), self.depth_select, self.font)
             depth_drop.open(self.depth_select)
 
 
@@ -243,7 +250,7 @@ class ListDropDown(DropDown):
     Attributes:
         Inherits attributes from kivy.uix.dropdown.Dropdown (see kivy docs)
     """
-    def __init__(self, items, button, **kwargs):
+    def __init__(self, items, button, font, **kwargs):
         """
         Creates dropdown. When options in dropdown are selected dropdown closes and selection button
         text changes to the selected option.
@@ -251,11 +258,12 @@ class ListDropDown(DropDown):
         Args:
             items: List of items to be options for dropdown.
             button: Button which opens dropdown
+            font: Font size for text, also used to calculate button height
         """
         super(ListDropDown, self).__init__(**kwargs)
         for item in items:
-            btn = Button(text=str(item), size_hint_y=None, height=dp(30),
-                         halign='center', valign='middle', shorten=True)
+            btn = Button(text=str(item), size_hint_y=None, height=dp(20) + font,
+                         halign='center', valign='middle', shorten=True, font_size=font)
             btn.bind(on_release=lambda btn: self.select(btn.text), on_press=self.dismiss, size=func.text_wrap)
             self.add_widget(btn)
         self.bind(on_select=lambda instance, x: setattr(button, 'text', x))
