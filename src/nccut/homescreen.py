@@ -189,10 +189,13 @@ class HomeScreen(Screen):
         """
         Opens native operating system file browser to allow user to select their file
         """
-        files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
-        if files is not None and len(files) > 0:
-            self.ids.file_in.text = files[0]
-            self.load_btn()
+        try:
+            files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
+            if files is not None and len(files) > 0:
+                self.ids.file_in.text = files[0]
+                self.load_btn()
+        except Exception as error:
+            func.alert_popup("Error with file browser, please use manual file entry. Error: " + str(error))
 
     def load_colorbar_and_info(self, colorbar, config):
         """

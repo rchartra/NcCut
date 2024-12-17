@@ -59,6 +59,8 @@ class YAxis(FloatLayout):
         # Determine whether z coordinate values can be used for the y axis
         try:
             self.z_coords = config["data"][config["z"]].data.astype(float)
+            if self.z_coords[1] < self.z_coords[0]:
+                self.z_coords = np.flip(self.z_coords)
         except ValueError:
             self.z_coords = np.arange(0, len(config["data"][config["z"]].data))
         # Assumption made in order to be able to plot an image despite their being same number of coords as data points
@@ -99,16 +101,18 @@ class YAxis(FloatLayout):
         # Identify ideal y tick labels and whether to use scientific notation
         # Assume origin for coordinate data is top left as with numpy array indexing
         cpp = (self.z_coords[-1] - self.z_coords[0]) / n_size[1]
-        y_min = (n_size[1] + n_pos[1] - self.height) * cpp
-        y_max = (n_size[1] + n_pos[1]) * cpp
+        y_max = (self.height - n_pos[1]) * cpp
+        y_min = (-n_pos[1]) * cpp
+        lab_min = y_min + np.min(self.z_coords)
+        lab_max = y_max + np.min(self.z_coords)
         if y_min >= y_max:
             selected_labels = [y_min]
         else:
-            selected_labels = func.label_placer(y_min, y_max, d)
-            selected_labels = selected_labels[np.where((selected_labels >= y_min) & (selected_labels <= y_max))]
+            selected_labels = func.label_placer(lab_min, lab_max, d)
+            selected_labels = selected_labels[np.where((selected_labels >= lab_min) & (selected_labels <= lab_max))]
             if len(selected_labels) < 2:
-                selected_labels = [y_min, y_max]
-        rep = "{:.2e}".format(selected_labels[-1])
+                selected_labels = [lab_min, lab_max]
+        rep = "{:.2e}".format(selected_labels[0])
         exp_str = rep[rep.find("e"):]
         exp = int(exp_str[1:])
         if abs(exp) > 2:
@@ -119,7 +123,8 @@ class YAxis(FloatLayout):
             exp_str = ""
         # Calculate y tick positions of the chosen y tick labels
         # Assume origin for coordinate data is top left as with numpy array indexing
-        selected_t_pos = [n_size[1] - (s / cpp) + n_pos[1] + self.y for s in selected_labels]
+        label_ticks = selected_labels - np.min(self.z_coords)
+        selected_t_pos = [(s / cpp) + n_pos[1] + self.y for s in label_ticks]
         tick_x = self.right
         # Draw y ticks
         with self.canvas:

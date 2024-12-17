@@ -7,6 +7,7 @@ Manages having multiple chains on screen at once.
 import kivy.uix as ui
 from kivy.core.window import Window
 from scipy.interpolate import CubicSpline
+import numpy as np
 import nccut.functions as func
 from nccut.chain import Chain
 
@@ -152,14 +153,19 @@ class MultiChain(ui.widget.Widget):
         y_name = "Y"
         if self.home.display.f_type == "netcdf":
             config = self.home.display.config
-            x = config["netcdf"]["data"].coords[config["netcdf"]["x"]].data
-            y = config["netcdf"]["data"].coords[config["netcdf"]["y"]].data
+            x_coord = config["netcdf"]["data"].coords[config["netcdf"]["x"]].data
+            y_coord = config["netcdf"]["data"].coords[config["netcdf"]["y"]].data
             try:
-                x = x.astype(float)
-                x_spline = CubicSpline(range(len(x)), x)
+                x_coord = x_coord.astype(float)
+                y_coord = y_coord.astype(float)
+                x_pix = min(abs(x_coord[:-1] - x_coord[1:]))
+                y_pix = min(abs(y_coord[:-1] - y_coord[1:]))
+                x = np.arange(x_coord.min(), x_coord.max() + x_pix, x_pix)
+                y = np.arange(y_coord.min(), y_coord.max() + y_pix, y_pix)
 
-                y = y.astype(float)
+                x_spline = CubicSpline(range(len(x)), x)
                 y_spline = CubicSpline(range(len(y)), y)
+
                 x_name = config["netcdf"]["x"]
                 y_name = config["netcdf"]["y"]
                 nc_coords = True
