@@ -22,6 +22,7 @@ from nccut.plotwindow import PlotWindow
 from kivy.core.image import Image as CoreImage
 import matplotlib.pyplot as plt
 from PIL import Image as im
+from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import copy
 import pandas as pd
@@ -266,19 +267,21 @@ class PlotPopup(Popup):
                 self.z_select.bind(on_press=lambda x: self.z_drop.open(self.z_select))
                 self.ids.sidebar.add_widget(z_box, 1)
 
-                # Plot All Z option
-                zp_box = ui.boxlayout.BoxLayout(size_hint=(1, None), height=self.b_height, padding=dp(10))
-                zp_btn = func.RoundedButton(text="Plot all Z as Img", size_hint=(1, 1), font_size=self.font)
-                zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
-                zp_box.add_widget(zp_btn)
-                self.ids.sidebar.add_widget(zp_box, 1)
+                # Plot All Z option only if there is more than one z value
+                if len(self.config[self.f_type]["data"][self.config[self.f_type]['z']].data) > 1:
+                    zp_box = ui.boxlayout.BoxLayout(size_hint=(1, None), height=self.b_height, padding=dp(10))
+                    zp_btn = func.RoundedButton(text="Plot all Z as Img", size_hint=(1, 1), font_size=self.font)
+                    zp_btn.bind(on_press=lambda x: self.get_all_z_plot())
+                    zp_box.add_widget(zp_btn)
+                    self.ids.sidebar.add_widget(zp_box, 1)
+                    self.widgets_with_text.append(zp_btn)
 
                 # Export All Z Option
                 self.allz_btn = func.RoundedButton(text="All Z Data", size_hint_x=None, width=dp(50) + self.font * 3,
                                                    font_size=self.font)
                 self.allz_btn.bind(on_press=lambda x: self.file_input('all_z'))
                 self.ids.buttons.add_widget(self.allz_btn)
-                self.widgets_with_text.extend([z_lab, self.z_select, zp_btn])
+                self.widgets_with_text.extend([z_lab, self.z_select])
             else:
                 # Spacer if 2D NetCDF
                 self.ids.sidebar.add_widget(Label(text="", size_hint=(1, 0.6)))
@@ -786,7 +789,8 @@ class PlotPopup(Popup):
             for key in list(self.active_transects.keys()):
                 # Count current transects selected
                 no_avg = copy.copy(self.active_transects[key])
-                no_avg.pop("Average")
+                if "Average" in list(no_avg.keys()):
+                    no_avg.pop("Average")
                 t_count += sum(no_avg.values())
             if t_count == 1 and len(self.active_vars) == 1:
                 plot_ok = True
@@ -799,14 +803,17 @@ class PlotPopup(Popup):
                 plot_ok = True
         if plot_ok:
             # Go ahead and plot
-            self.ids.plotting.remove_widget(self.plot)
-            if self.t_type == "Marker":
-                z_data = self.get_all_z_marker()
-            elif self.t_type == "Chain":
-                z_data = self.get_all_z_chain()
-            self.plot = PlotWindow(self.config[self.f_type], z_data, self.home.display.colormap, size_hint=(0.7, 1))
-            self.plot.bind(size=self.plot.load)
-            self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
+            try:
+                self.ids.plotting.remove_widget(self.plot)
+                if self.t_type == "Marker":
+                    z_data = self.get_all_z_marker()
+                elif self.t_type == "Chain":
+                    z_data = self.get_all_z_chain()
+                self.plot = PlotWindow(self.config[self.f_type], z_data, self.home.display.colormap, size_hint=(0.7, 1))
+                self.plot.bind(size=self.plot.load)
+                self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
+            except Exception as error:
+                func.alert_popup(str(error))
         else:
             # Error popup if more than one transect and/or variable is selected
             content = ui.boxlayout.BoxLayout()
@@ -855,24 +862,61 @@ class PlotPopup(Popup):
         config = f_config[self.f_type]
         config['var'] = self.active_vars[0]
         ds = ds[config['var']].rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-        data, scaled_bound_points, scales = func.subset_around_transect(ds, bound_points)
-        point_scales = np.array(bound_points) - np.array(scaled_bound_points)
-        data = data.transpose('y', 'x', 'z')
-        data['z'] = data['z'].astype(str)
-        data = np.flip(data.data, 0)
+
+        x_points = np.sort(np.array([bound_points[0], bound_points[2]]))
+        y_points = np.sort(np.array([bound_points[1], bound_points[3]]))
+
+        if ds["x"][1] < ds["x"][0]:
+            og_x = ds["x"][::-1]
+        else:
+            og_x = ds["x"]
+
+        if ds["y"][1] < ds["y"][0]:
+            og_y = ds["y"][::-1]
+        else:
+            og_y = ds["y"]
+
+        # Create new, equidistant coordinate arrays
+        x_pix = min(abs(og_x.data[:-1] - og_x.data[1:]))
+        y_pix = min(abs(og_y.data[:-1] - og_y.data[1:]))
+
+        curr_x = np.arange(og_x.min(), og_x.max() + x_pix, x_pix)
+        curr_y = np.arange(og_y.min(), og_y.max() + y_pix, y_pix)
+
+        x_vals = x_points * x_pix + curr_x.min()
+        y_vals = y_points * y_pix + curr_y.min()
+
+        sub_x = og_x[np.searchsorted(og_x, x_vals[0]) - 1:np.searchsorted(og_x, x_vals[1]) + 1]
+        new_x = np.arange(sub_x[0], sub_x[-1] + x_pix, x_pix)
+        sub_y = og_y[np.searchsorted(og_y, y_vals[0]) - 1:np.searchsorted(og_y, y_vals[1]) + 1]
+        new_y = np.arange(sub_y[0], sub_y[-1] + y_pix, y_pix)
+
+        sub_data = ds.sel({"x": sub_x, "y": sub_y})
+        sub_data = sub_data.transpose("y", "x", "z")
+        sub_data['z'] = sub_data['z'].astype(str)
+        sub_data = sub_data.data
+        if ds["z"][1] < ds["z"][0]:
+            sub_data = np.flip(sub_data, 2)
+        coord_scales = [curr_x.min(), curr_y.min(), curr_x.min(), curr_y.min()]
+        sub_scales = [new_x.min(), new_y.min(), new_x.min(), new_y.min()]
+        pix_scales = [x_pix, y_pix, x_pix, y_pix]
 
         # Array of data values at x, y pairs for each z
         all_z = np.empty(shape=(z_len, width))
-        for d in range(0, z_len):
+        for z in range(0, z_len):
             # Get transect data for each z level and add to array
-            curr = data[:, :, d]
-            s_points = np.array(chain_points["Cut 1"]) - point_scales
-            dat = func.ip_get_points(s_points, curr, f_config)["Cut"]
+            interpolator = RegularGridInterpolator((sub_y, sub_x), sub_data[:, :, z], method="linear",
+                                                   bounds_error=False, fill_value=None)
+            X, Y = np.meshgrid(new_x, new_y)
+            interp_data = interpolator((Y, X))
+            s_points = ((np.array(chain_points["Cut 1"]) * pix_scales) + coord_scales - sub_scales) / pix_scales
+            dat = func.ip_get_points(s_points, interp_data, f_config)["Cut"]
             for tran in list(chain_points.keys())[3:]:
-                s_points = np.array(chain_points[tran]) - point_scales
-                res = func.ip_get_points(s_points, curr, f_config)["Cut"]
+                s_points = ((np.array(chain_points[tran]) * pix_scales) + coord_scales - sub_scales) / pix_scales
+                res = func.ip_get_points(s_points, interp_data, f_config)["Cut"]
+
                 dat = np.concatenate((dat, res))
-            all_z[d, :] = dat
+            all_z[z, :] = dat
         return all_z
 
     def get_all_z_marker(self):
@@ -892,24 +936,61 @@ class PlotPopup(Popup):
         width = len(z[group][tran]['Cut'])
         ds = self.config[self.f_type]['data']
 
-        # Subset dataset around transect
+        # Subset dataset around transect and convert coordinates
         z_len = len(ds.coords[self.config[self.f_type]['z']].data)
         f_config = copy.copy(self.config)
         config = f_config[self.f_type]
         config['var'] = self.active_vars[0]
         ds = ds[config['var']].rename({config['y']: "y", config['x']: "x", config['z']: "z"})
-        data, scale_points, scales = func.subset_around_transect(ds, points)
-        data = data.transpose('y', 'x', 'z')
-        data['z'] = data['z'].astype(str)
-        data = np.flip(data.data, 0)
+
+        x_points = np.sort(np.array([points[0], points[2]]))
+        y_points = np.sort(np.array([points[1], points[3]]))
+
+        if ds["x"][1] < ds["x"][0]:
+            og_x = ds["x"][::-1]
+        else:
+            og_x = ds["x"]
+
+        if ds["y"][1] < ds["y"][0]:
+            og_y = ds["y"][::-1]
+        else:
+            og_y = ds["y"]
+        x_pix = min(abs(ds["x"].data[:-1] - ds["x"].data[1:]))
+        y_pix = min(abs(ds["y"].data[:-1] - ds["y"].data[1:]))
+        curr_x = np.arange(ds["x"].min(), ds["x"].max() + x_pix, x_pix)
+        curr_y = np.arange(ds["y"].min(), ds["y"].max() + y_pix, y_pix)
+
+        x_vals = x_points + curr_x.min()
+        y_vals = y_points + curr_y.min()
+
+        sub_x = og_x[np.searchsorted(og_x, x_vals[0]) - 1:np.searchsorted(og_x, x_vals[1]) + 1]
+        new_x = np.arange(sub_x[0], sub_x[-1] + x_pix, x_pix)
+        sub_y = og_y[np.searchsorted(og_y, y_vals[0]) - 1:np.searchsorted(og_y, y_vals[1]) + 1]
+        new_y = np.arange(sub_y[0], sub_y[-1] + y_pix, y_pix)
+
+        sub_data = ds.sel({"x": sub_x, "y": sub_y})
+        sub_data = sub_data.transpose("y", "x", "z")
+        sub_data['z'] = sub_data['z'].astype(str)
+        sub_data = sub_data.data
+        if ds["z"][1] < ds["z"][0]:
+            sub_data = np.flip(sub_data, 2)
+
+        coord_scales = [curr_x.min(), curr_y.min(), curr_x.min(), curr_y.min()]
+        sub_scales = [new_x.min(), new_y.min(), new_x.min(), new_y.min()]
+        pix_scales = [x_pix, y_pix, x_pix, y_pix]
+
+        new_points = (np.array(points) * pix_scales + coord_scales - sub_scales) / pix_scales
 
         # Array of data values at x, y pairs for each z
         all_z = np.empty(shape=(z_len, width))
-        for d in range(0, z_len):
+        for z in range(0, z_len):
             # Get transect data for each z level and add to array
-            curr = data[:, :, d]
-            dat = func.ip_get_points(scale_points, curr, f_config)
-            all_z[d, :] = dat['Cut']
+            interpolator = RegularGridInterpolator((sub_y, sub_x), sub_data[:, :, z], method="linear",
+                                                   bounds_error=False, fill_value=None)
+            X, Y = np.meshgrid(new_x, new_y)
+            interp_data = interpolator((Y, X))
+            dat = func.ip_get_points(new_points, interp_data, f_config)
+            all_z[z, :] = dat["Cut"]
         return all_z
 
     def plot_active(self):
@@ -1071,23 +1152,19 @@ class PlotPopup(Popup):
                         # Multiple Z selection
                         values[var][z] = {}
                         config["z_val"] = z
-                        curr = func.sel_data(config)
-                        values[var][z] = self.get_transect_data(curr)
+                        values[var][z] = self.get_transect_data(config)
                 else:
-                    curr = func.sel_data(config)
-                    values[var] = self.get_transect_data(curr)
-
+                    values[var] = self.get_transect_data(config)
         else:
-            curr = np.asarray(im.open(config))
-            values = self.get_transect_data(curr)
+            values = self.get_transect_data(config)
         return values
 
-    def get_transect_data(self, curr):
+    def get_transect_data(self, config):
         """
         Iterates through the active transect points and returns the transect data.
 
         Args:
-            curr: Either a Dataset (NetCDF) or a 2D array (Image) to take transect data from
+            config: Either a Dataset (NetCDF) or a 2D array (Image) to take transect data from
 
         Return:
             Returns dictionary of nested tool group dictionaries of transect data
@@ -1100,43 +1177,37 @@ class PlotPopup(Popup):
                 if self.active_transects[key][tran]:
                     # All transects selected
                     if tran == "Average":
-                        val_dict[key][tran] = self.get_average(key, curr)
+                        val_dict[key][tran] = self.get_average(key, config)
                     else:
-                        sub_d, sub_p, scales = func.subset_around_transect(curr, self.all_transects[key][tran])
+                        sub_d, sub_p, scales = func.subset_around_transect(config, self.all_transects[key][tran])
                         if self.f_type == "image":
                             x_lab = "x"
                             y_lab = "y"
-                            dat = sub_d
                         else:
                             x_lab = self.config[self.f_type]["x"]
                             y_lab = self.config[self.f_type]["y"]
-                            dat = np.flip(sub_d.data, 0)
-                        val_dict[key][tran] = func.ip_get_points(sub_p, dat, self.config)
-                        val_dict[key][tran][x_lab] = [x + scales[1] for x in val_dict[key][tran][x_lab]]
-                        val_dict[key][tran][y_lab] = [x + scales[0] for x in val_dict[key][tran][y_lab]]
+                        val_dict[key][tran] = func.ip_get_points(sub_p, sub_d, self.config)
+                        val_dict[key][tran][x_lab] = [x + scales[0] for x in val_dict[key][tran][x_lab]]
+                        val_dict[key][tran][y_lab] = [y + scales[1] for y in val_dict[key][tran][y_lab]]
 
             if len(val_dict[key]) == 0:
                 val_dict.pop(key)
         return val_dict
 
-    def get_average(self, key, curr):
+    def get_average(self, key, config):
         """
         Finds average of all transects in a marker. Transect width must be the same for the entire marker.
 
         Args:
             key (str): 'Marker #'
-            curr: 2D array, currently loaded dataset
+            config: 2D array, currently loaded dataset
 
         Returns:
             1D array of length of transect width containing average transect values for the marker.
         """
         dat = np.zeros(self.all_transects[key]['Width'][0])
         for tran in list(self.all_transects[key].keys())[3:]:
-            sub_d, sub_p, scales = func.subset_around_transect(curr, self.all_transects[key][tran])
-            if self.f_type == "image":
-                data = sub_d
-            else:
-                data = np.flip(sub_d.data, 0)
-            dat += func.ip_get_points(sub_p, data, self.config)['Cut']
+            sub_d, sub_p, scales = func.subset_around_transect(config, self.all_transects[key][tran])
+            dat += func.ip_get_points(sub_p, sub_d, self.config)['Cut']
         dat = dat / len(list(self.all_transects[key].keys())[3:])
         return list(dat)

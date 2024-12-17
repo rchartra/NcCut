@@ -20,6 +20,7 @@ from kivy.metrics import dp
 from PIL import Image as im
 from PIL import ImageEnhance
 import numpy as np
+from scipy.interpolate import RegularGridInterpolator
 import matplotlib.pyplot as plt
 import io
 import warnings
@@ -364,7 +365,32 @@ class FileDisplay(ScatterLayout):
         Normalizes data and then applies colormap and contrast settings and then calls for the creation of colorbar.
         Loads image into memory as io.BytesIO object so kivy can make image out of an array.
         """
-        self.nc_data = np.flip(func.sel_data(self.config['netcdf']).data, 0)
+        # Select data
+        config = self.config["netcdf"]
+        if config['z'] == 'N/A':
+            # 2D NetCDF data
+            ds = config['data'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
+            data = ds.sel(y=ds['y'], x=ds['x'])
+        else:
+            # 3D NetCDF data
+            ds = config['data'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
+            ds['z'] = ds['z'].astype(str)
+            data = ds.sel(y=ds['y'], x=ds['x'], z=config['z_val'])
+        x_coord = ds['x'].data
+        y_coord = ds['y'].data
+        data = data.transpose('y', 'x')
+
+        # Interpolate dataset dimensions to coordinate data
+        interp = RegularGridInterpolator((y_coord, x_coord), data.data, method="linear", bounds_error=False,
+                                         fill_value=None)
+        x_pix = min(abs(x_coord[:-1] - x_coord[1:]))
+        y_pix = min(abs(y_coord[:-1] - y_coord[1:]))
+        x = np.arange(x_coord.min(), x_coord.max() + x_pix, x_pix)
+        y = np.arange(y_coord.min(), y_coord.max() + y_pix, y_pix)
+        xg, yg = np.meshgrid(x, y)
+        self.nc_data = np.flip(interp((yg, xg)), 0)
+
+        # Turn into image
         with warnings.catch_warnings(record=True) as w:
             n_data = (self.nc_data - np.nanmin(self.nc_data)) / (np.nanmax(self.nc_data) - np.nanmin(self.nc_data))
             if len(w) > 0 and issubclass(w[-1].category, RuntimeWarning):

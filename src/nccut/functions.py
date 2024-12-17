@@ -21,11 +21,11 @@ import kivy.uix as ui
 from functools import partial
 from scipy.interpolate import RegularGridInterpolator, CubicSpline
 import numpy as np
+from PIL import Image as im
 import math
 import io
 import warnings
 import itertools
-import xarray as xr
 import matplotlib
 from pathlib import Path
 import tomli
@@ -507,72 +507,82 @@ def get_color_bar(colormap, data, face_color, text_color, font):
     return plot
 
 
-def sel_data(config):
+def subset_around_transect(config, points):
     """
-    Selects data from NetCDF file according to dimension and variable selections.
+    Determines and loads a subset of the data that surrounds the transect.
 
     Args:
-        config: Dictionary of key details about NetCDF file as outlined in
-            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs`
+        config: config (dict): Information necessary for accessing the loaded data. For images this is the file path and
+            for NetCDF files this is a dictionary of configuration values (see
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+        points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
 
     Returns:
-        2D Dataset from NetCDF file according to selections transposed to (y, x).
+        Subset of data, rescaled points [X1, Y1, X2, Y2], list of [X, Y] rescale factors>. If passed data is an
+        image doesn't do sub-secting since efficiency is less of an issue.
     """
-    # IMPORTANT: Numpy indexes (row, column) with (0, 0) at top left corner
-    if config['z'] == 'N/A':
+    if isinstance(config, str):
+        # Don't subsect if image file
+        img = np.flip(np.asarray(im.open(config)), 0)
+        return img, points, [0, 0]
+    elif config['z'] == 'N/A':
         # 2D NetCDF data
         ds = config['data'][config['var']].rename({config['y']: 'y', config['x']: 'x'})
-        data = ds.sel(y=ds['y'], x=ds['x'])
     else:
         # 3D NetCDF data
         ds = config['data'][config['var']].rename({config['y']: 'y', config['x']: 'x', config['z']: 'z'})
         ds['z'] = ds['z'].astype(str)
-        data = ds.sel(y=ds['y'], x=ds['x'], z=config['z_val'])
-    return data.transpose('y', 'x')
+        ds = ds.sel(z=config["z_val"])
+    ds["x"] = ds["x"].astype(float)
+    ds["y"] = ds["y"].astype(float)
 
+    x_points = np.sort(np.array([points[0], points[2]]))
+    y_points = np.sort(np.array([points[1], points[3]]))
 
-def subset_around_transect(ds, points):
-    """
-    Determines a subset of the data with appropriate margins that surround the transect.
-
-    If room is available around
-
-    Args:
-        ds: Data to be subset from. Either a DataArray (X and Y coordinates must be named "x" and "y") or a 2D array
-        points: 4 element 1D array with coordinates of the two transect end points: [X1, Y1, X2, Y2]
-
-    Returns:
-        Subset of data, rescaled points [X1, Y1, X2, Y2], list of [Y, X] rescale factors
-    """
-    # Determine x, y bounds for subset area around transect
-    ys_xs = [sorted([points[1], points[3]]), sorted([points[0], points[2]])]
-    ys_xs = [c for cs in ys_xs for c in cs]
-    if isinstance(ds, xr.DataArray):
-        margins = [len(ds.coords["y"].data), len(ds.coords["x"].data)]
+    # Get original coordinates in ascending order
+    if ds["x"][1] < ds["x"][0]:
+        og_x = ds["x"][::-1]
     else:
-        margins = ds.shape
-    # Include a buffer margin if possible for interpolating
-    for i, p in enumerate(ys_xs):
-        if i % 2 == 0:  # Minimums
-            if p < 3:
-                ys_xs[i] = int(np.floor(p))
-            else:
-                ys_xs[i] = int(np.floor(p)) - 3
-        else:  # Maximums
-            if p > margins[int(i / 3)] - 3:
-                ys_xs[i] = int(np.floor(p))
-            else:
-                ys_xs[i] = int(np.floor(p)) + 3
-    # Subset dataset around the transect
-    if isinstance(ds, xr.DataArray):
-        ds = ds.isel({"y": slice(ys_xs[0], ys_xs[1] + 1), "x": slice(ys_xs[2], ys_xs[3] + 1)})
+        og_x = ds["x"]
+
+    if ds["y"][1] < ds["y"][0]:
+        og_y = ds["y"][::-1]
     else:
-        ds = ds[(margins[0] - 1 - ys_xs[1]): (margins[0] - ys_xs[0]), ys_xs[2]: ys_xs[3] + 1]
+        og_y = ds["y"]
 
-    points = [points[0] - ys_xs[2], points[1] - ys_xs[0], points[2] - ys_xs[2], points[3] - ys_xs[0]]
+    # Create new, equidistant coordinate arrays
+    x_pix = min(abs(og_x.data[:-1] - og_x.data[1:]))
+    y_pix = min(abs(og_y.data[:-1] - og_y.data[1:]))
 
-    scales = [ys_xs[0], ys_xs[2]]
-    return ds, points, scales
+    curr_x = np.arange(og_x.min(), og_x.max() + x_pix, x_pix)
+    curr_y = np.arange(og_y.min(), og_y.max() + y_pix, y_pix)
+
+    # Convert pixel coordinates to netcdf_coordinates
+    x_vals = x_points * x_pix + curr_x.min()
+    y_vals = y_points * y_pix + curr_y.min()
+
+    # Determine original data to grab that surrounds selected points
+    sub_x = og_x[np.searchsorted(og_x, x_vals[0]) - 1:np.searchsorted(og_x, x_vals[1]) + 1]
+    new_x = np.arange(sub_x[0], sub_x[-1] + x_pix, x_pix)
+    sub_y = og_y[np.searchsorted(og_y, y_vals[0]) - 1:np.searchsorted(og_y, y_vals[1]) + 1]
+    new_y = np.arange(sub_y[0], sub_y[-1] + y_pix, y_pix)
+    # Select subset
+    sub_data = ds.sel({"x": sub_x, "y": sub_y})
+    sub_data = sub_data.transpose("y", "x")
+    # Shift points to subset coordinate system
+
+    coord_scales = [curr_x.min(), curr_y.min(), curr_x.min(), curr_y.min()]
+    sub_scales = [new_x.min(), new_y.min(), new_x.min(), new_y.min()]
+    pix_scales = [x_pix, y_pix, x_pix, y_pix]
+
+    new_points = (np.array(points) * pix_scales + coord_scales - sub_scales) / pix_scales
+
+    # Interpolate subset of data to equidistant grid
+    interpolator = RegularGridInterpolator((sub_y, sub_x), sub_data.data, method="linear",
+                                           bounds_error=False, fill_value=None)
+    X, Y = np.meshgrid(new_x, new_y)
+    interp_data = interpolator((Y, X))
+    return interp_data, new_points, [new_x.min() - og_x.data.min(), new_y.min() - og_y.data.min()]
 
 
 def ip_get_points(line, curr, config):
@@ -629,7 +639,6 @@ def ip_get_points(line, curr, config):
         x_lab = "x"
         y_lab = "y"
     b = line[1] - m * (line[0])
-
     # Get interpolation object
     ix = np.arange(0, img.shape[1])
     iy = np.arange(0, img.shape[0])
@@ -638,7 +647,6 @@ def ip_get_points(line, curr, config):
     if list(config.keys())[0] == "image" and len(z.shape) == 3:
         # If file is an image, take average of RGB values as point value
         z = np.mean(z, axis=2)
-    z = np.flipud(z)
 
     int_pol = RegularGridInterpolator((iy, ix), z, method='linear', bounds_error=False, fill_value=None)
     if line[0] > line[2]:
@@ -655,15 +663,20 @@ def ip_get_points(line, curr, config):
     # If NetCDF and valid coordinate data is available, return that
 
     if list(config.keys())[0] == "netcdf":
-        x = config["netcdf"]["data"].coords[config["netcdf"][x_lab]].data
-        y = config["netcdf"]["data"].coords[config["netcdf"][y_lab]].data
+        x_coord = config["netcdf"]["data"].coords[config["netcdf"][x_lab]].data
+        y_coord = config["netcdf"]["data"].coords[config["netcdf"][y_lab]].data
         try:
-            x = x.astype(float)
+            x_coord = x_coord.astype(float)
+            y_coord = y_coord.astype(float)
+            x_pix = min(abs(x_coord[:-1] - x_coord[1:]))
+            y_pix = min(abs(y_coord[:-1] - y_coord[1:]))
+            x = np.arange(x_coord.min(), x_coord.max() + x_pix, x_pix)
+            y = np.arange(y_coord.min(), y_coord.max() + y_pix, y_pix)
+
             xcs = CubicSpline(range(len(x)), x)
             xarr = xcs(xarr)
             x_name = config["netcdf"]["x"]
 
-            y = y.astype(float)
             ycs = CubicSpline(range(len(y)), y)
             yarr = ycs(yarr)
             y_name = config["netcdf"]["y"]

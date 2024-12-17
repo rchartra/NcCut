@@ -74,13 +74,13 @@ class InteractivePlot(ScatterLayout):
         """
         n_data = (self.data - np.nanmin(self.data)) / (np.nanmax(self.data) - np.nanmin(self.data))
 
-        x_grid, y_grid = np.meshgrid(self.z_coords, np.arange(0, n_data.shape[1]))
+        x_grid, y_grid = np.meshgrid(np.arange(0, n_data.shape[1]), self.z_coords)
         plt.figure(frameon=False)
-        plt.pcolormesh(y_grid, x_grid, n_data.T, cmap=self.window.colormap, shading="nearest")
-        plt.gca().invert_yaxis()
+        plt.pcolormesh(x_grid, y_grid, n_data, cmap=self.window.colormap, shading="nearest")
         plt.axis('off')
         self.byte = io.BytesIO()
         plt.savefig(self.byte, format="png", bbox_inches='tight', pad_inches=0)
+        plt.savefig("test.png", format="png")
         self.byte.seek(0)
         plt.close()
 

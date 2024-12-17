@@ -14,6 +14,7 @@ import pooch
 import json
 import tempfile
 import numpy as np
+import xarray as xr
 from functools import partial
 from kivy.metrics import dp
 from kivy.clock import Clock
@@ -536,6 +537,35 @@ class Test(unittest.TestCase):
         self.assertEqual(np.round(display.rotation, 4), float(45), "Display did not rotate 45 degrees")
         display.rotate()
         self.assertEqual(np.round(display.rotation, 4), float(90), "Display only rotated 45 degrees once")
+
+    def test_load_nonuniform_coords(self):
+        """
+        Test that when loading a DataArray when nonuniform coordinates the resulting image is interpolated to the
+        coordinate data
+        :return:
+        """
+        run_app.home.ids.file_in.text = EXAMPLE_3D_PATH
+        run_app.home.load_btn()
+        popup = run_app.home.nc_popup
+        popup.var_select.text = "Theta"
+        popup.x_select.text = "i"
+        popup.y_select.text = "k"
+        popup.z_select.text = "j"
+        popup.depth_select.text = "2780"
+        popup.load.dispatch("on_press")
+        popup.load.dispatch("on_release")
+
+        netcdf_dat = xr.open_dataset(EXAMPLE_3D_PATH)
+        x_coord = netcdf_dat["i"].data
+        y_coord = netcdf_dat["k"].data
+
+        x_pix = min(abs(x_coord[:-1] - x_coord[1:]))
+        y_pix = min(abs(y_coord[:-1] - y_coord[1:]))
+        x = np.arange(x_coord.min(), x_coord.max() + x_pix, x_pix)
+        y = np.arange(y_coord.min(), y_coord.max() + y_pix, y_pix)
+        expected_size = [x.shape[0], y.shape[0]]
+        self.assertEqual(run_app.home.display.size, expected_size, "Loaded data with nonuniform coordinates does not "
+                                                                   "match expected size.")
 
     def test_plot_popup_2d_nc(self):
         """
