@@ -11,7 +11,7 @@ circle_size = 5 # Default tool graphics size, int between [2, 70]
 font_size = 14 # Font size for text elements, int between [8, 24]
 
 [tool_defaults]
-marker_width = 40 # The default width for the marker tool, int between [1, 400]
+orthogonal_width = 40 # The default width for the orthogonal chain tool, int between [1, 400]
 
 [netcdf]
 # Default assumed order of NetCDF file dimensions.

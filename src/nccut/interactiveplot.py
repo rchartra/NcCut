@@ -33,8 +33,8 @@ class InteractivePlot(ScatterLayout):
         Args:
             array (arr): The 2D array of data to be plotted
             z_coords (arr): 1D array of Z Coordinate data
-            bounds (arr): Factors that define the maximum percentage of the layout space that the plot is allowed to take up
-                in both width and height ([w_factor, h_factor])
+            bounds (arr): Factors that define the maximum percentage of the layout space that the plot is allowed to
+                take up in both width and height ([w_factor, h_factor])
             window: Reference to the PlotWindow object that is managing this plot
         """
         super(InteractivePlot, self).__init__(**kwargs)

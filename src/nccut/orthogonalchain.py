@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """
-Singular marker widget.
+Singular orthogonal chain widget.
 
-Graphics and functionality of a singular marker created by the transect marker tool.
+Graphics and functionality of a singular orthogonal chain created by the orthogonal chain tool.
 """
 
 import kivy.uix as ui
@@ -18,11 +18,11 @@ from kivy.core.window import Window
 import nccut.functions as functions
 
 
-class Marker(ui.widget.Widget):
+class OrthogonalChain(ui.widget.Widget):
     """
-    Singular transect marker widget.
+    Singular orthogonal chain widget.
 
-    Graphics and functionality of a singular marker created by the transect marker tool.
+    Graphics and functionality of an orthogonal chain created by the orthogonal chain tool.
     Determines endpoints of where transects should be made orthogonally to the user marked
     out line, and then stores the transects.
 
@@ -48,7 +48,7 @@ class Marker(ui.widget.Widget):
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
             width (int): Initial transect width to use.
         """
-        super(Marker, self).__init__(**kwargs)
+        super(OrthogonalChain, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
         self.t_width = width
@@ -204,7 +204,7 @@ class Marker(ui.widget.Widget):
         if self.clicks != 1:
             self.transects = self.transects[:-1]
         else:
-            # Remove plot and width buttons from sidebar if last point of the marker
+            # Remove plot and width buttons from sidebar if last point of the chain
             if self.parent.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.parent.dbtn)
             if self.parent.width_w in self.home.display.tool_action_widgets:
@@ -224,7 +224,7 @@ class Marker(ui.widget.Widget):
         Args:
             touch: MouseMotionEvent, see kivy docs for details
         """
-        # Draws marker line and points.
+        # Draws chain line and points.
         proceed = False
         if self.uploaded:  # If being uploaded, just needs to be within image bounds
             if touch.pos[0] < self.size[0] and touch.pos[1] < self.size[1]:
@@ -268,7 +268,7 @@ class Marker(ui.widget.Widget):
                         functions.alert("Orthogonal point out of bounds", self.home)
 
             else:
-                # If first click, adds marker number
+                # If first click, adds chain number
                 self.number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=self.c_size[0] * 2)
                 self.add_widget(self.number)
 
@@ -276,8 +276,8 @@ class Marker(ui.widget.Widget):
         """
         Draw line from most recent click point to user cursor.
 
-        Updates anytime cursor moves. Does not draw if not current marker being drawn or if tool
-        in dragging mode. Also won't draw if marker was uploaded and it was final marker.
+        Updates anytime cursor moves. Does not draw if not current chain being drawn or if tool
+        in dragging mode. Also won't draw if chain was uploaded and it was final chain.
 
         Args:
             instance: WindowSDL instance, current window loaded (not used by method)
@@ -291,7 +291,7 @@ class Marker(ui.widget.Widget):
                         Color(self.l_color.r, self.l_color.g, self.l_color.b)
                         self.curr_line.points = [self.points[-1][0:2], self.to_widget(pos[0], pos[1])]
         else:
-            # Don't draw if not current marker or in dragging mode
+            # Don't draw if not current chain or in dragging mode
             self.stop_drawing()
 
     def stop_drawing(self):

@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """
-Marker width adjustment tool.
+Orthogonal chain width adjustment tool.
 
 Creates sidebar element that allows the control of width of orthogonal transects made via the
-transect marker tool.
+orthogonal chain tool.
 """
 
 import kivy.uix as ui
@@ -15,37 +15,37 @@ from kivy.metrics import dp
 import nccut.functions as func
 
 
-class MarkerWidth(ui.boxlayout.BoxLayout):
+class OrthogonalChainWidth(ui.boxlayout.BoxLayout):
     """
-    Marker width adjustment tool.
+    Orthogonal Chain width adjustment tool.
 
     Creates sidebar element that allows the control of width of orthogonal transects made via the
-    transect marker tool.
+    orthogonal chain tool.
 
     Attributes:
         spacing: The spacing between widgets in the layout
         txt: kivy.uix.textinput.TextInput widget where user enters their desired width
         btn: 'Set' Button
-        marker: Current :class:`nccut.multimarker.MultiMarker` instance
+        orthogonal_chain: Current :class:`nccut.multiorthogonalchain.MultiOrthogonalChain` instance
         min (int): Minimum width allowed
         max (int): Maximum width allowed
     """
-    def __init__(self, marker, **kwargs):
+    def __init__(self, orthogonal_chain, **kwargs):
         """
         Defines graphical elements.
 
         Args:
-            marker: Active :class:`nccut.multimarker.MultiMarker` instance
+            orthogonal_chain: Active :class:`nccut.multiorthogonalchain.MultiOrthogonalChain` instance
         """
-        super(MarkerWidth, self).__init__(**kwargs)
+        super(OrthogonalChainWidth, self).__init__(**kwargs)
         self.spacing = dp(8)
-        self.font_size = marker.home.font
+        self.font_size = orthogonal_chain.home.font
         self.txt = TextInput(hint_text="Width", size_hint=(.7, 1), font_size=self.font_size)
         self.btn = func.RoundedButton(text="Set", size_hint=(.3, 1), font_size=self.font_size)
         self.btn.bind(on_press=lambda x: self.update())
         self.add_widget(self.txt)
         self.add_widget(self.btn)
-        self.marker = marker
+        self.orthogonal_chain = orthogonal_chain
         self.min = 1
         self.max = 400
 
@@ -60,10 +60,10 @@ class MarkerWidth(ui.boxlayout.BoxLayout):
 
     def update(self):
         """
-        Update width of current marker if given a valid width.
+        Update width of current orthogonal chain if given a valid width.
         """
         num = self.txt.text
         if num.isnumeric():
             num = int(num)
             if self.min <= num <= self.max:
-                self.marker.update_width(num)
+                self.orthogonal_chain.update_width(num)

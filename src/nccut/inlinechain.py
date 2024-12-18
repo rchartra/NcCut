@@ -1,5 +1,5 @@
 """
-Singular chain widget.
+Singular inline chain widget.
 
 Graphics and functionality of a singular chain created by the transect chain tool.
 """
@@ -11,12 +11,12 @@ from kivy.uix.label import Label
 from kivy.core.window import Window
 
 
-class Chain(ui.widget.Widget):
+class InlineChain(ui.widget.Widget):
     """
-    Singular transect chain widget.
+    Singular inline chain widget.
 
-    Graphics and functionality of a singular chain created by the transect chain tool. Draws point on each user click
-    and connects points with a line creating a chain of transects.
+    Graphics and functionality of a singular inline chain created by the inline chain tool. Draws point on each user
+    click and connects points with a line creating a chain of transects.
 
     Attributes:
         clicks (int): Number of clicks user has made. Decreases when points are deleted.
@@ -38,7 +38,7 @@ class Chain(ui.widget.Widget):
         Args:
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         """
-        super(Chain, self).__init__(**kwargs)
+        super(InlineChain, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
         self.home = home

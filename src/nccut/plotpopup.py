@@ -85,11 +85,11 @@ class PlotPopup(Popup):
         is_open (bool): Whether popup is currently open
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance.
         all_transects (dict): Dictionary of data from all transects marked out by the user.
-        t_type (str): 'Marker' if transects came from transect marker tool or 'Chain' if transects came from transect
-            chain tool
+        t_type (str): 'Orthogonal' if transects came from orthogonal chain tool or 'Inline' if transects came from
+            inline chain tool
         active_transects (dict): Dictionary of currently selected transects. 'Click <X Cord>', 'Click <Y Cord>', and
-            'Width' fields should be removed (if marker tool) to simplify plotting. Contains average
-            of transects if marker tool was used with a constant transect width.
+            'Width' fields should be removed (if orthogonal chain tool) to simplify plotting. Contains average
+            of transects if orthogonal chain tool was used with a constant transect width.
         f_type (str): If file is NetCDF file: 'netcdf'. If file is a JPG or PNG: 'image'.
         config (dict): Information necessary for accessing the file. For images this is the file path and for NetCDF
             files this is a dictionary of configuration values (see
@@ -167,10 +167,10 @@ class PlotPopup(Popup):
         self.font = self.home.font
         self.f_type = list(config.keys())[0]
         self.config = config
-        if list(self.all_transects.keys())[0][0:-2] == "Marker":
-            self.t_type = "Marker"
-        elif list(self.all_transects.keys())[0][0:-2] == "Chain":
-            self.t_type = "Chain"
+        if list(self.all_transects.keys())[0][0:-2] == "Orthogonal Chain":
+            self.t_type = "Orthogonal"
+        elif list(self.all_transects.keys())[0][0:-2] == "Inline Chain":
+            self.t_type = "Inline"
 
         # Create nested dictionary of Booleans indicating which transects are currently selected
         self.active_transects = {}
@@ -179,16 +179,16 @@ class PlotPopup(Popup):
         for key in list(act.keys()):
             self.active_transects[key] = {}
             # Remove fields that don't get plotted
-            if self.t_type == "Marker":
+            if self.t_type == "Orthogonal":
                 for k in list(act[key].keys())[:3]:
                     act[key].pop(k)
-            elif self.t_type == "Chain":
+            elif self.t_type == "Inline":
                 for k in list(act[key].keys())[:2]:
                     act[key].pop(k)
             self.active_transects[key] = dict.fromkeys(act[key], False)
 
-            # If marker and all values same width, add an average option
-            if self.t_type == "Marker":
+            # If orthogonal and all values same width, add an average option
+            if self.t_type == "Orthogonal":
                 w_lis = self.all_transects[key]['Width']
                 if all(x == w_lis[0] for x in w_lis):
                     new = {"Average": False}
@@ -199,8 +199,8 @@ class PlotPopup(Popup):
         first = list(self.active_transects.keys())[0]
         self.active_transects[first] = dict.fromkeys(self.active_transects[first], True)
 
-        # If marker start with average not selected
-        if self.t_type == "Marker":
+        # If orthogonal chain start with average not selected
+        if self.t_type == "Orthogonal":
             w_lis = self.all_transects[first]['Width']
             if all(x == w_lis[0] for x in w_lis):
                 self.active_transects[first]["Average"] = False
@@ -233,10 +233,10 @@ class PlotPopup(Popup):
         self.widgets_with_text = [self.ids.sel_transects_label, self.ids.sel_transects_btn]
 
         # Transect selection
-        if self.t_type == "Marker":
-            self.t_drop = self.get_marker_dropdown()
-        elif self.t_type == "Chain":
-            self.t_drop = self.get_chain_dropdown()
+        if self.t_type == "Orthogonal":
+            self.t_drop = self.get_orthogonal_chain_dropdown()
+        elif self.t_type == "Inline":
+            self.t_drop = self.get_inline_chain_dropdown()
         self.ids.sel_transects_btn.fbind("on_press", self.t_drop.open_obj, self.ids.sel_transects_btn)
 
         if self.f_type == "netcdf":
@@ -294,6 +294,9 @@ class PlotPopup(Popup):
         self.font_adapt(self.font)
 
     def clean(self):
+        """
+        Cleans plot and optional widgets from plotting popup
+        """
         self.ids.plotting.remove_widget(self.plot)
         while len(self.ids.sidebar.children) > 2:
             self.ids.sidebar.remove_widget(self.ids.sidebar.children[1])
@@ -493,7 +496,7 @@ class PlotPopup(Popup):
 
     def add_group_info(self, dicti):
         """
-        Adds back fields removed for plotting purposes if marker or chain tool was used
+        Adds back fields removed for plotting purposes
 
         Args:
             dicti (dict): Dictionary of transect data from a single group
@@ -501,14 +504,14 @@ class PlotPopup(Popup):
         Returns:
             Dictionary of transect data with non-plotted data fields added back in.
         """
-        if list(dicti.keys())[0][0:6] == "Marker":
-            for marker in list(dicti.keys()):
-                for key in list(self.all_transects[marker].keys())[:3]:
-                    dicti[marker][key] = list(self.all_transects[marker][key])
-        elif list(dicti.keys())[0][0:5] == "Chain":
-            for chain in list(dicti.keys()):
-                for key in list(self.all_transects[chain].keys())[:2]:
-                    dicti[chain][key] = list(self.all_transects[chain][key])
+        if list(dicti.keys())[0][0:10] == "Orthogonal":
+            for o in list(dicti.keys()):
+                for key in list(self.all_transects[o].keys())[:3]:
+                    dicti[o][key] = list(self.all_transects[o][key])
+        elif list(dicti.keys())[0][0:6] == "Inline":
+            for i in list(dicti.keys()):
+                for key in list(self.all_transects[i].keys())[:2]:
+                    dicti[i][key] = list(self.all_transects[i][key])
         return dicti
 
     def download_all_z_data(self, f_path):
@@ -529,14 +532,14 @@ class PlotPopup(Popup):
         except Exception as error:
             func.alert_popup(str(error))
 
-    def get_chain_dropdown(self):
+    def get_inline_chain_dropdown(self):
         """
-        Build dropdown menu for selecting chains.
+        Build dropdown menu for selecting entire inline chains.
 
         Returns:
             :class:`nccut.plotpopup.BackgroundDropDown` for transect options
         """
-        # Get dropdown for transect options
+        # Get dropdown for chain options
         drop = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(200))
         all_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(30) + self.font)
         drop.add_widget(all_box)
@@ -545,7 +548,7 @@ class PlotPopup(Popup):
             c_box = ui.boxlayout.BoxLayout(spacing=dp(5), size_hint_y=None, height=dp(30) + self.font)
             but = Button(text=i, size_hint=(0.5, 1), background_color=[0, 0, 0, 0], font_size=self.font)
             check = CheckBox(active=all(self.active_transects[i].values()), size_hint=(0.5, 1))
-            check.bind(active=lambda x, y, t=i: self.on_chain_checkbox(x, t))
+            check.bind(active=lambda x, y, t=i: self.on_inline_chain_checkbox(x, t))
             but.bind(on_press=lambda x, c=check: self.on_check_button(c))
             c_box.add_widget(but)
             c_box.add_widget(check)
@@ -554,14 +557,14 @@ class PlotPopup(Popup):
         all_box.add_widget(all_btn)
         return drop
 
-    def on_chain_checkbox(self, check, chain, *args):
+    def on_inline_chain_checkbox(self, check, chain, *args):
         """
         Updates plot when a chain checkbox is clicked. Safeguards so at least one chain
         is always selected.
 
         Args:
             check: Reference to kivy.uix.checkbox.CheckBox in transect list
-            chain (str): Name of chain 'Chain #'
+            chain (str): Name of chain 'Inline Chain #'
         """
         # Select or deselect chain
         for tran in list(self.active_transects[chain].keys()):
@@ -582,41 +585,41 @@ class PlotPopup(Popup):
             self.active_data = self.get_data()
             self.update_plot()
 
-    def get_marker_dropdown(self):
+    def get_orthogonal_chain_dropdown(self):
         """
-        Build dropdown menu for Markers with sub-menus for the individual transects.
+        Build dropdown menu for orthogonal chains with sub-menus for the individual transects.
 
         Returns:
-            :class:`nccut.plotpopup.BackgroundDropDown` for Marker options
+            :class:`nccut.plotpopup.BackgroundDropDown` for orthogonal chain options
         """
-        # Get dropdown for marker options
-        marker_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
+        # Get dropdown for orthogonal chain options
+        chain_list = BackgroundDropDown(auto_width=False, width=dp(180), max_height=dp(300))
         for i in list(self.all_transects.keys()):
             g_box = ui.boxlayout.BoxLayout(spacing=dp(10), padding=dp(10), size_hint_y=None, height=dp(30) + self.font,
                                            width=dp(180))
             btn = func.RoundedButton(text=i, font_size=self.font)
             btn.bind(on_press=lambda but=btn, txt=i: self.transect_drop(txt, but))
             g_box.add_widget(btn)
-            marker_list.add_widget(g_box)
-        return marker_list
+            chain_list.add_widget(g_box)
+        return chain_list
 
-    def transect_drop(self, marker, button):
+    def transect_drop(self, chain, button):
         """
-        Attaches transect dropdowns to marker buttons in marker dropdown menu
+        Attaches transect dropdowns to orthogonal chain buttons in orthogonal chain dropdown menu
 
         Args:
-            marker (str): Marker label. Ex: 'Marker #'
-            button: RoundedButton, Marker's button in marker dropdown menu
+            chain (str): Orthogonal chain label. Ex: 'Orthogonal Chain #'
+            button: RoundedButton, Orthogonal chain's button in orthogonal chain dropdown menu
         """
-        temp_transect_drop = self.get_transect_dropdown(marker)
+        temp_transect_drop = self.get_transect_dropdown(chain)
         temp_transect_drop.open(button)
 
     def get_transect_dropdown(self, key):
         """
-        Build dropdown menu for selecting transects from a marker.
+        Build dropdown menu for selecting orthogonal transects from an orthogonal chain.
 
         Args:
-            key (str): Name of marker selecting from. Ex: 'Marker #'
+            key (str): Name of orthogonal chain selecting from. Ex: 'Orthogonal Chain #'
 
         Returns:
             :class:`nccut.plotpopup.BackgroundDropDown` for transect options
@@ -641,7 +644,7 @@ class PlotPopup(Popup):
 
     def select_all(self, boxes):
         """
-        If all checkboxes are checked, uncheck all boxes. Otherwise check all boxes. If a box is the only box checked
+        If all checkboxes are checked, uncheck all boxes. Otherwise, check all boxes. If a box is the only box checked
         across all groups it will remain checked no matter what.
 
         Args:
@@ -656,25 +659,25 @@ class PlotPopup(Popup):
             for c_box in boxes:
                 c_box.children[0].active = False
 
-    def on_transect_checkbox(self, check, marker, transect, *args):
+    def on_transect_checkbox(self, check, chain, transect, *args):
         """
         Updates plot when a transect checkbox is clicked. Safeguards so at least one transect
         is always selected.
 
         Args:
             check: Reference to kivy.uix.checkbox.CheckBox in transect list
-            marker (str): Name of marker selecting from. Ex: 'Marker #'
+            chain (str): Name of orthogonal chain selecting from. Ex: 'Orthogonal Chain #'
             transect (str): Name of transect 'Cut #'
         """
         # Select or deselect transect
-        self.active_transects[marker][transect] = not self.active_transects[marker][transect]
+        self.active_transects[chain][transect] = not self.active_transects[chain][transect]
 
         # Check this isn't the last transect selected
         count = 0
         for key in list(self.active_transects.keys()):  # Count current transects
             count += sum(self.active_transects[key].values())
         if count == 0:  # If last transect unchecked, recheck and ignore
-            self.active_transects[marker][transect] = not self.active_transects[marker][transect]
+            self.active_transects[chain][transect] = not self.active_transects[chain][transect]
             check.active = True
             return
         else:
@@ -784,7 +787,7 @@ class PlotPopup(Popup):
         popup.
         """
         plot_ok = False
-        if self.t_type == "Marker":
+        if self.t_type == "Orthogonal":
             t_count = 0
             for key in list(self.active_transects.keys()):
                 # Count current transects selected
@@ -794,10 +797,10 @@ class PlotPopup(Popup):
                 t_count += sum(no_avg.values())
             if t_count == 1 and len(self.active_vars) == 1:
                 plot_ok = True
-        elif self.t_type == "Chain":
+        elif self.t_type == "Inline":
             c_count = 0
             for key in list(self.active_transects.keys()):
-                # Count current transects selected
+                # Count current chains selected
                 c_count += all(self.active_transects[key].values())
             if c_count == 1 and len(self.active_vars) == 1:
                 plot_ok = True
@@ -805,10 +808,10 @@ class PlotPopup(Popup):
             # Go ahead and plot
             try:
                 self.ids.plotting.remove_widget(self.plot)
-                if self.t_type == "Marker":
-                    z_data = self.get_all_z_marker()
-                elif self.t_type == "Chain":
-                    z_data = self.get_all_z_chain()
+                if self.t_type == "Orthogonal":
+                    z_data = self.get_all_z_orthogonal_chain()
+                elif self.t_type == "Inline":
+                    z_data = self.get_all_z_inline_chain()
                 self.plot = PlotWindow(self.config[self.f_type], z_data, self.home.display.colormap, size_hint=(0.7, 1))
                 self.plot.bind(size=self.plot.load)
                 self.ids.plotting.add_widget(self.plot, len(self.ids.plotting.children))
@@ -818,9 +821,9 @@ class PlotPopup(Popup):
             # Error popup if more than one transect and/or variable is selected
             content = ui.boxlayout.BoxLayout()
             error = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
-            if self.t_type == "Marker":
+            if self.t_type == "Orthogonal":
                 text = "transect"
-            elif self.t_type == "Chain":
+            elif self.t_type == "Inline":
                 text = "chain"
             lab = Label(text="Please only select one " + text + " and one variable", size_hint=(0.8, 1))
             close = Button(text="Close", size_hint=(0.2, 1))
@@ -829,10 +832,10 @@ class PlotPopup(Popup):
             content.add_widget(close)
             error.open()
 
-    def get_all_z_chain(self):
+    def get_all_z_inline_chain(self):
         """
-        Gather data over all z values for current variable when chain tool used. Assumes only one variable and only one
-        chain are selected.
+        Gather data over all z values for current variable when inline chain tool was used. Assumes only one variable
+        and only one chain are selected.
 
         Returns:
             3D Array of concatenated transect data over all z values in the NetCDF file.
@@ -919,7 +922,7 @@ class PlotPopup(Popup):
             all_z[z, :] = dat
         return all_z
 
-    def get_all_z_marker(self):
+    def get_all_z_orthogonal_chain(self):
         """
         Gather transect data over all z values for current variable. Assumes only one variable and only one transect are
         selected.
@@ -1054,7 +1057,7 @@ class PlotPopup(Popup):
         dat = copy.copy(data)
         plot_dat = {}
 
-        if list(dat.keys())[0][0:6] != "Marker" and list(dat.keys())[0][0:5] != "Chain":
+        if list(dat.keys())[0][0:10] != "Orthogonal" and list(dat.keys())[0][0:6] != "Inline":
             # Gather data for all transects selected across all groups for all Z levels selected
             for z in list(dat.keys()):
                 if len(z) >= 12:
@@ -1075,9 +1078,9 @@ class PlotPopup(Popup):
         ax.set_ylabel(label.capitalize())
         if not self.f_type == "netcdf":
             ax.set_ylim(ymin=0)
-        if self.t_type == "Marker":
+        if self.t_type == "Orthogonal":
             x_text = "Normalized Long Transect Distance"
-        elif self.t_type == "Chain":
+        elif self.t_type == "Inline":
             x_text = "Normalized Long Chain Distance"
         ax.set_xlabel(x_text)
         plt.tight_layout()
@@ -1086,20 +1089,20 @@ class PlotPopup(Popup):
 
     def plot_gather_data(self, dat, name_start, plot_dat):
         """
-        Iterates group transect data and gathers it into a dictionary for plotting. If tool used is chain, ensures that
-        transect data is in direction user clicked the points (left to right or right to left).
+        Iterates group transect data and gathers it into a dictionary for plotting. If tool used is inline chain,
+        ensures that transect data is in direction user clicked the points (left to right or right to left).
 
         Args:
-            dat (dict): Dictionary of all chains or all markers transect data that are selected for plotting
+            dat (dict): Dictionary of all chains or all transect data that are selected for plotting
             name_start (str): Start of string to use as key name for plotting dictionary. Key names are ultimately used
                 for labels in plot legend. 'Z: <z_value>' if 3D NetCDF data, otherwise just ''.
             plot_dat: Plotting dictionary to add data to
 
         Returns:
-            Plotting dictionary with chain/marker data added in the correct plotting format
+            Plotting dictionary with chain/transect data added in the correct plotting format
         """
         for obj in list(dat.keys()):
-            if obj[0:5] == "Chain":
+            if obj[0:6] == "Inline":
                 title = name_start + "C" + obj[-1]
                 all_trans = np.array(dat[obj]["Cut 1"]["Cut"])
                 for tran in list(dat[obj].keys())[1:]:
@@ -1107,7 +1110,7 @@ class PlotPopup(Popup):
                     all_trans = np.concatenate((all_trans, n_dat))
                 plot_dat[title] = all_trans
             else:
-                title = name_start + "M" + obj[-1] + " "
+                title = name_start + "C" + obj[-1] + " "
                 for tran in list(dat[obj].keys()):
                     if tran == "Average":
                         plot_dat[title + tran] = dat[obj][tran]
@@ -1196,14 +1199,15 @@ class PlotPopup(Popup):
 
     def get_average(self, key, config):
         """
-        Finds average of all transects in a marker. Transect width must be the same for the entire marker.
+        Finds average of all transects in an orthogonal chain. Orthogonal transect width must be the same for the
+        entire chain.
 
         Args:
-            key (str): 'Marker #'
+            key (str): 'Orthogonal Chain #'
             config: 2D array, currently loaded dataset
 
         Returns:
-            1D array of length of transect width containing average transect values for the marker.
+            1D array of length of transect width containing average transect values for the orthogonal chain.
         """
         dat = np.zeros(self.all_transects[key]['Width'][0])
         for tran in list(self.all_transects[key].keys())[3:]:

@@ -99,7 +99,7 @@ def validate_config(config):
                                              "colormap": plt.colormaps()[:87],
                                              "circle_size": np.arange(2, 71).astype(int),
                                              "font_size": np.arange(8, 25)},
-                       "tool_defaults": {"marker_width": np.arange(0, 401).astype(int)},
+                       "tool_defaults": {"orthogonal_width": np.arange(0, 401).astype(int)},
                        "netcdf": {"dimension_order": xyz},
                        "metadata": {}}
 

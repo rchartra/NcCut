@@ -13,16 +13,16 @@ import json
 import pooch
 import xarray as xr
 import nccut.functions as func
-from nccut.multimarker import marker_find
+from nccut.multiorthogonalchain import orthogonal_chain_find
 
-EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14507378/example.jpg",
+EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/example.jpg",
                                   known_hash="f039e8cb72d6821f4909707767863373230159e384a26ba7edd8a01a3e359e53")
-EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14507378/example_3d.nc",
+EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/example_3d.nc",
                                  known_hash="ccb6c76062d3228799746e68e1bb3ff715538bc3aae796c577c6fb1d06fcdc9f")
-EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14507378/example_4v.nc",
+EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/example_4v.nc",
                                  known_hash="afd261063f4b58c382c46db0d81e69dfb8f5234ef0037b261087177e6d3f7e1b")
-PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14507378/project_example.json",
-                                      known_hash="33c739a4c5515ece45f44eb3de266da46afd6eab47c10cb1f53ac1821226c595")
+PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/project_example.json",
+                                      known_hash='82f37306b94ee54ad1906c6bed72f8c9e8243940f95a8fe1f0d39a27eb920091')
 
 
 class Test(unittest.TestCase):
@@ -152,51 +152,51 @@ class Test(unittest.TestCase):
         self.assertListEqual(list(dat.coords["j"][points[1]:points[3]]), app["j"],
                              "Y Coordinates for NetCDF 90 Degree Transect Incorrect")
 
-    def test_marker_find(self):
+    def test_orthogonal_chain_find(self):
         """
         Test whether valid project files can be accurately identified
         """
         # Data from a valid file is correctly extracted
         proper_json = open(PROJECT_EXAMPLE_PATH)
         proper_data = json.load(proper_json)
-        marker_result = marker_find(proper_data, [], ["Click x", "Click y", "Width"])
-
-        self.assertEqual(len(marker_result), len(proper_data["Vorticity"].keys()), "All markers weren't found")
-        self.assertEqual(len(marker_result[0]), 3, "All fields weren't found")
-        self.assertListEqual(marker_result[0][0], proper_data["Vorticity"]["Marker 1"]["Click x"],
+        chain_result = orthogonal_chain_find(proper_data, [], ["Click x", "Click y", "Width"])
+        self.assertEqual(len(chain_result), len(proper_data["Vorticity"].keys()) - 1, "All chains weren't found")
+        self.assertEqual(len(chain_result[0]), 3, "All fields weren't found")
+        self.assertListEqual(chain_result[0][0], proper_data["Vorticity"]["Orthogonal Chain 1"]["Click x"],
                              "X Coords were not correct")
-        self.assertListEqual(marker_result[1][1], proper_data["Vorticity"]["Marker 2"]["Click y"],
+        self.assertListEqual(chain_result[1][1], proper_data["Vorticity"]["Orthogonal Chain 2"]["Click y"],
                              "Y coords were not orrect")
-        self.assertListEqual(marker_result[2][2], proper_data["Vorticity"]["Marker 3"]["Width"],
+        self.assertListEqual(chain_result[2][2], proper_data["Vorticity"]["Orthogonal Chain 3"]["Width"],
                              "Transect widths were not correct")
 
-        # Output data from non marker tool fails
+        # Output data from non-orthogonal chain tool fails
         multi_data = {"Multi": {"Cut 1": {"x": [1000, 2000, 3000], "y": [100, 200, 300], "Cut": [5, 10, 15]},
                                 "Cut 2": {"x": [50, 60, 70, 80], "y": [20, 15, 10, 5], "Cut": [33, 66, 99]}}}
-        multi_result = marker_find(multi_data, [], ["Click x", "Click y", "Width"])
+        multi_result = orthogonal_chain_find(multi_data, [], ["Click x", "Click y", "Width"])
         self.assertEqual(len(multi_result), 0, "Files that were outputs from Transect tool should fail")
 
-        # All identified markers are unique
+        # All identified chains are unique
         multi_var = {"2nd Var": proper_data["Vorticity"], "Vorticity": proper_data["Vorticity"]}
-        multi_var_result = marker_find(multi_var, [], ["Click x", "Click y", "Width"])
-        self.assertEqual(len(multi_var_result), len(proper_data["Vorticity"].keys()), "No repeated Markers")
+        multi_var_result = orthogonal_chain_find(multi_var, [], ["Click x", "Click y", "Width"])
+        self.assertEqual(len(multi_var_result), len(proper_data["Vorticity"].keys()) - 1, "No repeated chains")
 
-        # Markers without all necessary fields aren't included
-        del proper_data["Vorticity"]["Marker 1"]["Click x"]
-        incomplete_marker_result = marker_find(proper_data, [], ["Click x", "Click y", "Width"])
+        # Orthogonal chains without all necessary fields aren't included
+        del proper_data["Vorticity"]["Orthogonal Chain 1"]["Click x"]
+        incomplete_chain_result = orthogonal_chain_find(proper_data, [], ["Click x", "Click y", "Width"])
 
-        self.assertEqual(len(incomplete_marker_result), 2, "Incomplete markers should not be included in findings")
+        self.assertEqual(len(incomplete_chain_result), 2,
+                         "Incomplete orthogonal chains should not be included in findings")
 
         # A random dictionary fails
         bad_data = {"Apples": ["Fuji", "Cosmic Crisp", "Honeycrisp"]}
-        bad_data_result = marker_find(bad_data, [], ["Click x", "Click y", "Width"])
+        bad_data_result = orthogonal_chain_find(bad_data, [], ["Click x", "Click y", "Width"])
 
         self.assertEqual(bad_data_result, [], "Random dictionaries shouldn't pass")
 
-        # Marker coordinates must match current NetCDF file
-        wrong_coords_result = marker_find(proper_data, [], ["Click Lon", "Click Lat", "Width"])
+        # Orthogonal chain coordinates must match current NetCDF file
+        wrong_coords_result = orthogonal_chain_find(proper_data, [], ["Click Lon", "Click Lat", "Width"])
         self.assertEqual(len(wrong_coords_result), 0,
-                         "Markers whose coords don't match current NetCDF file shouldn't be loaded")
+                         "Orthogonal chains whose coords don't match current NetCDF file shouldn't be loaded")
 
     def test_transect_from_points(self):
         """
@@ -277,8 +277,9 @@ class Test(unittest.TestCase):
                                "netcdf": {"dimension_order": ["z", "y", "x"]},
                                "metadata": {}}
         self.assertFalse(func.validate_config(illegal_circle_size), "Illegal config file circle size was allowed.")
-        illegal_marker_width = {"tool_defaults": {"marker_width": 5000}}
-        self.assertFalse(func.validate_config(illegal_marker_width), "Illegal config file marker width was allowed.")
+        illegal_orthogonal_chain_width = {"tool_defaults": {"orthogonal_chain_width": 5000}}
+        self.assertFalse(func.validate_config(illegal_orthogonal_chain_width),
+                         "Illegal config file orthogonal chain width was allowed.")
         legal_config = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
                                               "circle_size": 5},
                         "netcdf": {"dimension_order": ["z", "y", "x"]},
