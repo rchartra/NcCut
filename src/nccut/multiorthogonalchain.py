@@ -195,9 +195,12 @@ class MultiOrthogonalChain(ui.widget.Widget):
         """
         Opens native operating system file browser to allow user to select their project file
         """
-        path = filechooser.open_file(filters=["*.json"])
-        if path is not None and len(path) != 0:
-            self.check_file(path[0])
+        try:
+            path = filechooser.open_file(filters=["*.json"])
+            if path is not None and len(path) != 0:
+                self.check_file(path[0])
+        except Exception as e:
+            func.alert_popup("Cannot upload project files at this time")
 
     def check_file(self, file):
         """

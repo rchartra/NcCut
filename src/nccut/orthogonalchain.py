@@ -7,6 +7,7 @@ Singular orthogonal chain widget.
 
 Graphics and functionality of a singular orthogonal chain created by the orthogonal chain tool.
 """
+import copy
 
 import kivy.uix as ui
 from kivy.metrics import dp
@@ -16,6 +17,23 @@ import math
 import numpy as np
 from kivy.core.window import Window
 import nccut.functions as functions
+
+
+class Click:
+    """
+    Object that mimics a user click.
+
+    Attributes:
+        x (float): X coordinate of click point
+        y (float): Y coordinate of click point
+        pos (tuple): 2 element tuple: (X coord, Y coord)
+    """
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.pos = (x, y)
+        self.is_double_tap = False
+        self.button = "left"
 
 
 class OrthogonalChain(ui.widget.Widget):
@@ -32,7 +50,6 @@ class OrthogonalChain(ui.widget.Widget):
         t_width (int): Current width in pixels of orthogonal transects
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         transects (list): List of transects made
-        curr_line: kivy.graphics.Line, Line between cursor and last clicked
         number: kivy.uix.label.Label, Reference to the number label
         size: 2 element array of ints, Size of widget
         pos: 2 element array of ints, Position of widget
@@ -55,7 +72,6 @@ class OrthogonalChain(ui.widget.Widget):
         self.uploaded = False
         self.home = home
         self.transects = []
-        self.curr_line = Line()
         self.number = None
         self.size = self.home.display.size
         self.pos = self.home.display.pos
@@ -93,7 +109,6 @@ class OrthogonalChain(ui.widget.Widget):
         for g in groups:
             for i in g:
                 self.canvas.add(i)
-        self.canvas.add(self.curr_line)
         if self.clicks > 0:
             self.add_widget(self.number)
 
@@ -104,20 +119,15 @@ class OrthogonalChain(ui.widget.Widget):
         Args:
             value (float): New graphics size
         """
-        self.line_width = dp(value / 5)
-        for c in range(1, self.clicks + 1):
-            group = self.canvas.get_group(str(c))
-            for i in group:
-                if isinstance(i, Ellipse):
-                    i.size = (dp(value), dp(value))
-                    i.pos = (i.pos[0] + self.c_size[0] / 2 - dp(value) / 2,
-                             i.pos[1] + self.c_size[1] / 2 - dp(value) / 2)
-                elif isinstance(i, Line):
-                    i.width = self.line_width
-        if self.clicks > 0:
-            self.number.font_size = dp(value) * 2
-        self.curr_line.width = self.line_width
         self.c_size = (dp(value), dp(value))
+        self.line_width = dp(value / 5)
+        points = copy.copy(self.points)
+        for c in range(self.clicks):
+            self.del_point()
+        for p in points:
+            self.update_width(p[2])
+            self.on_touch_down(Click(p[0], p[1]))
+        self.stop_drawing()
 
     def update_width(self, width):
         """
@@ -139,19 +149,20 @@ class OrthogonalChain(ui.widget.Widget):
         """
         self.uploaded = val
 
-    def get_orthogonal(self, line):
+    def get_orthogonal(self, line_start, line_end):
         """
         Get a line orthogonal to line drawn by user to use as transect.
 
         Args:
-            line: kivy.graphics.Line, line between two last clicked points
+            line_start: x, y of start point
+            line_end: x, y of end point
 
         Returns:
             4 element array of floats: Coordinates of the two endpoints of the centered
             orthogonal line with length t_width.
         """
         xyswap = False
-        line = line.points
+        line = line_start + line_end
 
         if line[0] > line[2]:  # Always read from left point to right
             line = [line[2], line[3], line[0], line[1]]
@@ -183,12 +194,13 @@ class OrthogonalChain(ui.widget.Widget):
         yarr = (xarr * m + b).tolist()
         xarr = xarr.tolist()
 
-        # Draw points at ends of transect
+        # Draw points at ends of transect and line between them
         with self.canvas:
             Color(self.l_color.r, self.l_color.g, self.l_color.b)
             coords = [xarr[0], yarr[0], xarr[-1], yarr[-1]]
             if xyswap:
                 coords = [yarr[0], xarr[0], yarr[-1], xarr[-1]]
+            Line(points=[coords[0:2], coords[2:]], width=self.line_width, group=str(self.clicks))
             Ellipse(pos=(coords[0] - self.c_size[0] / 2, coords[1] - self.c_size[1] / 2),
                     size=self.c_size, group=str(self.clicks))
             Ellipse(pos=(coords[2] - self.c_size[0] / 2, coords[3] - self.c_size[1] / 2),
@@ -242,24 +254,19 @@ class OrthogonalChain(ui.widget.Widget):
                 Ellipse(pos=(touch.x - self.c_size[0] / 2, touch.y - self.c_size[1] / 2),
                         size=self.c_size, group=str(self.clicks))
                 self.points.append((touch.x, touch.y, self.t_width))
-                self.curr_line = Line(points=[], width=self.line_width, group=str(self.clicks + 1))
             # Draw line between last point and cursor whenever cursor position changes
             Window.bind(mouse_pos=self.draw_line)
             if self.clicks != 1:
-                # If 2nd or more click, create a line inbetween click points
-                with self.canvas:
-                    Color(self.l_color.r, self.l_color.g, self.l_color.b)
-                    line = Line(points=[self.points[-2][0:2], self.points[-1][0:2]],
-                                width=self.line_width, group=str(self.clicks))
+                # If 2nd or more click, create a dashed line inbetween click points
+                self.draw_dashed_line(str(self.clicks), self.points[-2][0:2], self.points[-1][0:2])
                 # Stores orthogonal line
-                coords = self.get_orthogonal(line)
+                coords = self.get_orthogonal(self.points[-2][0:2], self.points[-1][0:2])
                 if self.in_bounds(coords):
                     # Check if orthogonal points are within image bounds
                     self.transects.append(Line(points=coords, width=self.line_width))
                 else:
                     # Undo actions and alert user or parent
                     self.canvas.remove_group(str(self.clicks))
-                    self.canvas.remove(self.curr_line)
                     self.clicks -= 1
                     self.points = self.points[:-1]
                     if self.uploaded:
@@ -287,9 +294,8 @@ class OrthogonalChain(ui.widget.Widget):
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*pos)):
                 mouse = self.to_widget(*pos)
                 if self.size[0] >= mouse[0] >= 0 and self.size[1] >= mouse[1] >= 0:
-                    with self.canvas:
-                        Color(self.l_color.r, self.l_color.g, self.l_color.b)
-                        self.curr_line.points = [self.points[-1][0:2], self.to_widget(pos[0], pos[1])]
+                    self.canvas.remove_group("temp")
+                    self.draw_dashed_line("temp", self.points[-1][0:2], self.to_widget(pos[0], pos[1]))
         else:
             # Don't draw if not current chain or in dragging mode
             self.stop_drawing()
@@ -298,9 +304,7 @@ class OrthogonalChain(ui.widget.Widget):
         """
         Remove line from most recent point to cursor.
         """
-        with self.canvas:
-            Color(self.l_color.r, self.l_color.g, self.l_color.b)
-            self.curr_line.points = self.curr_line.points[0:2]
+        self.canvas.remove_group("temp")
 
     def in_bounds(self, points):
         """
@@ -316,3 +320,47 @@ class OrthogonalChain(ui.widget.Widget):
             if min(d) < 0 or any([i[0] > i[1] for i in list(zip(d, self.size))]):
                 return False
         return True
+
+    def draw_dashed_line(self, group, start, end):
+        """
+        Draws a dashed line on the canvas between two points.
+
+        Args:
+            group: Canvas group to group line segments in
+            start: Tuple of (x, y) coordinates for the start point.
+            end: Tuple of (x, y) coordinates for the end point.
+        """
+        dash_length = self.line_width * 4
+        dash_gap = dash_length
+        x1, y1 = start
+        x2, y2 = end
+
+        # Calculate the total distance between start and end points
+        distance = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+        # Calculate the direction unit vector (dx, dy)
+        dx = (x2 - x1) / distance
+        dy = (y2 - y1) / distance
+
+        # Total number of segments (dash + gap) to cover the distance
+        segment_length = dash_length + dash_gap
+        num_segments = int(distance // segment_length)
+
+        with self.canvas:
+            Color(self.l_color.r, self.l_color.g, self.l_color.b)  # Set the color for the line
+            for i in range(num_segments + 1):
+                # Start point of the dash segment
+                segment_start_x = x1 + i * segment_length * dx
+                segment_start_y = y1 + i * segment_length * dy
+
+                # End point of the dash segment
+                segment_end_x = segment_start_x + dash_length * dx
+                segment_end_y = segment_start_y + dash_length * dy
+
+                # Clip the last segment to the endpoint if it exceeds the total length
+                if np.sqrt((segment_end_x - x1) ** 2 + (segment_end_y - y1) ** 2) > distance:
+                    segment_end_x, segment_end_y = x2, y2
+
+                # Draw the segment
+                Line(points=[segment_start_x, segment_start_y, segment_end_x, segment_end_y],
+                     width=self.line_width, cap="none", group=group)
