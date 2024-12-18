@@ -178,6 +178,7 @@ class FileDisplay(ScatterLayout):
         self.back_btn.font_size = font
         self.delete_chain_btn.font_size = font
         self.delete_point_btn.font_size = font
+        self.resized = False
         if self.f_type == "netcdf":
             self.home.update_colorbar(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1),
                                                          "white", font * 2.5))
@@ -207,7 +208,7 @@ class FileDisplay(ScatterLayout):
     def resize_to_fit(self, *args):
         """
         Resizes image to be just large enough to fill viewer screen. Method is bound to size property but only resizes
-        on initial size change
+        on initial size change.
 
         Args:
             args: Two element list of object and it's size
@@ -217,7 +218,7 @@ class FileDisplay(ScatterLayout):
             r = min([bounds[i] / self.bbox[1][i] for i in range(len(bounds))])
             self.apply_transform(Matrix().scale(r, r, r))
             xco = bounds[0] / 2 - self.bbox[1][0] / 2
-            self.pos = (xco, self.pos[1])
+            self.pos = (xco, 0)
             if args[0]:
                 self.resized = True
 
