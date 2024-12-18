@@ -199,7 +199,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
             path = filechooser.open_file(filters=["*.json"])
             if path is not None and len(path) != 0:
                 self.check_file(path[0])
-        except Exception as e:
+        except Exception:
             func.alert_popup("Cannot upload project files at this time")
 
     def check_file(self, file):
