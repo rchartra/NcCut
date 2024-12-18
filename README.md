@@ -2,7 +2,7 @@
 
 ### Documentation: [NcCut Docs](https://nccut.readthedocs.io/en/latest/index.html)
 
-NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using NcCut users can view vertical cross-sections of their data over all values of a third dimension along the transect drawn. In addition, NcCut is designed to make the measurement of linear features as automatic as possible through it's "Transect Marker" tool where linear features can be marked out and have transects automatically be made perpendicular to the feature. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.
+NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using NcCut users can view vertical cross-sections of their data over all values of a third dimension along the transect drawn. In addition, NcCut is designed to make the measurement of linear features as automatic as possible through it's "Orthogonal Chain" tool where linear features can be marked out and have transects be made perpendicular to the feature. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.
 
 
 ![](images/nccut.png)
@@ -97,11 +97,11 @@ NcCut().run()
 
 ## Tools
 * NcCut has two types of tools for making transects.
-### Transect Chain
-* Using this tool chains of transects can be drawn. Transects will be taken along the line segments drawn between the clicked points. Multiple such "Chains" can be drawn out at once before being plotted.
+### Inline Chain
+* Using this tool chains of transects can be drawn connected end to end. Transects will be taken along the line segments drawn between the clicked points. Multiple such "Chains" can be drawn out at once before being plotted.
 
 
-1. Hit "Transect Chain" to enter transect mode
+1. Hit "Inline Chain" to enter transect mode
 2. Click points along the feature you'd like to make transects along. Transects will be made between the points you click.
     * Select "Drag Mode" from the actions sidebar to drag the image without selecting points, and select "Transect Mode" to go back. 
     * Select "Edit Mode" to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain drawn.
@@ -109,23 +109,23 @@ NcCut().run()
 4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first chain and downloading options.
 
 
-### Transect Marker
-* Using this tool multiple "Markers" can be drawn onto a loaded file. These "Markers" can all be saved together as a project and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
+### Orthogonal Chain
+* Using this tool multiple "Chains" can be drawn onto a loaded file. Transects are made orthogonally to the marked out line. These "Chains" can all be saved together as a project and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
 
 
-1. Hit the "Transect Marker" button to enter transect mode
+1. Hit the "Orthogonal Chain" button to enter transect mode
 2. Click points along the feature you'd like transects of. Dots will appear on either side of the line drawn indicating the start and end of the transects that will be made
    * Select "Drag Mode" from the actions sidebar to drag the image without selecting points, and select "Transect Mode" to go back.
-   * Select "Edit Mode" to delete either the last point clicked or the last marker drawn. You can also press the esc key to delete the last marker drawn.
+   * Select "Edit Mode" to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain drawn.
    * To change the width of the transects being made you may enter the number of pixels into the "Width" text box. Select "Set" to change the width for all future transects.
-3. Right click to select the final point or select "New Marker" to begin a new marker and repeat for as many markers as you'd like
-4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first marker and downloading options.
+3. Right click to select the final point or select "New Chain" to begin a new chain and repeat for as many chains as you'd like
+4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first chain and downloading options.
    * If you want to continue working on your project at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
 
 
 #### Uploading a project
 1. Load the same dataset/image you worked on previously.
-2. Hit the "Transect Marker" button to enter transect mode.
+2. Hit the "Orthogonal Chain" button to enter transect mode.
 3. Instead of clicking new points, select the "Upload Project" button.
 4. Enter the file name of the transect data you saved previously and select "Ok".
 5. All markers from the file will load onto the viewer and you can continue working on the project.

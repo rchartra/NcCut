@@ -25,8 +25,8 @@ import matplotlib.pyplot as plt
 import io
 import warnings
 import nccut.functions as func
-from nccut.multimarker import MultiMarker
-from nccut.multichain import MultiChain
+from nccut.multiorthogonalchain import MultiOrthogonalChain
+from nccut.multiinlinechain import MultiInlineChain
 
 
 class FileDisplay(ScatterLayout):
@@ -62,8 +62,8 @@ class FileDisplay(ScatterLayout):
         cmaps (dict): Dictionary of colormap names mapping to colormap values from cv2
         colormap: current colormap data
         btn_height: Height for buttons in sidebar which adapts to font size
-        transect_chain_btn: Transect Chain button which opens Transect Chain tool
-        transect_marker_btn: Transect Marker button which opens Transect Marker tool
+        inline_chain_btn: Inline chain button which opens inline chain tool
+        orthogonal_chain__btn: Orthogonal chain button which opens orthogonal chain tool
         initial_side_bar (list): List of sidebar buttons in 'Tools' sidebar menu
         drag_btn: Drag button to be loaded when in transect mode
         edit_btn: Edit button to be loaded when in transect mode
@@ -72,7 +72,7 @@ class FileDisplay(ScatterLayout):
         tool_action_widgets: List of widgets in Actions menu at any given moment
         tran_mode_btn: Button to close Drag Mode
         back_btn: Back button for editing mode
-        delete_line_btn: Delete line button
+        delete_chain_btn: Delete chain button
         delete_point_btn: Delete point button
         edit_widgets (list): List of widgets that must be added to screen when entering editing mode
     """
@@ -88,12 +88,12 @@ class FileDisplay(ScatterLayout):
                 form {"image": str(file)}. For a netcdf file the value is a dictionary of configuration values (see
                 :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
             g_config (dict): Dictionary holding initial contrast value, line color, colormap, and circle size
-            t_config (dict): Dictionary holding tool configurations: default marker width
+            t_config (dict): Dictionary holding tool configurations: default orthogonal width
         """
         super(FileDisplay, self).__init__(**kwargs)
 
         self.config = f_config
-        self.default_marker_width = t_config["marker_width"]
+        self.default_orthogonal_width = t_config["orthogonal_width"]
         self.f_type = list(f_config.keys())[0]
         self.home = home
         self.sidebar = self.home.ids.sidebar
@@ -117,14 +117,14 @@ class FileDisplay(ScatterLayout):
         self.colormap = g_config["colormap"]
         self.btn_height = dp(20) + self.home.font
         # Initial Sidebar Widgets
-        self.transect_chain_btn = func.RoundedButton(text="Transect Chain", size_hint_y=None, height=self.btn_height,
-                                                     font_size=self.home.font)
-        self.transect_chain_btn.bind(on_press=lambda x: self.transect_btn("transect_chain"))
+        self.inline_chain_btn = func.RoundedButton(text="Inline Chain", size_hint_y=None, height=self.btn_height,
+                                                   font_size=self.home.font)
+        self.inline_chain_btn.bind(on_press=lambda x: self.tool_btn("inline_chain"))
 
-        self.transect_marker_btn = func.RoundedButton(text="Transect Marker", size_hint_y=None, height=self.btn_height,
-                                                      font_size=self.home.font)
-        self.transect_marker_btn.bind(on_press=lambda x: self.transect_btn("transect_marker"))
-        self.initial_side_bar = [self.transect_chain_btn, self.transect_marker_btn]
+        self.orthogonal_chain_btn = func.RoundedButton(text="Orthogonal Chain", size_hint_y=None, height=self.btn_height,
+                                                       font_size=self.home.font)
+        self.orthogonal_chain_btn.bind(on_press=lambda x: self.tool_btn("orthogonal_chain"))
+        self.initial_side_bar = [self.inline_chain_btn, self.orthogonal_chain_btn]
 
         # Action Widgets
         self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint_y=None, height=self.btn_height,
@@ -147,14 +147,14 @@ class FileDisplay(ScatterLayout):
         self.back_btn = func.RoundedButton(text="Back", size_hint_y=None, height=self.btn_height,
                                            halign='center', valign='center', font_size=self.home.font)
         self.back_btn.bind(on_press=self.edit_mode)
-        self.delete_line_btn = func.RoundedButton(text="Delete Last Line", size_hint_y=None, height=self.btn_height,
-                                                  font_size=self.home.font)
-        self.delete_line_btn.bind(on_press=lambda x: self.tool.del_line())
+        self.delete_chain_btn = func.RoundedButton(text="Delete Last Chain", size_hint_y=None, height=self.btn_height,
+                                                   font_size=self.home.font)
+        self.delete_chain_btn.bind(on_press=lambda x: self.tool.del_chain())
         self.delete_point_btn = func.RoundedButton(text="Delete Last Point", size_hint_y=None, height=self.btn_height,
                                                    font_size=self.home.font)
         self.delete_point_btn.bind(on_press=lambda x: self.tool.del_point())
 
-        self.edit_widgets = [self.back_btn, self.delete_line_btn, self.delete_point_btn]
+        self.edit_widgets = [self.back_btn, self.delete_chain_btn, self.delete_point_btn]
 
         self.load_image()
         Window.bind(on_key_down=self.on_key)
@@ -166,7 +166,7 @@ class FileDisplay(ScatterLayout):
     def on_key(self, *args):
         key_ascii = args[1]
         if key_ascii == 27 and self.tool and not self.home.plot_popup.is_open:
-            self.tool.del_line()
+            self.tool.del_chain()
 
     def font_adapt(self, font):
         """
@@ -176,10 +176,11 @@ class FileDisplay(ScatterLayout):
             font (float): New font size
         """
         self.back_btn.font_size = font
-        self.delete_line_btn.font_size = font
+        self.delete_chain_btn.font_size = font
         self.delete_point_btn.font_size = font
         if self.f_type == "netcdf":
-            self.home.update_colorbar(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1), "white", font * 2.5))
+            self.home.update_colorbar(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1),
+                                                         "white", font * 2.5))
         if self.t_mode:
             self.tool.font_adapt(font)
 
@@ -198,7 +199,7 @@ class FileDisplay(ScatterLayout):
         self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.pos)
         self.home.ids.view.bind(size=self.resize_to_fit)
         self.add_widget(self.img)
-        self.home.populate_dynamic_sidebar(self.initial_side_bar, "Tools")
+        self.home.populate_dynamic_sidebar(self.initial_side_bar, "Transect Tools")
         # Necessary for when viewer doesn't change size on file load (image -> image)
         self.resize_to_fit(False)
         self.home.font_adapt()
@@ -220,7 +221,7 @@ class FileDisplay(ScatterLayout):
             if args[0]:
                 self.resized = True
 
-    def transect_btn(self, t_type):
+    def tool_btn(self, t_type):
         """
         Manages the creation and deletion of each tool.
 
@@ -228,16 +229,17 @@ class FileDisplay(ScatterLayout):
         and clean up. If not, load indicated tool and switches cursor to a cross.
 
         Args:
-            t_type (str): Tool type: 'transect_chain' or 'transect_marker'
+            t_type (str): Tool type: 'inline_chain' or 'orthogonal_chain'
         """
 
         if not self.t_mode:
             # Opens a new tool
             kivy.core.window.Window.set_system_cursor("crosshair")
-            if t_type == "transect_marker":
-                self.tool = MultiMarker(home=self.home, m_width=self.default_marker_width, b_height=self.btn_height)
-            elif t_type == "transect_chain":
-                self.tool = MultiChain(home=self.home, b_height=self.btn_height)
+            if t_type == "orthogonal_chain":
+                self.tool = MultiOrthogonalChain(home=self.home, t_width=self.default_orthogonal_width,
+                                                 b_height=self.btn_height)
+            elif t_type == "inline_chain":
+                self.tool = MultiInlineChain(home=self.home, b_height=self.btn_height)
             self.add_widget(self.tool)
             self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
             self.t_mode = True
@@ -274,7 +276,7 @@ class FileDisplay(ScatterLayout):
             kivy.core.window.Window.set_system_cursor("arrow")
             self.remove_widget(self.tool)
             self.tool_action_widgets = self.action_widgets
-            self.home.populate_dynamic_sidebar(self.initial_side_bar, "Tools")
+            self.home.populate_dynamic_sidebar(self.initial_side_bar, "Transect Tools")
             self.t_mode = False
 
     def edit_mode(self, *args):

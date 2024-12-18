@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 """
-Transect marker tool widget.
+Orthogonal chain tool widget.
 
-Manages having multiple markers on screen at once and the uploading of previous projects.
+Manages having multiple orthogonal chains on screen at once and the uploading of previous projects.
 """
 
 import kivy.uix as ui
@@ -17,8 +17,8 @@ from plyer import filechooser
 from scipy.interpolate import CubicSpline
 import numpy as np
 import nccut.functions as func
-from nccut.marker import Marker
-from nccut.markerwidth import MarkerWidth
+from nccut.orthogonalchain import OrthogonalChain
+from nccut.orthogonalchainwidth import OrthogonalChainWidth
 
 
 class Click:
@@ -40,11 +40,12 @@ class Click:
 
 def correct_test(data, need):
     """
-    Check if dictionary has necessary fields to be a marker
+    Check if dictionary has necessary fields to be an orthogonal chain
 
     Args:
         data (dict): Dictionary to be tested.
-        need (list): List of required fields to qualify as a marker: ["Click <cord>", "Click <cord>", "Width"]
+        need (list): List of required fields to qualify as an orthogonal chain:
+            ["Click <cord>", "Click <cord>", "Width"]
 
     Returns:
         Boolean, whether dictionary has necessary keys with a list has the value
@@ -59,27 +60,28 @@ def correct_test(data, need):
     return True
 
 
-def marker_find(data, res, need):
+def orthogonal_chain_find(data, res, need):
     """
-    Recursively examines dictionary and finds marker click coordinates and transect widths.
+    Recursively examines dictionary and finds chain click coordinates and orthogonal transect widths.
 
     Args:
         data (dict): Dictionary to examine
-        res (list): Empty list to fill with marker click coordinates and transect widths
-        need (list): List of required fields to qualify as a marker: ["Click <cord>", "Click <cord>", "Width"]
+        res (list): Empty list to fill with chain click coordinates and orthogonal transect widths
+        need (list): List of required fields to qualify as an orthogonal chain:
+            ["Click <cord>", "Click <cord>", "Width"]
 
     Returns:
-        Nested List. A list containing a list for each marker which each contains three lists:
-        click X coords, click y coords, and the transect width for each click point in the marker.
+        Nested List. A list containing a list for each orthogonal chain which each contains three lists:
+        click X coords, click y coords, and the orthogonal transect width for each click point in the chain.
         If no qualifying data was found returns empty list. If duplicate data is found (ex: multiple
-        variables in a file) only returns one instance of marker data.
+        variables in a file) only returns one instance of orthogonal chain data.
     """
     for key in list(data.keys()):
-        if key[0:6] == 'Marker':
-            if correct_test(data[key], need):  # Marker dict has necessary fields
-                if len(res) == 0:  # If res empty, always add marker data
+        if key[0:10] == 'Orthogonal':
+            if correct_test(data[key], need):  # Orthogonal chain dict has necessary fields
+                if len(res) == 0:  # If res empty, always add orthogonal chain data
                     res.append([data[key][need[0]], data[key][need[1]], data[key][need[2]]])
-                else:  # If res not empty, ensure found marker data isn't already in res
+                else:  # If res not empty, ensure found orthogonal chain data isn't already in res
                     new = True
                     for item in res:
                         l1 = data[key][need[0]]
@@ -90,60 +92,61 @@ def marker_find(data, res, need):
                         res.append([data[key][need[0]], data[key][need[1]], data[key][need[2]]])
         else:
             if type(data[key]) is dict:  # Can still go further in nested dictionary tree
-                marker_find(data[key], res, need)
+                orthogonal_chain_find(data[key], res, need)
             else:
                 return res
     return res
 
 
-class MultiMarker(ui.widget.Widget):
+class MultiOrthogonalChain(ui.widget.Widget):
     """
-    Transect marker tool widget.
+    Orthogonal chain tool widget.
 
-    Created when Transect Marker button is selected. From there on this object manages the creation,
-    modification, and data packaging of markers. Manages the uploading of previous projects
+    Created when 'Orthogonal Chain' button is selected. From there on this object manages the creation,
+    modification, and data packaging of orthogonal chains. Manages the uploading of previous projects
     into the viewer.
 
     Attributes:
-        m_on (bool): Whether there are any markers active
+        c_on (bool): Whether there are any chains active
         upload_fail (bool): If anything has gone wrong in the project uploading process
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         dbtn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
         dragging (bool): Whether viewer is in dragging mode
-        width_w: :class:`nccut.markerwidth.MarkerWidth` widget to allow for adjustable marker widths
+        width_w: :class:`nccut.orthogonalchainwidth.OrthogonalChainWidth` widget to allow for adjustable orthogonal
+            transect widths
         clicks (int): Number of clicks made by user. Decreases when points are deleted
         up_btn: RoundedButton, Upload button for uploading a past project
-        nbtn: RoundedButton, New marker button
-        curr_width (int): Current marker width being used. Used to initialize width of new markers.
+        nbtn: RoundedButton, New chain button
+        curr_width (int): Current orthogonal transect width being used. Used to initialize width of new chains.
     """
-    def __init__(self, home, m_width, b_height, **kwargs):
+    def __init__(self, home, t_width, b_height, **kwargs):
         """
         Defines sidebar elements and initializes widget
 
         Args:
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
-            m_width: Default marker width in pixels
+            t_width: Default orthogonal transect width in pixels
             b_height: Height for sidebar buttons based on font size
         """
-        super(MultiMarker, self).__init__(**kwargs)
-        self.m_on = False
+        super(MultiOrthogonalChain, self).__init__(**kwargs)
+        self.c_on = False
         self.upload_fail = False
         self.home = home
         self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
-        self.width_w = MarkerWidth(self, size_hint_y=None, height=b_height)
+        self.width_w = OrthogonalChainWidth(self, size_hint_y=None, height=b_height)
         self.clicks = 0
-        self.curr_width = m_width
+        self.curr_width = t_width
 
         # Upload Button
         self.upbtn = func.RoundedButton(text="Upload Project", size_hint_y=None, height=b_height,
                                         font_size=self.home.font)
         self.upbtn.bind(on_press=lambda x: self.upload_pop())
 
-        # New Marker Button
-        self.nbtn = func.RoundedButton(text="New Marker", size_hint_y=None, height=b_height, font_size=self.home.font)
-        self.nbtn.bind(on_press=lambda x: self.new_marker())
+        # New Chain Button
+        self.nbtn = func.RoundedButton(text="New Chain", size_hint_y=None, height=b_height, font_size=self.home.font)
+        self.nbtn.bind(on_press=lambda x: self.new_chain())
 
         self.home.display.add_to_sidebar([self.upbtn, self.nbtn])
 
@@ -161,7 +164,7 @@ class MultiMarker(ui.widget.Widget):
 
     def update_l_col(self, color):
         """
-        Asks each marker to update their line color
+        Asks each chain to update their line color
 
         Args:
             color (str): New color value: 'Blue', 'Green' or 'Orange'
@@ -171,7 +174,7 @@ class MultiMarker(ui.widget.Widget):
 
     def update_c_size(self, value):
         """
-       Asks each marker to update their circle size
+       Asks each chain to update their circle size
 
        Args:
            value (float): New circle size
@@ -189,9 +192,6 @@ class MultiMarker(ui.widget.Widget):
         self.dragging = val
 
     def upload_pop(self):
-        """
-        Opens popup to ask for name of project file user wishes to upload.
-        """
         """
         Opens native operating system file browser to allow user to select their project file
         """
@@ -221,7 +221,7 @@ class MultiMarker(ui.widget.Widget):
                 nc_coords = True
             except ValueError:
                 pass
-        found = marker_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"])
+        found = orthogonal_chain_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"])
         if len(found) >= 1:
             if nc_coords:
                 found = self.convert_found_coords(found)
@@ -234,22 +234,22 @@ class MultiMarker(ui.widget.Widget):
     def convert_found_coords(self, found):
         """
         If coordinates from uploaded project file came from the currently loaded NetCDF file convert the coordinates to
-        pixel coordinates for plotting the markers on the viewer.
+        pixel coordinates for plotting the chains on the viewer.
 
         Args:
-            found: The found markers from the project file that have already been verified to have come from the current
-                NetCDF file. A list containing a list for each marker which contains three lists: [X Coord List,
+            found: The found chains from the project file that have already been verified to have come from the current
+                NetCDF file. A list containing a list for each chain which contains three lists: [X Coord List,
                 Y Coord List, Width List]
 
         Returns:
             The original found list except the Click points have been converted to pixel coordinates
         """
         config = self.home.display.config
-        for marker in found:
+        for chain in found:
             for i, c in enumerate(["x", "y"]):
                 coords = config["netcdf"]["data"].coords[config["netcdf"][c]].data.astype(float)
                 c_spline = CubicSpline(coords, range(len(coords)))
-                marker[i] = c_spline(marker[i]).tolist()
+                chain[i] = c_spline(chain[i]).tolist()
         return found
 
     def upload_fail_alert(self):
@@ -260,54 +260,55 @@ class MultiMarker(ui.widget.Widget):
 
     def upload_data(self, points):
         """
-        Loads markers from project file.
+        Loads chains from project file.
 
-        Adds markers by 'clicking' the points in the file with the marker width denoted by the file
+        Adds chains by 'clicking' the points in the file with the orthogonal transect width denoted by the file
 
         Args:
-            points: Properly formatted nested list from :class:`nccut.multimarker.marker_find()` function.
+            points: Properly formatted nested list from :class:`nccut.multiorthogonalchain.orthogonal_chain_find()`
+                function.
         """
         try:
             self.upload_fail = False
-            if len(self.children) != 0:  # If markers already exist in viewer
+            if len(self.children) != 0:  # If chains already exist in viewer
                 self.children[0].stop_drawing()
-                if self.children[0].clicks < 2:  # If any existing markers are incomplete, remove them
+                if self.children[0].clicks < 2:  # If any existing chains are incomplete, remove them
                     if self.children[0].clicks == 1:
                         self.children[0].del_point()
                     self.remove_widget(self.children[0])
-            for m in range(0, len(points)):
-                marker = Marker(home=self.home, width=self.curr_width)
-                clicks = tuple(zip(points[m][0], points[m][1], points[m][2]))
-                marker.upload_mode(True)
-                self.add_widget(marker)
+            for c in range(0, len(points)):
+                chain = OrthogonalChain(home=self.home, width=self.curr_width)
+                clicks = tuple(zip(points[c][0], points[c][1], points[c][2]))
+                chain.upload_mode(True)
+                self.add_widget(chain)
                 for i in clicks:
                     touch = Click(i[0], i[1])
-                    marker.t_width = i[2]
-                    marker.on_touch_down(touch)
+                    chain.t_width = i[2]
+                    chain.on_touch_down(touch)
                     self.clicks += 1
-                marker.upload_mode(False)
+                chain.upload_mode(False)
                 if self.clicks >= 1 and self.width_w.parent is None:
                     self.home.display.add_to_sidebar([self.width_w])
                 if self.clicks >= 2 and self.dbtn.parent is None:
                     self.home.display.add_to_sidebar([self.dbtn])
                 if self.upload_fail:  # If upload goes wrong, stop and undo everything
-                    self.undo_upload(m)
+                    self.undo_upload(c)
                     return
-            self.new_marker()
+            self.new_chain()
         except Exception as error:
             func.alert_popup(str(error))
 
-    def undo_upload(self, markers):
+    def undo_upload(self, chains):
         """
-        Remove any previous markers that had been uploaded if upload fails
+        Remove any previous chains that had been uploaded if upload fails
 
         Args:
-            markers (int): Number of markers added so far
+            chains (int): Number of chains added so far
         """
-        for m in range(0, markers + 1):
-            self.del_line()
+        for m in range(0, chains + 1):
+            self.del_chain()
         if len(self.children) == 0:
-            # Remove sidebar buttons if deleted marker was the only marker
+            # Remove sidebar buttons if deleted chain was the only chain
             self.clicks = 0
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
@@ -315,14 +316,14 @@ class MultiMarker(ui.widget.Widget):
                 self.home.display.remove_from_tool_action_widgets(self.width_w)
             if self.dragging:
                 self.home.display.drag_mode()
-            self.new_marker()
-        content = Label(text="Project File Markers out of Bounds")
+            self.new_chain()
+        content = Label(text="Project File Chains out of Bounds")
         popup = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
         popup.open()
 
     def update_width(self, num):
         """
-        Update width of active marker.
+        Update orthogonal transect width of active chain.
 
         Args:
             num (int): New width value
@@ -330,47 +331,47 @@ class MultiMarker(ui.widget.Widget):
         self.curr_width = num
         self.children[0].update_width(num)
 
-    def del_line(self):
+    def del_chain(self):
         """
-        Delete most recent marker with some safeguards.
+        Delete most recent chain with some safeguards.
 
-        If only one marker on screen, delete but add new marker and remove sidebar elements.
-        Otherwise delete current marker and go to previous. If no markers are on screen nothing
+        If only one chain on screen, delete but add new chain and remove sidebar elements.
+        Otherwise delete current chain and go to previous. If no chain are on screen nothing
         happens.
         """
         if len(self.children) == 0:
-            # If no markers on screen do nothing
+            # If no chain on screen do nothing
             return
         Window.unbind(mouse_pos=self.children[0].draw_line)
         self.clicks -= self.children[0].clicks
         self.remove_widget(self.children[0])
         if len(self.children) == 0:
-            # Remove sidebar buttons if deleted marker was the only marker
+            # Remove sidebar buttons if deleted chain was the only chain
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
             if self.width_w in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.width_w)
-            self.new_marker()
+            self.new_chain()
 
     def del_point(self):
         """
         Delete most recently clicked point with some safeguards.
 
-        If no markers are on screen does nothing. If only one marker exists and no points have been clicked,
-        does nothing. If more than one marker exists and no points have been clicked on most recent marker,
-        Deletes most recent marker and then deletes last point of previous marker. Any other conditions
+        If no chains are on screen does nothing. If only one chain exists and no points have been clicked,
+        does nothing. If more than one chain exists and no points have been clicked on most recent chain,
+        Deletes most recent chain and then deletes last point of previous chain. Any other conditions
         simply deletes last clicked point.
         """
         if len(self.children) == 0:
-            # If no markers on screen do nothing
+            # If no chains on screen do nothing
             return
         elif self.children[0].clicks == 0:
             if len(self.children) > 1:
-                # If no clicks on current marker and not the only marker delete current marker
+                # If no clicks on current chain and not the only chain delete current chain
                 self.remove_widget(self.children[0])
             else:
                 return
-        # Delete point from current marker
+        # Delete point from current chain
         self.children[0].del_point()
         self.clicks -= 1
         # Determine which buttons should be in sidebar
@@ -379,20 +380,20 @@ class MultiMarker(ui.widget.Widget):
         elif self.clicks == 0:
             self.home.display.remove_from_tool_action_widgets(self.width_w)
 
-    def new_marker(self):
+    def new_chain(self):
         """
-        Creates a new marker if not in dragging or editing mode and current marker has at least two clicks.
+        Creates a new chain if not in dragging or editing mode and current chain has at least two clicks.
         """
         if not self.dragging or self.home.display.editing:
             if len(self.children) == 0 or self.children[0].clicks >= 2:
                 if len(self.children) != 0:
                     self.children[0].stop_drawing()
-                m = Marker(home=self.home, width=self.curr_width)
+                m = OrthogonalChain(home=self.home, width=self.curr_width)
                 self.add_widget(m)
 
     def gather_popup(self):
         """
-        Gather data from markers and call for :class:`nccut.plotpopup.PlotPopup`
+        Gather data from chains and call for :class:`nccut.plotpopup.PlotPopup`
         """
         frames = {}
         c = 1
@@ -420,7 +421,7 @@ class MultiMarker(ui.widget.Widget):
             except ValueError:
                 pass
         for i in reversed(self.children):
-            if i.clicks > 0:  # Ignore empty markers
+            if i.clicks > 0:  # Ignore empty chains
                 data = {}
                 cx, cy, w = map(list, zip(*i.points))
                 if nc_coords:
@@ -431,14 +432,14 @@ class MultiMarker(ui.widget.Widget):
                 for j in i.transects:
                     data["Cut " + str(count)] = j.points
                     count += 1
-                frames["Marker " + str(c)] = data
+                frames["Orthogonal Chain " + str(c)] = data
                 c += 1
         self.home.plot_popup.run(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """
         Manages when sidebar elements are added to sidebar and clears them as needed. If click is a right click and not
-        the first click creates new marker.
+        the first click creates new chain.
 
         Args:
             touch: MouseMotionEvent, see kivy docs for details
@@ -451,10 +452,10 @@ class MultiMarker(ui.widget.Widget):
                         self.home.display.add_to_sidebar([self.width_w])
                     if self.clicks >= 2 and self.dbtn.parent is None:
                         self.home.display.add_to_sidebar([self.dbtn])
-                    # If no current marker, create marker. Otherwise, pass touch to current marker.
-                    if not self.m_on:
-                        self.new_marker()
-                        self.m_on = True
+                    # If no current chain, create chain. Otherwise, pass touch to current chain.
+                    if not self.c_on:
+                        self.new_chain()
+                        self.c_on = True
                     self.children[0].on_touch_down(touch)
                     if touch.button == "right":
-                        self.new_marker()
+                        self.new_chain()

@@ -203,9 +203,9 @@ class HomeScreen(Screen):
 
         Args:
             colorbar: kivy.uix.image.Image, colorbar graphic
-            config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data from
-                the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
-                value is the necessary configuration settings. For images, the config dictionary has form
+            config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data
+                from the file. Highest level should have one key that is the name of the file type ("image" or "netcdf")
+                whose value is the necessary configuration settings. For images, the config dictionary has form
                 {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
                 :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
         """

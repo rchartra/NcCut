@@ -67,27 +67,27 @@ menu for loading NetCDF4 files. ](images/paper_fig_1.png)
 
 Using NcCut, users can mark out transects onto loaded images or NetCDF4 data which can then be plotted and saved for further analysis. There two tools for marking out transects:
 
-The first is the 'Transect Chain' tool. Users can click on points along a features and lines will be drawn connecting the points forming a "chain". Transects are then made along the line segments shown (Figure 2a). Multiple chains can be drawn at once, and plotted together in the plotting menu (Figure 3). When plotted, the transect data from each segment is plotted continuously end to end. If the loaded file is an image, the transect data is the mean of the RGB values of each pixel along the transect. The pixels are 
+The first is the 'Inline Chain' tool. Users can click on points along a features and lines will be drawn connecting the points forming a "chain". Transects are then made along the line segments shown (Figure 2a). Multiple chains can be drawn at once, and plotted together in the plotting menu (Figure 3). When plotted, the transect data from each segment is plotted continuously end to end. If the loaded file is an image, the transect data is the mean of the RGB values of each pixel along the transect. The pixels are 
 interpolated using linear interpolation to improve the accuracy of the pixel selection. If the loaded file is a NetCDF4 
 file, the transect data is taken from the original dataset (also interpolated) at each point along the transect. 
-The second is the 'Transect Marker' tool. Using this tool users can click points along a feature and transects of a set width will be made orthogonal to the line 
-marked out by the user (Figure 2b). This width can be adjusted at any point in the marking process and multiple markers 
+The second is the 'Orthogonal Chain' tool. Using this tool users can click points along a feature and transects of a set width will be made orthogonal to the line 
+marked out by the user (Figure 2b). This width can be adjusted at any point in the marking process and multiple such chains 
 can be drawn on the same file and plotted together. For use on large projects worked on over multiple sessions, the 
-marker data saved from the plotting menu (Figure 3) can be reloaded back into NcCut and continued.
+transect data saved from the plotting menu (Figure 3) can be reloaded back into NcCut and continued.
 
-![a.) The 'Transect Chain' tool used over features in a loaded NetCDF file. b.) The 'Transect Marker' tool used to take multiple 
+![a.) The 'Inline Chain' tool used over features in a loaded NetCDF file. b.) The 'Orthogonal Chain' tool used to take multiple 
 transects orthogonal to various linear features.](images/paper_fig_2.png)
 
 In the plotting menu users can select which chains/transects to plot, and if the file is a NetCDF file the 
 user can additionally plot multiple variables (Figure 3b) and values along the chosen z dimension (Figure 3a). Additionally, users can plot an interactive
-vertical cross-section of the data values along the chain/transect for all z values (Figure 4). The y axis of the image is taken from and scaled by the coordinate values of the chosen z dimension. This means when the coordinate values are not evenly spaced the image is scaled accordingly. From this menu
+vertical cross-section of the data values along the chain/transect for all z values (Figure 4). The y axis of the image is taken from and scaled by the coordinate values of the chosen z dimension. From this menu
 users can choose to save the data to a .JSON file as well as save the plot to either a .PNG or .PDF format. The JSON 
-file groups the transect data and their corresponding coordinates together and labels them by the transect number shown in the viewing interface. The transects are then further grouped by the marker or chain they belong to. This labeled and 
+file groups the transect data and their corresponding coordinates together and labels them by the transect number shown in the viewing interface. The transects are then further grouped by the chain they belong to. This labeled and 
 organized data structure aims to be easily loaded and understood using minimal programming experience in a language such
 as Python or R (there is a tutorial available [here](https://nccut.readthedocs.io/en/latest/example.html) on how to work with the output data using Python).
 
-![a.) A plot of a single 'Transect Chain' drawn over a feature plotted at multiple values along the z dimension. b.) A plot of two 'Transect Chains' taken over various variables in the NetCDF4 file.](images/paper_fig_3.png)
+![a.) A plot of a single 'Inline Chain' drawn over a feature plotted at multiple values along the z dimension. b.) A plot of two 'Inline Chains' taken over various variables in the NetCDF4 file.](images/paper_fig_3.png)
 
-![a.) A vertical cross section of the data along a transect chain. In this case the selected Z dimension was "K" and the variable was ocean potential temperature.](images/paper_fig_4.png)
+![a.) A vertical cross section of the data along an inline transect chain. In this case the selected Z dimension was "K" and the variable was ocean potential temperature.](images/paper_fig_4.png)
 
 # References

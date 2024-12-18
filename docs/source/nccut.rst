@@ -48,34 +48,42 @@ nccut.homescreen module
    :undoc-members:
    :show-inheritance:
 
-nccut.marker module
+nccut.orthogonalchain module
 ---------------------
 
-.. automodule:: nccut.marker
+.. automodule:: nccut.orthogonalchain
    :members:
    :undoc-members:
    :show-inheritance:
 
-nccut.markerwidth module
+nccut.orthogonalchainwidth module
 --------------------------
 
-.. automodule:: nccut.markerwidth
+.. automodule:: nccut.orthogonalchainwidth
    :members:
    :undoc-members:
    :show-inheritance:
 
-nccut.multimarker module
+nccut.multiorthogonalchain module
 --------------------------
 
-.. automodule:: nccut.multimarker
+.. automodule:: nccut.multiorthogonalchain
    :members:
    :undoc-members:
    :show-inheritance:
 
-nccut.multitransect module
+nccut.inlinechain module
+-----------------------------
+
+.. automodule:: nccut.inlinechain
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nccut.multiinlinechain module
 ----------------------------
 
-.. automodule:: nccut.multitransect
+.. automodule:: nccut.multiinlinechain
    :members:
    :undoc-members:
    :show-inheritance:
@@ -96,10 +104,26 @@ nccut.plotpopup module
    :undoc-members:
    :show-inheritance:
 
-nccut.singletransect module
+nccut.interactiveplot module
 -----------------------------
 
-.. automodule:: nccut.singletransect
+.. automodule:: nccut.interactiveplot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nccut.plotwindow module
+-----------------------------
+
+.. automodule:: nccut.plotwindow
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nccut.settingsbar module
+-----------------------------
+
+.. automodule:: nccut.settingsbar
    :members:
    :undoc-members:
    :show-inheritance:

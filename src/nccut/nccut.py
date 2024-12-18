@@ -44,7 +44,7 @@ class NcCut(App):
         default_config = {"graphics_defaults": {"contrast": 0, "line_color": "Blue", "colormap": "viridis",
                                                 "circle_size": 5, "font_size": 14},
                           "netcdf": {"dimension_order": ["z", "y", "x"]},
-                          "tool_defaults": {"marker_width": 40},
+                          "tool_defaults": {"orthogonal_width": 40},
                           "metadata": {}}
         config_dict = func.find_config(self.config_file)
         if config_dict:

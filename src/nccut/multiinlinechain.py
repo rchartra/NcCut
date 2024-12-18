@@ -9,15 +9,15 @@ from kivy.core.window import Window
 from scipy.interpolate import CubicSpline
 import numpy as np
 import nccut.functions as func
-from nccut.chain import Chain
+from nccut.inlinechain import InlineChain
 
 
-class MultiChain(ui.widget.Widget):
+class MultiInlineChain(ui.widget.Widget):
     """
-    Transect chain tool widget.
+    Inline chain tool widget.
 
-    Created when Transect Chain button is selected. From there on this object manages the creation,
-    modification, and data packaging of chains.
+    Created when 'Inline Chain' button is selected. From there on this object manages the creation,
+    modification, and data packaging of inline chains.
 
     Attributes:
         c_on (bool): Whether there are any chains active
@@ -26,7 +26,7 @@ class MultiChain(ui.widget.Widget):
         dragging (bool): Whether viewer is in dragging mode
         clicks (int): Number of clicks made by user. Does not decrease when points are deleted
             unless all points are deleted in which case it goes back to zero.
-        nbtn: RoundedButton, New chain button
+        nbtn: RoundedButton, New inline chain button
     """
     def __init__(self, home, b_height, **kwargs):
         """
@@ -36,7 +36,7 @@ class MultiChain(ui.widget.Widget):
             home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
             b_height: Height for buttons in sidebar according to font size
         """
-        super(MultiChain, self).__init__(**kwargs)
+        super(MultiInlineChain, self).__init__(**kwargs)
         self.c_on = False
         self.home = home
         self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
@@ -88,12 +88,12 @@ class MultiChain(ui.widget.Widget):
         """
         self.dragging = val
 
-    def del_line(self):
+    def del_chain(self):
         """
-        Delete most recent chain with some safeguards.
+        Delete most recent inline chain with some safeguards.
 
-        If only one chain on screen, delete but add new chain and remove sidebar elements.
-        Otherwise delete current chain and go to previous. If no chains are on screen nothing
+        If only one chain on screen, delete but add new inline chain and remove sidebar elements.
+        Otherwise, delete current chain and go to previous. If no chains are on screen nothing
         happens.
         """
         if len(self.children) == 0:
@@ -102,7 +102,7 @@ class MultiChain(ui.widget.Widget):
         Window.unbind(mouse_pos=self.children[0].draw_line)
         self.remove_widget(self.children[0])
         if len(self.children) == 0:
-            # Remove sidebar buttons if deleted chain was the only chain
+            # Remove sidebar buttons if deleted inline chain was the only inline chain
             self.clicks = 0
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
@@ -139,7 +139,7 @@ class MultiChain(ui.widget.Widget):
             if len(self.children) == 0 or self.children[0].clicks >= 2:
                 if len(self.children) != 0:
                     self.children[0].stop_drawing()
-                c = Chain(home=self.home)
+                c = InlineChain(home=self.home)
                 self.add_widget(c)
 
     def gather_popup(self):
@@ -183,14 +183,14 @@ class MultiChain(ui.widget.Widget):
                 for j in i.transects:
                     data["Cut " + str(count)] = j.points
                     count += 1
-                frames["Chain " + str(c)] = data
+                frames["Inline Chain " + str(c)] = data
                 c += 1
         self.home.plot_popup.run(frames, self.home, self.home.display.config)
 
     def on_touch_down(self, touch):
         """
         Manages when sidebar elements are added to sidebar and clears them as needed. If click is a right click and not
-        the first click creates new marker.
+        the first click creates new chain.
 
         Args:
             touch: MouseMotionEvent, see kivy docs for details
