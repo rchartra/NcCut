@@ -347,7 +347,6 @@ class PlotPopup(Popup):
         elif s_type == "pdf":
             f_types = ["*.pdf"]
         try:
-            print(s_type[999999])
             fpath = filechooser.save_file(filters=f_types)
         except Exception:
             # If native file browser not working, provide manual file entry method
