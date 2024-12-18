@@ -16,6 +16,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
+from kivy.uix.textinput import TextInput
 from plyer import filechooser
 import nccut.functions as func
 from nccut.plotwindow import PlotWindow
@@ -30,6 +31,7 @@ import datetime
 import json
 import pathlib
 import os
+import re
 
 
 KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotpopup.kv"
@@ -344,7 +346,24 @@ class PlotPopup(Popup):
             f_types = ["*.png"]
         elif s_type == "pdf":
             f_types = ["*.pdf"]
-        fpath = filechooser.save_file(filters=f_types)
+        try:
+            print(s_type[999999])
+            fpath = filechooser.save_file(filters=f_types)
+        except Exception:
+            # If native file browser not working, provide manual file entry method
+            content = ui.boxlayout.BoxLayout(orientation='horizontal')
+            popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
+            txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
+            content.add_widget(txt)
+            go = Button(text="Ok", size_hint=(0.1, 1))
+            go.bind(on_press=lambda x: self.manual_file_input(txt.text, s_type))
+            go.bind(on_release=popup.dismiss)
+            close = Button(text="Close", size_hint=(0.2, 1), font_size=self.home.font)
+            close.bind(on_press=popup.dismiss)
+            content.add_widget(go)
+            content.add_widget(close)
+            popup.open()
+            return
         if fpath is not None and len(fpath) > 0:
             fpath = fpath[0]
             if s_type == "s_data":
@@ -357,6 +376,63 @@ class PlotPopup(Popup):
                 self.download_png_plot(fpath)
             elif s_type == "pdf":
                 self.download_pdf_plot(fpath)
+
+    def manual_file_input(self, fname, s_type):
+        """
+        Checks if a filename is valid and prevents overwriting.
+        Checks a file name doesn't have any problematic characters. If file name is a file path
+        ensures that the directories exists. If a file name is the same as one that already
+        exists it adds a (#) to avoid overwriting existing file. Calls for data/plot to be saved to corrected file name.
+
+        Args:
+            fname: File name/path given by user
+            s_type (str): String corresponding to what is being saved:
+                'data': Transect data for selections
+                'all_z_data': Transect data for selections for all z dimension values
+                'png': Current plot as a PNG file
+                'pdf': Current plot as a PDF file
+        """
+
+        if s_type == "s_data" or s_type == "a_data" or s_type == "all_z":
+            extension = ".json"
+        elif s_type == "png":
+            extension = ".png"
+        elif s_type == "pdf":
+            extension = ".pdf"
+        path = self.home.rel_path
+        if fname.find(".") >= 1:
+            fname = fname[:fname.find(".")]
+        if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/:\\]', fname)) > 0:
+            func.alert_popup("Invalid file name")
+            return False
+        if "/" in fname:
+            if not pathlib.Path.exists(path / fname[:fname.rfind("/") + 1]):
+                func.alert_popup("Directory not found")
+                return False
+
+        exist = True
+        fcount = 0
+        while exist:
+            if pathlib.Path.exists(path / (fname + extension)):
+                fcount += 1
+                if fcount == 1:
+                    fname = fname + "(1)"
+                else:
+                    fname = fname[:fname.find("(") + 1] + str(fcount) + ")"
+            else:
+                exist = False
+        fpath = os.path.abspath(fname + extension)
+
+        if s_type == "s_data":
+            self.download_selected_data(fpath)
+        elif s_type == "a_data":
+            self.download_all_data(fpath)
+        elif s_type == "all_z":
+            self.download_all_z_data(fpath)
+        elif s_type == "png":
+            self.download_png_plot(fpath)
+        elif s_type == "pdf":
+            self.download_pdf_plot(fpath)
 
     def download_png_plot(self, f_path):
         """
