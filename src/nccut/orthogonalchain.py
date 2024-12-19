@@ -219,8 +219,8 @@ class OrthogonalChain(ui.widget.Widget):
             # Remove plot and width buttons from sidebar if last point of the chain
             if self.parent.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.parent.dbtn)
-            if self.parent.width_w in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.parent.width_w)
+            if self.parent.width_btn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.parent.width_btn)
             self.remove_widget(self.children[0])
             # Stop drawing line between last point and cursor
             Window.unbind(mouse_pos=self.draw_line)

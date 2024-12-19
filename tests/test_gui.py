@@ -21,6 +21,7 @@ from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from nccut.multiorthogonalchain import Click, orthogonal_chain_find
+from nccut.orthogonalchainwidth import OrthogonalChainWidth
 import nccut.functions as functions
 from nccut.nccut import NcCut
 
@@ -277,7 +278,8 @@ class Test(unittest.TestCase):
             select_sidebar_button("Delete Last Point")
 
         select_sidebar_button("Back")
-        self.assertNotIn(multi_chain_instance.width_w, sidebar, "Width adjuster in sidebar when only one point clicked")
+        self.assertNotIn(multi_chain_instance.width_btn, sidebar,
+                         "Width adjustment button in sidebar when only one point clicked")
         select_sidebar_button("Edit Mode")
         select_sidebar_button("Delete Last Point")
         select_sidebar_button("Back")
@@ -296,11 +298,11 @@ class Test(unittest.TestCase):
         w_arr = [int(n * 100) for n in incs]
         w_arr[0] = 44
         multi_chain_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
-        w_wid = multi_chain_instance.width_w
         for i in range(1, len(incs)):
+            w_wid = OrthogonalChainWidth(multi_chain_instance)
             w_wid.txt.text = str(w_arr[i])
-            w_wid.btn.dispatch('on_press')
-            w_wid.btn.dispatch('on_release')
+            w_wid.set_btn.dispatch('on_press')
+            w_wid.set_btn.dispatch('on_release')
             multi_chain_instance.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
         self.assertEqual(multi_chain_instance.children[0].points, list(zip(x_arr, y_arr, w_arr)),
                          "Points were not selected with appropriate width adjustments")

@@ -56,6 +56,8 @@ class FileDisplay(ScatterLayout):
         editing (bool): Whether in editing mode or not
         t_mode (bool): Whether a tool is currently loaded
         resized (bool): Whether the image has been resized to fit in the viewer window
+        x_pix (float) X coordinate units represented by one pixel
+        y_pix (float: Y coordinate units represented by one pixel
         contrast (int): Int from -127 to 127, contrast value to use when making image from NetCDF file
         l_col (str): Line color for transect tools: 'Blue', 'Green' or 'Orange'
         cir_size (float): Circle size for transect tools
@@ -108,6 +110,9 @@ class FileDisplay(ScatterLayout):
         self.editing = False
         self.t_mode = False
         self.resized = False
+
+        self.x_pix = 1
+        self.y_pix = 1
 
         self.contrast = func.contrast_function(g_config["contrast"])
         self.l_col = g_config["line_color"]
@@ -386,10 +391,10 @@ class FileDisplay(ScatterLayout):
         # Interpolate dataset dimensions to coordinate data
         interp = RegularGridInterpolator((y_coord, x_coord), data.data, method="linear", bounds_error=False,
                                          fill_value=None)
-        x_pix = min(abs(x_coord[:-1] - x_coord[1:]))
-        y_pix = min(abs(y_coord[:-1] - y_coord[1:]))
-        x = np.arange(x_coord.min(), x_coord.max() + x_pix, x_pix)
-        y = np.arange(y_coord.min(), y_coord.max() + y_pix, y_pix)
+        self.x_pix = min(abs(x_coord[:-1] - x_coord[1:]))
+        self.y_pix = min(abs(y_coord[:-1] - y_coord[1:]))
+        x = np.arange(x_coord.min(), x_coord.max() + self.x_pix, self.x_pix)
+        y = np.arange(y_coord.min(), y_coord.max() + self.y_pix, self.y_pix)
         xg, yg = np.meshgrid(x, y)
         self.nc_data = np.flip(interp((yg, xg)), 0)
 

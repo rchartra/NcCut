@@ -112,8 +112,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         dbtn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
         dragging (bool): Whether viewer is in dragging mode
-        width_w: :class:`nccut.orthogonalchainwidth.OrthogonalChainWidth` widget to allow for adjustable orthogonal
-            transect widths
+        width_btn: Button to open transect width adjustment popup
         clicks (int): Number of clicks made by user. Decreases when points are deleted
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New chain button
@@ -135,7 +134,9 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
-        self.width_w = OrthogonalChainWidth(self, size_hint_y=None, height=b_height)
+        self.width_btn = func.RoundedButton(text="Set Transect Width", size_hint_y=None, height=b_height,
+                                            font_size=self.home.font)
+        self.width_btn.bind(on_press=lambda x: self.width_pop())
         self.clicks = 0
         self.curr_width = t_width
 
@@ -160,7 +161,13 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.dbtn.font_size = font
         self.upbtn.font_size = font
         self.nbtn.font_size = font
-        self.width_w.font_adapt(font)
+        self.width_btn.font_size = font
+
+    def width_pop(self):
+        """
+        Opens transect width adjustment popup
+        """
+        OrthogonalChainWidth(self)
 
     def update_l_col(self, color):
         """
@@ -174,11 +181,11 @@ class MultiOrthogonalChain(ui.widget.Widget):
 
     def update_c_size(self, value):
         """
-       Asks each chain to update their circle size
+        Asks each chain to update their circle size
 
-       Args:
-           value (float): New circle size
-       """
+        Args:
+            value (float): New circle size
+        """
         for m in self.children:
             m.update_c_size(value)
 
@@ -290,8 +297,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
                     chain.on_touch_down(touch)
                     self.clicks += 1
                 chain.upload_mode(False)
-                if self.clicks >= 1 and self.width_w.parent is None:
-                    self.home.display.add_to_sidebar([self.width_w])
+                if self.clicks >= 1 and self.width_btn.parent is None:
+                    self.home.display.add_to_sidebar([self.width_btn])
                 if self.clicks >= 2 and self.dbtn.parent is None:
                     self.home.display.add_to_sidebar([self.dbtn])
                 if self.upload_fail:  # If upload goes wrong, stop and undo everything
@@ -315,8 +322,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
             self.clicks = 0
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
-            if self.width_w in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.width_w)
+            if self.width_btn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.width_btn)
             if self.dragging:
                 self.home.display.drag_mode()
             self.new_chain()
@@ -352,8 +359,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
             # Remove sidebar buttons if deleted chain was the only chain
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
-            if self.width_w in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.width_w)
+            if self.width_btn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.width_btn)
             self.new_chain()
 
     def del_point(self):
@@ -381,7 +388,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
         if self.clicks == 1:
             self.home.display.remove_from_tool_action_widgets(self.dbtn)
         elif self.clicks == 0:
-            self.home.display.remove_from_tool_action_widgets(self.width_w)
+            self.home.display.remove_from_tool_action_widgets(self.width_btn)
 
     def new_chain(self):
         """
@@ -451,8 +458,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 if self.clicks > 0 or touch.button == "left":
                     self.clicks += 1
-                    if self.clicks >= 1 and self.width_w.parent is None:
-                        self.home.display.add_to_sidebar([self.width_w])
+                    if self.clicks >= 1 and self.width_btn.parent is None:
+                        self.home.display.add_to_sidebar([self.width_btn])
                     if self.clicks >= 2 and self.dbtn.parent is None:
                         self.home.display.add_to_sidebar([self.dbtn])
                     # If no current chain, create chain. Otherwise, pass touch to current chain.
