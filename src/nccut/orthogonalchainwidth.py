@@ -13,6 +13,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 from kivy.metrics import dp
 import nccut.functions as func
 
@@ -65,16 +66,20 @@ class OrthogonalChainWidth(Popup):
                 y_units = "[b]" + y_attrs["units"] + "[/b] "
         self.max = max(display.size)
         self.min = 3
+        scroll = ScrollView(size_hint=(1, 0.6), do_scroll_x=False)
         description = "Enter the number of unit coordinates between [b]" + str(self.min) + "[/b] and [b]" + \
                       str(self.max) + "[/b]\n    \u2022 One unit coordinate is: \n        \u2022 [b]" + \
                       str(round(display.x_pix, 5)) + "[/b] " + x_units + "in the X dimension (" + x_label + \
                       ") \n        \u2022 [b]" + str(round(display.y_pix, 5)) + "[/b] " + y_units + \
                       "in the Y dimension (" + y_label + ") \n\n The current width is [b]" + \
                       str(orthogonal_chain.curr_width) + "[/b]"
-        self.description = Label(text=description, font_size=self.font_size, size_hint_y=0.6,
+        self.description = Label(text=description, font_size=self.font_size, size_hint_y=None, text_size=(None, None),
                                  halign="left", valign="top", markup=True)
-        self.description.bind(size=self.description.setter('text_size'))
-
+        self.description.bind(
+            width=lambda instance, value: setattr(instance, 'text_size', (value, None)),
+            texture_size=lambda instance, value: setattr(instance, 'height', value[1])
+        )
+        scroll.add_widget(self.description)
         # Text Entry
         self.txt = TextInput(hint_text="Enter Transect Width", font_size=self.font_size, size_hint_y=0.2)
 
@@ -91,7 +96,7 @@ class OrthogonalChainWidth(Popup):
         buttons.add_widget(self.back_btn)
         buttons.add_widget(self.set_btn)
 
-        content.add_widget(self.description)
+        content.add_widget(scroll)
         content.add_widget(self.txt)
         content.add_widget(buttons)
         self.add_widget(content)

@@ -98,7 +98,7 @@ def validate_config(config):
                                              "line_color": ["Blue", "Orange", "Green"],
                                              "colormap": plt.colormaps()[:87],
                                              "circle_size": np.arange(2, 71).astype(int),
-                                             "font_size": np.arange(8, 25)},
+                                             "font_size": np.arange(8, 21)},
                        "tool_defaults": {"orthogonal_width": np.arange(0, 401).astype(int)},
                        "netcdf": {"dimension_order": xyz},
                        "metadata": {}}
