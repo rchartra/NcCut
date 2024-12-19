@@ -19,23 +19,6 @@ from kivy.core.window import Window
 import nccut.functions as functions
 
 
-class Click:
-    """
-    Object that mimics a user click.
-
-    Attributes:
-        x (float): X coordinate of click point
-        y (float): Y coordinate of click point
-        pos (tuple): 2 element tuple: (X coord, Y coord)
-    """
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.pos = (x, y)
-        self.is_double_tap = False
-        self.button = "left"
-
-
 class OrthogonalChain(ui.widget.Widget):
     """
     Singular orthogonal chain widget.
@@ -126,7 +109,7 @@ class OrthogonalChain(ui.widget.Widget):
             self.del_point()
         for p in points:
             self.update_width(p[2])
-            self.on_touch_down(Click(p[0], p[1]))
+            self.on_touch_down(functions.Click(p[0], p[1]))
         self.stop_drawing()
 
     def update_width(self, width):

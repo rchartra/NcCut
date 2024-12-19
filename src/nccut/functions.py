@@ -34,6 +34,23 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
+class Click:
+    """
+    Object that mimics a user click.
+
+    Attributes:
+        x (float): X coordinate of click point
+        y (float): Y coordinate of click point
+        pos (tuple): 2 element tuple: (X coord, Y coord)
+    """
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.pos = (x, y)
+        self.is_double_tap = False
+        self.button = "left"
+
+
 class RoundedButton(Button):
     """
     Code for this is in nccut.kv. Referenced here so it can be used in scripts.
@@ -120,6 +137,28 @@ def validate_config(config):
     return True
 
 
+def convert_found_coords(found, config):
+    """
+    If coordinates from uploaded project file came from the currently loaded NetCDF file convert the coordinates to
+    pixel coordinates for plotting the chains on the viewer.
+
+    Args:
+        config:
+        found: The found chains from the project file that have already been verified to have come from the current
+            NetCDF file. A list containing a list for each chain which contains three lists: [X Coord List,
+            Y Coord List, Width List]
+
+    Returns:
+        The original found list except the Click points have been converted to pixel coordinates
+    """
+    for chain in found:
+        for i, c in enumerate(["x", "y"]):
+            coords = config["netcdf"]["data"].coords[config["netcdf"][c]].data.astype(float)
+            c_spline = CubicSpline(coords, range(len(coords)))
+            chain[i] = c_spline(chain[i]).tolist()
+    return found
+
+
 def find_config(config_file):
     """
     Looks for nccut_config.toml file. If found, validates and applied configuration changes.
@@ -163,6 +202,73 @@ def find_config(config_file):
                 return {}
     except FileNotFoundError:
         return {}
+
+
+def chain_find(data, res, need, c_type):
+    """
+    Recursively examines dictionary and determines if dictionary is valid project file containing the needed fields.
+
+    Args:
+        data (dict): Dictionary to examine
+        res (list): Empty list to fill with chain click coordinates and orthogonal transect widths
+        need (list): List of required fields to qualify as an orthogonal chain:
+            ["Click <cord>", "Click <cord>", "Width"]
+        c_type: Type of chain to look for
+
+    Returns:
+        Nested List. A list containing a list for each orthogonal chain which each contains three lists:
+        click X coords, click y coords, and the orthogonal transect width for each click point in the chain.
+        If no qualifying data was found returns empty list. If duplicate data is found (ex: multiple
+        variables in a file) only returns one instance of orthogonal chain data.
+    """
+    for key in list(data.keys()):
+        if key[0:len(c_type)] == c_type:
+            if correct_test(data[key], need):  # Orthogonal chain dict has necessary fields
+                if len(res) == 0:  # If res empty, always add orthogonal chain data
+                    new_items = []
+                    for i in range(len(need)):
+                        new_items.append(data[key][need[i]])
+                    res.append(new_items)
+                else:  # If res not empty, ensure found orthogonal chain data isn't already in res
+                    new = True
+                    for item in res:
+                        l1 = data[key][need[0]]
+                        l2 = item[0]
+                        if len(l1) == len(l2) and len(l1) == sum([1 for i, j in zip(l1, l2) if i == j]):
+                            new = False
+                    if new:
+                        new_items = []
+                        for i in range(len(need)):
+                            new_items.append(data[key][need[i]])
+                        res.append(new_items)
+        else:
+            if type(data[key]) is dict:  # Can still go further in nested dictionary tree
+                chain_find(data[key], res, need, c_type)
+            else:
+                return res
+    return res
+
+
+def correct_test(data, need):
+    """
+    Check if dictionary has necessary fields to be an orthogonal chain
+
+    Args:
+        data (dict): Dictionary to be tested.
+        need (list): List of required fields to qualify as an orthogonal chain:
+            ["Click <cord>", "Click <cord>", "Width"]
+
+    Returns:
+        Boolean, whether dictionary has necessary keys with a list has the value
+    """
+    keys = list(data.keys())
+    if len(keys) == 0:
+        return False
+    else:
+        for item in need:
+            if item not in keys or not isinstance(data[item], list):
+                return False
+    return True
 
 
 def contrast_function(value):

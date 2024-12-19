@@ -41,6 +41,7 @@ class InlineChain(ui.widget.Widget):
         super(InlineChain, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
+        self.uploaded = False
         self.home = home
         self.transects = []
         self.curr_line = Line()
@@ -107,6 +108,15 @@ class InlineChain(ui.widget.Widget):
         self.curr_line.width = self.line_width
         self.c_size = (dp(value), dp(value))
 
+    def upload_mode(self, val):
+        """
+        Update whether in upload mode or not
+
+        Args:
+            val (bool): Whether in upload mode or not
+        """
+        self.uploaded = val
+
     def del_point(self):
         """
         Remove most recent point, line, and transect points.
@@ -135,7 +145,15 @@ class InlineChain(ui.widget.Widget):
             touch: MouseMotionEvent, see kivy docs for details
         """
         # Draws chain line and points.
-        if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
+        proceed = False
+        if self.uploaded:  # If being uploaded, just needs to be within image bounds
+            if touch.pos[0] < self.size[0] and touch.pos[1] < self.size[1]:
+                proceed = True
+            else:
+                self.parent.upload_fail_alert()  # Upload failed
+        elif self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
+            proceed = True
+        if proceed:
             if self.clicks > 1 and (touch.x, touch.y) == self.points[-1]:
                 return
             else:
