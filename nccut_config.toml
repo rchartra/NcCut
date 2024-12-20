@@ -8,7 +8,7 @@ contrast = 0 # The intitial contrast value to apply to displayed image, int betw
 line_color = "Blue" # Default color for tool graphics, one of "Blue", "Orange", or "Green"
 colormap = "viridis" # Default colormap for NetCDF data. Must be one of plt.colormaps()[:87]
 circle_size = 5 # Default tool graphics size, int between [2, 70]
-font_size = 14 # Font size for text elements, int between [8, 24]
+font_size = 20 # Font size for text elements, int between [8, 20]
 
 [tool_defaults]
 orthogonal_width = 40 # The default width for the orthogonal chain tool, int between [1, 400]

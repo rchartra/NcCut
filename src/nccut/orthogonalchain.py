@@ -19,23 +19,6 @@ from kivy.core.window import Window
 import nccut.functions as functions
 
 
-class Click:
-    """
-    Object that mimics a user click.
-
-    Attributes:
-        x (float): X coordinate of click point
-        y (float): Y coordinate of click point
-        pos (tuple): 2 element tuple: (X coord, Y coord)
-    """
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.pos = (x, y)
-        self.is_double_tap = False
-        self.button = "left"
-
-
 class OrthogonalChain(ui.widget.Widget):
     """
     Singular orthogonal chain widget.
@@ -126,7 +109,7 @@ class OrthogonalChain(ui.widget.Widget):
             self.del_point()
         for p in points:
             self.update_width(p[2])
-            self.on_touch_down(Click(p[0], p[1]))
+            self.on_touch_down(functions.Click(p[0], p[1]))
         self.stop_drawing()
 
     def update_width(self, width):
@@ -219,8 +202,8 @@ class OrthogonalChain(ui.widget.Widget):
             # Remove plot and width buttons from sidebar if last point of the chain
             if self.parent.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.parent.dbtn)
-            if self.parent.width_w in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.parent.width_w)
+            if self.parent.width_btn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.parent.width_btn)
             self.remove_widget(self.children[0])
             # Stop drawing line between last point and cursor
             Window.unbind(mouse_pos=self.draw_line)

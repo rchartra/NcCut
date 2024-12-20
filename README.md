@@ -98,7 +98,7 @@ NcCut().run()
 ## Tools
 * NcCut has two types of tools for making transects.
 ### Inline Chain
-* Using this tool chains of transects can be drawn connected end to end. Transects will be taken along the line segments drawn between the clicked points. Multiple such "Chains" can be drawn out at once before being plotted.
+* Using this tool chains of transects can be drawn. Transects will be taken along the line segments drawn between the clicked points. Multiple such *Chains* can be drawn out at once before being plotted. These *chains* can all be saved together as a *project* and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
 
 
 1. Hit "Inline Chain" to enter transect mode
@@ -125,9 +125,9 @@ NcCut().run()
 
 #### Uploading a project
 1. Load the same dataset/image you worked on previously.
-2. Hit the "Orthogonal Chain" button to enter transect mode.
+2. Hit the tool button of the tool you used previously to enter transect mode.
 3. Instead of clicking new points, select the "Upload Project" button.
-4. Enter the file name of the transect data you saved previously and select "Ok".
-5. All markers from the file will load onto the viewer and you can continue working on the project.
+4. Enter the file name of the transect data you saved previously from the plotting menu and select "Ok".
+5. All chains from the file will load onto the viewer and you can continue working on the project.
 
 For more on these tools please refer to [usage section](https://nccut.readthedocs.io/en/latest/usage.html) of the docs.

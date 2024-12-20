@@ -20,20 +20,22 @@ from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
-from nccut.multiorthogonalchain import Click, orthogonal_chain_find
+from nccut.orthogonalchainwidth import OrthogonalChainWidth
 import nccut.functions as functions
 from nccut.nccut import NcCut
 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 TEST_NC_PATH = pooch.retrieve(url="doi:10.5281/zenodo.12734574/test_nc.nc", known_hash=None)
-EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/example.jpg",
+EXAMPLE_JPG_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/example.jpg",
                                   known_hash="f039e8cb72d6821f4909707767863373230159e384a26ba7edd8a01a3e359e53")
-EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/example_3d.nc",
+EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/example_3d.nc",
                                  known_hash="ccb6c76062d3228799746e68e1bb3ff715538bc3aae796c577c6fb1d06fcdc9f")
-EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/example_4v.nc",
+EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/example_4v.nc",
                                  known_hash="afd261063f4b58c382c46db0d81e69dfb8f5234ef0037b261087177e6d3f7e1b")
-PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14512874/project_example.json",
-                                      known_hash='82f37306b94ee54ad1906c6bed72f8c9e8243940f95a8fe1f0d39a27eb920091')
+ORTHOGONAL_PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/orthogonal_project_example.json",
+                                                 known_hash='82f37306b94ee54ad1906c6bed72f8c9e8243940f95a8fe1f0d39a27eb920091')
+INLINE_PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/inline_project_example.json",
+                                             known_hash='9f0f1d4d536cc445ccfc5aa07a011a32379673a114fbe2b7be7070bd2f73e9b5')
 
 
 class AppInfo:
@@ -116,7 +118,7 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = ""
         run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Empty file names are invalid")
-        run_app.home.ids.file_in.text = PROJECT_EXAMPLE_PATH
+        run_app.home.ids.file_in.text = ORTHOGONAL_PROJECT_EXAMPLE_PATH
         run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
@@ -174,7 +176,7 @@ class Test(unittest.TestCase):
         x_arr = incs * x
         y_arr = incs * y
         for i in range(len(incs)):
-            tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
+            tool.on_touch_down(functions.Click(float(x_arr[i]), float(y_arr[i])))
 
         run_app.home.ids.file_in.text = EXAMPLE_JPG_PATH
         run_app.home.load_btn()
@@ -191,10 +193,10 @@ class Test(unittest.TestCase):
 
     def test_project_upload(self):
         """
-        Tests the project upload function of the Orthogonal Chain tool.
+        Tests the project upload function of the tools.
 
-        Assumes 'support/project_example.json' exists and is a valid project file for 'support/example.jpg' with
-        a variable 'Vorticity' and three orthogonal chains.
+        Assumes project files are valid project files for 'support/example_4v.nc' with
+        a variable 'Vorticity' and three chains.
         """
         load_2d_nc("Vorticity")
 
@@ -202,11 +204,11 @@ class Test(unittest.TestCase):
         select_sidebar_button("Orthogonal Chain")
 
         # Project File
-        f1 = open(PROJECT_EXAMPLE_PATH)
+        f1 = open(ORTHOGONAL_PROJECT_EXAMPLE_PATH)
         project1 = json.load(f1)
         # Upload Project File
         multi_chain_instance = run_app.home.display.tool
-        multi_chain_instance.upload_data(orthogonal_chain_find(project1, [], ["Click x", "Click y", "Width"]))
+        multi_chain_instance.upload_data(functions.chain_find(project1, [], ["Click x", "Click y", "Width"], "Orthogonal"))
 
         # Check file uploaded properly
         for i, chain in enumerate(list(project1["Vorticity"].keys())[:-1]):
@@ -218,6 +220,27 @@ class Test(unittest.TestCase):
 
         self.assertEqual(multi_chain_instance.children[0].points, [],
                          "Empty new orthogonal chain was created after upload")
+        select_sidebar_button("Close Tool")
+        # Open Inline Chain tool
+        select_sidebar_button("Inline Chain")
+
+        # Project File
+        f2 = open(INLINE_PROJECT_EXAMPLE_PATH)
+        project2 = json.load(f2)
+        # Upload Project File
+        multi_chain_instance = run_app.home.display.tool
+        multi_chain_instance.upload_data(functions.chain_find(project2, [], ["Click x", "Click y"], "Inline"))
+
+        # Check file uploaded properly
+        for i, chain in enumerate(list(project2["Vorticity"].keys())[:-1]):
+            p_c = project2["Vorticity"][chain]
+            c_expected_points = list(zip(p_c["Click x"], p_c["Click y"]))
+            i_chain = multi_chain_instance.children[len(list(project2["Vorticity"].keys())) - 1 - i]
+            self.assertListEqual(i_chain.points, c_expected_points,
+                                 chain + " Inline Chain Points Did not Upload Properly")
+
+        self.assertEqual(multi_chain_instance.children[0].points, [],
+                         "Empty new inline chain was created after upload")
 
     def test_orthogonal_chain(self):
         """
@@ -233,12 +256,12 @@ class Test(unittest.TestCase):
         select_sidebar_button("Orthogonal Chain")
 
         # Project File
-        f = open(PROJECT_EXAMPLE_PATH)
+        f = open(ORTHOGONAL_PROJECT_EXAMPLE_PATH)
         project = json.load(f)
 
         # Upload Project File
         multi_chain_instance = run_app.home.display.tool
-        multi_chain_instance.upload_data(orthogonal_chain_find(project, [], ["Click x", "Click y", "Width"]))
+        multi_chain_instance.upload_data(functions.chain_find(project, [], ["Click x", "Click y", "Width"], "Orthogonal"))
 
         # Open editing mode
         select_sidebar_button("Edit Mode")
@@ -277,7 +300,8 @@ class Test(unittest.TestCase):
             select_sidebar_button("Delete Last Point")
 
         select_sidebar_button("Back")
-        self.assertNotIn(multi_chain_instance.width_w, sidebar, "Width adjuster in sidebar when only one point clicked")
+        self.assertNotIn(multi_chain_instance.width_btn, sidebar,
+                         "Width adjustment button in sidebar when only one point clicked")
         select_sidebar_button("Edit Mode")
         select_sidebar_button("Delete Last Point")
         select_sidebar_button("Back")
@@ -295,19 +319,19 @@ class Test(unittest.TestCase):
         y_arr = (incs * y).tolist()
         w_arr = [int(n * 100) for n in incs]
         w_arr[0] = 44
-        multi_chain_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
-        w_wid = multi_chain_instance.width_w
+        multi_chain_instance.on_touch_down(functions.Click(float(x_arr[0]), float(y_arr[0])))
         for i in range(1, len(incs)):
+            w_wid = OrthogonalChainWidth(multi_chain_instance)
             w_wid.txt.text = str(w_arr[i])
-            w_wid.btn.dispatch('on_press')
-            w_wid.btn.dispatch('on_release')
-            multi_chain_instance.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
+            w_wid.set_btn.dispatch('on_press')
+            w_wid.set_btn.dispatch('on_release')
+            multi_chain_instance.on_touch_down(functions.Click(float(x_arr[i]), float(y_arr[i])))
         self.assertEqual(multi_chain_instance.children[0].points, list(zip(x_arr, y_arr, w_arr)),
                          "Points were not selected with appropriate width adjustments")
 
         # Test Drag Mode
         select_sidebar_button("Drag Mode")
-        multi_chain_instance.on_touch_down(Click(0.43 * x, 0.43 * y))
+        multi_chain_instance.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(multi_chain_instance.children[0].points, list(zip(x_arr, y_arr, w_arr)),
                          "A point was added while tool in drag mode")
 
@@ -331,17 +355,17 @@ class Test(unittest.TestCase):
         tran_instance = run_app.home.display.tool
         # First Click
         sidebar = run_app.home.ids.dynamic_sidebar.children
-        tran_instance.on_touch_down(Click(float(x_arr[0]), float(y_arr[0])))
+        tran_instance.on_touch_down(functions.Click(float(x_arr[0]), float(y_arr[0])))
         self.assertNotIn(tran_instance.dbtn, sidebar, "There cannot be a Plot Button on First Click")
         self.assertEqual(len(tran_instance.children), 1, "Inline chain Not Added")
 
         # Second Click
-        tran_instance.on_touch_down(Click(float(x_arr[1]), float(y_arr[1])))
+        tran_instance.on_touch_down(functions.Click(float(x_arr[1]), float(y_arr[1])))
         self.assertIn(tran_instance.dbtn, sidebar, "Plot Button should be added on second click")
         self.assertEqual(len(tran_instance.children), 1, "A chain was improperly deleted or added")
 
         # Third Click
-        tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
+        tran_instance.on_touch_down(functions.Click(float(x_arr[2]), float(y_arr[2])))
         self.assertIn(tran_instance.dbtn, sidebar, "Plot Button should be there on third click")
         self.assertEqual(len(tran_instance.children), 1, "A chain was improperly deleted or added")
 
@@ -349,13 +373,13 @@ class Test(unittest.TestCase):
                          "Chain points were not placed correctly")
 
         # Repeat Click
-        tran_instance.on_touch_down(Click(float(x_arr[2]), float(y_arr[2])))
+        tran_instance.on_touch_down(functions.Click(float(x_arr[2]), float(y_arr[2])))
         self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
                          "Point was added where there was already a point")
 
         # Test Drag Mode
         select_sidebar_button("Drag Mode")
-        tran_instance.on_touch_down(Click(0.43 * x, 0.43 * y))
+        tran_instance.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
                          "A point was added while tool in drag mode")
 
@@ -366,7 +390,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("New Chain")
         self.assertEqual(len(tran_instance.children), 2,
                          "New chain was added even though previous chain had no clicks")
-        tran_instance.on_touch_down(Click(0.43 * x, 0.43 * y))
+        tran_instance.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(tran_instance.children[1].points, list(zip(x_arr, y_arr)),
                          "A point was added to previous chain")
         self.assertEqual(tran_instance.children[0].points, [(0.43 * x, 0.43 * y)],
@@ -511,13 +535,13 @@ class Test(unittest.TestCase):
         display.update_settings("cir_size", 20)
         self.assertEqual(display.cir_size, 20, "Display circle size was not updated on setting change")
         select_sidebar_button("Inline Chain")
-        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        display.tool.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)),
                          "Inline chain graphics did not update on circle size change")
 
         select_sidebar_button("Close Tool")
         select_sidebar_button("Orthogonal Chain")
-        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        display.tool.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].c_size, (dp(20), dp(20)),
                          "Orthogonal chain graphics were not updated on circle size change")
 
@@ -529,13 +553,13 @@ class Test(unittest.TestCase):
         self.assertEqual(display.l_col, "Orange", "Display line color was not updated on line color setting change")
 
         select_sidebar_button("Inline Chain")
-        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        display.tool.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13],
                          "Inline chain graphics were not updated on line color setting change")
 
         select_sidebar_button("Close Tool")
         select_sidebar_button("Orthogonal Chain")
-        display.tool.on_touch_down(Click(0.43 * x, 0.43 * y))
+        display.tool.on_touch_down(functions.Click(0.43 * x, 0.43 * y))
         self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13],
                          "Orthogonal chain graphics were not updated on line color size change")
 
@@ -595,10 +619,10 @@ class Test(unittest.TestCase):
         select_sidebar_button("Orthogonal Chain")
         tool = run_app.home.display.tool
         for i in range(len(c1_incs)):
-            tool.on_touch_down(Click(float(c1_x_arr[i]), float(c1_y_arr[i])))
+            tool.on_touch_down(functions.Click(float(c1_x_arr[i]), float(c1_y_arr[i])))
         select_sidebar_button("New Chain")
         for i in range(len(c2_incs)):
-            tool.on_touch_down(Click(float(c2_x_arr[i]), float(c2_y_arr[i])))
+            tool.on_touch_down(functions.Click(float(c2_x_arr[i]), float(c2_y_arr[i])))
         select_sidebar_button("Plot")
         plot_popup = run_app.home.plot_popup
 
@@ -683,10 +707,10 @@ class Test(unittest.TestCase):
         select_sidebar_button("Inline Chain")
         tool = run_app.home.display.tool
         for i in range(3):
-            tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
+            tool.on_touch_down(functions.Click(float(x_arr[i]), float(y_arr[i])))
         select_sidebar_button("New Chain")
         for i in range(3, 6):
-            tool.on_touch_down(Click(float(x_arr[i]), float(y_arr[i])))
+            tool.on_touch_down(functions.Click(float(x_arr[i]), float(y_arr[i])))
         select_sidebar_button("Plot")
         self.assertEqual(len(tool.children), 2, "2 Chains Not Added")
         plot_popup = run_app.home.plot_popup
@@ -759,7 +783,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Orthogonal Chain")
         tool = run_app.home.display.tool
         for i in range(len(c1_incs)):
-            tool.on_touch_down(Click(float(c1_x_arr[i]), float(c1_y_arr[i])))
+            tool.on_touch_down(functions.Click(float(c1_x_arr[i]), float(c1_y_arr[i])))
         self.assertEqual(run_app.home.display.l_col, non_default_config["graphics_defaults"]["line_color"],
                          "Tool line color was not updated from config file.")
         c = non_default_config["graphics_defaults"]["circle_size"]

@@ -21,83 +21,6 @@ from nccut.orthogonalchain import OrthogonalChain
 from nccut.orthogonalchainwidth import OrthogonalChainWidth
 
 
-class Click:
-    """
-    Object that mimics a user click.
-
-    Attributes:
-        x (float): X coordinate of click point
-        y (float): Y coordinate of click point
-        pos (tuple): 2 element tuple: (X coord, Y coord)
-    """
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.pos = (x, y)
-        self.is_double_tap = False
-        self.button = "left"
-
-
-def correct_test(data, need):
-    """
-    Check if dictionary has necessary fields to be an orthogonal chain
-
-    Args:
-        data (dict): Dictionary to be tested.
-        need (list): List of required fields to qualify as an orthogonal chain:
-            ["Click <cord>", "Click <cord>", "Width"]
-
-    Returns:
-        Boolean, whether dictionary has necessary keys with a list has the value
-    """
-    keys = list(data.keys())
-    if len(keys) == 0:
-        return False
-    else:
-        for item in need:
-            if item not in keys or not isinstance(data[item], list):
-                return False
-    return True
-
-
-def orthogonal_chain_find(data, res, need):
-    """
-    Recursively examines dictionary and finds chain click coordinates and orthogonal transect widths.
-
-    Args:
-        data (dict): Dictionary to examine
-        res (list): Empty list to fill with chain click coordinates and orthogonal transect widths
-        need (list): List of required fields to qualify as an orthogonal chain:
-            ["Click <cord>", "Click <cord>", "Width"]
-
-    Returns:
-        Nested List. A list containing a list for each orthogonal chain which each contains three lists:
-        click X coords, click y coords, and the orthogonal transect width for each click point in the chain.
-        If no qualifying data was found returns empty list. If duplicate data is found (ex: multiple
-        variables in a file) only returns one instance of orthogonal chain data.
-    """
-    for key in list(data.keys()):
-        if key[0:10] == 'Orthogonal':
-            if correct_test(data[key], need):  # Orthogonal chain dict has necessary fields
-                if len(res) == 0:  # If res empty, always add orthogonal chain data
-                    res.append([data[key][need[0]], data[key][need[1]], data[key][need[2]]])
-                else:  # If res not empty, ensure found orthogonal chain data isn't already in res
-                    new = True
-                    for item in res:
-                        l1 = data[key][need[0]]
-                        l2 = item[0]
-                        if len(l1) == len(l2) and len(l1) == sum([1 for i, j in zip(l1, l2) if i == j]):
-                            new = False
-                    if new:
-                        res.append([data[key][need[0]], data[key][need[1]], data[key][need[2]]])
-        else:
-            if type(data[key]) is dict:  # Can still go further in nested dictionary tree
-                orthogonal_chain_find(data[key], res, need)
-            else:
-                return res
-    return res
-
-
 class MultiOrthogonalChain(ui.widget.Widget):
     """
     Orthogonal chain tool widget.
@@ -112,8 +35,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         dbtn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
         dragging (bool): Whether viewer is in dragging mode
-        width_w: :class:`nccut.orthogonalchainwidth.OrthogonalChainWidth` widget to allow for adjustable orthogonal
-            transect widths
+        width_btn: Button to open transect width adjustment popup
         clicks (int): Number of clicks made by user. Decreases when points are deleted
         up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New chain button
@@ -135,7 +57,9 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
-        self.width_w = OrthogonalChainWidth(self, size_hint_y=None, height=b_height)
+        self.width_btn = func.RoundedButton(text="Set Transect Width", size_hint_y=None, height=b_height,
+                                            font_size=self.home.font)
+        self.width_btn.bind(on_press=lambda x: self.width_pop())
         self.clicks = 0
         self.curr_width = t_width
 
@@ -160,7 +84,13 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.dbtn.font_size = font
         self.upbtn.font_size = font
         self.nbtn.font_size = font
-        self.width_w.font_adapt(font)
+        self.width_btn.font_size = font
+
+    def width_pop(self):
+        """
+        Opens transect width adjustment popup
+        """
+        OrthogonalChainWidth(self)
 
     def update_l_col(self, color):
         """
@@ -174,11 +104,11 @@ class MultiOrthogonalChain(ui.widget.Widget):
 
     def update_c_size(self, value):
         """
-       Asks each chain to update their circle size
+        Asks each chain to update their circle size
 
-       Args:
-           value (float): New circle size
-       """
+        Args:
+            value (float): New circle size
+        """
         for m in self.children:
             m.update_c_size(value)
 
@@ -224,36 +154,15 @@ class MultiOrthogonalChain(ui.widget.Widget):
                 nc_coords = True
             except ValueError:
                 pass
-        found = orthogonal_chain_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"])
+        found = func.chain_find(data, [], ["Click " + str(x_name), "Click " + str(y_name), "Width"], "Orthogonal")
         if len(found) >= 1:
             if nc_coords:
-                found = self.convert_found_coords(found)
+                found = func.convert_found_coords(found, self.home.display.config)
             self.upload_data(found)
         else:
             content = Label(text="JSON File is not a Project for this File")
             popup2 = Popup(title="Error", content=content, size_hint=(0.5, 0.15))
             popup2.open()
-
-    def convert_found_coords(self, found):
-        """
-        If coordinates from uploaded project file came from the currently loaded NetCDF file convert the coordinates to
-        pixel coordinates for plotting the chains on the viewer.
-
-        Args:
-            found: The found chains from the project file that have already been verified to have come from the current
-                NetCDF file. A list containing a list for each chain which contains three lists: [X Coord List,
-                Y Coord List, Width List]
-
-        Returns:
-            The original found list except the Click points have been converted to pixel coordinates
-        """
-        config = self.home.display.config
-        for chain in found:
-            for i, c in enumerate(["x", "y"]):
-                coords = config["netcdf"]["data"].coords[config["netcdf"][c]].data.astype(float)
-                c_spline = CubicSpline(coords, range(len(coords)))
-                chain[i] = c_spline(chain[i]).tolist()
-        return found
 
     def upload_fail_alert(self):
         """
@@ -268,7 +177,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
         Adds chains by 'clicking' the points in the file with the orthogonal transect width denoted by the file
 
         Args:
-            points: Properly formatted nested list from :class:`nccut.multiorthogonalchain.orthogonal_chain_find()`
+            points: Properly formatted nested list from :class:`nccut.functions.chain_find()`
                 function.
         """
         try:
@@ -285,13 +194,13 @@ class MultiOrthogonalChain(ui.widget.Widget):
                 chain.upload_mode(True)
                 self.add_widget(chain)
                 for i in clicks:
-                    touch = Click(i[0], i[1])
+                    touch = func.Click(i[0], i[1])
                     chain.t_width = i[2]
                     chain.on_touch_down(touch)
                     self.clicks += 1
                 chain.upload_mode(False)
-                if self.clicks >= 1 and self.width_w.parent is None:
-                    self.home.display.add_to_sidebar([self.width_w])
+                if self.clicks >= 1 and self.width_btn.parent is None:
+                    self.home.display.add_to_sidebar([self.width_btn])
                 if self.clicks >= 2 and self.dbtn.parent is None:
                     self.home.display.add_to_sidebar([self.dbtn])
                 if self.upload_fail:  # If upload goes wrong, stop and undo everything
@@ -315,8 +224,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
             self.clicks = 0
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
-            if self.width_w in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.width_w)
+            if self.width_btn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.width_btn)
             if self.dragging:
                 self.home.display.drag_mode()
             self.new_chain()
@@ -352,8 +261,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
             # Remove sidebar buttons if deleted chain was the only chain
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
-            if self.width_w in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.width_w)
+            if self.width_btn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.width_btn)
             self.new_chain()
 
     def del_point(self):
@@ -381,7 +290,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
         if self.clicks == 1:
             self.home.display.remove_from_tool_action_widgets(self.dbtn)
         elif self.clicks == 0:
-            self.home.display.remove_from_tool_action_widgets(self.width_w)
+            self.home.display.remove_from_tool_action_widgets(self.width_btn)
 
     def new_chain(self):
         """
@@ -451,8 +360,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
             if self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
                 if self.clicks > 0 or touch.button == "left":
                     self.clicks += 1
-                    if self.clicks >= 1 and self.width_w.parent is None:
-                        self.home.display.add_to_sidebar([self.width_w])
+                    if self.clicks >= 1 and self.width_btn.parent is None:
+                        self.home.display.add_to_sidebar([self.width_btn])
                     if self.clicks >= 2 and self.dbtn.parent is None:
                         self.home.display.add_to_sidebar([self.dbtn])
                     # If no current chain, create chain. Otherwise, pass touch to current chain.

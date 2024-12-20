@@ -8,6 +8,8 @@ import kivy.uix as ui
 from kivy.core.window import Window
 from scipy.interpolate import CubicSpline
 import numpy as np
+import json
+from plyer import filechooser
 import nccut.functions as func
 from nccut.inlinechain import InlineChain
 
@@ -21,11 +23,13 @@ class MultiInlineChain(ui.widget.Widget):
 
     Attributes:
         c_on (bool): Whether there are any chains active
+        upload_fail (bool): If anything has gone wrong in the project uploading process
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         dbtn: RoundedButton, Plot button to activate PlotPopup
         dragging (bool): Whether viewer is in dragging mode
         clicks (int): Number of clicks made by user. Does not decrease when points are deleted
             unless all points are deleted in which case it goes back to zero.
+        up_btn: RoundedButton, Upload button for uploading a past project
         nbtn: RoundedButton, New inline chain button
     """
     def __init__(self, home, b_height, **kwargs):
@@ -38,17 +42,21 @@ class MultiInlineChain(ui.widget.Widget):
         """
         super(MultiInlineChain, self).__init__(**kwargs)
         self.c_on = False
+        self.upload_fail = False
         self.home = home
         self.dbtn = func.RoundedButton(text="Plot", size_hint_y=None, height=b_height, font_size=self.home.font)
         self.dbtn.bind(on_press=lambda x: self.gather_popup())
         self.dragging = False
         self.clicks = 0
-
+        # Upload Button
+        self.upbtn = func.RoundedButton(text="Upload Project", size_hint_y=None, height=b_height,
+                                        font_size=self.home.font)
+        self.upbtn.bind(on_press=lambda x: self.upload_pop())
         # New Chain Button
         self.nbtn = func.RoundedButton(text="New Chain", size_hint_y=None, height=b_height, font_size=self.home.font)
 
         self.nbtn.bind(on_press=lambda x: self.new_chain())
-        self.home.display.add_to_sidebar([self.nbtn])
+        self.home.display.add_to_sidebar([self.upbtn, self.nbtn])
 
     def font_adapt(self, font):
         """
@@ -57,6 +65,7 @@ class MultiInlineChain(ui.widget.Widget):
             font (float): New font size
         """
         self.dbtn.font_size = font
+        self.upbtn.font_size = font
         self.nbtn.font_size = font
 
     def update_l_col(self, color):
@@ -87,6 +96,113 @@ class MultiInlineChain(ui.widget.Widget):
             val (bool): Whether in dragging mode or not.
         """
         self.dragging = val
+
+    def upload_pop(self):
+        """
+        Opens native operating system file browser to allow user to select their project file
+        """
+        try:
+            path = filechooser.open_file(filters=["*.json"])
+            if path is not None and len(path) != 0:
+                self.check_file(path[0])
+        except Exception:
+            func.alert_popup("Cannot upload project files at this time")
+
+    def check_file(self, file):
+        """
+        Checks is given file name is a properly formatted project file. If it is it uploads
+        file. If not, shows error message.
+
+        Args:
+            file (str): File path
+        """
+        data = json.load(open(file))
+        config = self.home.display.config
+        x_name = "X"
+        y_name = "Y"
+        nc_coords = False
+        if list(config.keys())[0] == "netcdf":
+            try:
+                config["netcdf"]["data"].coords[config["netcdf"]["x"]].data.astype(float)
+                config["netcdf"]["data"].coords[config["netcdf"]["y"]].data.astype(float)
+                x_name = config["netcdf"]["x"]
+                y_name = config["netcdf"]["y"]
+                nc_coords = True
+            except ValueError:
+                pass
+        found = func.chain_find(data, [], ["Click " + str(x_name), "Click " + str(y_name)], "Inline")
+        if len(found) >= 1:
+            if nc_coords:
+                found = func.convert_found_coords(found, self.home.display.config)
+            self.upload_data(found)
+        else:
+            content = ui.label.Label(text="JSON File is not a Project for this File")
+            popup2 = ui.popup.Popup(title="Error", content=content, size_hint=(0.5, 0.15))
+            popup2.open()
+
+    def upload_fail_alert(self):
+        """
+        Indicate upload has failed
+        """
+        self.upload_fail = True
+
+    def upload_data(self, points):
+        """
+        Loads chains from project file.
+
+        Adds chains by 'clicking' the points in the file
+
+        Args:
+            points: Properly formatted nested list from :class:`nccut.functions.chain_find()`
+                function.
+        """
+        try:
+            self.upload_fail = False
+            if len(self.children) != 0:  # If chains already exist in viewer
+                self.children[0].stop_drawing()
+                if self.children[0].clicks < 2:  # If any existing chains are incomplete, remove them
+                    if self.children[0].clicks == 1:
+                        self.children[0].del_point()
+                    self.remove_widget(self.children[0])
+            for c in range(0, len(points)):
+                chain = InlineChain(home=self.home)
+                clicks = tuple(zip(points[c][0], points[c][1]))
+                chain.upload_mode(True)
+                self.add_widget(chain)
+                for i in clicks:
+                    touch = func.Click(i[0], i[1])
+                    chain.on_touch_down(touch)
+                    self.clicks += 1
+                chain.upload_mode(False)
+                if self.clicks >= 2 and self.dbtn.parent is None:
+                    self.home.display.add_to_sidebar([self.dbtn])
+                if self.upload_fail:  # If upload goes wrong, stop and undo everything
+                    self.undo_upload(c)
+                    return
+            self.new_chain()
+        except Exception as error:
+            func.alert_popup(str(error))
+
+    def undo_upload(self, chains):
+        """
+        Remove any previous chains that had been uploaded if upload fails
+
+        Args:
+            chains (int): Number of chains added so far
+        """
+        for m in range(0, chains + 1):
+            self.del_chain()
+        if len(self.children) == 0:
+            # Remove sidebar buttons if deleted chain was the only chain
+            self.clicks = 0
+            if self.dbtn in self.home.display.tool_action_widgets:
+                self.home.display.remove_from_tool_action_widgets(self.dbtn)
+            if self.dragging:
+                self.home.display.drag_mode()
+            self.new_chain()
+        content = ui.label.Label(text="Project File Chains out of Bounds")
+        popup = ui.popup.Popup(title="Error", content=content, size_hint=(0.5, 0.15))
+        popup.open()
 
     def del_chain(self):
         """
