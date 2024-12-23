@@ -273,6 +273,16 @@ class HomeScreen(Screen):
         if len(self.ids.main_box.children) > 3:
             self.ids.main_box.remove_widget(self.netcdf_info)
         if self.file_on:
+            if len(self.display.x_labels) > 0:
+                for i in self.display.x_labels:
+                    self.ids.plot_box.remove_widget(i)
+                self.ids.plot_box.canvas.remove_group("x_ticks")
+            self.ids.x_axis_label.text = ""
+            self.ids.y_axis_label.text = ""
+            if len(self.display.y_labels) > 0:
+                for i in self.display.y_labels:
+                    self.ids.plot_box.remove_widget(i)
+                self.ids.plot_box.canvas.remove_group("y_ticks")
             self.ids.view.unbind(size=self.display.resize_to_fit)
             def_img_name = self.general_config["graphics_defaults"]["line_color"].lower() + "_line_btn.png"
             self.settings_bar.set_line_color_btn(os.path.join(self.btn_img_path, def_img_name))

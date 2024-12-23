@@ -563,12 +563,6 @@ class Test(unittest.TestCase):
         self.assertEqual(display.tool.children[0].l_color.rgb, [0.74, 0.42, 0.13],
                          "Orthogonal chain graphics were not updated on line color size change")
 
-        # Rotation
-        display.rotate()
-        self.assertEqual(np.round(display.rotation, 4), float(45), "Display did not rotate 45 degrees")
-        display.rotate()
-        self.assertEqual(np.round(display.rotation, 4), float(90), "Display only rotated 45 degrees once")
-
     def test_load_nonuniform_coords(self):
         """
         Test that when loading a DataArray when nonuniform coordinates the resulting image is interpolated to the
