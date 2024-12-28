@@ -110,6 +110,7 @@ class OrthogonalChain(ui.widget.Widget):
         for p in points:
             self.update_width(p[2])
             self.on_touch_down(functions.Click(p[0], p[1]))
+            self.parent.clicks += 1
         self.stop_drawing()
 
     def update_width(self, width):

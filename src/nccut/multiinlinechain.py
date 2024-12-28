@@ -236,14 +236,15 @@ class MultiInlineChain(ui.widget.Widget):
         if len(self.children) == 0:
             # If no chains on screen do nothing
             return
-        elif self.children[0].clicks == 0:
+        elif self.children[0].clicks <= 2:
             if self.dbtn in self.home.display.tool_action_widgets:
                 self.home.display.remove_from_tool_action_widgets(self.dbtn)
-            if len(self.children) > 1:
-                # If no clicks on current chain and not the only chain delete current chain
-                self.remove_widget(self.children[0])
-            else:
-                return
+            if self.children[0].clicks == 0:
+                if len(self.children) > 1:
+                    # If no clicks on current chain and not the only chain delete current chain
+                    self.remove_widget(self.children[0])
+                else:
+                    return
         # Delete point from current chain
         self.children[0].del_point()
 
