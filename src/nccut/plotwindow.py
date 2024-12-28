@@ -34,6 +34,7 @@ class YAxis(FloatLayout):
         size: Size of the object.
         pos: Position of the object.
         y_label: Label object for the y axis label (z coordinate name).
+        y_tick_labels (list): List of y tick labels
     """
     def __init__(self, config, window_box, main, font, **kwargs):
         """
@@ -78,6 +79,8 @@ class YAxis(FloatLayout):
             Rotate(angle=90, origin=self.y_label.center)
         with self.y_label.canvas.after:
             PopMatrix()
+        self.y_tick_labels = []
+        self.add_widget(self.y_label)
         # Initialize axes
         self.on_plot_change((0, 0), self.window.size)
 
@@ -90,8 +93,7 @@ class YAxis(FloatLayout):
             n_pos (tuple): The current position of the plot (x, y) relative to the viewing window.
             n_size (tuple): The current size of the plot (w, h).
         """
-        self.canvas.clear()
-        self.clear_widgets()
+        self.canvas.remove_group("y_ticks")
         # Determine goal tick density (not necessarily the actual density)
         d = self.height / 50
         if d < 2:
@@ -121,6 +123,7 @@ class YAxis(FloatLayout):
         else:
             formatted_labels = [round(elem, 2) for elem in selected_labels]
             exp_str = ""
+        formatted_labels = [int(lab) if lab.is_integer() else lab for lab in formatted_labels]
         # Calculate y tick positions of the chosen y tick labels
         # Assume origin for coordinate data is top left as with numpy array indexing
         label_ticks = selected_labels - np.min(self.z_coords)
@@ -130,16 +133,24 @@ class YAxis(FloatLayout):
         with self.canvas:
             Color(0, 0, 0)
             for p in selected_t_pos:
-                Line(points=[tick_x - dp(6), p, tick_x - dp(1), p], width=dp(1), cap="none")
+                Line(points=[tick_x - dp(6), p, tick_x - dp(1), p], width=dp(1), cap="none", group="y_ticks")
+
+        # Add or remove labels until have required amount
+        while len(self.y_tick_labels) < len(formatted_labels):
+            lab = Label(text="", color=[0, 0, 0, 1], halign="left", size_hint=(None, None), font_size=self.font)
+            lab.bind(texture_size=lab.setter("size"))
+            self.y_tick_labels.append(lab)
+            self.add_widget(lab)
+        while len(self.y_tick_labels) > len(formatted_labels):
+            self.remove_widget(self.y_tick_labels.pop(0))
         # Place y tick labels
         for i, y in enumerate(formatted_labels):
-            lab = Label(text=str(y), color=[0, 0, 0, 1], halign="left", size_hint=(None, None),
-                        x=tick_x - self.font * 2.5, y=float(selected_t_pos[i]) - self.font / 2, font_size=self.font)
-            lab.bind(texture_size=lab.setter("size"))
-            self.add_widget(lab)
+            lab = self.y_tick_labels[i]
+            lab.text = str(y)
+            lab.pos = (tick_x - self.font * 2.5, float(selected_t_pos[i]) - self.font / 2)
+
         # Update y label
         self.y_label.text = self.y_label_text + exp_str
-        self.add_widget(self.y_label)
 
 
 class XAxis(FloatLayout):
@@ -155,6 +166,7 @@ class XAxis(FloatLayout):
         pos: Position of the object.
         x_label: Label object for the x axis label (Along Transect Point).
         transect_points (int): Number of pixels in transect
+        x_axis_labels (list): List of x tick labels
 
     """
     def __init__(self, window_box, main, font, transect_points, **kwargs):
@@ -176,7 +188,9 @@ class XAxis(FloatLayout):
         self.pos = (self.window.x, self.window.y - self.height)
         self.x_label = Label(text="Along Transect Point", color=[0, 0, 0, 1], halign="center", size_hint=(None, None),
                              size=self.size, pos=self.pos, font_size=font, text_size=(None, self.height))
+        self.add_widget(self.x_label)
         self.transect_points = transect_points
+        self.x_tick_labels = []
         self.on_plot_change((0, 0), self.window.size)
 
     def on_plot_change(self, n_pos, n_size):
@@ -188,8 +202,7 @@ class XAxis(FloatLayout):
             n_pos (tuple): The current position of the plot (x, y) relative to the viewing window.
             n_size (tuple): The current size of the plot (w, h).
         """
-        self.canvas.clear()
-        self.clear_widgets()
+        self.canvas.remove_group("x_ticks")
         # Determine goal tick density (not necessarily the actual density)
         d = self.width / 70
         if d < 2:
@@ -214,15 +227,22 @@ class XAxis(FloatLayout):
         with self.canvas:
             Color(0, 0, 0)
             for p in selected_t_pos:
-                Line(points=[p, tick_top, p, tick_top - dp(5)], width=dp(1), cap="none")
+                Line(points=[p, tick_top, p, tick_top - dp(5)], width=dp(1), cap="none", group="x_ticks")
+
+        # Add or remove labels until have required amount
+        while len(self.x_tick_labels) < len(selected_labels):
+            lab = Label(text="", color=[0, 0, 0, 1], halign="left", size_hint=(None, None), font_size=self.font)
+            lab.bind(texture_size=lab.setter("size"))
+            self.x_tick_labels.append(lab)
+            self.add_widget(lab)
+        while len(self.x_tick_labels) > len(selected_labels):
+            self.remove_widget(self.x_tick_labels.pop(0))
+
         # Place x tick labels
         for i, x in enumerate(selected_labels):
-            lab = Label(text=str(np.round(x, 3)), color=[0, 0, 0, 1], halign="left", size_hint=(None, None),
-                        pos=(float(selected_t_pos[i]) - self.font / 2, tick_top - self.font * 1.6), font_size=self.font)
-            lab.bind(texture_size=lab.setter("size"))
-            self.add_widget(lab)
-        # Add x label
-        self.add_widget(self.x_label)
+            lab = self.x_tick_labels[i]
+            lab.text = str(np.round(x, 3))
+            lab.pos = (float(selected_t_pos[i]) - self.font / 2, tick_top - self.font * 1.6)
 
 
 class PlotWindow(RelativeLayout):

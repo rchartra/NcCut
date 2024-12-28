@@ -111,6 +111,10 @@ class MultiOrthogonalChain(ui.widget.Widget):
         """
         for m in self.children:
             m.update_c_size(value)
+        if self.clicks >= 1 and self.width_btn.parent is None:
+            self.home.display.add_to_sidebar([self.width_btn])
+        if self.clicks >= 2 and self.dbtn.parent is None:
+            self.home.display.add_to_sidebar([self.dbtn])
 
     def change_dragging(self, val):
         """
@@ -287,9 +291,9 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.children[0].del_point()
         self.clicks -= 1
         # Determine which buttons should be in sidebar
-        if self.clicks == 1:
+        if self.clicks == 1 and self.dbtn in self.home.display.tool_action_widgets:
             self.home.display.remove_from_tool_action_widgets(self.dbtn)
-        elif self.clicks == 0:
+        elif self.clicks == 0 and self.width_btn in self.home.display.tool_action_widgets:
             self.home.display.remove_from_tool_action_widgets(self.width_btn)
 
     def new_chain(self):

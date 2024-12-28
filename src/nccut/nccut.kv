@@ -313,17 +313,6 @@
             pos: circle_size_btn.pos
 
     RoundedButton:
-        id: rotate_btn
-        size_hint: (0.15, 1)
-        on_press: root.rotate()
-
-        Image:
-            id: rotate_btn_img
-            source: join(app.btn_img_path, "rotate_btn.png")
-            size: rotate_btn.size
-            pos: rotate_btn.pos
-
-    RoundedButton:
         id: h_flip_btn
         size_hint: (0.15, 1)
         on_press: root.h_flip()
@@ -379,17 +368,69 @@
                 on_size: root.initial_load()
 
                 RelativeLayout:
+                    canvas:
+                        Color:
+                            rgb: [.1, .1, .1]
+                        Rectangle:
+                            size: self.size
+                            pos: (0, 0)
 
-                    StencilView:
-                        id: view
-                        size: self.size
-                        pos: self.pos
+                    RelativeLayout:
+                        id: plot_box
+                        size_hint: (None, None)
+                        size: (self.parent.size[0] - dp(60), self.parent.size[1] - dp(50))
+                        pos_hint: {"right":1, "top":1}
+
                         canvas:
                             Color:
-                                rgb: [.7, .7, .7]
-                            RoundedRectangle:
-                                size: self.size
-                                pos: self.pos
+                                rgb: [1, 1, 1]
+                            Line:
+                                points: [0, 0, self.right - self.x - dp(3), 0]
+                                width: dp(3)
+                                cap: "square"
+
+                            Line:
+                                points: [0, 0, 0, self.top - self.y - dp(3)]
+                                width: dp(3)
+                                cap: "square"
+
+                        Label:
+                            id: x_axis_label
+                            text: ""
+                            color: [1, 1, 1, 1]
+                            halign: "center"
+                            valign: "center"
+                            size_hint: (None, None)
+                            size: (self.parent.width, dp(20))
+                            pos: (0, -dp(47))
+
+                        Label:
+                            id: y_axis_label
+                            text: ""
+                            color: [1, 1, 1, 1]
+                            halign: "center"
+                            valign: "center"
+                            size_hint: (None, None)
+                            size: (dp(20), self.parent.height)
+                            pos: (-dp(60), 0)
+                            canvas.before:
+                                PushMatrix
+                                Rotate:
+                                    angle: 90
+                                    origin: self.center
+                            canvas.after:
+                                PopMatrix
+
+                        StencilView:
+                            id: view
+                            size_hint: (None, None)
+                            size: (self.parent.size[0], self.parent.size[1])
+                            canvas:
+                                Color:
+                                    rgb: [.7, .7, .7]
+                                Rectangle:
+                                    size: self.size
+                                    pos: self.pos
 
             BoxLayout:
                 size_hint_y: None

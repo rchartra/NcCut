@@ -11,10 +11,12 @@ ScatterLayout class. Manages the creation and deletion of tools.
 """
 
 import kivy
+from kivy.graphics import Color, Line
 from kivy.graphics.transformation import Matrix
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.core.window import Window
 import kivy.uix as ui
+from kivy.uix.label import Label
 from kivy.core.image import Image as CoreImage
 from kivy.metrics import dp
 from PIL import Image as im
@@ -56,8 +58,13 @@ class FileDisplay(ScatterLayout):
         editing (bool): Whether in editing mode or not
         t_mode (bool): Whether a tool is currently loaded
         resized (bool): Whether the image has been resized to fit in the viewer window
+        axis_font (float): Font to use for the plot axes. Not adjustable.
         x_pix (float) X coordinate units represented by one pixel
-        y_pix (float: Y coordinate units represented by one pixel
+        y_pix (float): Y coordinate units represented by one pixel
+        x_labels (list): List of x axis tick labels
+        y_labels (list): List of y axis tick labels
+        h_flip (bool): Has the data been flipped horizontally
+        v_flip (bool): Has the data been flipped vertically
         contrast (int): Int from -127 to 127, contrast value to use when making image from NetCDF file
         l_col (str): Line color for transect tools: 'Blue', 'Green' or 'Orange'
         cir_size (float): Circle size for transect tools
@@ -111,8 +118,15 @@ class FileDisplay(ScatterLayout):
         self.t_mode = False
         self.resized = False
 
+        # Axes info
+        self.axis_font = dp(14)
         self.x_pix = 1
         self.y_pix = 1
+
+        self.x_labels = []
+        self.y_labels = []
+        self.h_flip = False
+        self.v_flip = False
 
         self.contrast = func.contrast_function(g_config["contrast"])
         self.l_col = g_config["line_color"]
@@ -183,7 +197,10 @@ class FileDisplay(ScatterLayout):
         self.back_btn.font_size = font
         self.delete_chain_btn.font_size = font
         self.delete_point_btn.font_size = font
+        # Re-centers and rescales image on viewer resize
         self.resized = False
+        self.x_axis()
+        self.y_axis()
         if self.f_type == "netcdf":
             self.home.update_colorbar(func.get_color_bar(self.colormap, self.nc_data, (0.1, 0.1, 0.1),
                                                          "white", font * 2.5))
@@ -224,6 +241,8 @@ class FileDisplay(ScatterLayout):
             self.apply_transform(Matrix().scale(r, r, r))
             xco = bounds[0] / 2 - self.bbox[1][0] / 2
             self.pos = (xco, 0)
+            self.x_axis()
+            self.y_axis()
             if args[0]:
                 self.resized = True
 
@@ -415,6 +434,234 @@ class FileDisplay(ScatterLayout):
         self.byte = io.BytesIO()
         img.save(self.byte, format="PNG")
 
+    def x_axis(self):
+        """
+        Chooses x-axis tick distributions, calculates their locations, and draws them.
+        """
+        # Determine x coordinate data
+        if self.f_type == "image":
+            x_bounds = np.array([0, self.size[0]])
+            x_name = "x"
+        else:
+            try:
+                x_coord = self.config["netcdf"]["data"][self.config["netcdf"]["x"]].data.astype(float)
+                x_bounds = np.array([x_coord.min(), x_coord.max() + self.x_pix])
+            except ValueError:
+                x_bounds = np.array([0, self.size[0]])
+            x_attrs = self.config["netcdf"]["data"][self.config["netcdf"]["x"]].attrs
+            if "long_name" in list(x_attrs.keys()):
+                x_name = x_attrs["long_name"].title()
+            else:
+                x_name = self.config["netcdf"]["x"].title()
+            if "units" in list(x_attrs.keys()):
+                x_name = x_name + " (" + x_attrs["units"] + ")"
+
+        x_range = x_bounds[1] - x_bounds[0]
+        x_pos = self.bbox[0][0]
+        width = self.bbox[1][0]
+        plot_box = self.home.ids.plot_box
+        h_flip = self.h_flip
+        # Margin on edges to make sure text doesn't overflow
+        m_right = dp(30)
+        m_left = dp(10)
+        cpp = x_range / width
+
+        # Clean up old axis
+        if len(self.x_labels) > 0:
+            plot_box.canvas.remove_group("x_ticks")
+
+        # Determine visible data range
+        vis_x = np.array([0, width])
+        if x_pos < m_left:
+            vis_x[0] = -(x_pos - m_left)
+        if x_pos + width > plot_box.width - m_right:
+            vis_x[1] = vis_x[1] - (x_pos + width - (plot_box.width - m_right))
+        vis_factors = vis_x / width
+        if h_flip:
+            dat_range = x_bounds[1] - (x_range * vis_factors)
+        else:
+            dat_range = x_bounds[0] + (x_range * vis_factors)
+        # Determine goal tick density (not necessarily the actual density)
+        vis_width = np.diff(width * vis_factors)[0]
+        d = vis_width / 70
+        if d < 2:
+            d = 2
+        elif d > 9:
+            d = 9
+        # Select and format labels
+        if h_flip:
+            dat_range = np.flip(dat_range)
+        if dat_range[0] >= dat_range[1]:
+            selected_labels = [dat_range[0]]
+        else:
+            selected_labels = func.label_placer(dat_range[0], dat_range[1], d)
+            selected_labels = selected_labels[np.where((selected_labels >= dat_range[0]) & (selected_labels <= dat_range[1]))]
+        if len(selected_labels) < 2:
+            selected_labels = [dat_range[0], dat_range[1]]
+        rep = "{:.2e}".format(selected_labels[0])
+        exp_str = rep[rep.find("e"):]
+        exp = int(exp_str[1:])
+        if abs(exp) > 2:
+            formatted_labels = [round(elem / 10 ** exp, 2) for elem in selected_labels]
+            exp_str = " (" + exp_str + ")"
+        else:
+            formatted_labels = [round(elem, 2) for elem in selected_labels]
+            exp_str = ""
+        formatted_labels = [int(lab) if lab.is_integer() else lab for lab in formatted_labels]
+        if h_flip:
+            formatted_labels = np.flip(formatted_labels)
+            selected_labels = np.flip(selected_labels)
+        # Determine tick positions
+        if h_flip:
+            label_pos = [(width - (x - x_bounds[0]) / cpp) + x_pos for x in selected_labels]
+        else:
+            label_pos = [(x - x_bounds[0]) / cpp + x_pos for x in selected_labels]
+        # Draw ticks
+        tick_top = 0
+        tick_bottom = -dp(5)
+
+        with plot_box.canvas:
+            Color(1, 1, 1)
+            if x_pos > 0:
+                Line(points=[x_pos, tick_top, x_pos, tick_bottom - dp(3)], width=dp(1), cap="none", group="x_ticks")
+            for p in label_pos:
+                Line(points=[p, tick_top, p, tick_bottom], width=dp(1), cap="none", group="x_ticks")
+            if x_pos + width < plot_box.width:
+                Line(points=[x_pos + width, tick_top, x_pos + width, tick_bottom - dp(3)], width=dp(1), cap="none", group="x_ticks")
+
+        # Add or remove labels until have required amount
+        while len(self.x_labels) < len(formatted_labels):
+            lab = Label(text="", color=[1, 1, 1, 1], halign="left", size_hint=(None, None),
+                        font_size=self.axis_font)
+            lab.bind(texture_size=lab.setter("size"))
+            self.x_labels.append(lab)
+            plot_box.add_widget(lab)
+        while len(self.x_labels) > len(formatted_labels):
+            plot_box.remove_widget(self.x_labels.pop(0))
+
+        # Place tick labels
+        for i, x in enumerate(formatted_labels):
+            lab = self.x_labels[i]
+            lab.text = str(x)
+            lab.pos = (float(label_pos[i]) - self.axis_font / 2, tick_top - self.axis_font * 1.6)
+
+        # Update x label
+        self.home.ids.x_axis_label.text = x_name + exp_str
+
+    def y_axis(self):
+        """
+        Chooses y-axis tick distributions, calculates their locations, and draws them.
+        """
+        # Determine x coordinate data
+        if self.f_type == "image":
+            y_bounds = np.array([0, self.size[1]])
+            y_name = "y"
+        else:
+            try:
+                y_coord = self.config["netcdf"]["data"][self.config["netcdf"]["y"]].data.astype(float)
+                y_bounds = np.array([y_coord.min(), y_coord.max() + self.y_pix])
+            except ValueError:
+                y_bounds = np.array([0, self.size[1]])
+            y_attrs = self.config["netcdf"]["data"][self.config["netcdf"]["y"]].attrs
+            if "long_name" in list(y_attrs.keys()):
+                y_name = y_attrs["long_name"].title()
+            else:
+                y_name = self.config["netcdf"]["y"].title()
+            if "units" in list(y_attrs.keys()):
+                y_name = y_name + " (" + y_attrs["units"] + ")"
+
+        y_range = y_bounds[1] - y_bounds[0]
+        y_pos = self.bbox[0][1]
+        height = self.bbox[1][1]
+        m_top = dp(10)
+        plot_box = self.home.ids.plot_box
+        v_flip = self.v_flip
+        cpp = y_range / height
+
+        # Clean up old axis
+        if len(self.y_labels) > 0:
+            plot_box.canvas.remove_group("y_ticks")
+
+        # Determine visible data range
+        vis_y = np.array([0, height])
+        if y_pos < 0:
+            vis_y[0] = -y_pos
+        if y_pos + height > plot_box.height - m_top:
+            vis_y[1] = vis_y[1] - (y_pos + height - (plot_box.height - m_top))
+        vis_factors = vis_y / height
+        if v_flip:
+            dat_range = y_bounds[1] - (y_range * vis_factors)
+        else:
+            dat_range = y_bounds[0] + (y_range * vis_factors)
+        # Determine goal tick density (not necessarily the actual density)
+        vis_height = np.diff(height * vis_factors)[0]
+        d = vis_height / 70
+        if d < 2:
+            d = 2
+        elif d > 9:
+            d = 9
+        # Select and format labels
+        if v_flip:
+            dat_range = np.flip(dat_range)
+        if dat_range[0] >= dat_range[1]:
+            selected_labels = [dat_range[0]]
+        else:
+            selected_labels = func.label_placer(dat_range[0], dat_range[1], d)
+            selected_labels = selected_labels[
+                np.where((selected_labels >= dat_range[0]) & (selected_labels <= dat_range[1]))]
+        if len(selected_labels) < 2:
+            selected_labels = [dat_range[0], dat_range[1]]
+        rep = "{:.2e}".format(selected_labels[-1])
+        exp_str = rep[rep.find("e"):]
+        exp = int(exp_str[1:])
+        if abs(exp) > 2:
+            formatted_labels = [round(elem / 10 ** exp, 2) for elem in selected_labels]
+            exp_str = " (" + exp_str + ")"
+        else:
+            formatted_labels = [round(elem, 2) for elem in selected_labels]
+            exp_str = ""
+        formatted_labels = [int(lab) if lab.is_integer() else lab for lab in formatted_labels]
+        if v_flip:
+            formatted_labels = np.flip(formatted_labels)
+            selected_labels = np.flip(selected_labels)
+        # Determine tick positions
+        if v_flip:
+            label_pos = [(height - (y - y_bounds[0]) / cpp) + y_pos for y in selected_labels]
+        else:
+            label_pos = [(y - y_bounds[0]) / cpp + y_pos for y in selected_labels]
+        # Draw ticks
+        tick_right = 0
+        tick_left = -dp(5)
+
+        with plot_box.canvas:
+            Color(1, 1, 1)
+            if y_pos > 0:
+                Line(points=[tick_left - dp(3), y_pos, tick_right, y_pos], width=dp(1), cap="none", group="y_ticks")
+            for p in label_pos:
+                Line(points=[tick_left, p, tick_right, p], width=dp(1), cap="none", group="y_ticks")
+            if y_pos + height < plot_box.height:
+                Line(points=[tick_left - dp(3), y_pos + height, tick_right, y_pos + height], width=dp(1), cap="none",
+                     group="y_ticks")
+
+        # Add or remove labels until have required amount
+        while len(self.y_labels) < len(formatted_labels):
+            lab = Label(text="", color=[1, 1, 1, 1], halign="left", size_hint=(None, None),
+                        font_size=self.axis_font)
+            lab.bind(texture_size=lab.setter("size"))
+            self.y_labels.append(lab)
+            plot_box.add_widget(lab)
+        while len(self.y_labels) > len(formatted_labels):
+            plot_box.remove_widget(self.y_labels.pop(0))
+
+        # Place tick labels
+        for i, y in enumerate(formatted_labels):
+            lab = self.y_labels[i]
+            lab.text = str(y)
+            lab.pos = (tick_left - self.axis_font * 2, float(label_pos[i]) - self.axis_font / 2)
+
+        # Update y label
+        self.home.ids.y_axis_label.text = y_name + exp_str
+
     def flip_vertically(self):
         """
         Flips display vertically
@@ -427,6 +674,8 @@ class FileDisplay(ScatterLayout):
             [0.0, 0.0, 0.0, 1.0]]
         )
         self.apply_transform(m, anchor=self.center)
+        self.v_flip = not self.v_flip
+        self.y_axis()
 
     def flip_horizontally(self):
         """
@@ -440,12 +689,8 @@ class FileDisplay(ScatterLayout):
             [0.0, 0.0, 0.0, 1.0]]
         )
         self.apply_transform(m, anchor=self.center)
-
-    def rotate(self):
-        """
-        Rotates display 45 degrees counterclockwise
-        """
-        self.rotation += 45
+        self.h_flip = not self.h_flip
+        self.x_axis()
 
     def on_touch_down(self, touch):
         """
@@ -458,7 +703,7 @@ class FileDisplay(ScatterLayout):
         if self.collide_point(*touch.pos):
             if touch.is_mouse_scrolling:
                 if touch.button == 'scrolldown':
-                    if self.scale < 10:
+                    if self.scale < 30:
                         mat = Matrix().scale(1.1, 1.1, 1.1)
                         self.apply_transform(mat, anchor=touch.pos)
                 elif touch.button == 'scrollup':
@@ -467,3 +712,16 @@ class FileDisplay(ScatterLayout):
                         self.apply_transform(mat, anchor=touch.pos)
             else:
                 super(FileDisplay, self).on_touch_down(touch)
+            self.x_axis()
+            self.y_axis()
+
+    def on_touch_move(self, touch):
+        """
+        Calls for axes to update when plot is moved.
+
+        Args:
+            touch: MouseMotionEvent, see kivy docs for details
+        """
+        super(FileDisplay, self).on_touch_move(touch)
+        self.x_axis()
+        self.y_axis()
