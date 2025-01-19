@@ -32,6 +32,8 @@ import json
 import pathlib
 import os
 import re
+import platform
+import subprocess
 
 
 KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotpopup.kv"
@@ -347,7 +349,20 @@ class PlotPopup(Popup):
         elif s_type == "pdf":
             f_types = ["*.pdf"]
         try:
-            fpath = filechooser.save_file(filters=f_types)
+            if platform.system() == "Darwin":
+                # Construct the AppleScript command for prompting for file name
+                script = """
+                        set file_path to choose file name with prompt "Select a location and enter a filename:"
+                        POSIX path of file_path
+                        """
+                result = subprocess.run(
+                    ['osascript', '-e', script],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                if result.returncode == 0:
+                    fpath = result.stdout.strip()
+            else:
+                fpath = filechooser.save_file(filters=f_types)
         except Exception:
             # If native file browser not working, provide manual file entry method
             content = ui.boxlayout.BoxLayout(orientation='horizontal')

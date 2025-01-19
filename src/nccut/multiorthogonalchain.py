@@ -13,6 +13,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.core.window import Window
 import json
+import platform
+import subprocess
 from plyer import filechooser
 from scipy.interpolate import CubicSpline
 import numpy as np
@@ -130,9 +132,26 @@ class MultiOrthogonalChain(ui.widget.Widget):
         Opens native operating system file browser to allow user to select their project file
         """
         try:
-            path = filechooser.open_file(filters=["*.json"])
-            if path is not None and len(path) != 0:
-                self.check_file(path[0])
+            if platform.system() == "Darwin":
+                # Construct the AppleScript command for selecting json files
+                script = """
+                        set file_path to choose file of type {"json"}
+                        POSIX path of file_path
+                        """
+                result = subprocess.run(
+                    ['osascript', '-e', script],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                if result.returncode == 0:
+                    file_path = result.stdout.strip()
+                    self.check_file(file_path)
+                else:
+                    func.alert_popup("Cannot upload project files at this time. Error: "
+                                     + str(result.stderr))
+            else:
+                path = filechooser.open_file(filters=["*.json"])
+                if path is not None and len(path) != 0:
+                    self.check_file(path[0])
         except Exception:
             func.alert_popup("Cannot upload project files at this time")
 

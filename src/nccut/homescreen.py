@@ -18,6 +18,8 @@ from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp
 import re
 import os
+import platform
+import subprocess
 import nccut.functions as func
 from nccut.plotpopup import PlotPopup
 from pathlib import Path
@@ -190,10 +192,28 @@ class HomeScreen(Screen):
         Opens native operating system file browser to allow user to select their file
         """
         try:
-            files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
-            if files is not None and len(files) > 0:
-                self.ids.file_in.text = files[0]
-                self.load_btn()
+            if platform.system() == "Darwin":
+                # Construct the AppleScript command for selecting .nc files and images
+                script = """
+                        set file_path to choose file of type {"nc", "public.image"}
+                        POSIX path of file_path
+                        """
+                result = subprocess.run(
+                    ['osascript', '-e', script],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                if result.returncode == 0:
+                    file_path = result.stdout.strip()
+                    self.ids.file_in.text = file_path
+                    self.load_btn()
+                else:
+                    func.alert_popup("Error with file browser, please use manual file entry. Error: "
+                                     + str(result.stderr))
+            else:
+                files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
+                if files is not None and len(files) > 0:
+                    self.ids.file_in.text = files[0]
+                    self.load_btn()
         except Exception as error:
             func.alert_popup("Error with file browser, please use manual file entry. Error: " + str(error))
 
