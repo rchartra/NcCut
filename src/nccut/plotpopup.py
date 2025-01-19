@@ -366,7 +366,6 @@ class PlotPopup(Popup):
             else:
                 fpath = filechooser.save_file(filters=f_types)[0]
             if fpath is not None and len(fpath) > 0:
-                fpath = fpath[0]
                 if s_type == "s_data":
                     self.download_selected_data(fpath)
                 elif s_type == "a_data":
