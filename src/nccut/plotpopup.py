@@ -361,8 +361,22 @@ class PlotPopup(Popup):
                 )
                 if result.returncode == 0:
                     fpath = result.stdout.strip()
+                else:
+                    fpath = None
             else:
-                fpath = filechooser.save_file(filters=f_types)
+                fpath = filechooser.save_file(filters=f_types)[0]
+            if fpath is not None and len(fpath) > 0:
+                fpath = fpath[0]
+                if s_type == "s_data":
+                    self.download_selected_data(fpath)
+                elif s_type == "a_data":
+                    self.download_all_data(fpath)
+                elif s_type == "all_z":
+                    self.download_all_z_data(fpath)
+                elif s_type == "png":
+                    self.download_png_plot(fpath)
+                elif s_type == "pdf":
+                    self.download_pdf_plot(fpath)
         except Exception:
             # If native file browser not working, provide manual file entry method
             content = ui.boxlayout.BoxLayout(orientation='horizontal')
@@ -378,18 +392,6 @@ class PlotPopup(Popup):
             content.add_widget(close)
             popup.open()
             return
-        if fpath is not None and len(fpath) > 0:
-            fpath = fpath[0]
-            if s_type == "s_data":
-                self.download_selected_data(fpath)
-            elif s_type == "a_data":
-                self.download_all_data(fpath)
-            elif s_type == "all_z":
-                self.download_all_z_data(fpath)
-            elif s_type == "png":
-                self.download_png_plot(fpath)
-            elif s_type == "pdf":
-                self.download_pdf_plot(fpath)
 
     def manual_file_input(self, fname, s_type):
         """

@@ -135,7 +135,7 @@ class MultiOrthogonalChain(ui.widget.Widget):
             if platform.system() == "Darwin":
                 # Construct the AppleScript command for selecting json files
                 script = """
-                        set file_path to choose file of type {"json"}
+                        set file_path to choose file of type {"public.json"}
                         POSIX path of file_path
                         """
                 result = subprocess.run(
@@ -145,9 +145,6 @@ class MultiOrthogonalChain(ui.widget.Widget):
                 if result.returncode == 0:
                     file_path = result.stdout.strip()
                     self.check_file(file_path)
-                else:
-                    func.alert_popup("Cannot upload project files at this time. Error: "
-                                     + str(result.stderr))
             else:
                 path = filechooser.open_file(filters=["*.json"])
                 if path is not None and len(path) != 0:

@@ -206,9 +206,6 @@ class HomeScreen(Screen):
                     file_path = result.stdout.strip()
                     self.ids.file_in.text = file_path
                     self.load_btn()
-                else:
-                    func.alert_popup("Error with file browser, please use manual file entry. Error: "
-                                     + str(result.stderr))
             else:
                 files = filechooser.open_file(filters=[["Valid Files", "*.png", "*.jpg", "*.jpeg", "*.nc"]])
                 if files is not None and len(files) > 0:
