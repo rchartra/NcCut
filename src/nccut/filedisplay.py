@@ -57,7 +57,6 @@ class FileDisplay(ScatterLayout):
         dragging (bool): Whether in dragging mode or not
         editing (bool): Whether in editing mode or not
         t_mode (bool): Whether a tool is currently loaded
-        resized (bool): Whether the image has been resized to fit in the viewer window
         axis_font (float): Font to use for the plot axes. Not adjustable.
         x_pix (float) X coordinate units represented by one pixel
         y_pix (float): Y coordinate units represented by one pixel
@@ -116,7 +115,6 @@ class FileDisplay(ScatterLayout):
         self.dragging = False
         self.editing = False
         self.t_mode = False
-        self.resized = False
 
         # Axes info
         self.axis_font = dp(14)
@@ -198,7 +196,6 @@ class FileDisplay(ScatterLayout):
         self.delete_chain_btn.font_size = font
         self.delete_point_btn.font_size = font
         # Re-centers and rescales image on viewer resize
-        self.resized = False
         self.x_axis()
         self.y_axis()
         if self.f_type == "netcdf":
@@ -224,27 +221,24 @@ class FileDisplay(ScatterLayout):
         self.add_widget(self.img)
         self.home.populate_dynamic_sidebar(self.initial_side_bar, "Transect Tools")
         # Necessary for when viewer doesn't change size on file load (image -> image)
-        self.resize_to_fit(False)
+        self.resize_to_fit()
         self.home.font_adapt()
 
     def resize_to_fit(self, *args):
         """
-        Resizes image to be just large enough to fill viewer screen. Method is bound to size property but only resizes
-        on initial size change.
+        Resizes image to be just large enough to fill viewer screen. Method is bound to size property.
 
         Args:
             args: Two element list of object and it's size
         """
-        if not self.resized:
-            bounds = self.home.ids.view.size
-            r = min([bounds[i] / self.bbox[1][i] for i in range(len(bounds))])
-            self.apply_transform(Matrix().scale(r, r, r))
-            xco = bounds[0] / 2 - self.bbox[1][0] / 2
-            self.pos = (xco, 0)
-            self.x_axis()
-            self.y_axis()
-            if args[0]:
-                self.resized = True
+
+        bounds = self.home.ids.view.size
+        r = min([bounds[i] / self.bbox[1][i] for i in range(len(bounds))])
+        self.apply_transform(Matrix().scale(r, r, r))
+        xco = bounds[0] / 2 - self.bbox[1][0] / 2
+        self.pos = (xco, 0)
+        self.x_axis()
+        self.y_axis()
 
     def tool_btn(self, t_type):
         """
