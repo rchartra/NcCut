@@ -27,7 +27,6 @@ progress = "^1.6"
 plyer = "^2.1.0"
 tomli = "^2.0.2"
 json5 = "^0.10.0"
-pyobjus = {version = "^1.2.3", platform = "darwin"} # Necessary for native file browser on MacOS
 
 [tool.poetry.group.test.dependencies]
 flake8 = "^7.1.0"

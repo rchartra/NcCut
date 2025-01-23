@@ -162,25 +162,6 @@ jobs:
         cp nccut_config.toml "${{ github.workspace }}/command_dir"
         python -m poetry run python -c 'from nccut.functions import find_config; assert find_config(r"${{ github.workspace }}/command_dir/nccut_config.toml") == {"graphics_defaults": {"contrast": 0}}, "Config load failed via command line argument path"'
 
-  mac_deps_test:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install Poetry
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install poetry
-      - name: Install dependencies
-        run: |
-          python -m poetry install --with test
-      - name: Test pyobjus install
-        run: |
-          python -m poetry run python -c "import pyobjus"
-
   licenses:
     runs-on: ubuntu-latest
     steps:
