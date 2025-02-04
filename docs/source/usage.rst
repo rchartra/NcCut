@@ -147,7 +147,7 @@ For NcCut to locate the file it must be named ``nccut_config.toml`` and be in on
 
 #. Environment variable called 'NCCUT_CONFIG' holding the path to the config file.
 #. Current working directory and then in
-#. Either '%APPDATA%\nccut\nccut_config.toml' on Windows or '~/.config/your_app/config.toml' on Linux and macOS
+#. Either '%APPDATA%\nccut\nccut_config.toml' on Windows or '~/.config/nccut/config.toml' on Linux and macOS
 
 Changing Logger Settings
 ------------------------
