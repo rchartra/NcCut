@@ -14,7 +14,7 @@ No matter which tool you use the GUI will download the transect data into a JSON
         f = open("_FILE_NAME_.json")
         dat = json.load(f)
 
-This will load the data into a dictionary which you can easily manipulate for your purposes. You can use :py:meth:`nccut.project_file_printer` to have the data printed for you in a readable fashion.
+This will load the data into a dictionary which you can easily manipulate for your purposes. You can use :py:meth:`nccut.chain_data_file_printer` to have the data printed for you in a readable fashion.
 
 File Structure
 --------------
@@ -39,10 +39,10 @@ When taken from a NetCDF file the tool group sub-dictionaries are further nested
 The output will also have additional metadata from the loaded file. You can add additional metadata fields via a :ref:`configuration <config_file>` file.
 **NcCut** has a helper module for viewing the output data in a readable fashion.
 
-nccut.project\_file\_printer module
+nccut.chain\_data\_file\_printer module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: nccut.project_file_printer
+.. automodule:: nccut.chain_data_file_printer
    :members:
    :undoc-members:
    :show-inheritance:

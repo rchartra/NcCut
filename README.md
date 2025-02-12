@@ -2,7 +2,7 @@
 
 ### Documentation: [NcCut Docs](https://nccut.readthedocs.io/en/latest/index.html)
 
-NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using NcCut users can view vertical cross-sections of their data over all values of a third dimension along the transect drawn. In addition, NcCut is designed to make the measurement of linear features as automatic as possible through it's "Orthogonal Chain" tool where linear features can be marked out and have transects be made perpendicular to the feature. Multiple features can be marked at once on a file and saved all together as a “project” that can be uploaded and continued or edited.
+NcCut is a GUI for getting pixel data from images and data values from NetCDF files along linear transects. This simplifies the analysis of images with linear features where the brightness of the pixel can be used to gauge some physical value. Some examples include measuring sea ice floe concentration or characterizing ice sheet fractures from satellite imagery. For NetCDF files, NcCut serves as an easy way to view datasets quickly along any set of dimensions and to extract data along transects. Using NcCut users can view vertical cross-sections of their data over all values of a third dimension along the transect drawn. In addition, NcCut is designed to make the measurement of linear features as automatic as possible through it's "Orthogonal Chain" tool where linear features can be marked out and have transects be made perpendicular to the feature. Multiple features can be marked at once on a file, saved all together, and then be reloaded and continued or edited.
 
 
 ![](docs/source/_media/nccutgraphic.png)
@@ -98,7 +98,7 @@ NcCut().run()
 ## Tools
 * NcCut has two types of tools for making transects.
 ### Inline Chain
-* Using this tool chains of transects can be drawn. Transects will be taken along the line segments drawn between the clicked points. Multiple such *Chains* can be drawn out at once before being plotted. These *chains* can all be saved together as a *project* and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
+* Using this tool chains of transects can be drawn. Transects will be taken along the line segments drawn between the clicked points. Multiple such *Chains* can be drawn out at once before being plotted. These *chains* can all be saved together and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
 
 
 1. Hit "Inline Chain" to enter transect mode
@@ -110,7 +110,7 @@ NcCut().run()
 
 
 ### Orthogonal Chain
-* Using this tool multiple "Chains" can be drawn onto a loaded file. Transects are made orthogonally to the marked out line. These "Chains" can all be saved together as a project and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
+* Using this tool multiple "Chains" can be drawn onto a loaded file. Transects are made orthogonally to the marked out line. These "Chains" can all be saved together and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
 
 
 1. Hit the "Orthogonal Chain" button to enter transect mode
@@ -120,14 +120,14 @@ NcCut().run()
    * To change the width of the transects being made you may enter the number of pixels into the "Width" text box. Select "Set" to change the width for all future transects.
 3. Right click to select the final point or select "New Chain" to begin a new chain and repeat for as many chains as you'd like
 4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first chain and downloading options.
-   * If you want to continue working on your project at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
+   * If you want to continue working at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
 
 
-#### Uploading a project
+#### Loading Previously Saved Chain Data
 1. Load the same dataset/image you worked on previously.
 2. Hit the tool button of the tool you used previously to enter transect mode.
-3. Instead of clicking new points, select the "Upload Project" button.
+3. Instead of clicking new points, select the "Open Data" button.
 4. Enter the file name of the transect data you saved previously from the plotting menu and select "Ok".
-5. All chains from the file will load onto the viewer and you can continue working on the project.
+5. All chains from the file will load onto the viewer and you can continue working.
 
 For more on these tools please refer to [usage section](https://nccut.readthedocs.io/en/latest/usage.html) of the docs.

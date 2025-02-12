@@ -13,6 +13,9 @@ ScatterLayout class. Manages the creation and deletion of tools.
 import kivy
 from kivy.graphics import Color, Line
 from kivy.graphics.transformation import Matrix
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.textinput import TextInput
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.core.window import Window
 import kivy.uix as ui
@@ -21,10 +24,17 @@ from kivy.core.image import Image as CoreImage
 from kivy.metrics import dp
 from PIL import Image as im
 from PIL import ImageEnhance
+import platform
+import subprocess
+from plyer import filechooser
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 import matplotlib.pyplot as plt
 import io
+import os
+import pathlib
+import re
+import copy
 import warnings
 import nccut.functions as func
 from nccut.multiorthogonalchain import MultiOrthogonalChain
@@ -44,6 +54,7 @@ class FileDisplay(ScatterLayout):
             value is the necessary configuration settings. For images, the config dictionary has form
             {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
             :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+        default_orthogonal_width: Default width for the orthogonal transect tool
         f_type (str): File type being loaded ("image" or "netcdf")
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         pos (tuple): Position of viewer. Used to properly place transect widgets on screen.
@@ -70,15 +81,23 @@ class FileDisplay(ScatterLayout):
         cmaps (dict): Dictionary of colormap names mapping to colormap values from cv2
         colormap: current colormap data
         btn_height: Height for buttons in sidebar which adapts to font size
+        tools_lbl: "Tools" sidebar label
         inline_chain_btn: Inline chain button which opens inline chain tool
-        orthogonal_chain__btn: Orthogonal chain button which opens orthogonal chain tool
-        initial_side_bar (list): List of sidebar buttons in 'Tools' sidebar menu
+        orthogonal_chain_btn: Orthogonal chain button which opens orthogonal chain tool
+        initial_side_bar (list): List of sidebar buttons in 'Transect Tools' sidebar menu
+        tool_actions_lbl: "Tool Actions" sidebar label
+        new_chain_btn: New Chain button to be loaded when in transect mode
         drag_btn: Drag button to be loaded when in transect mode
         edit_btn: Edit button to be loaded when in transect mode
         close_tool_btn: Button to close currently loaded tool
-        action_widgets: Initial list of widgets in Actions menu, not including any widgets added by the tool
-        tool_action_widgets: List of widgets in Actions menu at any given moment
+        chain_data_lbl: "Chain Data" sidebar label
+        open_data_btn: Button to open previously exported chain data
+        tool_sb_widgets_constant: Initial list of widgets in main tool meny menu, not including any widgets added by the
+            tool
+        tool_sb_widgets: List of widgets in main tool menu at any given moment
+        drag_mode_lbl: "Drag Mode" sidebar label
         tran_mode_btn: Button to close Drag Mode
+        edit_mode_lbl: "Edit Mode" sidebar label
         back_btn: Back button for editing mode
         delete_chain_btn: Delete chain button
         delete_point_btn: Delete point button
@@ -134,6 +153,7 @@ class FileDisplay(ScatterLayout):
         self.colormap = g_config["colormap"]
         self.btn_height = dp(20) + self.home.font
         # Initial Sidebar Widgets
+        self.tools_lbl = func.SidebarHeaderLabel(text="Tools")
         self.inline_chain_btn = func.RoundedButton(text="Inline Chain", size_hint_y=None, height=self.btn_height,
                                                    font_size=self.home.font)
         self.inline_chain_btn.bind(on_press=lambda x: self.tool_btn("inline_chain"))
@@ -141,9 +161,15 @@ class FileDisplay(ScatterLayout):
         self.orthogonal_chain_btn = func.RoundedButton(text="Orthogonal Chain", size_hint_y=None, height=self.btn_height,
                                                        font_size=self.home.font)
         self.orthogonal_chain_btn.bind(on_press=lambda x: self.tool_btn("orthogonal_chain"))
-        self.initial_side_bar = [self.inline_chain_btn, self.orthogonal_chain_btn]
+        self.initial_side_bar = [self.tools_lbl, self.inline_chain_btn, self.orthogonal_chain_btn]
 
-        # Action Widgets
+        # Tool Action Widgets
+        self.tool_actions_lbl = func.SidebarHeaderLabel(text="Tool Actions")
+
+        self.new_chain_btn = func.RoundedButton(text="New Chain", size_hint_y=None, height=self.btn_height,
+                                                halign='center', valign='center', font_size=self.home.font)
+        self.new_chain_btn.bind(on_press=lambda x: self.tool.new_chain())
+
         self.drag_btn = func.RoundedButton(text="Drag Mode", size_hint_y=None, height=self.btn_height,
                                            halign='center', valign='center', font_size=self.home.font)
         self.drag_btn.bind(on_press=self.drag_mode)
@@ -153,14 +179,26 @@ class FileDisplay(ScatterLayout):
         self.close_tool_btn = func.RoundedButton(text="Close Tool", size_hint_y=None, height=self.btn_height,
                                                  halign='center', valign='center', font_size=self.home.font)
         self.close_tool_btn.bind(on_press=self.close_tool)
-        self.action_widgets = [self.close_tool_btn, self.drag_btn, self.edit_btn]
-        self.tool_action_widgets = self.action_widgets
+
+        # Chain Data Widgets
+        self.chain_data_lbl = func.SidebarHeaderLabel(text="Chain Data")
+        self.open_data_btn = func.RoundedButton(text="Open Data", size_hint_y=None, height=self.btn_height,
+                                                halign='center', valign='center', font_size=self.home.font)
+        self.open_data_btn.bind(on_press=lambda x: self.open_data_pop())
+
+        self.tool_sb_widgets_constant = [self.tool_actions_lbl, self.close_tool_btn, self.drag_btn, self.edit_btn,
+                                         self.new_chain_btn, self.chain_data_lbl, self.open_data_btn]
+        self.tool_sb_widgets = copy.copy(self.tool_sb_widgets_constant)
+
         # Drag Mode Widgets
+        self.drag_mode_lbl = func.SidebarHeaderLabel(text="Drag Mode")
         self.tran_mode_btn = func.RoundedButton(text="Transect Mode", size_hint_y=None, height=self.btn_height,
                                                 halign='center', valign='center', font_size=self.home.font)
         self.tran_mode_btn.bind(on_press=self.drag_mode)
+        self.drag_mode_widgets = [self.drag_mode_lbl, self.tran_mode_btn]
 
         # Editing Mode widgets
+        self.edit_mode_lbl = func.SidebarHeaderLabel(text="Edit Mode")
         self.back_btn = func.RoundedButton(text="Back", size_hint_y=None, height=self.btn_height,
                                            halign='center', valign='center', font_size=self.home.font)
         self.back_btn.bind(on_press=self.edit_mode)
@@ -171,7 +209,7 @@ class FileDisplay(ScatterLayout):
                                                    font_size=self.home.font)
         self.delete_point_btn.bind(on_press=lambda x: self.tool.del_point())
 
-        self.edit_widgets = [self.back_btn, self.delete_chain_btn, self.delete_point_btn]
+        self.edit_widgets = [self.edit_mode_lbl, self.back_btn, self.delete_chain_btn, self.delete_point_btn]
 
         self.load_image()
         Window.bind(on_key_down=self.on_key)
@@ -181,6 +219,12 @@ class FileDisplay(ScatterLayout):
     ScatterLayout.do_scale = False
 
     def on_key(self, *args):
+        """
+        If escape key is pressed, tool is loaded, and plot menu is not open then delete chain
+
+        Args:
+            args: Index 1 is key ascii code
+        """
         key_ascii = args[1]
         if key_ascii == 27 and self.tool and not self.home.plot_popup.is_open:
             self.tool.del_chain()
@@ -219,7 +263,7 @@ class FileDisplay(ScatterLayout):
         self.img = ui.image.Image(source="", texture=self.im.texture, size=self.size, pos=self.pos)
         self.home.ids.view.bind(size=self.resize_to_fit)
         self.add_widget(self.img)
-        self.home.populate_dynamic_sidebar(self.initial_side_bar, "Transect Tools")
+        self.home.populate_dynamic_sidebar(self.initial_side_bar)
         # Necessary for when viewer doesn't change size on file load (image -> image)
         self.resize_to_fit()
         self.home.font_adapt()
@@ -239,6 +283,67 @@ class FileDisplay(ScatterLayout):
         self.pos = (xco, 0)
         self.x_axis()
         self.y_axis()
+
+    def open_data_pop(self):
+        """
+        Opens native operating system file browser to allow user to select previously exported file
+        """
+        try:
+            if platform.system() == "Darwin":
+                # Construct the AppleScript command for selecting json files
+                script = """
+                        set file_path to choose file of type {"public.json"}
+                        POSIX path of file_path
+                        """
+                result = subprocess.run(
+                    ['osascript', '-e', script],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                if result.returncode == 0:
+                    file_path = result.stdout.strip()
+                    self.tool.check_file(file_path)
+            else:
+                path = filechooser.open_file(filters=["*.json"])
+                if path is not None and len(path) != 0:
+                    self.tool.check_file(path[0])
+        except Exception:
+            # If native file browser not working, provide manual file entry method
+            content = ui.boxlayout.BoxLayout(orientation='horizontal')
+            popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
+            txt = TextInput(size_hint=(0.7, 1), hint_text="Enter Chain Data File Name")
+            content.add_widget(txt)
+            go = Button(text="Ok", size_hint=(0.1, 1))
+            go.bind(on_press=lambda x: self.manual_check_file(txt.text))
+            go.bind(on_release=popup.dismiss)
+            close = Button(text="Close", size_hint=(0.2, 1), font_size=self.home.font)
+            close.bind(on_press=popup.dismiss)
+            content.add_widget(go)
+            content.add_widget(close)
+            popup.open()
+            return
+
+    def manual_check_file(self, text):
+        """
+        When native file browser is not working, checks manually entered text is a valid file path.
+
+        Args:
+            text: User entered file path
+        """
+        path = self.home.rel_path
+        if text.find(".") >= 1:
+            text = text[:text.find(".")]
+        if text == "" or len(re.findall(r'[^A-Za-z0-9_\-/:\\]', text)) > 0:
+            func.alert_popup("Invalid file name")
+            return False
+        if "/" in text:
+            if not pathlib.Path.exists(path / text[:text.rfind("/") + 1]):
+                func.alert_popup("Directory not found")
+                return False
+        if pathlib.Path.exists(path / (text + ".json")):
+            fpath = os.path.abspath(text + ".json")
+            self.tool.check_file(fpath)
+        else:
+            func.alert_popup("File not Found")
 
     def tool_btn(self, t_type):
         """
@@ -260,29 +365,30 @@ class FileDisplay(ScatterLayout):
             elif t_type == "inline_chain":
                 self.tool = MultiInlineChain(home=self.home, b_height=self.btn_height)
             self.add_widget(self.tool)
-            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
+            self.home.populate_dynamic_sidebar(self.tool_sb_widgets)
             self.t_mode = True
 
-    def add_to_sidebar(self, elements):
+    def add_to_sidebar(self, element, index=-1):
         """
         Adds elements to the dynamic sidebar.
 
         Args:
-            elements (list): List of kivy.uix.Widgets to add to sidebar
+            element: List of kivy.uix.Widget to add to sidebar
+            index (int): Index in which to insert elements. Default is -1 which adds it to bottom of sidebar.
         """
-        self.tool_action_widgets = self.tool_action_widgets + elements
-        self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
+        self.tool_sb_widgets.insert(index, element)
+        self.home.populate_dynamic_sidebar(self.tool_sb_widgets)
 
-    def remove_from_tool_action_widgets(self, element):
+    def remove_from_tool_sb_widgets(self, element):
         """
-        Removes element from widgets in 'Actions' sidebar menu.
+        Removes element from widgets in main tool sidebar menu.
 
         Args:
             element: kivy.uix.Widget to remove
         """
-        self.tool_action_widgets.remove(element)
+        self.tool_sb_widgets.remove(element)
         if not self.editing and not self.dragging:
-            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
+            self.home.populate_dynamic_sidebar(self.tool_sb_widgets)
 
     def close_tool(self, *args):
         """
@@ -294,8 +400,8 @@ class FileDisplay(ScatterLayout):
         if self.t_mode:
             kivy.core.window.Window.set_system_cursor("arrow")
             self.remove_widget(self.tool)
-            self.tool_action_widgets = self.action_widgets
-            self.home.populate_dynamic_sidebar(self.initial_side_bar, "Transect Tools")
+            self.tool_sb_widgets = copy.copy(self.tool_sb_widgets_constant)
+            self.home.populate_dynamic_sidebar(self.initial_side_bar)
             self.t_mode = False
 
     def edit_mode(self, *args):
@@ -310,10 +416,10 @@ class FileDisplay(ScatterLayout):
             *args: Unused arguments passed to method when called.
         """
         if self.editing:
-            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
+            self.home.populate_dynamic_sidebar(self.tool_sb_widgets)
             self.editing = False
         else:
-            self.home.populate_dynamic_sidebar(self.edit_widgets, "Edit Mode")
+            self.home.populate_dynamic_sidebar(self.edit_widgets)
             self.editing = True
         self.tool.change_dragging(self.editing)
 
@@ -325,12 +431,12 @@ class FileDisplay(ScatterLayout):
             *args: Unused arguments passed to method when called.
         """
         if not self.dragging:
-            self.home.populate_dynamic_sidebar([self.tran_mode_btn], "Drag Mode")
+            self.home.populate_dynamic_sidebar(self.drag_mode_widgets)
             kivy.core.window.Window.set_system_cursor("arrow")
             self.tool.change_dragging(True)
             self.dragging = True
         else:
-            self.home.populate_dynamic_sidebar(self.tool_action_widgets, "Actions")
+            self.home.populate_dynamic_sidebar(self.tool_sb_widgets)
             kivy.core.window.Window.set_system_cursor("crosshair")
             self.tool.change_dragging(False)
             self.dragging = False

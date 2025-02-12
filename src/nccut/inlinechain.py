@@ -21,6 +21,7 @@ class InlineChain(ui.widget.Widget):
     Attributes:
         clicks (int): Number of clicks user has made. Decreases when points are deleted.
         points (list): List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
+        loaded (bool): Whether chain was loaded from file data or clicked out manually
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         transects (list): List of transects made
         curr_line: kivy.graphics.Line, Line between cursor and last clicked
@@ -41,7 +42,7 @@ class InlineChain(ui.widget.Widget):
         super(InlineChain, self).__init__(**kwargs)
         self.clicks = 0
         self.points = []
-        self.uploaded = False
+        self.loaded = False
         self.home = home
         self.transects = []
         self.curr_line = Line()
@@ -108,14 +109,14 @@ class InlineChain(ui.widget.Widget):
         self.curr_line.width = self.line_width
         self.c_size = (dp(value), dp(value))
 
-    def upload_mode(self, val):
+    def load_mode(self, val):
         """
-        Update whether in upload mode or not
+        Update whether in load mode or not
 
         Args:
-            val (bool): Whether in upload mode or not
+            val (bool): Whether in load mode or not
         """
-        self.uploaded = val
+        self.loaded = val
 
     def del_point(self):
         """
@@ -127,8 +128,8 @@ class InlineChain(ui.widget.Widget):
             self.transects = self.transects[:-1]
         else:
             # Remove plot buttons from sidebar if last point of the chain
-            if self.parent.dbtn in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.parent.dbtn)
+            if self.parent.d_btn in self.home.display.tool_sb_widgets:
+                self.home.display.remove_from_tool_sb_widgets(self.parent.d_btn)
             self.remove_widget(self.children[0])
             # Stop drawing line between last point and cursor
             Window.unbind(mouse_pos=self.draw_line)
@@ -146,11 +147,11 @@ class InlineChain(ui.widget.Widget):
         """
         # Draws chain line and points.
         proceed = False
-        if self.uploaded:  # If being uploaded, just needs to be within image bounds
+        if self.loaded:  # If being loaded, just needs to be within image bounds
             if touch.pos[0] < self.size[0] and touch.pos[1] < self.size[1]:
                 proceed = True
             else:
-                self.parent.upload_fail_alert()  # Upload failed
+                self.parent.load_fail_alert()  # Load failed
         elif self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
             proceed = True
         if proceed:
@@ -176,7 +177,6 @@ class InlineChain(ui.widget.Widget):
                                     width=self.line_width, group=str(self.clicks))
                     # Store line
                     self.transects.append(line)
-
                 else:
                     # If first click, adds chain number
                     self.number = Label(text=str(len(par.children)), pos=(touch.x, touch.y), font_size=self.c_size[0] * 2)

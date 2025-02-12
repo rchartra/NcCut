@@ -32,10 +32,10 @@ EXAMPLE_3D_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/example_3d.nc"
                                  known_hash="ccb6c76062d3228799746e68e1bb3ff715538bc3aae796c577c6fb1d06fcdc9f")
 EXAMPLE_4V_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/example_4v.nc",
                                  known_hash="afd261063f4b58c382c46db0d81e69dfb8f5234ef0037b261087177e6d3f7e1b")
-ORTHOGONAL_PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/orthogonal_project_example.json",
-                                                 known_hash='82f37306b94ee54ad1906c6bed72f8c9e8243940f95a8fe1f0d39a27eb920091')
-INLINE_PROJECT_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/inline_project_example.json",
-                                             known_hash='9f0f1d4d536cc445ccfc5aa07a011a32379673a114fbe2b7be7070bd2f73e9b5')
+ORTHOGONAL_CHAIN_DATA_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/orthogonal_project_example.json",
+                                                    known_hash='82f37306b94ee54ad1906c6bed72f8c9e8243940f95a8fe1f0d39a27eb920091')
+INLINE_CHAIN_DATA_EXAMPLE_PATH = pooch.retrieve(url="doi:10.5281/zenodo.14525966/inline_project_example.json",
+                                                known_hash='9f0f1d4d536cc445ccfc5aa07a011a32379673a114fbe2b7be7070bd2f73e9b5')
 
 
 class AppInfo:
@@ -96,8 +96,11 @@ def load_3d_nc(z_val):
 def select_sidebar_button(text):
     sidebar = run_app.home.ids.dynamic_sidebar
     but = next((but for but in sidebar.children if isinstance(but, Button) and but.text == text), None)
-    but.dispatch('on_press')
-    but.dispatch('on_release')
+    if but:
+        but.dispatch('on_press')
+        but.dispatch('on_release')
+    else:
+        raise Exception("Button not in Sidebar")
 
 
 class Test(unittest.TestCase):
@@ -118,7 +121,7 @@ class Test(unittest.TestCase):
         run_app.home.ids.file_in.text = ""
         run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Invalid File Name", "Empty file names are invalid")
-        run_app.home.ids.file_in.text = ORTHOGONAL_PROJECT_EXAMPLE_PATH
+        run_app.home.ids.file_in.text = ORTHOGONAL_CHAIN_DATA_EXAMPLE_PATH
         run_app.home.load_btn()
         self.assertEqual(run_app.home.children[0].text, "Unsupported File Type", "No unaccepted file types")
         run_app.home.ids.file_in.text = "teacup.jpg"
@@ -191,11 +194,11 @@ class Test(unittest.TestCase):
         self.assertIsNone(run_app.home.settings_bar.netcdf_btn.parent, "NetCDF settings menu was not removed")
         self.assertEqual(len(run_app.home.display.children), 1, "Not all tools were removed from display")
 
-    def test_project_upload(self):
+    def test_data_load(self):
         """
-        Tests the project upload function of the tools.
+        Tests the chain data load function of the tools.
 
-        Assumes project files are valid project files for 'support/example_4v.nc' with
+        Assumes chain data files are valid for 'support/example_4v.nc' with
         a variable 'Vorticity' and three chains.
         """
         load_2d_nc("Vorticity")
@@ -203,44 +206,44 @@ class Test(unittest.TestCase):
         # Open Orthogonal Chain tool
         select_sidebar_button("Orthogonal Chain")
 
-        # Project File
-        f1 = open(ORTHOGONAL_PROJECT_EXAMPLE_PATH)
-        project1 = json.load(f1)
-        # Upload Project File
+        # Chain Data File
+        f1 = open(ORTHOGONAL_CHAIN_DATA_EXAMPLE_PATH)
+        cdata1 = json.load(f1)
+        # Load Chain Data File
         multi_chain_instance = run_app.home.display.tool
-        multi_chain_instance.upload_data(functions.chain_find(project1, [], ["Click x", "Click y", "Width"], "Orthogonal"))
+        multi_chain_instance.load_data(functions.chain_find(cdata1, [], ["Click x", "Click y", "Width"], "Orthogonal"))
 
-        # Check file uploaded properly
-        for i, chain in enumerate(list(project1["Vorticity"].keys())[:-1]):
-            p_c = project1["Vorticity"][chain]
+        # Check file loaded properly
+        for i, chain in enumerate(list(cdata1["Vorticity"].keys())[:-1]):
+            p_c = cdata1["Vorticity"][chain]
             c_expected_points = list(zip(p_c["Click x"], p_c["Click y"], p_c["Width"]))
-            o_chain = multi_chain_instance.children[len(list(project1["Vorticity"].keys())) - 1 - i]
+            o_chain = multi_chain_instance.children[len(list(cdata1["Vorticity"].keys())) - 1 - i]
             self.assertListEqual(o_chain.points, c_expected_points,
-                                 chain + " Orthogonal Chain Points Did not Upload Properly")
+                                 chain + " Orthogonal Chain Points Did not Load Properly")
 
         self.assertEqual(multi_chain_instance.children[0].points, [],
-                         "Empty new orthogonal chain was created after upload")
+                         "Empty new orthogonal chain was created after load")
         select_sidebar_button("Close Tool")
         # Open Inline Chain tool
         select_sidebar_button("Inline Chain")
 
-        # Project File
-        f2 = open(INLINE_PROJECT_EXAMPLE_PATH)
-        project2 = json.load(f2)
-        # Upload Project File
+        # Chain Data File
+        f2 = open(INLINE_CHAIN_DATA_EXAMPLE_PATH)
+        cdata1 = json.load(f2)
+        # Load Chain Data File
         multi_chain_instance = run_app.home.display.tool
-        multi_chain_instance.upload_data(functions.chain_find(project2, [], ["Click x", "Click y"], "Inline"))
+        multi_chain_instance.load_data(functions.chain_find(cdata1, [], ["Click x", "Click y"], "Inline"))
 
-        # Check file uploaded properly
-        for i, chain in enumerate(list(project2["Vorticity"].keys())[:-1]):
-            p_c = project2["Vorticity"][chain]
+        # Check file loaded properly
+        for i, chain in enumerate(list(cdata1["Vorticity"].keys())[:-1]):
+            p_c = cdata1["Vorticity"][chain]
             c_expected_points = list(zip(p_c["Click x"], p_c["Click y"]))
-            i_chain = multi_chain_instance.children[len(list(project2["Vorticity"].keys())) - 1 - i]
+            i_chain = multi_chain_instance.children[len(list(cdata1["Vorticity"].keys())) - 1 - i]
             self.assertListEqual(i_chain.points, c_expected_points,
-                                 chain + " Inline Chain Points Did not Upload Properly")
+                                 chain + " Inline Chain Points Did not Load Properly")
 
         self.assertEqual(multi_chain_instance.children[0].points, [],
-                         "Empty new inline chain was created after upload")
+                         "Empty new inline chain was created after load")
 
     def test_orthogonal_chain(self):
         """
@@ -255,13 +258,13 @@ class Test(unittest.TestCase):
         sidebar = run_app.home.ids.dynamic_sidebar.children
         select_sidebar_button("Orthogonal Chain")
 
-        # Project File
-        f = open(ORTHOGONAL_PROJECT_EXAMPLE_PATH)
-        project = json.load(f)
+        # Chain Data File
+        f = open(ORTHOGONAL_CHAIN_DATA_EXAMPLE_PATH)
+        cdata = json.load(f)
 
-        # Upload Project File
+        # Load Chain Data File
         multi_chain_instance = run_app.home.display.tool
-        multi_chain_instance.upload_data(functions.chain_find(project, [], ["Click x", "Click y", "Width"], "Orthogonal"))
+        multi_chain_instance.load_data(functions.chain_find(cdata, [], ["Click x", "Click y", "Width"], "Orthogonal"))
 
         # Open editing mode
         select_sidebar_button("Edit Mode")
@@ -270,7 +273,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Delete Last Point")
 
         # Check last clicked point was properly deleted
-        c3 = project["Vorticity"]["Orthogonal Chain 3"]
+        c3 = cdata["Vorticity"]["Orthogonal Chain 3"]
         c3_expected_points = list(zip(c3["Click x"][:-1], c3["Click y"][:-1], c3["Width"][:-1]))
         self.assertEqual(len(multi_chain_instance.children), 3, "Empty fourth chain was not deleted")
         self.assertEqual(multi_chain_instance.children[0].points, c3_expected_points, "Expected points were not found")
@@ -290,7 +293,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Edit Mode")
         select_sidebar_button("Delete Last Point")
         self.assertEqual(len(multi_chain_instance.children), 2, "Empty chain was not deleted")
-        c2 = project["Vorticity"]["Orthogonal Chain 2"]
+        c2 = cdata["Vorticity"]["Orthogonal Chain 2"]
         c2_expected_points = list(zip(c2["Click x"][:-1], c2["Click y"][:-1], c2["Width"][:-1]))
         self.assertEqual(multi_chain_instance.children[0].points, c2_expected_points,
                          "Last point of c2 was not deleted")
@@ -305,7 +308,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("Edit Mode")
         select_sidebar_button("Delete Last Point")
         select_sidebar_button("Back")
-        self.assertNotIn(multi_chain_instance.dbtn, sidebar,
+        self.assertNotIn(multi_chain_instance.d_btn, sidebar,
                          "Plot button not removed from sidebar when no more chains left")
 
         # Test orthogonal transect width adjustments
@@ -356,17 +359,17 @@ class Test(unittest.TestCase):
         # First Click
         sidebar = run_app.home.ids.dynamic_sidebar.children
         tran_instance.on_touch_down(functions.Click(float(x_arr[0]), float(y_arr[0])))
-        self.assertNotIn(tran_instance.dbtn, sidebar, "There cannot be a Plot Button on First Click")
+        self.assertNotIn(tran_instance.d_btn, sidebar, "There cannot be a Plot Button on First Click")
         self.assertEqual(len(tran_instance.children), 1, "Inline chain Not Added")
 
         # Second Click
         tran_instance.on_touch_down(functions.Click(float(x_arr[1]), float(y_arr[1])))
-        self.assertIn(tran_instance.dbtn, sidebar, "Plot Button should be added on second click")
+        self.assertIn(tran_instance.d_btn, sidebar, "Plot Button should be added on second click")
         self.assertEqual(len(tran_instance.children), 1, "A chain was improperly deleted or added")
 
         # Third Click
         tran_instance.on_touch_down(functions.Click(float(x_arr[2]), float(y_arr[2])))
-        self.assertIn(tran_instance.dbtn, sidebar, "Plot Button should be there on third click")
+        self.assertIn(tran_instance.d_btn, sidebar, "Plot Button should be there on third click")
         self.assertEqual(len(tran_instance.children), 1, "A chain was improperly deleted or added")
 
         self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
@@ -407,7 +410,7 @@ class Test(unittest.TestCase):
                          "Chain point was not deleted from previous chain after current chain was removed")
         select_sidebar_button("Delete Last Chain")
         self.assertEqual(len(tran_instance.children), 1, "When last chain is deleted, a new chain is added")
-        self.assertNotIn(tran_instance.dbtn, sidebar)
+        self.assertNotIn(tran_instance.d_btn, sidebar)
         self.assertEqual(tran_instance.children[0].points, [], "Chain was not properly deleted")
 
     def test_netcdf_config(self):
@@ -617,7 +620,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("New Chain")
         for i in range(len(c2_incs)):
             tool.on_touch_down(functions.Click(float(c2_x_arr[i]), float(c2_y_arr[i])))
-        select_sidebar_button("Plot")
+        select_sidebar_button("Plot Data")
         plot_popup = run_app.home.plot_popup
 
         # Initial Transect Selections
@@ -705,7 +708,7 @@ class Test(unittest.TestCase):
         select_sidebar_button("New Chain")
         for i in range(3, 6):
             tool.on_touch_down(functions.Click(float(x_arr[i]), float(y_arr[i])))
-        select_sidebar_button("Plot")
+        select_sidebar_button("Plot Data")
         self.assertEqual(len(tool.children), 2, "2 Chains Not Added")
         plot_popup = run_app.home.plot_popup
 
@@ -784,7 +787,7 @@ class Test(unittest.TestCase):
         self.assertEqual(tool.children[0].c_size, (dp(c), dp(c)),
                          "Tool graphics size was not updated from config file.")
         self.assertEqual(tool.curr_width, 20, "Default orthogonal chain width was not updated from config file.")
-        select_sidebar_button("Plot")
+        select_sidebar_button("Plot Data")
         plot_popup = run_app.home.plot_popup
         with tempfile.TemporaryDirectory() as jpath:
             plot_popup.download_selected_data(os.path.join(jpath, "test.json"))
