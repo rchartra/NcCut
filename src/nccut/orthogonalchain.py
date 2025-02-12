@@ -31,6 +31,7 @@ class OrthogonalChain(ui.widget.Widget):
         clicks (int): Number of clicks user has made. Decreases when points are deleted.
         points (list): List of Tuples, For each click user makes: (X-coord, Y-coord, t_width).
         t_width (int): Current width in pixels of orthogonal transects
+        loaded (bool): Whether chain was loaded from file data or clicked out manually
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
         transects (list): List of transects made
         number: kivy.uix.label.Label, Reference to the number label
@@ -52,7 +53,7 @@ class OrthogonalChain(ui.widget.Widget):
         self.clicks = 0
         self.points = []
         self.t_width = width
-        self.uploaded = False
+        self.loaded = False
         self.home = home
         self.transects = []
         self.number = None
@@ -124,14 +125,14 @@ class OrthogonalChain(ui.widget.Widget):
         if len(self.points) == 1:  # Update extra width entry at start of list so avg can be taken
             self.points[0] = (self.points[0][0], self.points[0][1], width)
 
-    def upload_mode(self, val):
+    def load_mode(self, val):
         """
-        Update whether in upload mode or not
+        Update whether in load mode or not
 
         Args:
-            val (bool): Whether in upload mode or not
+            val (bool): Whether in load mode or not
         """
-        self.uploaded = val
+        self.loaded = val
 
     def get_orthogonal(self, line_start, line_end):
         """
@@ -201,10 +202,10 @@ class OrthogonalChain(ui.widget.Widget):
             self.transects = self.transects[:-1]
         else:
             # Remove plot and width buttons from sidebar if last point of the chain
-            if self.parent.dbtn in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.parent.dbtn)
-            if self.parent.width_btn in self.home.display.tool_action_widgets:
-                self.home.display.remove_from_tool_action_widgets(self.parent.width_btn)
+            if self.parent.d_btn in self.home.display.tool_sb_widgets:
+                self.home.display.remove_from_tool_sb_widgets(self.parent.d_btn)
+            if self.parent.width_btn in self.home.display.tool_sb_widgets:
+                self.home.display.remove_from_tool_sb_widgets(self.parent.width_btn)
             self.remove_widget(self.children[0])
             # Stop drawing line between last point and cursor
             Window.unbind(mouse_pos=self.draw_line)
@@ -222,11 +223,11 @@ class OrthogonalChain(ui.widget.Widget):
         """
         # Draws chain line and points.
         proceed = False
-        if self.uploaded:  # If being uploaded, just needs to be within image bounds
+        if self.loaded:  # If being loaded, just needs to be within image bounds
             if touch.pos[0] < self.size[0] and touch.pos[1] < self.size[1]:
                 proceed = True
             else:
-                self.parent.upload_fail_alert()  # Upload failed
+                self.parent.load_fail_alert()  # Load failed
         elif self.home.ids.view.collide_point(*self.home.ids.view.to_widget(*self.to_window(*touch.pos))):
             proceed = True  # If being clicked, must also be within viewing window
         if proceed:
@@ -253,8 +254,8 @@ class OrthogonalChain(ui.widget.Widget):
                     self.canvas.remove_group(str(self.clicks))
                     self.clicks -= 1
                     self.points = self.points[:-1]
-                    if self.uploaded:
-                        self.parent.upload_fail_alert()
+                    if self.loaded:
+                        self.parent.load_fail_alert()
                     else:
                         functions.alert("Orthogonal point out of bounds", self.home)
 
@@ -268,7 +269,7 @@ class OrthogonalChain(ui.widget.Widget):
         Draw line from most recent click point to user cursor.
 
         Updates anytime cursor moves. Does not draw if not current chain being drawn or if tool
-        in dragging mode. Also won't draw if chain was uploaded and it was final chain.
+        in dragging mode. Also won't draw if chain was loaded and it was final chain.
 
         Args:
             instance: WindowSDL instance, current window loaded (not used by method)

@@ -491,21 +491,3 @@
                         size: self.size
                         pos: self.pos
                         radius: [dp(10),]
-
-                BackgroundLabel:
-                    id: sidebar_label
-                    text: ""
-                    background_color: 0.2, 0.2, 0.2, 1
-                    size_hint_y: None
-                    height: dp(40)
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'center'
-                    font_size: app.font_size
-                    canvas:
-                        Color:
-                            rgba: 1, 1, 1, 1
-                        Line:
-                            points: [self.x, self.y, self.x + self.width, self.y]
-                            width: dp(1)
-                            cap: "square"

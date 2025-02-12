@@ -66,7 +66,7 @@ The :ref:`Inline Chain <inline_chain>` tool allows you to draw multiple transect
 Inline Chain
 ^^^^^^^^^^^^
 
-Using this tool chains of transects can be drawn. Transects will be taken along the line segments drawn between the clicked points. Multiple such *Chains* can be drawn out at once before being plotted. These *chains* can all be saved together as a *project* and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
+Using this tool chains of transects can be drawn. Transects will be taken along the line segments drawn between the clicked points. Multiple such *Chains* can be drawn out at once before being plotted. These *chains* can all be saved together and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
 
 #. Hit the **Inline Chain** button to enter transect mode.
 #. Click points along the feature you'd like to make transects along. Transects will be made between the points you click.
@@ -82,7 +82,7 @@ Using this tool chains of transects can be drawn. Transects will be taken along 
 Orthogonal Chain
 ^^^^^^^^^^^^^^^^
 
-Using this tool transects will be made orthogonally to the line segments in the chain marked out by the user with a specified width. Multiple *chains* can be drawn onto a loaded file at once before being plotted. These *chains* can all be saved together as a *project* and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
+Using this tool transects will be made orthogonally to the line segments in the chain marked out by the user with a specified width. Multiple *chains* can be drawn onto a loaded file at once before being plotted. These *chains* can all be saved together and reloaded into the viewer later. When a large file is being explored this allows you to mark out features over multiple sessions.
 
 #. Hit the **Orthogonal Chain** button to enter transect mode.
 #. Click points along the feature you'd like to make transects across. Solid lines will appear crossing the dashed line you draw indicating where the transect will be taken.
@@ -119,17 +119,17 @@ Plotting
 #. See the :ref:`Data Output <data_output>` section for how the saved data is formatted.
 #. Click anywhere around the popup or the close button to dismiss plotting window.
 
-Uploading a Project
--------------------
+Loading Previously Saved Chain Data
+-----------------------------------
 
-To upload a previously worked on project:
+To reload a previously worked on project:
 
-#. Load the same dataset/image you worked on previously. Project files are specific to the file, variable, and coordinate
-selections originally used.
+#. Load the same dataset/image you worked on previously. Chain data files are specific to the file, variable, and coordinate
+ selections originally used.
 #. Hit the tool button of the tool you used previously to enter transect mode.
-#. Instead of clicking new points, select the **Upload Project** button.
+#. Instead of clicking new points, select the **Open Data** button.
 #. Enter the file name of the transect data you saved previously from the plotting menu and select **Ok**.
-#. All chains from the file will load onto the viewer and you can continue working on the project.
+#. All chains from the file will load onto the viewer and you can continue working.
 
 .. _config_file:
 

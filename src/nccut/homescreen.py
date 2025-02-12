@@ -35,9 +35,10 @@ class HomeScreen(Screen):
     to execute GUI operations.
 
     Attributes:
+        general_config: Dictionary of default configuration values
+        btn_img_path: Path to location of settings bar button icons
         file_on (bool): Whether there is a file currently loaded in viewer
         loaded (bool): Whether the window has fully loaded
-        win_load_size: Height and width of fully loaded window on Windows OS
         rel_path: pathlib.Path object to use as output directory
         font (float): Current font size for all buttons
         display: FileDisplay object (draggable image) created when a file is loaded
@@ -47,7 +48,6 @@ class HomeScreen(Screen):
         color_bar_box: BoxLayout containing colorbar and related graphics
         cb_bg: Background for colorbar box
         netcdf_info: Label object containing information about NetCDF file if it has necessary attributes
-        sidebar_label: Label object for title of dynamic sidebar
         sidebar_spacer: Spacer to fill any remaining area in dynamic sidebar not filled by widgets
         settings_bar: SettingsBar object holding view manipulation buttons and NetCDF menu
     """
@@ -55,7 +55,7 @@ class HomeScreen(Screen):
         """
         Initialize main screen with default settings.
 
-        Creates editing buttons, most UI elements defined in nccut.kv
+        Creates color bar box, otherwise most UI elements defined in nccut.kv
 
         Args:
             btn_img_path: Path to location of settings bar button icons
@@ -68,7 +68,7 @@ class HomeScreen(Screen):
         self.file_on = False
         self.loaded = False
         self.rel_path = Path(os.getcwd())
-        self.font = self.ids.sidebar_label.font_size
+        self.font = self.ids.load_btn.font_size
         self.display = None
         self.nc_popup = None
         self.plot_popup = PlotPopup()
@@ -81,28 +81,21 @@ class HomeScreen(Screen):
         self.netcdf_info = func.BackgroundLabel(text="", font_size=self.font, size_hint_y=None, markup=True,
                                                 height=dp(30) + self.font, background_color=[0.1, 0.1, 0.1, 1])
         # Dynamic sidebar
-        self.sidebar_label = self.ids.sidebar_label
-        self.sidebar_spacer = Widget(size_hint=(1, 0.9))
+        self.sidebar_spacer = Widget(size_hint=(1, 1))
         self.ids.dynamic_sidebar.add_widget(self.sidebar_spacer)
         # Settings bar
         self.settings_bar = SettingsBar(self.font, self)
 
-    def populate_dynamic_sidebar(self, elements, sidebar_label):
+    def populate_dynamic_sidebar(self, elements):
         """
         Removes current sidebar elements and replaces them with the widgets provided.
 
         Args:
-            elements (list): List of widgets to add
-            sidebar_label (str): Title for dynamic sidebar
+            elements (list): List of widgets to add. Assumes all have the same height.
         """
         dsl = self.ids.dynamic_sidebar
-        for i in range(len(dsl.children) - 1):
+        for i in range(len(dsl.children)):
             dsl.remove_widget(dsl.children[0])
-        self.sidebar_label.text = sidebar_label
-        y_space = 1 - ((len(elements) + 1) * 0.1)
-        if y_space < 0:
-            y_space = 0
-        self.sidebar_spacer.size_hint = (1, y_space)
         for el in elements:
             dsl.add_widget(el)
         dsl.add_widget(self.sidebar_spacer)
@@ -135,7 +128,7 @@ class HomeScreen(Screen):
         Updates font size throughout widget tree to the size automatically determined for static UI elements.
 
         When the window is resized Kivy automatically updates the font size of UI elements defined in nccut.kv
-        but not those defined in scripts. Thus this method updates font size for such elements to be the same as
+        but not those defined in scripts. Thus, this method updates font size for such elements to be the same as
         the static elements.
         """
         font = self.ids.load_btn.font_size
@@ -284,26 +277,35 @@ class HomeScreen(Screen):
         Resets file related attributes.
         """
         kivy.core.window.Window.set_system_cursor("arrow")
+        # Clear colorbar
         if len(self.ids.view_box.children) > 1:
             self.color_bar_box.remove_widget(self.color_bar_box.children[0])
             self.ids.view_box.remove_widget(self.color_bar_box)
+        # Clear NetCDF Info
         if len(self.ids.main_box.children) > 3:
             self.ids.main_box.remove_widget(self.netcdf_info)
         if self.file_on:
+            # Clear X Axis
             if len(self.display.x_labels) > 0:
                 for i in self.display.x_labels:
                     self.ids.plot_box.remove_widget(i)
                 self.ids.plot_box.canvas.remove_group("x_ticks")
             self.ids.x_axis_label.text = ""
+            # Clear Y axis
             self.ids.y_axis_label.text = ""
             if len(self.display.y_labels) > 0:
                 for i in self.display.y_labels:
                     self.ids.plot_box.remove_widget(i)
                 self.ids.plot_box.canvas.remove_group("y_ticks")
             self.ids.view.unbind(size=self.display.resize_to_fit)
+            # Reset settings to default
             def_img_name = self.general_config["graphics_defaults"]["line_color"].lower() + "_line_btn.png"
             self.settings_bar.set_line_color_btn(os.path.join(self.btn_img_path, def_img_name))
             self.display.parent.remove_widget(self.display)
+            # Reset Sidebar
+            dsl = self.ids.dynamic_sidebar
+            for i in range(len(dsl.children)):
+                dsl.remove_widget(dsl.children[0])
         if self.settings_bar.parent is not None:
             self.ids.settings_bar.remove_widget(self.settings_bar)
         self.settings_bar.remove_netcdf_button()

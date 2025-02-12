@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-def project_file_printer(data, tab):
+def chain_data_file_printer(data, tab):
     """
     Recursively prints the contents of an output data file from NcCut in a readable fashion.
 
@@ -17,4 +17,4 @@ def project_file_printer(data, tab):
                 print(key + ": [" + str(data[key][0]) + ", " + str(data[key][1]) + ", ..." + "]")
             else:
                 print(key + ":")
-                project_file_printer(data[key], tab + 4)
+                chain_data_file_printer(data[key], tab + 4)

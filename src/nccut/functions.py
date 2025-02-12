@@ -11,7 +11,7 @@ Contains error banner functionality, file management function, and transect taki
 """
 
 import kivy
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, Line
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.label import Label
@@ -62,7 +62,34 @@ class BackgroundLabel(Label):
     """
     Code for this is in nccut.kv. Referenced here so it can be used in scripts.
     """
-    pass
+    def __init__(self, background_color=[0, 0, 0, 1], **kwargs):
+        super(BackgroundLabel, self).__init__(**kwargs)
+        self.background_color = background_color
+
+
+class SidebarHeaderLabel(BackgroundLabel):
+    def __init__(self, text="", **kwargs):
+        super().__init__(**kwargs)
+        self.text_size = self.size  # Initial constraint
+        self.bind(size=self.update_text_size)
+        self.text = text
+        self.background_color = [0.2, 0.2, 0.2, 1]
+        self.size_hint_y = None
+        self.height = dp(40)
+        self.halign = "center"
+        self.valign = "center"
+        with self.canvas.before:
+            self.color_instruction = Color(1, 1, 1, 1)
+            self.line = Line(width=dp(1), cap="square", points=[self.x, self.y, self.x + self.width, self.y])
+        self.bind(pos=self.update_line, size=self.update_line)  # Keep the line in place
+
+    def update_text_size(self, *args):
+        """Ensure text_size always matches the label's size."""
+        self.text_size = self.size
+
+    def update_line(self, *args):
+        """Update the line position when the label moves or resizes."""
+        self.line.points = [self.x, self.y, self.x + self.width, self.y]
 
 
 class AlertPopup(Popup):
@@ -139,7 +166,7 @@ def validate_config(config):
 
 def convert_found_coords(found, config):
     """
-    If coordinates from uploaded project file came from the currently loaded NetCDF file convert the coordinates to
+    If coordinates from loaded project file came from the currently loaded NetCDF file convert the coordinates to
     pixel coordinates for plotting the chains on the viewer.
 
     Args:
