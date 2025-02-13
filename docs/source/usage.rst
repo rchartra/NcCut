@@ -124,8 +124,7 @@ Loading Previously Saved Chain Data
 
 To reload a previously worked on project:
 
-#. Load the same dataset/image you worked on previously. Chain data files are specific to the file, variable, and coordinate
- selections originally used.
+#. Load the same dataset/image you worked on previously. Chain data files are specific to the file, variable, and coordinate selections originally used.
 #. Hit the tool button of the tool you used previously to enter transect mode.
 #. Instead of clicking new points, select the **Open Data** button.
 #. Enter the file name of the transect data you saved previously from the plotting menu and select **Ok**.

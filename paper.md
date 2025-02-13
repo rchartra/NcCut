@@ -53,7 +53,7 @@ NcCut’s functions can be divided into two main categories:
 NcCut allows users to load NetCDF4 files, or images in JPG, JPEG, or PNG formats, and has adjustable graphics for 
 different file sizes. In the case of NetCDF4 files, the user can choose between different variables and dimensions of 
 the data to view. The user can select which dimensions to use as the x, y and z dimensions for the viewer, and once 
-displayed the user can switch between different displays of the x-y dimensions at different z-values. This is intuitive 
+displayed the user can switch between different displays of the x and y dimensions at different z-values. This is intuitive 
 for many NetCDF4 files which contain three-dimensional datasets with data arrays at different vertical heights or 
 depths. The data is displayed as an image mapped to a color map, which can be changed by the user as well as the 
 contrast of the image. Once loaded and configured, users can drag, rotate, flip, and zoom in on the file however they 
