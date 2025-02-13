@@ -9,7 +9,7 @@
 project = 'NcCut'
 copyright = '2024, Robin Chartrand'
 author = 'Robin Chartrand'
-release = '0.4.8'
+release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
