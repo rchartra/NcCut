@@ -16,8 +16,6 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.dropdown import DropDown
-from kivy.uix.textinput import TextInput
-from plyer import filechooser
 import nccut.functions as func
 from nccut.plotwindow import PlotWindow
 from kivy.core.image import Image as CoreImage
@@ -27,13 +25,8 @@ from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import copy
 import pandas as pd
-import datetime
 import json
 import pathlib
-import os
-import re
-import platform
-import subprocess
 
 
 KV_FILE_PATH = pathlib.Path(__file__).parent.resolve() / "plotpopup.kv"
@@ -341,113 +334,16 @@ class PlotPopup(Popup):
                 'png': Current plot as a PNG file
                 'pdf': Current plot as a PDF file
         """
-
-        if s_type == "s_data" or s_type == "a_data" or s_type == "all_z":
-            f_types = ["*.json"]
-        elif s_type == "png":
-            f_types = ["*.png"]
-        elif s_type == "pdf":
-            f_types = ["*.pdf"]
-        try:
-            if platform.system() == "Darwin":
-                # Construct the AppleScript command for prompting for file name
-                script = """
-                        set file_path to choose file name with prompt "Select a location and enter a filename:"
-                        POSIX path of file_path
-                        """
-                result = subprocess.run(
-                    ['osascript', '-e', script],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                )
-                if result.returncode == 0:
-                    fpath = result.stdout.strip()
-                else:
-                    fpath = None
-            else:
-                fpath = filechooser.save_file(filters=f_types)[0]
-            if fpath is not None and len(fpath) > 0:
-                if s_type == "s_data":
-                    self.download_selected_data(fpath)
-                elif s_type == "a_data":
-                    self.download_all_data(fpath)
-                elif s_type == "all_z":
-                    self.download_all_z_data(fpath)
-                elif s_type == "png":
-                    self.download_png_plot(fpath)
-                elif s_type == "pdf":
-                    self.download_pdf_plot(fpath)
-        except Exception:
-            # If native file browser not working, provide manual file entry method
-            content = ui.boxlayout.BoxLayout(orientation='horizontal')
-            popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
-            txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
-            content.add_widget(txt)
-            go = Button(text="Ok", size_hint=(0.1, 1))
-            go.bind(on_press=lambda x: self.manual_file_input(txt.text, s_type))
-            go.bind(on_release=popup.dismiss)
-            close = Button(text="Close", size_hint=(0.2, 1), font_size=self.home.font)
-            close.bind(on_press=popup.dismiss)
-            content.add_widget(go)
-            content.add_widget(close)
-            popup.open()
-            return
-
-    def manual_file_input(self, fname, s_type):
-        """
-        Checks if a filename is valid and prevents overwriting.
-        Checks a file name doesn't have any problematic characters. If file name is a file path
-        ensures that the directories exists. If a file name is the same as one that already
-        exists it adds a (#) to avoid overwriting existing file. Calls for data/plot to be saved to corrected file name.
-
-        Args:
-            fname: File name/path given by user
-            s_type (str): String corresponding to what is being saved:
-                'data': Transect data for selections
-                'all_z_data': Transect data for selections for all z dimension values
-                'png': Current plot as a PNG file
-                'pdf': Current plot as a PDF file
-        """
-
-        if s_type == "s_data" or s_type == "a_data" or s_type == "all_z":
-            extension = ".json"
-        elif s_type == "png":
-            extension = ".png"
-        elif s_type == "pdf":
-            extension = ".pdf"
-        path = self.home.rel_path
-        if fname.find(".") >= 1:
-            fname = fname[:fname.find(".")]
-        if fname == "" or len(re.findall(r'[^A-Za-z0-9_\-/:\\]', fname)) > 0:
-            func.alert_popup("Invalid file name")
-            return False
-        if "/" in fname:
-            if not pathlib.Path.exists(path / fname[:fname.rfind("/") + 1]):
-                func.alert_popup("Directory not found")
-                return False
-
-        exist = True
-        fcount = 0
-        while exist:
-            if pathlib.Path.exists(path / (fname + extension)):
-                fcount += 1
-                if fcount == 1:
-                    fname = fname + "(1)"
-                else:
-                    fname = fname[:fname.find("(") + 1] + str(fcount) + ")"
-            else:
-                exist = False
-        fpath = os.path.abspath(fname + extension)
-
         if s_type == "s_data":
-            self.download_selected_data(fpath)
+            func.ask_for_output_file_name("*.json", self.download_selected_data, self.home)
         elif s_type == "a_data":
-            self.download_all_data(fpath)
+            func.ask_for_output_file_name("*.json", self.download_all_data, self.home)
         elif s_type == "all_z":
-            self.download_all_z_data(fpath)
+            func.ask_for_output_file_name("*.json", self.download_all_z_data, self.home)
         elif s_type == "png":
-            self.download_png_plot(fpath)
+            func.ask_for_output_file_name("*.png", self.download_png_plot, self.home)
         elif s_type == "pdf":
-            self.download_pdf_plot(fpath)
+            func.ask_for_output_file_name("*.pdf", self.download_pdf_plot, self.home)
 
     def download_png_plot(self, f_path):
         """
@@ -521,7 +417,7 @@ class PlotPopup(Popup):
                     final[var] = {}
                     for z in list(dat[var].keys()):
                         final[var][z] = self.add_group_info(dat[var][z])
-            final = self.add_metadata(final)
+            final = func.add_metadata(self.config, self.f_type, self.home, final)
             with open(f_path, "w") as f:
                 json.dump(final, f)
 
@@ -547,43 +443,6 @@ class PlotPopup(Popup):
             self.active_data = self.get_data()
         except Exception as error:
             func.alert_popup(str(error))
-
-    def add_metadata(self, dicti):
-        """
-        Adds global and variable specific data to an output dictionary.
-
-        Args:
-            dicti: Dictionary of data about to be exported
-
-        Returns:
-            dicti: Dictionary of data with metadata fields added
-        """
-        def attrs_to_str(d):
-            return {k: str(v) for k, v in d.items()}
-
-        config = self.config[self.f_type]
-        # On GitHub Linux Runner a user is not defined resulting in an error
-        try:
-            user = os.getlogin()
-        except OSError:
-            user = "_user_id_not_found_"
-        global_metadata = {"time_stamp": datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-                           "user": user, "license": "CC0-1.0"}
-        global_metadata.update(self.home.general_config["metadata"])
-        if self.f_type == "netcdf":
-            global_metadata["file"] = config["file"]
-            global_metadata["netcdf_attrs"] = attrs_to_str(config["data"].attrs)
-            dims = {config["x"]: attrs_to_str(config["data"][config["x"]].attrs),
-                    config["y"]: attrs_to_str(config["data"][config["y"]].attrs)}
-            if config["z"] != "N/A":
-                dims[config["z"]] = attrs_to_str(config["data"][config["z"]].attrs)
-            global_metadata["dim_attrs"] = dims
-            for key in list(dicti.keys()):
-                dicti[key][key + "_attrs"] = attrs_to_str(config["data"][key].attrs)
-        else:
-            global_metadata["file"] = config
-        dicti["global_metadata"] = global_metadata
-        return dicti
 
     def add_group_info(self, dicti):
         """

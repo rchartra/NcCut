@@ -18,6 +18,8 @@ from kivy.uix.label import Label
 from kivy.metrics import dp
 from kivy.core.image import Image as CoreImage
 import kivy.uix as ui
+from kivy.uix.textinput import TextInput
+from plyer import filechooser
 from functools import partial
 from scipy.interpolate import RegularGridInterpolator, CubicSpline
 import numpy as np
@@ -27,9 +29,13 @@ import io
 import warnings
 import itertools
 import matplotlib
+import platform
+import subprocess
 from pathlib import Path
 import tomli
 import os
+import re
+import datetime
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -123,6 +129,92 @@ class AlertPopup(Popup):
             message (str): Text to display
         """
         self.ids.message.text = message
+
+
+def ask_for_output_file_name(extension, next_function, home):
+    """
+    Popup window for user to give a name for a file with the given file extension. If the native file browser is not
+    working, allows for manual text entry of the file name.
+
+    Args:
+        extension (str): File extension for file including "*." before
+        next_function: Function to call with the final file path as it's single parameter
+        home: Reference to root home object
+    """
+    try:
+        if platform.system() == "Darwin":
+            # Construct the AppleScript command for prompting for file name
+            script = """
+                            set file_path to choose file name with prompt "Select a location and enter a filename:"
+                            POSIX path of file_path
+                            """
+            result = subprocess.run(
+                ['osascript', '-e', script],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
+            if result.returncode == 0:
+                fpath = result.stdout.strip()
+            else:
+                fpath = None
+        else:
+            fpath = filechooser.save_file(filters=[extension])[0]
+        if fpath is not None and len(fpath) > 0:
+            next_function(fpath)
+    except Exception:
+        # If native file browser not working, provide manual file entry method
+        content = ui.boxlayout.BoxLayout(orientation='horizontal')
+        popup = Popup(title="File Name", content=content, size_hint=(0.5, 0.15))
+        txt = TextInput(size_hint=(0.7, 1), hint_text="Enter File Name")
+        content.add_widget(txt)
+        go = Button(text="Ok", size_hint=(0.1, 1))
+        go.bind(on_press=lambda x: manual_file_check(txt.text, extension, next_function, home))
+        go.bind(on_release=popup.dismiss)
+        close = Button(text="Close", size_hint=(0.2, 1), font_size=home.font)
+        close.bind(on_press=popup.dismiss)
+        content.add_widget(go)
+        content.add_widget(close)
+        popup.open()
+        return
+
+
+def manual_file_check(file_text, extension, next_function, home):
+    """
+    Checks if a filename is valid and prevents overwriting.
+    Checks a file name doesn't have any problematic characters. If file name is a file path
+    ensures that the directories exists. If a file name is the same as one that already
+    exists it adds a (#) to avoid overwriting existing file.
+
+    Args:
+        file_text: File name/path given by user
+        extension: The output file type
+        next_function: Function to call and pass correct file name to if file name is of valid form
+        home: Reference to root home object
+    """
+
+    path = home.rel_path
+    if file_text.find(".") >= 1:
+        file_text = file_text[:file_text.find(".")]
+    if file_text == "" or len(re.findall(r'[^A-Za-z0-9_\-/:\\]', file_text)) > 0:
+        alert_popup("Invalid file name")
+        return False
+    if "/" in file_text:
+        if not Path.exists(path / file_text[:file_text.rfind("/") + 1]):
+            alert_popup("Directory not found")
+            return False
+
+    exist = True
+    fcount = 0
+    while exist:
+        if Path.exists(path / (file_text + extension)):
+            fcount += 1
+            if fcount == 1:
+                file_text = file_text + "(1)"
+            else:
+                file_text = file_text[:file_text.find("(") + 1] + str(fcount) + ")"
+        else:
+            exist = False
+    fpath = os.path.abspath(file_text + extension)
+    next_function(fpath)
 
 
 def validate_config(config):
@@ -638,6 +730,51 @@ def get_color_bar(colormap, data, face_color, text_color, font):
     plt.close()
     plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
     return plot
+
+
+def add_metadata(config, f_type, home, dicti):
+    """
+    Adds global and variable specific data to an output dictionary.
+
+    Args:
+        config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data from
+            the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
+            value is the necessary configuration settings. For images, the config dictionary has form
+            {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+        f_type (str): File type being loaded ("image" or "netcdf")
+        dicti: Dictionary of data about to be exported
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+
+    Returns:
+        dicti: Dictionary of data with metadata fields added
+    """
+    def attrs_to_str(d):
+        return {k: str(v) for k, v in d.items()}
+
+    config = config[f_type]
+    # On GitHub Linux Runner a user is not defined resulting in an error
+    try:
+        user = os.getlogin()
+    except OSError:
+        user = "_user_id_not_found_"
+    global_metadata = {"time_stamp": datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                       "user": user, "license": "CC0-1.0"}
+    global_metadata.update(home.general_config["metadata"])
+    if f_type == "netcdf":
+        global_metadata["file"] = config["file"]
+        global_metadata["netcdf_attrs"] = attrs_to_str(config["data"].attrs)
+        dims = {config["x"]: attrs_to_str(config["data"][config["x"]].attrs),
+                config["y"]: attrs_to_str(config["data"][config["y"]].attrs)}
+        if config["z"] != "N/A":
+            dims[config["z"]] = attrs_to_str(config["data"][config["z"]].attrs)
+        global_metadata["dim_attrs"] = dims
+        for key in list(dicti.keys()):
+            dicti[key][key + "_attrs"] = attrs_to_str(config["data"][key].attrs)
+    else:
+        global_metadata["file"] = config
+    dicti["global_metadata"] = global_metadata
+    return dicti
 
 
 def subset_around_transect(config, points):

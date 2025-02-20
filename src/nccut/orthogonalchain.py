@@ -202,8 +202,8 @@ class OrthogonalChain(ui.widget.Widget):
             self.transects = self.transects[:-1]
         else:
             # Remove plot and width buttons from sidebar if last point of the chain
-            if self.parent.d_btn in self.home.display.tool_sb_widgets:
-                self.home.display.remove_from_tool_sb_widgets(self.parent.d_btn)
+            if self.parent.p_btn in self.home.display.tool_sb_widgets:
+                self.home.display.remove_from_tool_sb_widgets(self.parent.p_btn)
             if self.parent.width_btn in self.home.display.tool_sb_widgets:
                 self.home.display.remove_from_tool_sb_widgets(self.parent.width_btn)
             self.remove_widget(self.children[0])

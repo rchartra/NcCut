@@ -6,7 +6,7 @@ Data Output
 .. note::
    For an example of how to work with the output data look :ref:`here <output>`.
 
-No matter which tool you use the GUI will download the transect data into a JSON file. If you're unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages. One easy way to access it is using the python ``json`` library:
+No matter which tool you use the GUI will export the transect data into a JSON file. If you're unfamiliar with this data structure, it is equivalent to nested dictionaries in python or nested lists in many other programming languages. It is a common file type that is supported by many software and programming languages. One easy way to access it is using the python ``json`` library:
 
     .. code-block:: python
 

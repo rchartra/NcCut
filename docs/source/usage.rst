@@ -73,7 +73,7 @@ Using this tool chains of transects can be drawn. Transects will be taken along 
     * Select **Drag Mode** from the actions sidebar to drag the image without selecting points, and select **Transect Mode** to go back.
     * Select **Edit Mode** to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain draw.
 #. Right click to select the final point or select **New Chain** to begin a new chain and repeat for as many chains as you'd like.
-#. When done select the **Plot** button and a popup will appear with a plot of all transects from the first chain and downloading options.
+#. When done either select the **Export Data** button to save data or select the **Plot** button and a popup will appear with a plot of all transects from the first chain and additional exporting options.
 
 #. Click anywhere around the popup or the close button to dismiss
 
@@ -95,7 +95,7 @@ Using this tool transects will be made orthogonally to the line segments in the 
         * If you change the width of a chain any new chains will continue to use that same width unless you change it again.
 
 #. Right click to select the final point or select **New Chain** to begin a new chain and repeat for as many chains as you'd like.
-#. When done select the **Plot** button and a popup will appear with a plot of all transects from the first chain and downloading options.
+#. When done either select the **Export Data** button to save data or select the **Plot** button and a popup will appear with a plot of all transects from the first chain and additional exporting options.
 
 Plotting
 --------

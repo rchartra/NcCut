@@ -266,6 +266,18 @@ class Test(unittest.TestCase):
         multi_chain_instance = run_app.home.display.tool
         multi_chain_instance.load_data(functions.chain_find(cdata, [], ["Click x", "Click y", "Width"], "Orthogonal"))
 
+        # Test Chain Exporting
+        with tempfile.TemporaryDirectory() as jpath:
+            multi_chain_instance.save_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res1 = json.load(f)
+            f.close()
+            self.assertEqual(list(res1.keys())[0], "Vorticity", "NetCDF Variable not found")
+            self.assertEqual(list(res1.keys())[1], "global_metadata", "Global metadata not found")
+            self.assertEqual(len(list(res1["Vorticity"].keys())), 4, "Not all chains found")
+            self.assertEqual(len(list(res1["Vorticity"]["Orthogonal Chain 1"].keys())), 14,
+                             "Not all transects and group data found")
+
         # Open editing mode
         select_sidebar_button("Edit Mode")
 
@@ -308,10 +320,8 @@ class Test(unittest.TestCase):
         select_sidebar_button("Edit Mode")
         select_sidebar_button("Delete Last Point")
         select_sidebar_button("Back")
-        self.assertNotIn(multi_chain_instance.d_btn, sidebar,
+        self.assertNotIn(multi_chain_instance.p_btn, sidebar,
                          "Plot button not removed from sidebar when no more chains left")
-
-        # Test orthogonal transect width adjustments
 
         # Simulate chain clicks with width changes
         x = run_app.home.size[0]
@@ -359,21 +369,32 @@ class Test(unittest.TestCase):
         # First Click
         sidebar = run_app.home.ids.dynamic_sidebar.children
         tran_instance.on_touch_down(functions.Click(float(x_arr[0]), float(y_arr[0])))
-        self.assertNotIn(tran_instance.d_btn, sidebar, "There cannot be a Plot Button on First Click")
+        self.assertNotIn(tran_instance.p_btn, sidebar, "There cannot be a Plot Button on First Click")
         self.assertEqual(len(tran_instance.children), 1, "Inline chain Not Added")
 
         # Second Click
         tran_instance.on_touch_down(functions.Click(float(x_arr[1]), float(y_arr[1])))
-        self.assertIn(tran_instance.d_btn, sidebar, "Plot Button should be added on second click")
+        self.assertIn(tran_instance.p_btn, sidebar, "Plot Button should be added on second click")
         self.assertEqual(len(tran_instance.children), 1, "A chain was improperly deleted or added")
 
         # Third Click
         tran_instance.on_touch_down(functions.Click(float(x_arr[2]), float(y_arr[2])))
-        self.assertIn(tran_instance.d_btn, sidebar, "Plot Button should be there on third click")
+        self.assertIn(tran_instance.p_btn, sidebar, "Plot Button should be there on third click")
         self.assertEqual(len(tran_instance.children), 1, "A chain was improperly deleted or added")
 
         self.assertEqual(tran_instance.children[0].points, list(zip(x_arr, y_arr)),
                          "Chain points were not placed correctly")
+
+        # Test Chain Exporting
+        with tempfile.TemporaryDirectory() as jpath:
+            tran_instance.save_data(os.path.join(jpath, "test.json"))
+            f = open(os.path.join(jpath, "test.json"))
+            res1 = json.load(f)
+            f.close()
+            self.assertEqual(list(res1.keys())[0], "Inline Chain 1", "Chain not found")
+            self.assertEqual(list(res1.keys())[1], "global_metadata", "Global metadata not found")
+            self.assertEqual(len(list(res1["Inline Chain 1"].keys())), 4,
+                             "Not all transects and group data found")
 
         # Repeat Click
         tran_instance.on_touch_down(functions.Click(float(x_arr[2]), float(y_arr[2])))
@@ -410,7 +431,7 @@ class Test(unittest.TestCase):
                          "Chain point was not deleted from previous chain after current chain was removed")
         select_sidebar_button("Delete Last Chain")
         self.assertEqual(len(tran_instance.children), 1, "When last chain is deleted, a new chain is added")
-        self.assertNotIn(tran_instance.d_btn, sidebar)
+        self.assertNotIn(tran_instance.p_btn, sidebar)
         self.assertEqual(tran_instance.children[0].points, [], "Chain was not properly deleted")
 
     def test_netcdf_config(self):
