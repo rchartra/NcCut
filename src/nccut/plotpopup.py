@@ -444,7 +444,6 @@ class PlotPopup(Popup):
         except Exception as error:
             func.alert_popup(str(error))
 
-
     def add_group_info(self, dicti):
         """
         Adds back fields removed for plotting purposes
