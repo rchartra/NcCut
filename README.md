@@ -7,7 +7,7 @@ NcCut is a GUI for getting pixel data from images and data values from NetCDF fi
 
 ![](docs/source/_media/nccutgraphic.png)
 
-Users can display a plot of the data as well as package the data into a downloadable JSON file. When extracting values from the image/dataset, the program uses linear interpolation to interpolate between the values of the pixels to ensure an accurate portrayal of the line drawn. 
+Users can display a plot of the data as well as package the data into an exportable JSON file. When extracting values from the image/dataset, the program uses linear interpolation to interpolate between the values of the pixels to ensure an accurate portrayal of the line drawn. 
 
 This is an open source project. For contribution guidelines please refer to the contribution section of the [docs](https://nccut.readthedocs.io/en/latest/contribution.html).
 
@@ -106,7 +106,8 @@ NcCut().run()
     * Select "Drag Mode" from the actions sidebar to drag the image without selecting points, and select "Transect Mode" to go back. 
     * Select "Edit Mode" to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain drawn.
 3. Right click to select the final point or select "New Chain" to begin a new chain and repeat for as many chains as you'd like.
-4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first chain and downloading options.
+4. When done either select the "Export Data" button to save data or select the "Plot" button and a popup will appear with a plot of all transects from the first chain and additional exporting options.
+   * If you want to continue working at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
 
 
 ### Orthogonal Chain
@@ -119,7 +120,7 @@ NcCut().run()
    * Select "Edit Mode" to delete either the last point clicked or the last chain drawn. You can also press the esc key to delete the last chain drawn.
    * To change the width of the transects being made you may enter the number of pixels into the "Width" text box. Select "Set" to change the width for all future transects.
 3. Right click to select the final point or select "New Chain" to begin a new chain and repeat for as many chains as you'd like
-4. When done select the "Plot" button and a popup will appear with a plot of all transects from the first chain and downloading options.
+4. When done either select the "Export Data" button to save data or select the "Plot" button and a popup will appear with a plot of all transects from the first chain and additional exporting options.
    * If you want to continue working at a later time, select all the transects and save the data to JSON format. Refer to section below for reloading that data.
 
 
