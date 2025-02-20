@@ -35,6 +35,7 @@ from pathlib import Path
 import tomli
 import os
 import re
+import datetime
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -204,15 +205,15 @@ def manual_file_check(file_text, extension, next_function, home):
     exist = True
     fcount = 0
     while exist:
-        if Path.exists(path / (fname + extension)):
+        if Path.exists(path / (file_text + extension)):
             fcount += 1
             if fcount == 1:
-                fname = fname + "(1)"
+                file_text = file_text + "(1)"
             else:
-                fname = fname[:fname.find("(") + 1] + str(fcount) + ")"
+                file_text = file_text[:file_text.find("(") + 1] + str(fcount) + ")"
         else:
             exist = False
-    fpath = os.path.abspath(fname + extension)
+    fpath = os.path.abspath(file_text + extension)
     next_function(fpath)
 
 
@@ -729,6 +730,51 @@ def get_color_bar(colormap, data, face_color, text_color, font):
     plt.close()
     plot = ui.image.Image(source="", texture=CoreImage(io.BytesIO(temp.read()), ext="png").texture)
     return plot
+
+
+def add_metadata(config, f_type, home, dicti):
+    """
+    Adds global and variable specific data to an output dictionary.
+
+    Args:
+        config (dict): A dictionary holding info about the file necessary for loading, updating, and accessing data from
+            the file. Highest level should have one key that is the name of the file type ("image" or "netcdf") whose
+            value is the necessary configuration settings. For images, the config dictionary has form
+            {"image": str(file_path)}. For a netcdf file the value is a dictionary of configuration values (see
+            :meth:`nccut.netcdfconfig.NetCDFConfig.check_inputs` for structure of dictionary)
+        f_type (str): File type being loaded ("image" or "netcdf")
+        dicti: Dictionary of data about to be exported
+        home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
+
+    Returns:
+        dicti: Dictionary of data with metadata fields added
+    """
+    def attrs_to_str(d):
+        return {k: str(v) for k, v in d.items()}
+
+    config = config[f_type]
+    # On GitHub Linux Runner a user is not defined resulting in an error
+    try:
+        user = os.getlogin()
+    except OSError:
+        user = "_user_id_not_found_"
+    global_metadata = {"time_stamp": datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                       "user": user, "license": "CC0-1.0"}
+    global_metadata.update(home.general_config["metadata"])
+    if f_type == "netcdf":
+        global_metadata["file"] = config["file"]
+        global_metadata["netcdf_attrs"] = attrs_to_str(config["data"].attrs)
+        dims = {config["x"]: attrs_to_str(config["data"][config["x"]].attrs),
+                config["y"]: attrs_to_str(config["data"][config["y"]].attrs)}
+        if config["z"] != "N/A":
+            dims[config["z"]] = attrs_to_str(config["data"][config["z"]].attrs)
+        global_metadata["dim_attrs"] = dims
+        for key in list(dicti.keys()):
+            dicti[key][key + "_attrs"] = attrs_to_str(config["data"][key].attrs)
+    else:
+        global_metadata["file"] = config
+    dicti["global_metadata"] = global_metadata
+    return dicti
 
 
 def subset_around_transect(config, points):

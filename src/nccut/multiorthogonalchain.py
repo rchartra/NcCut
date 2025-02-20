@@ -32,7 +32,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
         c_on (bool): Whether there are any chains active
         load_fail (bool): If anything has gone wrong in the chain data loading process
         home: Reference to root :class:`nccut.homescreen.HomeScreen` instance
-        d_btn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
+        p_btn: RoundedButton, Plot button to activate :class:`nccut.plotpopup.PlotPopup`
+        e_btn: RoundedButton, Button to export all chain data to JSON
         dragging (bool): Whether viewer is in dragging mode
         width_btn: Button to open transect width adjustment popup
         clicks (int): Number of clicks made by user. Decreases when points are deleted
@@ -51,8 +52,10 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.c_on = False
         self.load_fail = False
         self.home = home
-        self.d_btn = func.RoundedButton(text="Plot Data", size_hint_y=None, height=b_height, font_size=self.home.font)
-        self.d_btn.bind(on_press=lambda x: self.gather_popup())
+        self.p_btn = func.RoundedButton(text="Plot Data", size_hint_y=None, height=b_height, font_size=self.home.font)
+        self.p_btn.bind(on_press=lambda x: self.gather_popup())
+        self.e_btn = func.RoundedButton(text="Export Data", size_hint_y=None, height=b_height, font_size=self.home.font)
+        self.e_btn.bind(on_press=lambda x: func.ask_for_output_file_name("*.json", self.save_data, self.home))
         self.dragging = False
         self.width_btn = func.RoundedButton(text="Set Transect Width", size_hint_y=None, height=b_height,
                                             font_size=self.home.font)
@@ -67,7 +70,8 @@ class MultiOrthogonalChain(ui.widget.Widget):
         Args:
             font (float): New font size
         """
-        self.d_btn.font_size = font
+        self.p_btn.font_size = font
+        self.e_btn.font_size = font
         self.width_btn.font_size = font
 
     def width_pop(self):
@@ -98,8 +102,10 @@ class MultiOrthogonalChain(ui.widget.Widget):
         if self.clicks >= 1 and self.width_btn.parent is None:
             self.home.display.add_to_sidebar(self.width_btn, 5)
         if self.clicks >= 2:
-            if self.d_btn.parent is None:
-                self.home.display.add_to_sidebar(self.d_btn)
+            if self.p_btn.parent is None:
+                self.home.display.add_to_sidebar(self.p_btn)
+            if self.e_btn.parent is None:
+                self.home.display.add_to_sidebar(self.e_btn)
 
     def change_dragging(self, val):
         """
@@ -180,8 +186,10 @@ class MultiOrthogonalChain(ui.widget.Widget):
                 if self.clicks >= 1 and self.width_btn.parent is None:
                     self.home.display.add_to_sidebar(self.width_btn, 5)
                 if self.clicks >= 2:
-                    if self.d_btn.parent is None:
-                        self.home.display.add_to_sidebar(self.d_btn)
+                    if self.p_btn.parent is None:
+                        self.home.display.add_to_sidebar(self.p_btn)
+                    if self.e_btn.parent is None:
+                        self.home.display.add_to_sidebar(self.e_btn)
                 if self.load_fail:  # If load goes wrong, stop and undo everything
                     self.undo_load(c)
                     return
@@ -201,10 +209,9 @@ class MultiOrthogonalChain(ui.widget.Widget):
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted chain was the only chain
             self.clicks = 0
-            if self.d_btn in self.home.display.tool_sb_widgets:
-                self.home.display.remove_from_tool_sb_widgets(self.d_btn)
-            if self.width_btn in self.home.display.tool_sb_widgets:
-                self.home.display.remove_from_tool_sb_widgets(self.width_btn)
+            for btn in [self.p_btn, self.e_btn, self.width_btn]:
+                if btn in self.home.display.tool_sb_widgets:
+                    self.home.display.remove_from_tool_sb_widgets(btn)
             if self.dragging:
                 self.home.display.drag_mode()
             self.new_chain()
@@ -238,10 +245,9 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.remove_widget(self.children[0])
         if len(self.children) == 0:
             # Remove sidebar buttons if deleted chain was the only chain
-            if self.d_btn in self.home.display.tool_sb_widgets:
-                self.home.display.remove_from_tool_sb_widgets(self.d_btn)
-            if self.width_btn in self.home.display.tool_sb_widgets:
-                self.home.display.remove_from_tool_sb_widgets(self.width_btn)
+            for btn in [self.p_btn, self.e_btn, self.width_btn]:
+                if btn in self.home.display.tool_sb_widgets:
+                    self.home.display.remove_from_tool_sb_widgets(btn)
             self.new_chain()
 
     def del_point(self):
@@ -267,8 +273,9 @@ class MultiOrthogonalChain(ui.widget.Widget):
         self.clicks -= 1
         # Determine which buttons should be in sidebar
         if self.clicks == 1:
-            if self.d_btn in self.home.display.tool_sb_widgets:
-                self.home.display.remove_from_tool_sb_widgets(self.d_btn)
+            for btn in [self.p_btn, self.e_btn]:
+                if btn in self.home.display.tool_sb_widgets:
+                    self.home.display.remove_from_tool_sb_widgets(btn)
         elif self.clicks == 0 and self.width_btn in self.home.display.tool_sb_widgets:
             self.home.display.remove_from_tool_sb_widgets(self.width_btn)
 
@@ -286,6 +293,13 @@ class MultiOrthogonalChain(ui.widget.Widget):
     def gather_popup(self):
         """
         Gather data from chains and call for :class:`nccut.plotpopup.PlotPopup`
+        """
+        frames = self.gather_data()
+        self.home.plot_popup.run(frames, self.home, self.home.display.config)
+
+    def gather_data(self):
+        """
+        Gather points into a dictionary for either plotting or saving
         """
         frames = {}
         c = 1
@@ -326,7 +340,55 @@ class MultiOrthogonalChain(ui.widget.Widget):
                     count += 1
                 frames["Orthogonal Chain " + str(c)] = data
                 c += 1
-        self.home.plot_popup.run(frames, self.home, self.home.display.config)
+        return frames
+
+    def save_data(self, f_path):
+        """
+        Save all orthogonal chain data to JSON file
+
+        Args:
+            f_path (str): Output file path
+        """
+        if f_path.find(".") == -1:
+            f_path = f_path + ".json"
+        else:
+            f_path = f_path[:f_path.find(".")] + ".json"
+
+        config = self.home.display.config
+        f_type = self.home.display.f_type
+        try:
+            frames = self.gather_data()
+            final_dict = {}
+            # Gather transect data
+            for chain in list(frames.keys()):
+                final_dict[chain] = {}
+                for cut in list(frames[chain].keys())[3:]:
+                    sub_d, sub_p, scales = func.subset_around_transect(config[f_type], frames[chain][cut])
+                    if f_type == "image":
+                        x_lab = "x"
+                        y_lab = "y"
+                    else:
+                        x_lab = config[f_type]["x"]
+                        y_lab = config[f_type]["y"]
+                    final_dict[chain][cut] = func.ip_get_points(sub_p, sub_d, config)
+                    final_dict[chain][cut][x_lab] = [x + float(scales[0]) for x in final_dict[chain][cut][x_lab]]
+                    final_dict[chain][cut][y_lab] = [y + float(scales[1]) for y in final_dict[chain][cut][y_lab]]
+                for field in list(frames[chain].keys())[:3]:
+                    final_dict[chain][field] = frames[chain][field]
+
+            # Add var and z fields if NetCDF
+            if f_type == "netcdf":
+                if config[f_type]["z"] != "N/A":
+                    final_dict = {config[f_type]["z_val"]: final_dict}
+                final_dict = {config[f_type]["var"]: final_dict}
+
+            # Add metadata
+            final_dict = func.add_metadata(config, f_type, self.home, final_dict)
+            with open(f_path, "w") as f:
+                json.dump(final_dict, f)
+            func.alert_popup("Download Complete")
+        except Exception as error:
+            func.alert_popup(str(error))
 
     def on_touch_down(self, touch):
         """
@@ -343,8 +405,10 @@ class MultiOrthogonalChain(ui.widget.Widget):
                     if self.clicks >= 1 and self.width_btn.parent is None:
                         self.home.display.add_to_sidebar(self.width_btn, 5)
                     if self.clicks >= 2:
-                        if self.d_btn.parent is None:
-                            self.home.display.add_to_sidebar(self.d_btn)
+                        if self.p_btn.parent is None:
+                            self.home.display.add_to_sidebar(self.p_btn)
+                        if self.e_btn.parent is None:
+                            self.home.display.add_to_sidebar(self.e_btn)
                     # If no current chain, create chain. Otherwise, pass touch to current chain.
                     if not self.c_on:
                         self.new_chain()
