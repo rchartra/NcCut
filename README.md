@@ -1,6 +1,9 @@
 # NcCut
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.07185/status.svg)](https://doi.org/10.21105/joss.07185)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+![App workflow](https://github.com/rchartra/NcCut/actions/workflows/python-app.yml/badge.svg)
 
 ### Documentation: [NcCut Docs](https://nccut.readthedocs.io/en/latest/index.html)
 
