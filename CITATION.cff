@@ -1,0 +1,38 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Chartrand
+  given-names: Robin
+  orcid: "https://orcid.org/0000-0001-6948-8380"
+- family-names: Fajber
+  given-names: Robert
+  orcid: "https://orcid.org/0000-0002-4656-7163"
+- family-names: Manucharyan
+  given-names: Georgy
+  orcid: "https://orcid.org/0000-0001-7959-2675"
+doi: 10.5281/zenodo.14862691
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Chartrand
+    given-names: Robin
+    orcid: "https://orcid.org/0000-0001-6948-8380"
+  - family-names: Fajber
+    given-names: Robert
+    orcid: "https://orcid.org/0000-0002-4656-7163"
+  - family-names: Manucharyan
+    given-names: Georgy
+    orcid: "https://orcid.org/0000-0001-7959-2675"
+  date-published: 2025-02-24
+  doi: 10.21105/joss.07185
+  issn: 2475-9066
+  issue: 106
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 7185
+  title: "NcCut: A NetCDF Viewer and Transecting Tool"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.07185"
+  volume: 10
+title: "NcCut: A NetCDF Viewer and Transecting Tool"
